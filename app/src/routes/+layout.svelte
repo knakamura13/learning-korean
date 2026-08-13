@@ -19,7 +19,7 @@
 <header class="bar">
 	<div class="inner">
 		<a class="brand" href="/">
-			<span class="mark">한</span>
+			<span class="mark" lang="ko">한</span>
 			<span class="name">Korean</span>
 		</a>
 		<nav>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import KoText from '$lib/components/KoText.svelte';
 	import {
 		LEADS, VOWELS, REPRESENTATIVE, CLUSTERS, SOUND_CHANGES, BLOCK_LAYOUTS,
 		GANADA_CONSONANTS, GANADA_VOWELS, CLUSTER_EXCEPTIONS, BASE_SHAPES,
@@ -60,9 +61,9 @@
 		<div class="grid">
 			{#each LEADS as c (c)}
 				<div class="cell">
-					<span class="big">{c}</span>
+					<span class="big" lang="ko">{c}</span>
 					<span class="rom2">{SOUND[c]}</span>
-					<span class="nm">{NAMES[c]}</span>
+					<span class="nm" lang="ko">{NAMES[c]}</span>
 					<span class="fin">final: {batchimSound(c) || '—'}</span>
 				</div>
 			{/each}
@@ -74,7 +75,7 @@
 		<div class="grid">
 			{#each SIMPLE as v (v)}
 				<div class="cell">
-					<span class="big">{v}</span>
+					<span class="big" lang="ko">{v}</span>
 					<span class="rom2">{SOUND[v]}</span>
 					<span class="nm">{harmony(v)}</span>
 				</div>
@@ -89,10 +90,10 @@
 				{@const parts = fusionParts(v)}
 				{@const merged = mergedWith(v)}
 				<div class="cell">
-					<span class="big">{v}</span>
+					<span class="big" lang="ko">{v}</span>
 					<span class="rom2">{SOUND[v]}</span>
-					<span class="nm">{parts ? `${parts[0]} + ${parts[1]}` : ''}</span>
-					{#if merged.length}<span class="fin">= {merged.join(' ')}</span>{/if}
+					<span class="nm"><KoText text={parts ? `${parts[0]} + ${parts[1]}` : ''} /></span>
+					{#if merged.length}<span class="fin">= <KoText text={merged.join(' ')} /></span>{/if}
 				</div>
 			{/each}
 		</div>
@@ -103,8 +104,8 @@
 		<div class="rows card">
 			{#each REPRESENTATIVE as r (r)}
 				<div class="row">
-					<span class="key hg">{r}</span>
-					<span class="vals hg">
+					<span class="key hg" lang="ko">{r}</span>
+					<span class="vals hg" lang="ko">
 						{['ㄱ','ㄲ','ㅋ','ㄳ','ㄺ','ㄴ','ㄵ','ㄶ','ㄷ','ㅅ','ㅆ','ㅈ','ㅊ','ㅌ','ㅎ','ㄹ','ㄼ','ㄽ','ㄾ','ㅀ','ㅁ','ㄻ','ㅂ','ㅍ','ㄿ','ㅄ','ㅇ']
 							.filter((f) => batchimSound(f) === r)
 							.join('  ')}
@@ -120,17 +121,19 @@
 			{#each CLUSTERS as c (c)}
 				{@const parts = clusterParts(c)}
 				<div class="row">
-					<span class="key hg">{c}</span>
+					<span class="key hg" lang="ko">{c}</span>
 					<span class="vals">
-						<span class="hg">{parts?.[0]} + {parts?.[1]}</span>
+						<span class="hg"><KoText text={parts ? `${parts[0]} + ${parts[1]}` : ''} /></span>
 						<span class="arrow">→</span>
-						<span class="hg win">{batchimSound(c)}</span>
+						<span class="hg win" lang="ko">{batchimSound(c)}</span>
 						<span class="rule">
-							{clusterRule(c) === 'first'
-								? 'first letter wins'
-								: clusterRule(c) === 'second'
-									? 'second letter wins'
-									: 'ㅎ aspirates what follows'}
+							<KoText
+								text={clusterRule(c) === 'first'
+									? 'first letter wins'
+									: clusterRule(c) === 'second'
+										? 'second letter wins'
+										: 'ㅎ aspirates what follows'}
+							/>
 						</span>
 					</span>
 				</div>
@@ -143,10 +146,10 @@
 			</p>
 			{#each CLUSTER_EXCEPTIONS as ex (ex.example)}
 				<div class="exrow">
-					<span class="hg">{ex.example}</span>
+					<span class="hg" lang="ko">{ex.example}</span>
 					<span class="arrow">→</span>
-					<span class="hg win">[{ex.pron}]</span>
-					<span class="rule">{ex.note}</span>
+					<span class="hg win" lang="ko">[{ex.pron}]</span>
+					<span class="rule"><KoText text={ex.note} /></span>
 				</div>
 			{/each}
 		</div>
@@ -161,10 +164,10 @@
 		<div class="rows card">
 			{#each FAMILIES as fam (fam.base)}
 				<div class="row">
-					<span class="key hg">{fam.base}</span>
+					<span class="key hg" lang="ko">{fam.base}</span>
 					<span class="vals">
-						<span class="hg">{fam.members.join('  ')}</span>
-						<span class="rule">{FAMILY_NAMES[fam.base]}</span>
+						<span class="hg" lang="ko">{fam.members.join('  ')}</span>
+						<span class="rule"><KoText text={FAMILY_NAMES[fam.base]} /></span>
 					</span>
 				</div>
 			{/each}
@@ -178,10 +181,10 @@
 				<div class="row wrap">
 					<span class="lkind">{l.kind}</span>
 					<span class="vals">
-						<span class="hg small">{l.vowels}</span>
+						<span class="hg small"><KoText text={l.vowels} /></span>
 						<span class="rule">{l.rule}</span>
 					</span>
-					<span class="hg ex">{l.examples}</span>
+					<span class="hg ex" lang="ko">{l.examples}</span>
 				</div>
 			{/each}
 		</div>
@@ -198,16 +201,16 @@
 				<div class="row wrap">
 					<span class="scname">
 						{sc.name}
-						<em class="hg">{sc.korean}</em>
+						<em class="hg" lang="ko">{sc.korean}</em>
 					</span>
 					<span class="vals">
-						<span class="rule wide">{sc.trigger}</span>
+						<span class="rule wide"><KoText text={sc.trigger} /></span>
 						<span class="exs">
 							{#each sc.examples as ex (ex.written)}
 								<span class="pair">
-									<span class="hg">{ex.written}</span>
+									<span class="hg" lang="ko">{ex.written}</span>
 									<span class="arrow">→</span>
-									<span class="hg win">[{ex.spoken}]</span>
+									<span class="hg win" lang="ko">[{ex.spoken}]</span>
 								</span>
 							{/each}
 						</span>
@@ -218,14 +221,15 @@
 	</section>
 
 	<section>
-		<h2 class="sec">Dictionary order (가나다순)</h2>
+		<h2 class="sec">Dictionary order (<span lang="ko">가나다순</span>)</h2>
 		<div class="card ganada">
 			<p class="glabel">consonants</p>
-			<p class="hg grow">{GANADA_CONSONANTS.join(' ')}</p>
+			<p class="hg grow" lang="ko">{GANADA_CONSONANTS.join(' ')}</p>
 			<p class="glabel">vowels</p>
-			<p class="hg grow">{GANADA_VOWELS.join(' ')}</p>
+			<p class="hg grow" lang="ko">{GANADA_VOWELS.join(' ')}</p>
 			<p class="muted tiny">
-				South Korean order. The name <em>ganada</em> is itself the order: ㄱ, ㄴ, ㄷ each on ㅏ.
+				South Korean order. The name <em>ganada</em> is itself the order:
+				<KoText text="ㄱ, ㄴ, ㄷ" /> each on <span lang="ko">ㅏ</span>.
 			</p>
 		</div>
 	</section>
@@ -234,12 +238,17 @@
 		<h2 class="sec">Sources</h2>
 		<ul class="src">
 			<li>
-				<a href="https://www.korean.go.kr/">National Institute of Korean Language (국립국어원)</a>
+				<a href="https://www.korean.go.kr/"
+					>National Institute of Korean Language (<span lang="ko">국립국어원</span>)</a
+				>
 				— the language regulator; publisher of the 1988 Standard Pronunciation Rules
-				(표준 발음법) that govern the batchim, cluster and sound-change sections above.
+				(<span lang="ko">표준 발음법</span>) that govern the batchim, cluster and sound-change
+				sections above.
 			</li>
 			<li>
-				<a href="https://www.tufs.ac.jp/ts/personal/choes/korean/nanboku/bareumbeop.html">표준 발음법, full text</a>
+				<a href="https://www.tufs.ac.jp/ts/personal/choes/korean/nanboku/bareumbeop.html"
+					><span lang="ko">표준 발음법</span>, full text</a
+				>
 				— Articles 10 and 11 are the source for the cluster rules and their exceptions.
 			</li>
 			<li>

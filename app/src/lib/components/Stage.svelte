@@ -17,7 +17,7 @@
 			<span class="vs">{vs}</span>
 		{/if}
 		<div class="item">
-			<span class="glyph">{item.glyph}</span>
+			<span class="glyph" lang="ko">{item.glyph}</span>
 			{#if item.caption}<span class="cap">{item.caption}</span>{/if}
 		</div>
 	{/each}

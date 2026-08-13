@@ -28,12 +28,12 @@
 </script>
 
 <div class="word">
-	<span class="w">{step.word}</span>
+	<span class="w" lang="ko">{step.word}</span>
 	{#if step.gloss}<span class="gloss">{step.gloss}</span>{/if}
 </div>
 
 <p class="q">
-	The bottom slot holds <span class="cl">{step.cluster}</span> — two consonants. Only one of
+	The bottom slot holds <span class="cl" lang="ko">{step.cluster}</span> — two consonants. Only one of
 	them is pronounced. Which?
 </p>
 
@@ -46,15 +46,16 @@
 			class:dim={solved && jamo !== winner}
 			disabled={solved}
 			onclick={() => pick(jamo)}
+			lang="ko"
 		>{jamo}</button>
 	{/each}
 </div>
 
 {#if solved}
 	<p class="pron" in:fly={{ y: 8, duration: 260 }}>
-		<span class="hg">{step.word}</span>
+		<span class="hg" lang="ko">{step.word}</span>
 		<span class="arr">is said</span>
-		<span class="hg said">{step.pron}</span>
+		<span class="hg said" lang="ko">{step.pron}</span>
 	</p>
 {/if}
 

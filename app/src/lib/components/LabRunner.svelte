@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
+	import { withLangKo } from '$lib/a11y/lang';
 	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 
@@ -100,7 +101,7 @@
 
 {#if finished}
 	<div class="done card" in:fly={{ y: 12, duration: 300 }}>
-		<span class="seal">한글</span>
+		<span class="seal" lang="ko">한글</span>
 		<h2>{lab.finish.title}</h2>
 		<p class="summary">{lab.finish.summary}</p>
 
@@ -142,8 +143,8 @@
 	{#key index}
 		<div class="card step" in:fly={{ y: 10, duration: 260 }}>
 			{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
-			<h2 class="do">{@html step.do}</h2>
-			{#if step.hint}<p class="hint">{@html step.hint}</p>{/if}
+			<h2 class="do">{@html withLangKo(step.do)}</h2>
+			{#if step.hint}<p class="hint">{@html withLangKo(step.hint)}</p>{/if}
 
 			<div class="work">
 				{#if step.type === 'mouth'}
@@ -176,7 +177,7 @@
 					<span class="verdict">
 						{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
 					</span>
-					{@html feedback.html}
+					{@html withLangKo(feedback.html)}
 				</div>
 			{/if}
 

@@ -141,7 +141,7 @@
 		<div class="card empty"><p class="muted">Loading your deck…</p></div>
 	{:else if stats.unlocked === 0}
 		<div class="card empty" in:fade>
-			<span class="big">한</span>
+			<span class="big" lang="ko">한</span>
 			<h2>Nothing in the deck yet</h2>
 			<p>
 				Cards unlock as you finish labs, so the deck never quizzes you on something you have
@@ -151,7 +151,7 @@
 		</div>
 	{:else if finishedSession}
 		<div class="card empty" in:fade>
-			<span class="big">{right / Math.max(shown, 1) >= 0.8 ? '좋아' : '또'}</span>
+			<span class="big" lang="ko">{right / Math.max(shown, 1) >= 0.8 ? '좋아' : '또'}</span>
 			<h2>{right} of {shown} first time</h2>
 			<p>
 				{#if right / Math.max(shown, 1) >= 0.9}
@@ -168,7 +168,7 @@
 		</div>
 	{:else if queue.length === 0}
 		<div class="card empty" in:fade>
-			<span class="big">쉬어</span>
+			<span class="big" lang="ko">쉬어</span>
 			<h2>Deck clear</h2>
 			<p>Nothing is due. The next card comes back <strong>{whenNext}</strong>.</p>
 			<p class="muted tiny">
@@ -187,7 +187,7 @@
 					{progress.state.cards[card.id] ? 'review' : 'new card'} · {index + 1} of {queue.length}
 				</p>
 
-				<div class="glyph">{card.front}</div>
+				<div class="glyph" lang="ko">{card.front}</div>
 				<p class="ask">{card.ask}</p>
 
 				<form

@@ -14,7 +14,7 @@
 
 <div class="shell">
 	<div class="card empty">
-		<span class="big">{isMissing ? '한' : '잠깐'}</span>
+		<span class="big" lang="ko">{isMissing ? '한' : '잠깐'}</span>
 		<p class="eyebrow">HTTP {status}</p>
 		<h2>{isMissing ? 'This page is not in the course' : 'Something went wrong'}</h2>
 		<p>

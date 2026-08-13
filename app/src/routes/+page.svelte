@@ -26,7 +26,7 @@
 
 <div class="shell">
 	<header class="hero">
-		<p class="eyebrow">한글</p>
+		<p class="eyebrow" lang="ko">한글</p>
 		<h1>Read Korean from first principles</h1>
 		<p class="lede">
 			Interactive labs that make you derive the writing system rather than memorise it,

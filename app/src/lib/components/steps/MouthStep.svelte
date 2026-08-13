@@ -108,7 +108,7 @@
 		/>
 		<text class="tag" x={z.lx} y={z.ly}>{z.tag}</text>
 		{#if label}
-			<text class="jamo-label" x={z.cx} y={z.cy + 9}>{label}</text>
+		<text class="jamo-label" lang="ko" x={z.cx} y={z.cy + 9}>{label}</text>
 		{/if}
 	{/each}
 </svg>

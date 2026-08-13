@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { hasHangul } from '$lib/a11y/lang';
+
 	/** A labelled row of selectable chips — the input for every composer step. */
 	let {
 		label,
@@ -30,6 +32,7 @@
 				class:on={selected === item}
 				class:blue={tone === 'blue'}
 				{disabled}
+				lang={hasHangul(item) ? 'ko' : undefined}
 				onclick={() => onSelect(item)}
 			>{item}</button>
 		{/each}

@@ -9,7 +9,7 @@
 
 <p class="target">
 	{verb}
-	<b>{target}</b>
+	<b lang="ko">{target}</b>
 	{#if name}<span class="name">— {name}</span>{/if}
 </p>
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { hasHangul } from '$lib/a11y/lang';
+
 	/**
 	 * The composer readout: filled slots on the left, result on the right.
 	 *
@@ -22,12 +24,22 @@
 <div class="asm">
 	{#each slots as slot, i (i)}
 		{#if i > 0}<span class="op">+</span>{/if}
-		<div class="slot" class:filled={!!slot.value} class:bottom={slot.bottom}>
+		<div
+			class="slot"
+			class:filled={!!slot.value}
+			class:bottom={slot.bottom}
+			lang={hasHangul(slot.value ?? '') ? 'ko' : undefined}
+		>
 			{slot.value ?? ''}
 		</div>
 	{/each}
 	<span class="op">=</span>
-	<div class="out" class:win={state === 'win'} class:dead={state === 'dead'}>
+	<div
+		class="out"
+		class:win={state === 'win'}
+		class:dead={state === 'dead'}
+		lang={hasHangul(result) ? 'ko' : undefined}
+	>
 		{#if result}
 			{result}
 		{:else if state === 'dead'}
