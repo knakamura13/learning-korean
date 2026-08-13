@@ -115,6 +115,20 @@
 	.pick.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 	.pick.dim { opacity: 0.4; }
 
+	@media (forced-colors: active) {
+		.pick {
+			background: ButtonFace;
+			color: ButtonText;
+			border-color: ButtonText;
+		}
+		.pick.right {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+		}
+		.pick.wrong { border-color: ButtonText; border-width: 3px; }
+	}
+
 	.pron {
 		display: flex;
 		align-items: center;

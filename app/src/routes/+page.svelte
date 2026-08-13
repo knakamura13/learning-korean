@@ -163,6 +163,7 @@
 		display: flex;
 		gap: var(--s4);
 		padding: var(--s4);
+		min-width: 0;
 		text-decoration: none;
 		color: inherit;
 		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
@@ -248,6 +249,24 @@
 	.sw.m { background: var(--good); }
 	.sw.y { background: var(--accent); }
 	.sw.n { background: var(--rule); }
+
+	@media (forced-colors: active) {
+		.stat {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		a.stat.hot:not(.quiet) {
+			border-color: Highlight;
+			background: Canvas;
+		}
+		.track { background: ButtonBorder; }
+		.track .m { background: Highlight; }
+		.track .y { background: ButtonText; }
+		.sw.m { background: Highlight; }
+		.sw.y { background: ButtonText; }
+		.sw.n { background: ButtonBorder; }
+	}
 
 	@media (max-width: 34rem) {
 		.nm { flex-basis: 6.5rem; }

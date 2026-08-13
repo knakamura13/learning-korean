@@ -135,5 +135,13 @@
 			border-bottom: 1px solid ButtonBorder;
 			backdrop-filter: none;
 		}
+		.badge {
+			background: Highlight;
+			color: HighlightText;
+		}
+		nav a.active {
+			background: Highlight;
+			color: HighlightText;
+		}
 	}
 </style>

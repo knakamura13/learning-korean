@@ -119,9 +119,11 @@
 html {
 	font-size: 106.25%;
 	color-scheme: light dark;
+	accent-color: var(--accent);
 	scroll-behavior: smooth;
 	scrollbar-width: thin;
-	scrollbar-color: var(--rule-strong) var(--paper-sunk);
+	scrollbar-color: var(--ink-faint) var(--paper-sunk);
+	scrollbar-gutter: stable;
 	-webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
@@ -162,7 +164,13 @@ h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); }
 h2 { font-size: clamp(1.35rem, 3vw, 1.6rem); }
 h3 { font-size: 1.1rem; }
 
-p { margin: 0 0 var(--s4); }
+h1, h2 { text-wrap: balance; }
+p { margin: 0 0 var(--s4); text-wrap: pretty; }
+
+p, h1, h2, h3, .lab .body {
+	overflow-wrap: anywhere;
+	min-width: 0;
+}
 
 a {
 	color: var(--blue);
@@ -180,8 +188,9 @@ button:not(:disabled):active {
 button { font: inherit; color: inherit; }
 
 :focus-visible {
-	outline: 2px solid var(--blue);
+	outline: 2px solid var(--paper);
 	outline-offset: 2px;
+	box-shadow: 0 0 0 4px var(--blue);
 	border-radius: 3px;
 }
 
@@ -248,6 +257,7 @@ button { font: inherit; color: inherit; }
 	color: var(--accent-ink);
 	border-radius: var(--r-md);
 	padding: 0.62rem 1.3rem;
+	min-height: 44px;
 	font-size: 0.88rem;
 	font-weight: 600;
 	cursor: pointer;
@@ -262,6 +272,10 @@ button { font: inherit; color: inherit; }
 .btn:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: var(--shadow-2); }
 .btn:active { transform: translateY(0); box-shadow: var(--shadow-1); }
 .btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; filter: none; }
+.btn:focus-visible,
+.btn:hover:focus-visible {
+	box-shadow: 0 0 0 4px var(--blue);
+}
 
 .btn.ghost {
 	background: transparent;
@@ -277,3 +291,41 @@ button { font: inherit; color: inherit; }
 	padding: 0.4rem 0.7rem;
 }
 .btn.quiet:hover { background: var(--paper-sunk); box-shadow: none; transform: none; }
+.btn.quiet:focus-visible { box-shadow: 0 0 0 4px var(--blue); }
+
+@media (forced-colors: active) {
+	:focus-visible {
+		outline: 2px solid Highlight;
+		outline-offset: 2px;
+		box-shadow: none;
+	}
+
+	.card {
+		background: Canvas;
+		color: CanvasText;
+		border: 1px solid ButtonBorder;
+		box-shadow: none;
+	}
+
+	.btn,
+	.btn.ghost,
+	.btn.quiet {
+		background: ButtonFace;
+		color: ButtonText;
+		border: 1px solid ButtonText;
+		filter: none;
+	}
+
+	.btn:disabled {
+		color: GrayText;
+		border-color: GrayText;
+		opacity: 1;
+	}
+
+	.btn:focus-visible,
+	.btn:hover:focus-visible,
+	.btn.quiet:focus-visible {
+		outline: 2px solid Highlight;
+		box-shadow: none;
+	}
+}

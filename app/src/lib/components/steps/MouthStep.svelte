@@ -84,7 +84,7 @@
 			class:locked={solved || isPrior}
 			cx={z.cx}
 			cy={z.cy}
-			r="34"
+			r="44"
 			role="button"
 			tabindex={solved || isPrior ? -1 : 0}
 			aria-label={z.tag}

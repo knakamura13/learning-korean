@@ -365,6 +365,24 @@
 	.in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	.in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
+	@media (forced-colors: active) {
+		.stat {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.stat.hot { border-color: Highlight; background: Canvas; }
+		.bar { background: ButtonBorder; }
+		.bar i { background: Highlight; }
+		.in {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.in.right { border-color: Highlight; background: Canvas; color: CanvasText; }
+		.in.wrong { border-color: ButtonText; background: Canvas; color: CanvasText; }
+	}
+
 	.fb {
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
