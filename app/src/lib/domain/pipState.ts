@@ -6,7 +6,7 @@
  * at furthest, not at a card they had jumped back to.
  *
  * Visual kind is independent of selection: the selected pip keeps its
- * inactive fill/stroke and gains an offset ring in the runner.
+ * inactive fill/stroke; the runner pulses and glows that same mark.
  */
 
 export type CardOutcome = 'right' | 'wrong';

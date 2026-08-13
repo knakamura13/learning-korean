@@ -347,6 +347,7 @@
 		min-width: 44px;
 		min-height: 44px;
 		padding: 0;
+		overflow: visible;
 		font: inherit;
 		font-size: 0.72rem;
 		font-weight: 600;
@@ -356,17 +357,28 @@
 		cursor: default;
 	}
 	button.pip { cursor: pointer; }
+	/* Hover filter stays off the selected pip so it cannot clip the glow. */
+	button.pip:not([data-selected]):hover { filter: brightness(1.08); }
 
-	/* Inner status mark. Numeral sits above a solid fill via .pip-n. */
+	/* Status mark. Centered with inset so selected pulse/glow can use
+	   transform + drop-shadow on this one box — no second ring. */
 	.pip::before {
 		content: '';
 		position: absolute;
+		display: block;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		margin: auto;
 		width: 1.55rem;
 		height: 1.55rem;
 		border-radius: 50%;
 		border: 2px solid transparent;
 		background: transparent;
 		pointer-events: none;
+		transform-origin: center;
+		--pip-glow: var(--accent);
 	}
 	.pip[data-kind='upcoming']::before { content: none; }
 
@@ -374,54 +386,65 @@
 	.pip[data-kind='right']::before {
 		background: var(--good);
 		border-color: var(--good);
+		--pip-glow: var(--good);
 	}
 	.pip[data-kind='wrong'] { color: var(--bad); }
 	.pip[data-kind='wrong']::before {
 		background: transparent;
 		border-color: var(--bad);
+		--pip-glow: var(--bad);
 	}
 	.pip[data-kind='visited'] { color: var(--ink-soft); }
-	.pip[data-kind='visited']::before { border-color: var(--rule-strong); }
+	.pip[data-kind='visited']::before {
+		border-color: var(--rule-strong);
+		--pip-glow: var(--accent);
+	}
+	.pip[data-kind='visited'][data-selected]::before,
+	button.pip[data-kind='visited']:focus-visible::before {
+		border-color: var(--accent);
+	}
 	.pip[data-kind='upcoming'] { font-weight: 500; }
 	.pip-n { position: relative; z-index: 1; }
 
-	/* Selected / hover / focus: 2px accent ring, 2px gap, outside the mark. */
-	.pip::after {
-		content: none;
-		position: absolute;
-		width: calc(1.55rem + 8px);
-		height: calc(1.55rem + 8px);
-		border-radius: 50%;
-		border: 2px solid var(--accent);
-		background: transparent;
-		pointer-events: none;
-		box-sizing: border-box;
+	button.pip:not([data-selected]):not(:focus-visible):hover::before {
+		transform: scale(1.03);
 	}
-	button.pip:not([data-selected]):hover::after {
-		content: '';
-		opacity: 0.35;
-	}
-	.pip[data-selected]::after,
-	button.pip:focus-visible::after {
-		content: '';
-		opacity: 1;
-	}
-	.pip[data-selected]::after {
-		animation: pip-ring 1.8s var(--ease-in-out) infinite;
+
+	.pip[data-selected]::before,
+	button.pip:focus-visible::before {
+		animation: pip-pulse 1.8s var(--ease-in-out) infinite;
+		filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pip-glow) 42%, transparent));
 	}
 	.pip:focus-visible {
 		outline: none;
 		box-shadow: none;
+		border-radius: 0;
 	}
 
-	@keyframes pip-ring {
+	@keyframes pip-pulse {
 		0%,
-		100% { transform: scale(1); }
-		50% { transform: scale(1.07); }
+		100% {
+			transform: scale(1);
+			filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pip-glow) 42%, transparent));
+		}
+		50% {
+			transform: scale(1.06);
+			filter: drop-shadow(0 0 10px color-mix(in srgb, var(--pip-glow) 58%, transparent));
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.pip[data-selected]::after { animation: none; }
+		.pip[data-selected]::before,
+		button.pip:focus-visible::before {
+			animation: none;
+			width: calc(1.55rem + 2px);
+			height: calc(1.55rem + 2px);
+			border-width: 3px;
+			filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pip-glow) 50%, transparent));
+		}
+		button.pip:not([data-selected]):not(:focus-visible):hover::before {
+			transform: none;
+		}
 	}
 
 	.vh {
@@ -442,8 +465,8 @@
 		.pip[data-kind='right']::before { background: Highlight; border-color: Highlight; }
 		.pip[data-kind='wrong'] { color: ButtonText; }
 		.pip[data-kind='wrong']::before { background: Canvas; border-color: ButtonText; }
-		.pip[data-selected]::after,
-		button.pip:focus-visible::after { border-color: ButtonText; }
+		.pip[data-selected]::before,
+		button.pip:focus-visible::before { border-color: ButtonText; }
 		.fb { background: Canvas; border-left-color: ButtonBorder; }
 		.fb[data-tone='right'] { background: Canvas; border-left-color: Highlight; }
 		.fb[data-tone='wrong'] { background: Canvas; border-left-color: ButtonText; }
