@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
+	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	import MouthStep from './steps/MouthStep.svelte';
@@ -80,6 +81,7 @@
 
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if (shouldIgnoreShortcut(e.target)) return;
 		if (settled && (e.key === 'Enter' || e.key === ' ')) {
 			e.preventDefault();
 			next();
@@ -123,7 +125,14 @@
 		</div>
 	</div>
 {:else}
-	<div class="rail" aria-label="progress">
+	<div
+		class="rail"
+		role="progressbar"
+		aria-label="progress"
+		aria-valuemin={1}
+		aria-valuemax={lab.steps.length}
+		aria-valuenow={index + 1}
+	>
 		{#each lab.steps as _, i (i)}
 			<span class="pip" class:done={i < index} class:now={i === index}></span>
 		{/each}
@@ -157,7 +166,13 @@
 			</div>
 
 			{#if feedback}
-				<div class="fb" data-tone={feedback.tone} in:fade={{ duration: 180 }}>
+				<div
+					class="fb"
+					data-tone={feedback.tone}
+					in:fade={{ duration: 180 }}
+					aria-live="polite"
+					aria-atomic="true"
+				>
 					<span class="verdict">
 						{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
 					</span>
