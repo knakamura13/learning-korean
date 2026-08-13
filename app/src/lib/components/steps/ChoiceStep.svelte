@@ -2,6 +2,7 @@
 	import Stage from '../Stage.svelte';
 	import Options from '../Options.svelte';
 	import type { ChoiceStep } from '$lib/content/types';
+	import { settleAdvancePick } from '$lib/domain/advancePick';
 
 	let { step, onSettle, onNudge }: {
 		step: ChoiceStep;
@@ -14,8 +15,8 @@
 	// A choice always resolves — a wrong pick still advances, because the
 	// teaching is in the explanation rather than in retrying a guess.
 	function handle(correct: boolean) {
-		if (correct) onSettle();
-		else onSettle(step.miss ?? step.teach, false);
+		const result = settleAdvancePick(correct, step);
+		onSettle(result.overrideTeach, result.correct);
 	}
 
 	export function key(n: number) {

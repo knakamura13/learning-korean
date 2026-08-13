@@ -75,10 +75,11 @@
 
 	/**
 	 * Resolve the step. `correct` is false only for step types where a wrong
-	 * answer still advances (choice cards teach through the explanation rather
-	 * than through retrying). An earlier miss dents the first-try tally but must
-	 * not turn a correct final answer into a "not quite" — the learner did get
-	 * there, and saying otherwise is just discouraging.
+	 * answer still advances (choice and read cards teach through the
+	 * explanation rather than through retrying). An earlier miss dents the
+	 * first-try tally but must not turn a correct final answer into a
+	 * "not quite" — the learner did get there, and saying otherwise is just
+	 * discouraging.
 	 */
 	function onSettle(overrideTeach?: string, correct = true) {
 		if (settled) return;
