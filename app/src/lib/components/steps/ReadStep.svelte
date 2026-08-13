@@ -24,7 +24,7 @@
 <div class="word">
 	{#each step.blocks as b, i (i)}
 		<button class="blk" class:open={opened.has(i)} onclick={() => reveal(i)}>
-			<span class="ch">{b.block}</span>
+			<span class="ch" lang="ko">{b.block}</span>
 			<span class="rd">{opened.has(i) ? b.reading : ''}</span>
 		</button>
 	{/each}

@@ -58,6 +58,7 @@
 			class="link"
 			class:cur={i === path.length - 1}
 			class:win={i === path.length - 1 && won}
+			lang="ko"
 			in:fly={{ y: 8, duration: 220 }}
 		>{glyph}</span>
 	{/each}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { hasHangul } from '$lib/a11y/lang';
+
 	/**
 	 * A grid of answer buttons with right/wrong reveal.
 	 *
@@ -64,7 +66,7 @@
 			onclick={() => pick(i)}
 		>
 			<span class="key">{i + 1}</span>
-			<span class="txt">{choice.text}</span>
+			<span class="txt" lang={hasHangul(choice.text) ? 'ko' : undefined}>{choice.text}</span>
 		</button>
 	{/each}
 </div>
