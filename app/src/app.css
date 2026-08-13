@@ -8,7 +8,7 @@
 	/* --- ink & paper --- */
 	--ink: #1a1a18;
 	--ink-soft: #55534e;
-	--ink-faint: #8b8880;
+	--ink-faint: #6f6c64;
 	--paper: #fffef9;
 	--paper-sunk: #f4f2ea;
 	--paper-raised: #ffffff;
@@ -72,7 +72,7 @@
 	:root {
 		--ink: #e9e7e0;
 		--ink-soft: #a8a49a;
-		--ink-faint: #74706a;
+		--ink-faint: #8a8680;
 		--paper: #131316;
 		--paper-sunk: #1b1b20;
 		--paper-raised: #212127;
@@ -98,6 +98,18 @@
 	}
 }
 
+@media (prefers-contrast: more) {
+	:root {
+		--ink-faint: #55534e;
+	}
+}
+
+@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+	:root {
+		--ink-faint: #a8a49a;
+	}
+}
+
 *,
 *::before,
 *::after {
@@ -105,9 +117,17 @@
 }
 
 html {
-	font-size: 17px;
-	-webkit-text-size-adjust: 100%;
+	font-size: 106.25%;
+	color-scheme: light dark;
 	scroll-behavior: smooth;
+	scrollbar-width: thin;
+	scrollbar-color: var(--rule-strong) var(--paper-sunk);
+	-webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+::selection {
+	background: var(--accent-soft);
+	color: var(--ink);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -148,9 +168,14 @@ a {
 	color: var(--blue);
 	text-decoration-thickness: 1px;
 	text-underline-offset: 0.16em;
-	transition: color var(--fast) var(--ease);
+	transition: color var(--fast) var(--ease), transform var(--fast) var(--ease);
 }
 a:hover { color: var(--accent); }
+
+a:active,
+button:not(:disabled):active {
+	transform: translateY(0);
+}
 
 button { font: inherit; color: inherit; }
 
@@ -194,11 +219,17 @@ button { font: inherit; color: inherit; }
 .shell {
 	max-width: var(--shell);
 	margin: 0 auto;
-	padding: var(--s6) var(--s5) var(--s8);
+	padding-top: var(--s6);
+	padding-bottom: max(var(--s8), env(safe-area-inset-bottom));
+	padding-inline: max(var(--s5), env(safe-area-inset-left)) max(var(--s5), env(safe-area-inset-right));
 }
 
 @media (max-width: 40rem) {
-	.shell { padding: var(--s5) var(--s4) var(--s7); }
+	.shell {
+		padding-top: var(--s5);
+		padding-bottom: max(var(--s7), env(safe-area-inset-bottom));
+		padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
+	}
 }
 
 .card {
