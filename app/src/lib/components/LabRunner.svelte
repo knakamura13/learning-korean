@@ -412,10 +412,8 @@
 
 	.pip[data-selected]::before,
 	button.pip:focus-visible::before {
-		/* Two animations: glow must not replace the scale pulse. */
-		animation:
-			pip-pulse 1.8s var(--ease-in-out) infinite,
-			pip-glow 1.8s var(--ease-in-out) infinite;
+		filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pip-glow) 50%, transparent));
+		animation: pip-pulse 1.8s var(--ease-in-out) infinite;
 	}
 	.pip:focus-visible {
 		outline: none;
@@ -429,16 +427,6 @@
 		50% { transform: scale(1.08); }
 	}
 
-	@keyframes pip-glow {
-		0%,
-		100% {
-			filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pip-glow) 42%, transparent));
-		}
-		50% {
-			filter: drop-shadow(0 0 10px color-mix(in srgb, var(--pip-glow) 58%, transparent));
-		}
-	}
-
 	@media (prefers-reduced-motion: reduce) {
 		.pip[data-selected]::before,
 		button.pip:focus-visible::before {
@@ -446,7 +434,6 @@
 			width: calc(1.55rem + 2px);
 			height: calc(1.55rem + 2px);
 			border-width: 3px;
-			filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pip-glow) 50%, transparent));
 		}
 		button.pip:not([data-selected]):not(:focus-visible):hover::before {
 			transform: none;
