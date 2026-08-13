@@ -3,8 +3,9 @@
 	import { LABS, LABS_BY_ID } from '$lib/content';
 	import { progress } from '$lib/stores/progress.svelte';
 
-	// Prerendered HTML has no stored progress. Gate the stats and completion
-	// badges until the client has ticked, so we never flash empty counts.
+	// Prerendered HTML has no stored progress. Gate stats, completion badges,
+	// and deck-tier counts until the client has ticked, so we never flash
+	// empty or stored values into static HTML.
 	let ready = $state(false);
 	onMount(() => {
 		progress.tick();
@@ -81,14 +82,14 @@
 		<h2 class="sec">Deck</h2>
 		<div class="tiers card">
 			{#each tiers as tier (tier.id)}
-				<div class="tier" class:locked={!tier.unlocked}>
+				<div class="tier" class:locked={!ready || !tier.unlocked}>
 					<span class="nm">{tier.label}</span>
 					<span class="track">
-						<span class="m" style="width:{pct(tier.mature, tier.size)}%"></span>
-						<span class="y" style="width:{pct(tier.young, tier.size)}%"></span>
+						<span class="m" style="width:{ready ? pct(tier.mature, tier.size) : 0}%"></span>
+						<span class="y" style="width:{ready ? pct(tier.young, tier.size) : 0}%"></span>
 					</span>
 					<span class="ct">
-						{#if tier.unlocked}{tier.mature}/{tier.size}{:else}locked{/if}
+						{#if ready && tier.unlocked}{tier.mature}/{tier.size}{:else}locked{/if}
 					</span>
 				</div>
 			{/each}
@@ -221,6 +222,8 @@
 	.track .y { background: var(--accent); }
 	.ct {
 		flex: 0 0 auto;
+		min-width: 6ch;
+		text-align: right;
 		font-family: var(--mono);
 		font-size: 0.72rem;
 		color: var(--ink-faint);
