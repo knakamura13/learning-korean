@@ -8,7 +8,7 @@
 	/* --- ink & paper --- */
 	--ink: #1a1a18;
 	--ink-soft: #55534e;
-	--ink-faint: #8b8880;
+	--ink-faint: #76736b;
 	--paper: #fffef9;
 	--paper-sunk: #f4f2ea;
 	--paper-raised: #ffffff;
@@ -72,7 +72,7 @@
 	:root {
 		--ink: #e9e7e0;
 		--ink-soft: #a8a49a;
-		--ink-faint: #74706a;
+		--ink-faint: #848078;
 		--paper: #131316;
 		--paper-sunk: #1b1b20;
 		--paper-raised: #212127;
@@ -98,6 +98,18 @@
 	}
 }
 
+@media (prefers-contrast: more) {
+	:root {
+		--ink-faint: #55534e;
+	}
+}
+
+@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+	:root {
+		--ink-faint: #a6a29a;
+	}
+}
+
 *,
 *::before,
 *::after {
@@ -108,6 +120,10 @@ html {
 	font-size: 17px;
 	-webkit-text-size-adjust: 100%;
 	scroll-behavior: smooth;
+	/* Newly available outside Safari 16.4 — progressive only. */
+	scrollbar-width: thin;
+	scrollbar-color: var(--rule-strong) var(--paper-sunk);
+	scrollbar-gutter: stable;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -138,11 +154,13 @@ h1, h2, h3, h4 {
 	margin: 0;
 }
 
+h1, h2 { text-wrap: balance; }
+
 h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); }
 h2 { font-size: clamp(1.35rem, 3vw, 1.6rem); }
 h3 { font-size: 1.1rem; }
 
-p { margin: 0 0 var(--s4); }
+p { margin: 0 0 var(--s4); text-wrap: pretty; }
 
 a {
 	color: var(--blue);
@@ -158,6 +176,11 @@ button { font: inherit; color: inherit; }
 	outline: 2px solid var(--blue);
 	outline-offset: 2px;
 	border-radius: 3px;
+}
+
+::selection {
+	background: var(--accent);
+	color: var(--accent-ink);
 }
 
 /* --- shared primitives --- */
@@ -194,11 +217,15 @@ button { font: inherit; color: inherit; }
 .shell {
 	max-width: var(--shell);
 	margin: 0 auto;
-	padding: var(--s6) var(--s5) var(--s8);
+	padding: var(--s6) max(var(--s5), env(safe-area-inset-right))
+		max(var(--s8), env(safe-area-inset-bottom)) max(var(--s5), env(safe-area-inset-left));
 }
 
 @media (max-width: 40rem) {
-	.shell { padding: var(--s5) var(--s4) var(--s7); }
+	.shell {
+		padding: var(--s5) max(var(--s4), env(safe-area-inset-right))
+			max(var(--s7), env(safe-area-inset-bottom)) max(var(--s4), env(safe-area-inset-left));
+	}
 }
 
 .card {
@@ -217,12 +244,14 @@ button { font: inherit; color: inherit; }
 	color: var(--accent-ink);
 	border-radius: var(--r-md);
 	padding: 0.62rem 1.3rem;
+	min-height: 44px;
 	font-size: 0.88rem;
 	font-weight: 600;
 	cursor: pointer;
 	text-decoration: none;
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: var(--s2);
 	transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
 		filter var(--fast) var(--ease), background var(--fast) var(--ease);
