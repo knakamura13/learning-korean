@@ -3,9 +3,13 @@
 	import { LABS, LABS_BY_ID } from '$lib/content';
 	import { progress } from '$lib/stores/progress.svelte';
 
-	// The clock only matters once we are in the browser; prerendered HTML uses
-	// the empty state and hydrates into the real one.
-	onMount(() => progress.tick());
+	// Prerendered HTML has no stored progress. Gate the stats and completion
+	// badges until the client has ticked, so we never flash empty counts.
+	let ready = $state(false);
+	onMount(() => {
+		progress.tick();
+		ready = true;
+	});
 
 	const stats = $derived(progress.stats);
 	const tiers = $derived(progress.tierProgress);
@@ -13,6 +17,8 @@
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
 	}
+
+	const placeholder = '–';
 </script>
 
 <svelte:head><title>Korean — labs and review</title></svelte:head>
@@ -27,13 +33,15 @@
 		</p>
 	</header>
 
-	<section class="strip">
-		<a class="stat hot" href="/review" class:quiet={stats.queue === 0}>
-			<b>{stats.queue}</b><span>to review</span>
+	<section class="strip" aria-busy={!ready}>
+		<a class="stat hot" href="/review" class:quiet={!ready || stats.queue === 0}>
+			<b>{ready ? stats.queue : placeholder}</b><span>to review</span>
 		</a>
-		<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
-		<div class="stat"><b>{stats.unlocked}<i>/{stats.total}</i></b><span>unlocked</span></div>
-		<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
+		<div class="stat"><b>{ready ? stats.mature : placeholder}</b><span>mastered</span></div>
+		<div class="stat">
+			<b>{ready ? stats.unlocked : placeholder}<i>/{stats.total}</i></b><span>unlocked</span>
+		</div>
+		<div class="stat"><b>{ready ? stats.streak : placeholder}</b><span>day streak</span></div>
 	</section>
 
 	<section>
@@ -42,7 +50,12 @@
 			{#each LABS as lab (lab.id)}
 				{@const done = progress.isUnlocked(lab.unlocks)}
 				{@const blocked = !!lab.requires && !progress.isUnlocked(LABS_BY_ID[lab.requires].unlocks)}
-				<a class="lab card" href="/lab/{lab.id}" class:done class:ahead={blocked}>
+				<a
+					class="lab card"
+					href="/lab/{lab.id}"
+					class:done={ready && done}
+					class:ahead={ready && blocked}
+				>
 					<div class="num">{String(lab.number).padStart(2, '0')}</div>
 					<div class="body">
 						<h3>{lab.title}</h3>
@@ -50,11 +63,13 @@
 						<div class="meta">
 							<span>~{lab.minutes} min</span>
 							<span>{lab.steps.length} cards</span>
-							{#if done}
-								<span class="ok">✓ completed</span>
-							{:else if blocked}
-								<span class="wait">finish Lab {LABS_BY_ID[lab.requires!].number} first</span>
-							{/if}
+							<span class="flag">
+								{#if ready && done}
+									<span class="ok">✓ completed</span>
+								{:else if ready && blocked}
+									<span class="wait">finish Lab {LABS_BY_ID[lab.requires!].number} first</span>
+								{/if}
+							</span>
 						</div>
 					</div>
 				</a>
@@ -96,6 +111,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
 		gap: var(--s2);
 		margin-bottom: var(--s7);
+		min-height: 4.75rem;
 	}
 
 	.stat {
@@ -106,6 +122,7 @@
 		text-align: center;
 		text-decoration: none;
 		color: inherit;
+		min-height: 4.5rem;
 		transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
 	}
 	.stat b {
@@ -113,6 +130,7 @@
 		font-size: 1.5rem;
 		font-weight: 500;
 		display: block;
+		min-height: 1.5em;
 		font-variant-numeric: tabular-nums;
 	}
 	.stat b i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
@@ -170,6 +188,7 @@
 		color: var(--ink-faint);
 		flex-wrap: wrap;
 	}
+	.flag { min-height: 1em; }
 	.meta .ok { color: var(--good); }
 	.meta .wait { color: var(--warn); }
 
