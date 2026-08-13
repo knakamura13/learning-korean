@@ -78,8 +78,18 @@
 		startedAt = Date.now();
 	}
 
+	function isEditableControl(target: EventTarget | null): boolean {
+		if (!(target instanceof HTMLElement)) return false;
+		const tag = target.tagName;
+		if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+			return true;
+		}
+		return target.isContentEditable;
+	}
+
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if (isEditableControl(e.target)) return;
 		if (settled && (e.key === 'Enter' || e.key === ' ')) {
 			e.preventDefault();
 			next();

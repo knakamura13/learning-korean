@@ -63,6 +63,7 @@
 		transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease);
 	}
 	.blk:hover { background: var(--paper-sunk); border-color: var(--rule); }
+	.blk:active { background: var(--paper-sunk); border-color: var(--rule); }
 
 	.ch {
 		font-family: var(--hangul);

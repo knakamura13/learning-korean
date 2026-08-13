@@ -1,9 +1,23 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
+	import { onNavigate } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	let { children } = $props();
+
+	onNavigate((navigation) => {
+		if (!browser) return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		if (!document.startViewTransition) return;
+		return new Promise<void>((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	const nav = [
 		{ href: '/', label: 'Labs' },
@@ -63,12 +77,14 @@
 		background: color-mix(in srgb, var(--paper) 88%, transparent);
 		backdrop-filter: blur(10px);
 		border-bottom: 1px solid var(--rule);
+		padding-top: env(safe-area-inset-top);
 	}
 
 	.inner {
 		max-width: var(--shell);
 		margin: 0 auto;
-		padding: var(--s3) var(--s5);
+		padding: var(--s3) max(var(--s5), env(safe-area-inset-right)) var(--s3)
+			max(var(--s5), env(safe-area-inset-left));
 		display: flex;
 		align-items: center;
 		gap: var(--s5);
@@ -81,6 +97,7 @@
 		text-decoration: none;
 		color: var(--ink);
 		font-weight: 600;
+		min-height: 44px;
 	}
 
 	.mark {
@@ -97,8 +114,11 @@
 	nav a {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		gap: var(--s1);
-		padding: 0.35rem 0.7rem;
+		padding: 0.45rem 0.75rem;
+		min-height: 44px;
+		min-width: 44px;
 		border-radius: var(--r-sm);
 		font-size: 0.84rem;
 		text-decoration: none;
@@ -106,6 +126,7 @@
 		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
 	}
 	nav a:hover { background: var(--paper-sunk); color: var(--ink); }
+	nav a:active { background: var(--paper-sunk); color: var(--ink); }
 	nav a.active { color: var(--accent); background: var(--accent-soft); }
 
 	.badge {
@@ -119,7 +140,10 @@
 	}
 
 	@media (max-width: 30rem) {
-		.inner { padding: var(--s3) var(--s4); }
+		.inner {
+			padding: var(--s3) max(var(--s4), env(safe-area-inset-right)) var(--s3)
+				max(var(--s4), env(safe-area-inset-left));
+		}
 		.name { display: none; }
 	}
 </style>
