@@ -80,14 +80,11 @@
 		{@const isPrior = priorLabels.has(z.id) && !(solved && z.id === step.zone)}
 		<path class="lead" d={z.lead} />
 		<circle
-			class="zone"
-			class:right={!!label}
-			class:prior={isPrior}
-			class:wrong={wrong === z.id}
+			class="hit"
 			class:locked={solved || isPrior}
 			cx={z.cx}
 			cy={z.cy}
-			r="21"
+			r="34"
 			role="button"
 			tabindex={solved || isPrior ? -1 : 0}
 			aria-label={z.tag}
@@ -98,6 +95,16 @@
 					pick(z.id);
 				}
 			}}
+		/>
+		<circle
+			class="zone"
+			class:right={!!label}
+			class:prior={isPrior}
+			class:wrong={wrong === z.id}
+			class:locked={solved || isPrior}
+			cx={z.cx}
+			cy={z.cy}
+			r="21"
 		/>
 		<text class="tag" x={z.lx} y={z.ly}>{z.tag}</text>
 		{#if label}
@@ -117,17 +124,24 @@
 	.tooth { fill: var(--paper); stroke: var(--ink-faint); stroke-width: 1.3; }
 	.lead { fill: none; stroke: var(--ink-faint); stroke-width: 1; opacity: 0.5; }
 
+	.hit {
+		fill: transparent;
+		stroke: none;
+		cursor: pointer;
+	}
+	.hit.locked { pointer-events: none; cursor: default; }
+
 	.zone {
 		fill: var(--blue);
 		fill-opacity: 0.13;
 		stroke: var(--blue);
 		stroke-width: 1.6;
 		stroke-dasharray: 4 3;
-		cursor: pointer;
+		pointer-events: none;
 		transition: fill-opacity var(--fast) var(--ease), stroke-width var(--fast) var(--ease);
 	}
-	.zone:hover:not(.locked) { fill-opacity: 0.3; stroke-width: 2.4; }
-	.zone.locked { cursor: default; pointer-events: none; }
+	.hit:hover:not(.locked) + .zone:not(.locked) { fill-opacity: 0.3; stroke-width: 2.4; }
+	.zone.locked { cursor: default; }
 
 	.zone.right {
 		fill: var(--good);
@@ -143,6 +157,18 @@
 		fill-opacity: 0.3;
 		stroke: var(--bad);
 		stroke-dasharray: none;
+	}
+
+	@media (forced-colors: active) {
+		.zone {
+			fill: Canvas;
+			fill-opacity: 1;
+			stroke: ButtonText;
+			stroke-dasharray: none;
+			stroke-width: 2;
+		}
+		.zone.right { fill: Highlight; stroke: HighlightText; }
+		.zone.wrong { stroke: ButtonText; stroke-width: 3; }
 	}
 
 	.jamo-label {

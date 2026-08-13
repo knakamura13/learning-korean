@@ -54,6 +54,8 @@
 	}
 
 	.blk {
+		appearance: none;
+		font: inherit;
 		border: 1px solid transparent;
 		border-radius: var(--r-md);
 		padding: 0.3rem 0.6rem 0.5rem;
