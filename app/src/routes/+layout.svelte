@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { assets } from '$app/paths';
 	import { page } from '$app/state';
 	import { progress } from '$lib/stores/progress.svelte';
 
@@ -13,6 +14,16 @@
 
 	const queue = $derived(progress.stats.queue);
 </script>
+
+<svelte:head>
+	<link
+		rel="preload"
+		href="{assets}/fonts/NotoSansKR-subset.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
+</svelte:head>
 
 <a class="skip" href="#main">Skip to content</a>
 

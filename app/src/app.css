@@ -4,6 +4,16 @@
    reference tokens only; no component invents a colour.
    ============================================================ */
 
+/* Self-hosted Noto Sans KR (OFL). Subset = Hangul used in the app +
+   basic Latin, variable wght 400–600. Full VF is ~10MB; this file is ~35KB. */
+@font-face {
+	font-family: 'Noto Sans KR';
+	font-style: normal;
+	font-weight: 400 600;
+	font-display: swap;
+	src: url('/fonts/NotoSansKR-subset.woff2') format('woff2');
+}
+
 :root {
 	/* --- ink & paper --- */
 	--ink: #1a1a18;
@@ -34,7 +44,7 @@
 	--serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
 	--sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
 	--mono: 'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
-	--hangul: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Nanum Gothic', sans-serif;
+	--hangul: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
 
 	/* --- space scale --- */
 	--s1: 0.25rem;
@@ -174,6 +184,11 @@ h3 { font-size: 1.1rem; }
 
 h1, h2 { text-wrap: balance; }
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
+
+/* Hangul / lang=ko uses the self-hosted face. English UI keeps serif/sans. */
+:lang(ko) {
+	font-family: var(--hangul);
+}
 
 p, h1, h2, h3, .lab .body {
 	overflow-wrap: anywhere;
