@@ -17,7 +17,10 @@ const config = {
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
-			fallback: 'index.html',
+			// `index.html` is the prerendered homepage. Using it as the SPA fallback
+			// made unknown URLs render Labs instead of +error.svelte. `404.html` is
+			// a separate shell so cold loads of missing paths can show the error page.
+			fallback: '404.html',
 			precompress: false,
 			strict: true
 		}),
