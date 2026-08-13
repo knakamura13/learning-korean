@@ -210,6 +210,15 @@
 	.pip.done { background: var(--good); }
 	.pip.now { background: var(--accent); }
 
+	@media (forced-colors: active) {
+		.pip { background: GrayText; }
+		.pip.done { background: Highlight; }
+		.pip.now { background: ButtonText; }
+		.fb { background: Canvas; border-left-color: ButtonBorder; }
+		.fb[data-tone='right'] { background: Canvas; border-left-color: Highlight; }
+		.fb[data-tone='wrong'] { background: Canvas; border-left-color: ButtonText; }
+	}
+
 	.where {
 		margin-left: auto;
 		font-size: 0.68rem;

@@ -85,6 +85,7 @@
 		border-radius: var(--r-md);
 		background: var(--paper-raised);
 		padding: 0.8rem 0.9rem;
+		min-height: 44px;
 		font-size: 0.94rem;
 		font-weight: 500;
 		line-height: 1.35;
@@ -123,6 +124,23 @@
 	.opt.dim { opacity: 0.4; }
 
 	.opt.right .key, .opt.wrong .key { opacity: 0.5; }
+
+	@media (forced-colors: active) {
+		.opt {
+			background: ButtonFace;
+			color: ButtonText;
+			border: 1px solid ButtonText;
+		}
+		.opt.right {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+		}
+		.opt.wrong {
+			border-color: ButtonText;
+			border-width: 3px;
+		}
+	}
 
 	@media (max-width: 34rem) {
 		.opts { grid-template-columns: 1fr 1fr; }

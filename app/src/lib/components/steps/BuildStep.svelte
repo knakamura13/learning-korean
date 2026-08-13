@@ -108,6 +108,7 @@
 		color: var(--accent);
 		border-radius: var(--r-pill);
 		padding: 0.5rem 1.2rem;
+		min-height: 44px;
 		font-size: 0.84rem;
 		font-weight: 600;
 		cursor: pointer;
@@ -117,4 +118,18 @@
 	.tool:disabled { opacity: 0.32; cursor: default; border-color: var(--rule); color: var(--ink-faint); }
 	.tool.undo { border-color: var(--rule-strong); color: var(--ink-soft); }
 	.tool.undo:hover:not(:disabled) { background: var(--paper-sunk); }
+
+	@media (forced-colors: active) {
+		.tool,
+		.tool.undo {
+			background: ButtonFace;
+			color: ButtonText;
+			border-color: ButtonText;
+		}
+		.tool:disabled {
+			color: GrayText;
+			border-color: GrayText;
+			opacity: 1;
+		}
+	}
 </style>

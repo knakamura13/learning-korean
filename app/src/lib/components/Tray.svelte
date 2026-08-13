@@ -74,6 +74,7 @@
 		font-size: 0.84rem;
 		font-weight: 600;
 		min-width: 4.4rem;
+		min-height: 44px;
 		padding: 0.62rem 0.7rem;
 	}
 
@@ -86,4 +87,18 @@
 		color: var(--accent);
 	}
 	.chip.on.blue { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+
+	@media (forced-colors: active) {
+		.chip {
+			background: ButtonFace;
+			color: ButtonText;
+			border: 1px solid ButtonText;
+		}
+		.chip.on,
+		.chip.on.blue {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+		}
+	}
 </style>
