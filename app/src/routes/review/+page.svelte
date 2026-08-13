@@ -122,7 +122,7 @@
 		</p>
 	</header>
 
-	{#if !progress.durable}
+	{#if ready && !progress.durable}
 		<div class="warn card">
 			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
 			origin, so your review history will vanish when you close the tab. Serve the built app
