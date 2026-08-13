@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
+	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
@@ -16,6 +17,7 @@
 	let startedAt = 0;
 	let input = $state<HTMLInputElement | undefined>();
 	let ready = $state(false);
+	let emptyHint = $state(false);
 
 	const card = $derived(queue[index]);
 	const finishedSession = $derived(ready && queue.length > 0 && index >= queue.length);
@@ -39,6 +41,7 @@
 		typed = '';
 		answered = false;
 		verdict = null;
+		emptyHint = false;
 		startedAt = Date.now();
 		await tick();
 		input?.focus();
@@ -47,7 +50,11 @@
 	function submit() {
 		if (answered) return next();
 		const value = typed.trim();
-		if (!value) return;
+		if (!value) {
+			emptyHint = true;
+			return;
+		}
+		emptyHint = false;
 
 		const ms = Date.now() - startedAt;
 		const ok = checkAnswer(card, value);
@@ -82,6 +89,7 @@
 	}
 
 	function onKey(e: KeyboardEvent) {
+		if (shouldIgnoreShortcut(e.target)) return;
 		if (e.key === 'Enter' && answered) {
 			e.preventDefault();
 			next();
@@ -188,26 +196,44 @@
 						submit();
 					}}
 				>
-					<input
-						bind:this={input}
-						bind:value={typed}
-						class="in"
-						class:right={verdict?.ok}
-						class:wrong={verdict && !verdict.ok}
-						disabled={answered}
-						type="text"
-						inputmode="text"
-						autocapitalize="off"
-						autocorrect="off"
-						spellcheck="false"
-						placeholder="type the romanisation"
-						aria-label="your answer"
-					/>
+					<div class="field">
+						<input
+							bind:this={input}
+							bind:value={typed}
+							class="in"
+							class:right={verdict?.ok}
+							class:wrong={verdict && !verdict.ok}
+							disabled={answered}
+							type="text"
+							inputmode="text"
+							autocapitalize="off"
+							autocorrect="off"
+							spellcheck="false"
+							placeholder="type the romanisation"
+							aria-label="your answer"
+							aria-describedby={emptyHint ? 'empty-hint' : undefined}
+							aria-invalid={emptyHint ? true : undefined}
+							oninput={() => {
+								emptyHint = false;
+							}}
+						/>
+						{#if emptyHint}
+							<p id="empty-hint" class="empty-hint" role="status">
+								Type a romanisation, then Check.
+							</p>
+						{/if}
+					</div>
 					<button class="btn" type="submit">{answered ? 'Next' : 'Check'}</button>
 				</form>
 
 				{#if verdict}
-					<div class="fb" data-tone={verdict.ok ? 'right' : 'wrong'} in:fade={{ duration: 150 }}>
+					<div
+						class="fb"
+						data-tone={verdict.ok ? 'right' : 'wrong'}
+						in:fade={{ duration: 150 }}
+						aria-live="polite"
+						aria-atomic="true"
+					>
 						<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
 						<span class="ans">
 							{card.answers[0]}
@@ -310,11 +336,24 @@
 
 	.ask { text-align: center; font-size: 0.84rem; color: var(--ink-soft); margin: 0 0 var(--s4); }
 
-	form { display: flex; gap: var(--s2); }
+	form { display: flex; gap: var(--s2); align-items: flex-start; }
 
-	.in {
+	.field {
 		flex: 1 1 auto;
 		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--s1);
+	}
+
+	.empty-hint {
+		margin: 0;
+		font-size: 0.82rem;
+		color: var(--ink);
+	}
+
+	.in {
+		width: 100%;
 		border: 1px solid var(--rule-strong);
 		border-radius: var(--r-md);
 		background: var(--paper-sunk);
