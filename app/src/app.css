@@ -101,12 +101,20 @@
 @media (prefers-contrast: more) {
 	:root {
 		--ink-faint: #55534e;
+		--rule: #b8b19f;
+		--rule-strong: #9a937f;
+		--accent: #8a2a22;
+		--accent-soft: #edd0cb;
 	}
 }
 
 @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
 	:root {
 		--ink-faint: #a8a49a;
+		--rule: #5c5c68;
+		--rule-strong: #767684;
+		--accent: #f09990;
+		--accent-soft: #4a2a26;
 	}
 }
 
@@ -225,6 +233,17 @@ button { font: inherit; color: inherit; }
 .muted { color: var(--ink-soft); }
 .tiny { font-size: 0.75rem; }
 
+@keyframes skel-pulse {
+	50% { opacity: 0.4; }
+}
+
+.skel {
+	display: block;
+	background: var(--paper-sunk);
+	border-radius: var(--r-sm);
+	animation: skel-pulse 1.2s var(--ease-in-out) infinite;
+}
+
 .shell {
 	max-width: var(--shell);
 	margin: 0 auto;
@@ -284,15 +303,6 @@ button { font: inherit; color: inherit; }
 }
 .btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; }
 
-.btn.quiet {
-	background: transparent;
-	border-color: transparent;
-	color: var(--ink-soft);
-	padding: 0.4rem 0.7rem;
-}
-.btn.quiet:hover { background: var(--paper-sunk); box-shadow: none; transform: none; }
-.btn.quiet:focus-visible { box-shadow: 0 0 0 4px var(--blue); }
-
 @media (forced-colors: active) {
 	:focus-visible {
 		outline: 2px solid Highlight;
@@ -308,8 +318,7 @@ button { font: inherit; color: inherit; }
 	}
 
 	.btn,
-	.btn.ghost,
-	.btn.quiet {
+	.btn.ghost {
 		background: ButtonFace;
 		color: ButtonText;
 		border: 1px solid ButtonText;
@@ -323,9 +332,13 @@ button { font: inherit; color: inherit; }
 	}
 
 	.btn:focus-visible,
-	.btn:hover:focus-visible,
-	.btn.quiet:focus-visible {
+	.btn:hover:focus-visible {
 		outline: 2px solid Highlight;
 		box-shadow: none;
+	}
+
+	.skel {
+		background: ButtonBorder;
+		animation: none;
 	}
 }

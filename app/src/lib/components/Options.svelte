@@ -117,6 +117,10 @@
 		transform: translateY(-1px);
 		box-shadow: var(--shadow-1);
 	}
+	.opt:active:not(:disabled) {
+		transform: translateY(0);
+		box-shadow: none;
+	}
 	.opt:disabled { cursor: default; }
 
 	.opt.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }

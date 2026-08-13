@@ -141,6 +141,7 @@
 		transition: fill-opacity var(--fast) var(--ease), stroke-width var(--fast) var(--ease);
 	}
 	.hit:hover:not(.locked) + .zone:not(.locked) { fill-opacity: 0.3; stroke-width: 2.4; }
+	.hit:active:not(.locked) + .zone:not(.locked) { fill-opacity: 0.13; stroke-width: 1.6; }
 	.zone.locked { cursor: default; }
 
 	.zone.right {

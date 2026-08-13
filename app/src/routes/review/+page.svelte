@@ -138,7 +138,12 @@
 	</div>
 
 	{#if !ready}
-		<div class="card empty"><p class="muted">Loading your deck…</p></div>
+		<div class="card empty loading" aria-busy="true">
+			<div class="skel glyph-ph" aria-hidden="true"></div>
+			<div class="skel line-ph" aria-hidden="true"></div>
+			<div class="skel field-ph" aria-hidden="true"></div>
+			<p class="muted">Loading your deck…</p>
+		</div>
 	{:else if stats.unlocked === 0}
 		<div class="card empty" in:fade>
 			<span class="big" lang="ko">한</span>
@@ -331,7 +336,7 @@
 
 	.glyph {
 		font-family: var(--hangul);
-		font-size: 6.5rem;
+		font-size: clamp(3.2rem, 10vw + 1.5rem, 6.5rem);
 		font-weight: 500;
 		line-height: 1.05;
 		text-align: center;
@@ -436,4 +441,28 @@
 	.empty .big { font-family: var(--hangul); font-size: 3.2rem; display: block; margin-bottom: var(--s3); }
 	.empty h2 { margin-bottom: var(--s2); }
 	.empty p { color: var(--ink-soft); font-size: 0.92rem; max-width: 28rem; margin: 0 auto var(--s4); }
+
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--s3);
+	}
+	.loading .glyph-ph {
+		width: 4.5rem;
+		height: 4.5rem;
+		border-radius: var(--r-md);
+	}
+	.loading .line-ph {
+		width: 12rem;
+		max-width: 80%;
+		height: 0.7rem;
+	}
+	.loading .field-ph {
+		width: 100%;
+		max-width: 22rem;
+		height: 2.8rem;
+		border-radius: var(--r-md);
+	}
+	.loading .muted { margin: var(--s2) 0 0; }
 </style>

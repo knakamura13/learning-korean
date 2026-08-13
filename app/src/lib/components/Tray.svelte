@@ -59,6 +59,7 @@
 		background: var(--paper-raised);
 		border-radius: var(--r-sm);
 		min-width: 3.2rem;
+		min-height: 44px;
 		padding: 0.45rem 0.55rem;
 		font-family: var(--hangul);
 		font-size: 1.55rem;
@@ -79,6 +80,7 @@
 	}
 
 	.chip:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+	.chip:active:not(:disabled) { transform: translateY(0); }
 	.chip:disabled { cursor: default; opacity: 0.5; }
 
 	.chip.on {

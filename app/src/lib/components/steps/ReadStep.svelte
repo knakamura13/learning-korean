@@ -62,9 +62,11 @@
 		text-align: center;
 		cursor: pointer;
 		background: none;
-		transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease);
+		transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease),
+			transform var(--fast) var(--ease);
 	}
-	.blk:hover { background: var(--paper-sunk); border-color: var(--rule); }
+	.blk:hover { background: var(--paper-sunk); border-color: var(--rule); transform: translateY(-1px); }
+	.blk:active { transform: translateY(0); }
 
 	.ch {
 		font-family: var(--hangul);
