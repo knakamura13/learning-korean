@@ -1,7 +1,38 @@
 const SHORTCUT_GUARD = 'a, button, input, textarea, select, [role="button"]';
 
+function isDisabledControl(el: Element): boolean {
+	if (
+		el instanceof HTMLButtonElement ||
+		el instanceof HTMLInputElement ||
+		el instanceof HTMLTextAreaElement ||
+		el instanceof HTMLSelectElement
+	) {
+		return el.disabled;
+	}
+	return el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled');
+}
+
 /** True when a window shortcut would steal keys from the focused control. */
 export function shouldIgnoreShortcut(target: EventTarget | null): boolean {
 	if (!(target instanceof Element)) return false;
-	return target.closest(SHORTCUT_GUARD) !== null;
+	const control = target.closest(SHORTCUT_GUARD);
+	if (!control) return false;
+	// Disabled controls cannot act on the key, so Enter/Space should still
+	// advance after a lab/review settle (focus often remains on the control
+	// just used). Enabled inputs keep their keys so typing is never stolen.
+	if (isDisabledControl(control)) return false;
+	return true;
+}
+
+/** Focus `node` when `active` is true, including on mount. */
+export function focusWhen(node: HTMLElement, active: boolean) {
+	function apply(on: boolean) {
+		if (on) node.focus();
+	}
+	apply(active);
+	return {
+		update(on: boolean) {
+			apply(on);
+		}
+	};
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
@@ -204,6 +204,7 @@
 							class:right={verdict?.ok}
 							class:wrong={verdict && !verdict.ok}
 							disabled={answered}
+							required
 							type="text"
 							inputmode="text"
 							autocapitalize="off"
@@ -213,6 +214,10 @@
 							aria-label="your answer"
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
+							oninvalid={(e) => {
+								e.preventDefault();
+								emptyHint = true;
+							}}
 							oninput={() => {
 								emptyHint = false;
 							}}
@@ -223,7 +228,10 @@
 							</p>
 						{/if}
 					</div>
-					<button class="btn" type="submit">{answered ? 'Next' : 'Check'}</button>
+					<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
+					{#if answered}
+						<span class="kb">or press Enter</span>
+					{/if}
 				</form>
 
 				{#if verdict}
@@ -243,10 +251,6 @@
 						</span>
 						<span class="note">{card.note}</span>
 						<span class="sched">{verdict.ok ? '' : 'reset — '}{verdict.when}</span>
-					</div>
-					<div class="foot">
-						<button class="btn" onclick={next}>Next</button>
-						<span class="kb">or press Enter</span>
 					</div>
 				{/if}
 			</div>
@@ -336,7 +340,7 @@
 
 	.ask { text-align: center; font-size: 0.84rem; color: var(--ink-soft); margin: 0 0 var(--s4); }
 
-	form { display: flex; gap: var(--s2); align-items: flex-start; }
+	form { display: flex; gap: var(--s2); align-items: flex-start; flex-wrap: wrap; }
 
 	.field {
 		flex: 1 1 auto;
@@ -361,6 +365,10 @@
 		font-family: var(--mono);
 		font-size: 1.15rem;
 		padding: 0.7rem 0.9rem;
+	}
+	.in:user-invalid,
+	.in[aria-invalid='true'] {
+		border-color: var(--bad);
 	}
 	.in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	.in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
@@ -399,8 +407,12 @@
 		color: var(--ink-faint);
 	}
 
-	.foot { margin-top: var(--s3); display: flex; align-items: center; gap: var(--s3); }
-	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-left: auto; }
+	.kb {
+		font-size: 0.7rem;
+		color: var(--ink-faint);
+		align-self: center;
+		margin-left: auto;
+	}
 
 	.empty { padding: var(--s7) var(--s5); text-align: center; }
 	.empty .big { font-family: var(--hangul); font-size: 3.2rem; display: block; margin-bottom: var(--s3); }

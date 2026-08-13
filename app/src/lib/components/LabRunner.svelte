@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
-	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	import MouthStep from './steps/MouthStep.svelte';
@@ -182,7 +182,7 @@
 
 			{#if settled}
 				<div class="foot" in:fade={{ duration: 160 }}>
-					<button class="btn" onclick={next}>{isLast ? 'Finish' : 'Next'}</button>
+					<button class="btn" use:focusWhen={true} onclick={next}>{isLast ? 'Finish' : 'Next'}</button>
 					<span class="kb">or press Enter</span>
 				</div>
 			{/if}
