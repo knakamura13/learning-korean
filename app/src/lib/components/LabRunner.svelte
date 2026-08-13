@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
 	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	import { withLangKo } from '$lib/a11y/lang';
@@ -21,8 +23,12 @@
 	let missedHere = $state(false);
 	let firstTry = $state(0);
 	let startedAt = $state(Date.now());
+	let elapsedMs = $state(0);
 	let finished = $state(false);
 	let released = $state(0);
+	let ready = $state(false);
+	let showResumeNote = $state(false);
+	let elapsedMinutes = $state(1);
 
 	/** null = no feedback yet; `blocking` false means the learner may advance. */
 	let feedback = $state<{ tone: 'right' | 'wrong'; html: string; blocking: boolean } | null>(null);
@@ -30,6 +36,42 @@
 	const step = $derived(lab.steps[index]);
 	const isLast = $derived(index === lab.steps.length - 1);
 	let choiceRef = $state<ChoiceStep | undefined>();
+
+	function segmentElapsed() {
+		return elapsedMs + Math.max(0, Date.now() - startedAt);
+	}
+
+	function persist(nextIndex: number, done = false) {
+		labSession.save(lab.id, {
+			nextIndex,
+			firstTry,
+			elapsedMs: segmentElapsed(),
+			finished: done
+		});
+	}
+
+	onMount(() => {
+		const saved = labSession.forLab(lab.id);
+		if (saved) {
+			firstTry = saved.firstTry;
+			elapsedMs = saved.elapsedMs;
+			startedAt = Date.now();
+			if (saved.finished || saved.nextIndex >= lab.steps.length) {
+				finish();
+			} else {
+				index = saved.nextIndex;
+				showResumeNote = saved.nextIndex > 0;
+			}
+		}
+		ready = true;
+	});
+
+	onDestroy(() => {
+		if (!ready || finished || settled) return;
+		if (index === 0 && firstTry === 0) return;
+		// Mid-card leave: keep this card. A settle already wrote nextIndex + 1.
+		persist(index);
+	});
 
 	/**
 	 * Resolve the step. `correct` is false only for step types where a wrong
@@ -47,6 +89,15 @@
 			html: overrideTeach ?? step.teach,
 			blocking: false
 		};
+		// Advance the saved place now so leaving before Next still resumes
+		// on the following card. Last card: unlock immediately so a Review
+		// peek cannot swallow the sitting.
+		if (isLast) {
+			released = progress.unlock([lab.unlocks]);
+			persist(lab.steps.length, true);
+		} else {
+			persist(index + 1);
+		}
 	}
 
 	/** A wrong answer that should not advance. `soft` means "exploration, not error". */
@@ -63,20 +114,28 @@
 		settled = false;
 		missedHere = false;
 		feedback = null;
+		showResumeNote = false;
 	}
 
 	function finish() {
-		released = progress.unlock([lab.unlocks]);
+		elapsedMinutes = Math.max(1, Math.round(segmentElapsed() / 60_000));
+		if (released === 0) released = progress.unlock([lab.unlocks]);
 		finished = true;
+		labSession.clear(lab.id);
 	}
 
 	function restart() {
+		labSession.clear(lab.id);
 		index = 0;
 		settled = false;
 		missedHere = false;
 		feedback = null;
 		firstTry = 0;
 		finished = false;
+		released = 0;
+		elapsedMs = 0;
+		elapsedMinutes = 1;
+		showResumeNote = false;
 		startedAt = Date.now();
 	}
 
@@ -94,7 +153,6 @@
 		}
 	}
 
-	const minutes = $derived(Math.max(1, Math.round((Date.now() - startedAt) / 60000)));
 </script>
 
 <svelte:window onkeydown={onKey} />
@@ -107,7 +165,7 @@
 
 		<div class="tally">
 			<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
-			<div><b>~{minutes}m</b><span>elapsed</span></div>
+			<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
 			{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
 		</div>
 
@@ -125,19 +183,36 @@
 			<button class="btn ghost" onclick={restart}>Run the lab again</button>
 		</div>
 	</div>
+{:else if !ready}
+	<div class="card step loading" aria-busy="true">
+		<div class="skel line-ph" aria-hidden="true"></div>
+		<div class="skel work-ph" aria-hidden="true"></div>
+		<p class="muted">Loading the lab…</p>
+	</div>
 {:else}
-	<div
-		class="rail"
-		role="progressbar"
-		aria-label="progress"
-		aria-valuemin={1}
-		aria-valuemax={lab.steps.length}
-		aria-valuenow={index + 1}
-	>
-		{#each lab.steps as _, i (i)}
-			<span class="pip" class:done={i < index} class:now={i === index}></span>
-		{/each}
-		<span class="where">{index + 1} / {lab.steps.length}</span>
+	{#if showResumeNote}
+		<p class="resume" role="status">
+			Picking up at card {index + 1} of {lab.steps.length}.
+		</p>
+	{/if}
+	<div class="rail-row">
+		<div
+			class="rail"
+			role="progressbar"
+			aria-label="progress"
+			aria-valuemin={1}
+			aria-valuemax={lab.steps.length}
+			aria-valuenow={index + 1}
+			aria-valuetext="{index + 1} of {lab.steps.length}"
+		>
+			{#each lab.steps as _, i (i)}
+				<span class="pip" class:done={i < index} class:now={i === index}></span>
+			{/each}
+			<span class="where">{index + 1} / {lab.steps.length}</span>
+		</div>
+		{#if index > 0 || showResumeNote}
+			<button type="button" class="textish" onclick={restart}>Start over</button>
+		{/if}
 	</div>
 
 	{#key index}
@@ -163,6 +238,8 @@
 					<ClusterStep {step} {onSettle} {onNudge} />
 				{:else if step.type === 'read'}
 					<ReadStep {step} {onSettle} {onNudge} />
+				{:else}
+					{@const _exhaustive: never = step}
 				{/if}
 			</div>
 
@@ -192,12 +269,21 @@
 {/if}
 
 <style>
+	.rail-row {
+		display: flex;
+		align-items: center;
+		gap: var(--s3);
+		margin-bottom: var(--s5);
+		flex-wrap: wrap;
+	}
+
 	.rail {
 		display: flex;
 		align-items: center;
 		gap: var(--s1);
-		margin-bottom: var(--s5);
+		flex: 1 1 auto;
 		flex-wrap: wrap;
+		min-width: 0;
 	}
 
 	.pip {
@@ -227,6 +313,50 @@
 		color: var(--ink-faint);
 		font-variant-numeric: tabular-nums;
 	}
+
+	.resume {
+		margin: 0 0 var(--s3);
+		font-size: 0.82rem;
+		color: var(--ink-soft);
+	}
+
+	.textish {
+		appearance: none;
+		border: 0;
+		background: none;
+		padding: 0.2rem 0;
+		min-height: 44px;
+		font: inherit;
+		font-size: 0.68rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		cursor: pointer;
+		text-decoration: underline;
+		text-underline-offset: 0.16em;
+	}
+	.textish:hover { color: var(--ink); }
+
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--s3);
+		padding: var(--s7) var(--s5);
+		text-align: center;
+	}
+	.loading .line-ph {
+		width: 14rem;
+		max-width: 80%;
+		height: 0.85rem;
+	}
+	.loading .work-ph {
+		width: 100%;
+		max-width: 22rem;
+		height: 8rem;
+		border-radius: var(--r-md);
+	}
+	.loading .muted { margin: var(--s2) 0 0; }
 
 	.step { padding: var(--s6) var(--s5) var(--s5); }
 
