@@ -1,0 +1,233 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { LABS, LABS_BY_ID } from '$lib/content';
+	import { progress } from '$lib/stores/progress.svelte';
+
+	// The clock only matters once we are in the browser; prerendered HTML uses
+	// the empty state and hydrates into the real one.
+	onMount(() => progress.tick());
+
+	const stats = $derived(progress.stats);
+	const tiers = $derived(progress.tierProgress);
+
+	function pct(part: number, whole: number) {
+		return whole === 0 ? 0 : Math.round((part / whole) * 100);
+	}
+</script>
+
+<svelte:head><title>Korean — labs and review</title></svelte:head>
+
+<div class="shell">
+	<header class="hero">
+		<p class="eyebrow">한글</p>
+		<h1>Read Korean from first principles</h1>
+		<p class="lede">
+			Interactive labs that make you derive the writing system rather than memorise it,
+			backed by a spaced-repetition deck that only ever asks about material you have met.
+		</p>
+	</header>
+
+	<section class="strip">
+		<a class="stat hot" href="/review" class:quiet={stats.queue === 0}>
+			<b>{stats.queue}</b><span>to review</span>
+		</a>
+		<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
+		<div class="stat"><b>{stats.unlocked}<i>/{stats.total}</i></b><span>unlocked</span></div>
+		<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
+	</section>
+
+	<section>
+		<h2 class="sec">Labs</h2>
+		<div class="labs">
+			{#each LABS as lab (lab.id)}
+				{@const done = progress.isUnlocked(lab.unlocks)}
+				{@const blocked = !!lab.requires && !progress.isUnlocked(LABS_BY_ID[lab.requires].unlocks)}
+				<a class="lab card" href="/lab/{lab.id}" class:done class:ahead={blocked}>
+					<div class="num">{String(lab.number).padStart(2, '0')}</div>
+					<div class="body">
+						<h3>{lab.title}</h3>
+						<p>{lab.standfirst}</p>
+						<div class="meta">
+							<span>~{lab.minutes} min</span>
+							<span>{lab.steps.length} cards</span>
+							{#if done}
+								<span class="ok">✓ completed</span>
+							{:else if blocked}
+								<span class="wait">finish Lab {LABS_BY_ID[lab.requires!].number} first</span>
+							{/if}
+						</div>
+					</div>
+				</a>
+			{/each}
+		</div>
+	</section>
+
+	<section>
+		<h2 class="sec">Deck</h2>
+		<div class="tiers card">
+			{#each tiers as tier (tier.id)}
+				<div class="tier" class:locked={!tier.unlocked}>
+					<span class="nm">{tier.label}</span>
+					<span class="track">
+						<span class="m" style="width:{pct(tier.mature, tier.size)}%"></span>
+						<span class="y" style="width:{pct(tier.young, tier.size)}%"></span>
+					</span>
+					<span class="ct">
+						{#if tier.unlocked}{tier.mature}/{tier.size}{:else}locked{/if}
+					</span>
+				</div>
+			{/each}
+			<p class="legend">
+				<i class="sw m"></i> mastered (21+ day gap)
+				<i class="sw y"></i> learning
+				<i class="sw n"></i> not started
+			</p>
+		</div>
+	</section>
+</div>
+
+<style>
+	.hero { margin-bottom: var(--s6); max-width: var(--measure); }
+	h1 { margin: var(--s2) 0 var(--s3); }
+	.lede { color: var(--ink-soft); font-size: 1rem; line-height: 1.65; }
+
+	.strip {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+		gap: var(--s2);
+		margin-bottom: var(--s7);
+	}
+
+	.stat {
+		border: 1px solid var(--rule);
+		border-radius: var(--r-md);
+		background: var(--paper-raised);
+		padding: var(--s3);
+		text-align: center;
+		text-decoration: none;
+		color: inherit;
+		transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+	}
+	.stat b {
+		font-family: var(--mono);
+		font-size: 1.5rem;
+		font-weight: 500;
+		display: block;
+		font-variant-numeric: tabular-nums;
+	}
+	.stat b i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
+	.stat span {
+		font-size: 0.6rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	a.stat.hot:not(.quiet) { border-color: var(--accent); background: var(--accent-soft); }
+	a.stat.hot:not(.quiet) b { color: var(--accent); }
+	a.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+	.sec {
+		font-family: var(--sans);
+		font-size: 0.66rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin: 0 0 var(--s3);
+	}
+
+	section { margin-bottom: var(--s7); }
+
+	.labs { display: grid; gap: var(--s3); }
+
+	.lab {
+		display: flex;
+		gap: var(--s4);
+		padding: var(--s4);
+		text-decoration: none;
+		color: inherit;
+		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
+			border-color var(--fast) var(--ease);
+	}
+	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+
+	.num {
+		font-family: var(--mono);
+		font-size: 1.5rem;
+		color: var(--ink-faint);
+		flex: 0 0 auto;
+		line-height: 1.2;
+	}
+	.lab.done .num { color: var(--good); }
+
+	.lab h3 { font-size: 1.15rem; margin-bottom: var(--s1); }
+	.lab p { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.55; }
+
+	.meta {
+		display: flex;
+		gap: var(--s3);
+		font-size: 0.7rem;
+		color: var(--ink-faint);
+		flex-wrap: wrap;
+	}
+	.meta .ok { color: var(--good); }
+	.meta .wait { color: var(--warn); }
+
+	/* Not blocked, just out of order — the link still works. */
+	.lab.ahead { opacity: 0.72; }
+
+	.tiers { padding: var(--s4); }
+
+	.tier {
+		display: flex;
+		align-items: center;
+		gap: var(--s3);
+		padding: var(--s2) 0;
+		border-bottom: 1px solid var(--rule);
+		font-size: 0.82rem;
+	}
+	.tier:last-of-type { border-bottom: none; }
+	.tier.locked { opacity: 0.45; }
+
+	.nm { flex: 0 0 9rem; }
+	.track {
+		flex: 1 1 auto;
+		height: 6px;
+		background: var(--rule);
+		border-radius: 3px;
+		overflow: hidden;
+		display: flex;
+	}
+	.track .m { background: var(--good); }
+	.track .y { background: var(--accent); }
+	.ct {
+		flex: 0 0 auto;
+		font-family: var(--mono);
+		font-size: 0.72rem;
+		color: var(--ink-faint);
+	}
+
+	.legend {
+		margin: var(--s3) 0 0;
+		font-size: 0.68rem;
+		color: var(--ink-faint);
+		display: flex;
+		gap: var(--s4);
+		flex-wrap: wrap;
+		align-items: center;
+	}
+	.sw {
+		display: inline-block;
+		width: 0.6rem;
+		height: 0.6rem;
+		border-radius: 2px;
+		margin-right: var(--s1);
+	}
+	.sw.m { background: var(--good); }
+	.sw.y { background: var(--accent); }
+	.sw.n { background: var(--rule); }
+
+	@media (max-width: 34rem) {
+		.nm { flex-basis: 6.5rem; }
+	}
+</style>

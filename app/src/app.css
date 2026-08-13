@@ -1,0 +1,248 @@
+/* ============================================================
+   app.css — design tokens and base styles
+   One palette, one type scale, one motion vocabulary. Components
+   reference tokens only; no component invents a colour.
+   ============================================================ */
+
+:root {
+	/* --- ink & paper --- */
+	--ink: #1a1a18;
+	--ink-soft: #55534e;
+	--ink-faint: #8b8880;
+	--paper: #fffef9;
+	--paper-sunk: #f4f2ea;
+	--paper-raised: #ffffff;
+	--rule: #e2ded1;
+	--rule-strong: #cdc7b5;
+
+	/* --- accents: 태극 red and blue --- */
+	--accent: #a4342b;
+	--accent-ink: #ffffff;
+	--accent-soft: #f9ece9;
+	--blue: #2b5c8a;
+	--blue-soft: #eaf1f7;
+
+	/* --- semantic --- */
+	--good: #2f6b45;
+	--good-soft: #e8f1eb;
+	--bad: #9c2f28;
+	--bad-soft: #faeae8;
+	--warn: #8a6316;
+	--warn-soft: #faf2e0;
+
+	/* --- type --- */
+	--serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+	--sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+	--mono: 'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
+	--hangul: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Nanum Gothic', sans-serif;
+
+	/* --- space scale --- */
+	--s1: 0.25rem;
+	--s2: 0.5rem;
+	--s3: 0.75rem;
+	--s4: 1rem;
+	--s5: 1.5rem;
+	--s6: 2rem;
+	--s7: 3rem;
+	--s8: 4rem;
+
+	/* --- shape --- */
+	--r-sm: 6px;
+	--r-md: 10px;
+	--r-lg: 16px;
+	--r-pill: 999px;
+
+	/* --- elevation --- */
+	--shadow-1: 0 1px 2px rgba(26, 26, 24, 0.05), 0 1px 3px rgba(26, 26, 24, 0.04);
+	--shadow-2: 0 2px 6px rgba(26, 26, 24, 0.07), 0 8px 20px rgba(26, 26, 24, 0.05);
+	--shadow-3: 0 8px 24px rgba(26, 26, 24, 0.1), 0 20px 48px rgba(26, 26, 24, 0.07);
+
+	/* --- motion --- */
+	--ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+	--fast: 130ms;
+	--med: 240ms;
+	--slow: 420ms;
+
+	--measure: 36rem;
+	--shell: 62rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--ink: #e9e7e0;
+		--ink-soft: #a8a49a;
+		--ink-faint: #74706a;
+		--paper: #131316;
+		--paper-sunk: #1b1b20;
+		--paper-raised: #212127;
+		--rule: #32323a;
+		--rule-strong: #454550;
+
+		--accent: #e28379;
+		--accent-ink: #1a1a18;
+		--accent-soft: #2d1e1c;
+		--blue: #8ab7e0;
+		--blue-soft: #182531;
+
+		--good: #83c99e;
+		--good-soft: #17251d;
+		--bad: #e88b81;
+		--bad-soft: #2a1a18;
+		--warn: #d8b055;
+		--warn-soft: #2a2312;
+
+		--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+		--shadow-2: 0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3);
+		--shadow-3: 0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35);
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 17px;
+	-webkit-text-size-adjust: 100%;
+	scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html { scroll-behavior: auto; }
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--sans);
+	line-height: 1.6;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+	font-family: var(--serif);
+	font-weight: 400;
+	letter-spacing: -0.015em;
+	line-height: 1.18;
+	margin: 0;
+}
+
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); }
+h2 { font-size: clamp(1.35rem, 3vw, 1.6rem); }
+h3 { font-size: 1.1rem; }
+
+p { margin: 0 0 var(--s4); }
+
+a {
+	color: var(--blue);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.16em;
+	transition: color var(--fast) var(--ease);
+}
+a:hover { color: var(--accent); }
+
+button { font: inherit; color: inherit; }
+
+:focus-visible {
+	outline: 2px solid var(--blue);
+	outline-offset: 2px;
+	border-radius: 3px;
+}
+
+/* --- shared primitives --- */
+
+.hg { font-family: var(--hangul); font-weight: 500; }
+
+.jamo {
+	font-family: var(--hangul);
+	font-size: 1.2em;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.rom {
+	font-family: var(--mono);
+	font-size: 0.86em;
+	color: var(--ink-soft);
+}
+.rom::before { content: '['; }
+.rom::after { content: ']'; }
+
+.eyebrow {
+	font-size: 0.66rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--accent);
+	margin: 0;
+}
+
+.muted { color: var(--ink-soft); }
+.tiny { font-size: 0.75rem; }
+
+.shell {
+	max-width: var(--shell);
+	margin: 0 auto;
+	padding: var(--s6) var(--s5) var(--s8);
+}
+
+@media (max-width: 40rem) {
+	.shell { padding: var(--s5) var(--s4) var(--s7); }
+}
+
+.card {
+	background: var(--paper-raised);
+	border: 1px solid var(--rule);
+	border-radius: var(--r-lg);
+	box-shadow: var(--shadow-1);
+}
+
+/* --- buttons --- */
+
+.btn {
+	appearance: none;
+	border: 1px solid var(--accent);
+	background: var(--accent);
+	color: var(--accent-ink);
+	border-radius: var(--r-md);
+	padding: 0.62rem 1.3rem;
+	font-size: 0.88rem;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--s2);
+	transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
+		filter var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+
+.btn:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn:active { transform: translateY(0); box-shadow: var(--shadow-1); }
+.btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; filter: none; }
+
+.btn.ghost {
+	background: transparent;
+	color: var(--ink-soft);
+	border-color: var(--rule-strong);
+}
+.btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; }
+
+.btn.quiet {
+	background: transparent;
+	border-color: transparent;
+	color: var(--ink-soft);
+	padding: 0.4rem 0.7rem;
+}
+.btn.quiet:hover { background: var(--paper-sunk); box-shadow: none; transform: none; }
