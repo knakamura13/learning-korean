@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
-	import { withLangKo } from '$lib/a11y/lang';
 	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 
+	import { withLangKo } from '$lib/a11y/lang';
 	import MouthStep from './steps/MouthStep.svelte';
 	import ChoiceStep from './steps/ChoiceStep.svelte';
 	import BuildStep from './steps/BuildStep.svelte';
