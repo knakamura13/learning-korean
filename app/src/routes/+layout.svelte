@@ -60,6 +60,7 @@
 		position: sticky;
 		top: 0;
 		z-index: 5;
+		padding-top: env(safe-area-inset-top);
 		background: color-mix(in srgb, var(--paper) 88%, transparent);
 		backdrop-filter: blur(10px);
 		border-bottom: 1px solid var(--rule);
@@ -68,7 +69,8 @@
 	.inner {
 		max-width: var(--shell);
 		margin: 0 auto;
-		padding: var(--s3) var(--s5);
+		padding-block: var(--s2);
+		padding-inline: max(var(--s5), env(safe-area-inset-left)) max(var(--s5), env(safe-area-inset-right));
 		display: flex;
 		align-items: center;
 		gap: var(--s5);
@@ -92,12 +94,13 @@
 
 	.name { font-size: 0.9rem; letter-spacing: 0.01em; }
 
-	nav { display: flex; gap: var(--s1); margin-left: auto; }
+	nav { display: flex; gap: var(--s2); margin-left: auto; }
 
 	nav a {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--s1);
+		min-height: 44px;
 		padding: 0.35rem 0.7rem;
 		border-radius: var(--r-sm);
 		font-size: 0.84rem;
@@ -119,7 +122,18 @@
 	}
 
 	@media (max-width: 30rem) {
-		.inner { padding: var(--s3) var(--s4); }
+		.inner {
+			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
+		}
 		.name { display: none; }
+	}
+
+	@media (forced-colors: active) {
+		.bar {
+			background: Canvas;
+			color: CanvasText;
+			border-bottom: 1px solid ButtonBorder;
+			backdrop-filter: none;
+		}
 	}
 </style>
