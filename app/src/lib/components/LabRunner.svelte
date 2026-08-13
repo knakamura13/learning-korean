@@ -7,6 +7,14 @@
 	import { progress } from '$lib/stores/progress.svelte';
 
 	import { withLangKo } from '$lib/a11y/lang';
+	import {
+		emptyOutcomes,
+		holdFurthest,
+		pipIsJumpTarget,
+		pipKind,
+		pipLabel,
+		type CardOutcome
+	} from '$lib/domain/pipState';
 	import MouthStep from './steps/MouthStep.svelte';
 	import ChoiceStep from './steps/ChoiceStep.svelte';
 	import BuildStep from './steps/BuildStep.svelte';
@@ -29,6 +37,8 @@
 	let ready = $state(false);
 	let showResumeNote = $state(false);
 	let elapsedMinutes = $state(1);
+	let furthest = $state(0);
+	let outcomes = $state<(CardOutcome | null)[]>([]);
 
 	/** null = no feedback yet; `blocking` false means the learner may advance. */
 	let feedback = $state<{ tone: 'right' | 'wrong'; html: string; blocking: boolean } | null>(null);
@@ -46,7 +56,8 @@
 			nextIndex,
 			firstTry,
 			elapsedMs: segmentElapsed(),
-			finished: done
+			finished: done,
+			outcomes: outcomes.slice()
 		});
 	}
 
@@ -56,21 +67,25 @@
 			firstTry = saved.firstTry;
 			elapsedMs = saved.elapsedMs;
 			startedAt = Date.now();
+			outcomes = saved.outcomes.slice();
+			furthest = saved.nextIndex;
 			if (saved.finished || saved.nextIndex >= lab.steps.length) {
 				finish();
 			} else {
 				index = saved.nextIndex;
 				showResumeNote = saved.nextIndex > 0;
 			}
+		} else {
+			outcomes = emptyOutcomes(lab.steps.length);
 		}
 		ready = true;
 	});
 
 	onDestroy(() => {
 		if (!ready || finished || settled) return;
-		if (index === 0 && firstTry === 0) return;
-		// Mid-card leave: keep this card. A settle already wrote nextIndex + 1.
-		persist(index);
+		if (furthest === 0 && firstTry === 0 && outcomes.every((o) => o == null)) return;
+		// Mid-card leave: keep the furthest card, not a card the learner jumped back to.
+		persist(furthest);
 	});
 
 	/**
@@ -84,12 +99,15 @@
 	function onSettle(overrideTeach?: string, correct = true) {
 		if (settled) return;
 		settled = true;
-		if (correct && !missedHere) firstTry += 1;
+		const firstVisit = outcomes[index] == null;
+		if (firstVisit && correct && !missedHere) firstTry += 1;
+		outcomes[index] = correct ? 'right' : 'wrong';
 		feedback = {
 			tone: correct ? 'right' : 'wrong',
 			html: overrideTeach ?? step.teach,
 			blocking: false
 		};
+		furthest = holdFurthest(furthest, index, true, lab.steps.length);
 		// Advance the saved place now so leaving before Next still resumes
 		// on the following card. Last card: unlock immediately so a Review
 		// peek cannot swallow the sitting.
@@ -97,7 +115,7 @@
 			released = progress.unlock([lab.unlocks]);
 			persist(lab.steps.length, true);
 		} else {
-			persist(index + 1);
+			persist(furthest);
 		}
 	}
 
@@ -112,6 +130,16 @@
 		if (!settled) return;
 		if (isLast) return finish();
 		index += 1;
+		furthest = holdFurthest(furthest, index, false, lab.steps.length);
+		settled = false;
+		missedHere = false;
+		feedback = null;
+		showResumeNote = false;
+	}
+
+	function jumpTo(i: number) {
+		if (i === index || i < 0 || i > furthest) return;
+		index = i;
 		settled = false;
 		missedHere = false;
 		feedback = null;
@@ -128,6 +156,8 @@
 	function restart() {
 		labSession.clear(lab.id);
 		index = 0;
+		furthest = 0;
+		outcomes = emptyOutcomes(lab.steps.length);
 		settled = false;
 		missedHere = false;
 		feedback = null;
@@ -159,7 +189,7 @@
 <svelte:window onkeydown={onKey} />
 
 {#if finished}
-	<div class="done card" in:fly={{ y: 12, duration: 300 }}>
+	<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
 		<span class="seal" lang="ko">한글</span>
 		<h2>{lab.finish.title}</h2>
 		<p class="summary">{lab.finish.summary}</p>
@@ -196,25 +226,35 @@
 			Picking up at card {index + 1} of {lab.steps.length}.
 		</p>
 	{/if}
-	<div class="rail-row">
-		<div
-			class="rail"
-			role="progressbar"
-			aria-label="progress"
-			aria-valuemin={1}
-			aria-valuemax={lab.steps.length}
-			aria-valuenow={index + 1}
-			aria-valuetext="{index + 1} of {lab.steps.length}"
-		>
+	<nav class="rail-wrap" aria-label="Lab cards">
+		<ol class="rail">
 			{#each lab.steps as _, i (i)}
-				<span class="pip" class:done={i < index} class:now={i === index}></span>
+				{@const kind = pipKind(i, outcomes, furthest)}
+				{@const selected = i === index}
+				<li>
+					{#if pipIsJumpTarget(kind) || selected}
+						<button
+							type="button"
+							class="pip"
+							data-kind={kind}
+							data-selected={selected || undefined}
+							aria-current={selected ? 'step' : undefined}
+							aria-label={pipLabel(kind, i + 1, selected)}
+							onclick={() => jumpTo(i)}
+						>
+							<span class="pip-n">{i + 1}</span>
+						</button>
+					{:else}
+						<span class="pip" data-kind={kind}>
+							<span class="pip-n" aria-hidden="true">{i + 1}</span>
+							<span class="vh">{pipLabel(kind, i + 1)}</span>
+						</span>
+					{/if}
+				</li>
 			{/each}
-			<span class="where">{index + 1} / {lab.steps.length}</span>
-		</div>
-		{#if index > 0 || showResumeNote}
-			<button type="button" class="textish" onclick={restart}>Start over</button>
-		{/if}
-	</div>
+		</ol>
+		<span class="where">{index + 1} / {lab.steps.length}</span>
+	</nav>
 
 	{#key index}
 		<div class="card step" in:fly={{ y: 10, duration: 260 }}>
@@ -270,10 +310,10 @@
 {/if}
 
 <style>
-	.rail-row {
+	.rail-wrap {
 		display: flex;
 		align-items: center;
-		gap: var(--s3);
+		gap: var(--s2);
 		margin-bottom: var(--s5);
 		flex-wrap: wrap;
 	}
@@ -281,26 +321,141 @@
 	.rail {
 		display: flex;
 		align-items: center;
-		gap: var(--s1);
 		flex: 1 1 auto;
 		flex-wrap: wrap;
 		min-width: 0;
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
+
+	.rail li { display: flex; }
 
 	.pip {
-		width: 1.6rem;
-		height: 3px;
-		border-radius: 2px;
-		background: var(--rule);
-		transition: background var(--slow) var(--ease);
+		appearance: none;
+		-webkit-appearance: none;
+		box-sizing: border-box;
+		isolation: isolate;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		min-width: 44px;
+		min-height: 44px;
+		padding: 0;
+		overflow: visible;
+		font: inherit;
+		font-size: 0.72rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+		color: var(--ink-faint);
+		cursor: default;
 	}
-	.pip.done { background: var(--good); }
-	.pip.now { background: var(--accent); }
+	button.pip { cursor: pointer; }
+	/* Hover filter stays off the selected pip so it cannot clip the glow. */
+	button.pip:not([data-selected]):hover { filter: brightness(1.08); }
+
+	/* Status mark. Centered with inset so selected pulse/glow can use
+	   transform + drop-shadow on this one box — no second ring. */
+	.pip::before {
+		content: '';
+		position: absolute;
+		display: block;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		margin: auto;
+		width: 1.55rem;
+		height: 1.55rem;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		background: transparent;
+		pointer-events: none;
+		transform-origin: center;
+		--pip-glow: var(--ink-faint);
+	}
+	.pip[data-kind='upcoming']::before { content: none; }
+
+	.pip[data-kind='right'] { color: var(--paper); }
+	.pip[data-kind='right']::before {
+		background: var(--good);
+		border-color: var(--good);
+		--pip-glow: var(--good);
+	}
+	.pip[data-kind='wrong'] { color: var(--bad); }
+	.pip[data-kind='wrong']::before {
+		background: transparent;
+		border-color: var(--bad);
+		--pip-glow: var(--bad);
+	}
+	.pip[data-kind='visited'] { color: var(--ink-soft); }
+	.pip[data-kind='visited']::before {
+		border-color: var(--rule-strong);
+		--pip-glow: var(--ink-faint);
+	}
+	.pip[data-kind='upcoming'] { font-weight: 500; }
+	.pip-n { position: relative; z-index: 1; }
+
+	button.pip:not([data-selected]):not(:focus-visible):hover::before {
+		transform: scale(1.03);
+	}
+
+	.pip[data-selected]::before,
+	button.pip:focus-visible::before {
+		filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pip-glow) 50%, transparent));
+		animation: pip-pulse 1.8s var(--ease-in-out) infinite;
+	}
+	.pip:focus-visible {
+		outline: none;
+		box-shadow: none;
+		border-radius: 0;
+	}
+
+	@keyframes pip-pulse {
+		0%,
+		100% { transform: scale(1); }
+		50% { transform: scale(1.08); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.pip[data-selected]::before,
+		button.pip:focus-visible::before {
+			animation: none;
+			width: calc(1.55rem + 2px);
+			height: calc(1.55rem + 2px);
+			border-width: 3px;
+		}
+		button.pip:not([data-selected]):not(:focus-visible):hover::before {
+			transform: none;
+		}
+	}
+
+	.vh {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
 
 	@media (forced-colors: active) {
-		.pip { background: GrayText; }
-		.pip.done { background: Highlight; }
-		.pip.now { background: ButtonText; }
+		.pip[data-kind='upcoming'] { color: GrayText; }
+		.pip[data-kind='right'] { color: Canvas; }
+		.pip[data-kind='right']::before { background: Highlight; border-color: Highlight; }
+		.pip[data-kind='wrong'] { color: ButtonText; }
+		.pip[data-kind='wrong']::before { background: Canvas; border-color: ButtonText; }
+		.pip[data-selected]::before,
+		button.pip:focus-visible::before { border-color: ButtonText; }
 		.fb { background: Canvas; border-left-color: ButtonBorder; }
 		.fb[data-tone='right'] { background: Canvas; border-left-color: Highlight; }
 		.fb[data-tone='wrong'] { background: Canvas; border-left-color: ButtonText; }
@@ -320,23 +475,6 @@
 		font-size: 0.82rem;
 		color: var(--ink-soft);
 	}
-
-	.textish {
-		appearance: none;
-		border: 0;
-		background: none;
-		padding: 0.2rem 0;
-		min-height: 44px;
-		font: inherit;
-		font-size: 0.68rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--ink-faint);
-		cursor: pointer;
-		text-decoration: underline;
-		text-underline-offset: 0.16em;
-	}
-	.textish:hover { color: var(--ink); }
 
 	.loading {
 		display: flex;
@@ -409,7 +547,7 @@
 	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-left: auto; }
 
 	/* --- finish --- */
-	.done { padding: var(--s7) var(--s5); text-align: center; }
+	.finish { padding: var(--s7) var(--s5); text-align: center; }
 
 	.seal {
 		font-family: var(--hangul);

@@ -7,6 +7,8 @@
  * file only validates and updates the payload.
  */
 
+import { reviveOutcomes, type CardOutcome } from './pipState';
+
 export const LAB_SESSION_VERSION = 1;
 
 export interface LabProgress {
@@ -14,6 +16,8 @@ export interface LabProgress {
 	firstTry: number;
 	elapsedMs: number;
 	finished: boolean;
+	/** Index-aligned; null means this card has no recorded settle yet. */
+	outcomes: (CardOutcome | null)[];
 }
 
 export interface LabSessions {
@@ -46,7 +50,8 @@ function reviveOne(raw: unknown, stepCount: number): LabProgress | null {
 		nextIndex: finished ? stepCount : nextIndex,
 		firstTry,
 		elapsedMs,
-		finished
+		finished,
+		outcomes: reviveOutcomes(rec.outcomes, stepCount)
 	};
 }
 
@@ -104,11 +109,17 @@ export function resumable(progress: LabProgress | undefined, stepCount: number):
 	return progress;
 }
 
+function sameOutcomes(a: (CardOutcome | null)[], b: (CardOutcome | null)[]): boolean {
+	if (a.length !== b.length) return false;
+	return a.every((value, i) => value === b[i]);
+}
+
 function shallowEqual(a: LabProgress, b: LabProgress): boolean {
 	return (
 		a.nextIndex === b.nextIndex &&
 		a.firstTry === b.firstTry &&
 		a.elapsedMs === b.elapsedMs &&
-		a.finished === b.finished
+		a.finished === b.finished &&
+		sameOutcomes(a.outcomes, b.outcomes)
 	);
 }
