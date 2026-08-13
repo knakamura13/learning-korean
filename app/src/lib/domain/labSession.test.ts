@@ -7,6 +7,7 @@ import {
 	upsertLab,
 	type LabProgress
 } from './labSession';
+import { emptyOutcomes } from './pipState';
 
 const COUNTS = { '0001': 17, '0002': 16 };
 
@@ -14,7 +15,8 @@ const mid: LabProgress = {
 	nextIndex: 7,
 	firstTry: 5,
 	elapsedMs: 90_000,
-	finished: false
+	finished: false,
+	outcomes: emptyOutcomes(17)
 };
 
 describe('reviveSessions', () => {
@@ -56,6 +58,29 @@ describe('reviveSessions', () => {
 	it('accepts a bare labs map so a future wrapper bump does not discard place', () => {
 		const revived = reviveSessions({ '0001': mid }, COUNTS);
 		expect(revived.labs['0001']).toEqual(mid);
+	});
+
+	it('pads missing outcomes so a pre-pip session still resumes', () => {
+		const revived = reviveSessions(
+			{
+				version: 1,
+				labs: { '0001': { nextIndex: 7, firstTry: 5, elapsedMs: 90_000, finished: false } }
+			},
+			COUNTS
+		);
+		expect(revived.labs['0001']?.outcomes).toEqual(emptyOutcomes(17));
+	});
+
+	it('keeps recorded right/wrong marks on revive', () => {
+		const outcomes = emptyOutcomes(17);
+		outcomes[0] = 'right';
+		outcomes[1] = 'wrong';
+		const revived = reviveSessions(
+			{ version: 1, labs: { '0001': { ...mid, outcomes } } },
+			COUNTS
+		);
+		expect(revived.labs['0001']?.outcomes[0]).toBe('right');
+		expect(revived.labs['0001']?.outcomes[1]).toBe('wrong');
 	});
 });
 
