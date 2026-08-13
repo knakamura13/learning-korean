@@ -378,7 +378,7 @@
 		background: transparent;
 		pointer-events: none;
 		transform-origin: center;
-		--pip-glow: var(--accent);
+		--pip-glow: var(--ink-faint);
 	}
 	.pip[data-kind='upcoming']::before { content: none; }
 
@@ -397,11 +397,7 @@
 	.pip[data-kind='visited'] { color: var(--ink-soft); }
 	.pip[data-kind='visited']::before {
 		border-color: var(--rule-strong);
-		--pip-glow: var(--accent);
-	}
-	.pip[data-kind='visited'][data-selected]::before,
-	button.pip[data-kind='visited']:focus-visible::before {
-		border-color: var(--accent);
+		--pip-glow: var(--ink-faint);
 	}
 	.pip[data-kind='upcoming'] { font-weight: 500; }
 	.pip-n { position: relative; z-index: 1; }
