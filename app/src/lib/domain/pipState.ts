@@ -84,3 +84,11 @@ export function holdFurthest(furthest: number, index: number, settled: boolean, 
 	const reached = settled ? index + 1 : index;
 	return Math.min(stepCount, Math.max(furthest, reached));
 }
+
+/**
+ * Left/Right card index, clamped to `[0, furthest]`. Same bound as pip clicks:
+ * walk back and forward freely, but never skip ahead of the unfinished frontier.
+ */
+export function stepCardIndex(index: number, delta: number, furthest: number): number {
+	return Math.max(0, Math.min(furthest, index + delta));
+}

@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
-	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { focusWhen, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
@@ -13,6 +13,7 @@
 		pipIsJumpTarget,
 		pipKind,
 		pipLabel,
+		stepCardIndex,
 		type CardOutcome
 	} from '$lib/domain/pipState';
 	import MouthStep from './steps/MouthStep.svelte';
@@ -172,6 +173,14 @@
 
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+			// Finish hides the pip rail; leave arrows to the browser there.
+			if (!ready || finished) return;
+			if (shouldIgnoreArrowNav(e.target)) return;
+			e.preventDefault();
+			jumpTo(stepCardIndex(index, e.key === 'ArrowLeft' ? -1 : 1, furthest));
+			return;
+		}
 		if (shouldIgnoreShortcut(e.target)) return;
 		if (settled && (e.key === 'Enter' || e.key === ' ')) {
 			e.preventDefault();

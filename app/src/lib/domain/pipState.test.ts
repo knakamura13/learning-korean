@@ -6,6 +6,7 @@ import {
 	pipKind,
 	pipLabel,
 	reviveOutcomes,
+	stepCardIndex,
 	type CardOutcome
 } from './pipState';
 
@@ -68,5 +69,33 @@ describe('holdFurthest', () => {
 		expect(holdFurthest(5, 4, true, 17)).toBe(5);
 		expect(holdFurthest(5, 5, true, 17)).toBe(6);
 		expect(holdFurthest(16, 16, true, 17)).toBe(17);
+	});
+});
+
+describe('stepCardIndex', () => {
+	it('is a no-op at card 1 and at the unfinished frontier', () => {
+		expect(stepCardIndex(0, -1, 4)).toBe(0);
+		expect(stepCardIndex(0, 1, 0)).toBe(0);
+		expect(stepCardIndex(4, 1, 4)).toBe(4);
+	});
+
+	it('does not skip ahead of furthest', () => {
+		expect(stepCardIndex(2, 1, 2)).toBe(2);
+		expect(stepCardIndex(0, 5, 2)).toBe(2);
+		expect(stepCardIndex(1, 9, 3)).toBe(3);
+	});
+
+	it('walks forward again after a jump back, up to furthest', () => {
+		let i = 5;
+		i = stepCardIndex(i, -1, 5);
+		expect(i).toBe(4);
+		i = stepCardIndex(i, -1, 5);
+		expect(i).toBe(3);
+		i = stepCardIndex(i, 1, 5);
+		expect(i).toBe(4);
+		i = stepCardIndex(i, 1, 5);
+		expect(i).toBe(5);
+		i = stepCardIndex(i, 1, 5);
+		expect(i).toBe(5);
 	});
 });
