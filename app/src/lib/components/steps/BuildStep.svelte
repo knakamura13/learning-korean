@@ -115,6 +115,7 @@
 		transition: background var(--fast) var(--ease), transform var(--fast) var(--ease);
 	}
 	.tool:hover:not(:disabled) { background: var(--accent-soft); transform: translateY(-1px); }
+	.tool:active:not(:disabled) { transform: translateY(0); }
 	.tool:disabled { opacity: 0.32; cursor: default; border-color: var(--rule); color: var(--ink-faint); }
 	.tool.undo { border-color: var(--rule-strong); color: var(--ink-soft); }
 	.tool.undo:hover:not(:disabled) { background: var(--paper-sunk); }

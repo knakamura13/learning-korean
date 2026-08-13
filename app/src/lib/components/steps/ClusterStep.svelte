@@ -111,6 +111,7 @@
 			transform var(--fast) var(--ease);
 	}
 	.pick:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+	.pick:active:not(:disabled) { transform: translateY(0); }
 	.pick:disabled { cursor: default; }
 	.pick.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	.pick.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }

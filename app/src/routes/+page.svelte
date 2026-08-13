@@ -18,8 +18,6 @@
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
 	}
-
-	const placeholder = '–';
 </script>
 
 <svelte:head><title>Korean — labs and review</title></svelte:head>
@@ -36,13 +34,41 @@
 
 	<section class="strip" aria-busy={!ready}>
 		<a class="stat hot" href="/review" class:quiet={!ready || stats.queue === 0}>
-			<b>{ready ? stats.queue : placeholder}</b><span>to review</span>
+			<b>
+				{#if ready}
+					{stats.queue}
+				{:else}
+					<span class="skel" aria-hidden="true"></span>
+				{/if}
+			</b><span>to review</span>
 		</a>
-		<div class="stat"><b>{ready ? stats.mature : placeholder}</b><span>mastered</span></div>
 		<div class="stat">
-			<b>{ready ? stats.unlocked : placeholder}<i>/{stats.total}</i></b><span>unlocked</span>
+			<b>
+				{#if ready}
+					{stats.mature}
+				{:else}
+					<span class="skel" aria-hidden="true"></span>
+				{/if}
+			</b><span>mastered</span>
 		</div>
-		<div class="stat"><b>{ready ? stats.streak : placeholder}</b><span>day streak</span></div>
+		<div class="stat">
+			<b>
+				{#if ready}
+					{stats.unlocked}<i>/{stats.total}</i>
+				{:else}
+					<span class="skel" aria-hidden="true"></span>
+				{/if}
+			</b><span>unlocked</span>
+		</div>
+		<div class="stat">
+			<b>
+				{#if ready}
+					{stats.streak}
+				{:else}
+					<span class="skel" aria-hidden="true"></span>
+				{/if}
+			</b><span>day streak</span>
+		</div>
 	</section>
 
 	<section>
@@ -135,6 +161,11 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.stat b i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
+	.stat .skel {
+		width: 1.6em;
+		height: 0.65em;
+		margin: 0.42em auto 0.18em;
+	}
 	.stat span {
 		font-size: 0.6rem;
 		letter-spacing: 0.1em;
