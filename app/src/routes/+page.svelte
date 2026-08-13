@@ -96,6 +96,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
 		gap: var(--s2);
 		margin-bottom: var(--s7);
+		min-height: 4.75rem;
 	}
 
 	.stat {
@@ -106,6 +107,10 @@
 		text-align: center;
 		text-decoration: none;
 		color: inherit;
+		min-height: 4.5rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 		transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
 	}
 	.stat b {
@@ -114,6 +119,7 @@
 		font-weight: 500;
 		display: block;
 		font-variant-numeric: tabular-nums;
+		min-height: 1.8em;
 	}
 	.stat b i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
 	.stat span {

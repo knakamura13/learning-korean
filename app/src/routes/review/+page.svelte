@@ -130,7 +130,7 @@
 	</div>
 
 	{#if !ready}
-		<div class="card empty"><p class="muted">Loading your deck…</p></div>
+		<div class="card empty loading"><p class="muted">Loading your deck…</p></div>
 	{:else if stats.unlocked === 0}
 		<div class="card empty" in:fade>
 			<span class="big">한</span>
@@ -254,6 +254,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
 		gap: var(--s2);
 		margin-bottom: var(--s5);
+		min-height: 4.5rem;
 	}
 	.stat {
 		border: 1px solid var(--rule);
@@ -261,6 +262,7 @@
 		background: var(--paper-raised);
 		padding: var(--s3) var(--s2);
 		text-align: center;
+		min-height: 4.25rem;
 	}
 	.stat.hot { border-color: var(--accent); background: var(--accent-soft); }
 	.stat.hot b { color: var(--accent); }
@@ -364,6 +366,7 @@
 	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-left: auto; }
 
 	.empty { padding: var(--s7) var(--s5); text-align: center; }
+	.empty.loading { min-height: 22rem; display: flex; align-items: center; justify-content: center; }
 	.empty .big { font-family: var(--hangul); font-size: 3.2rem; display: block; margin-bottom: var(--s3); }
 	.empty h2 { margin-bottom: var(--s2); }
 	.empty p { color: var(--ink-soft); font-size: 0.92rem; max-width: 28rem; margin: 0 auto var(--s4); }
