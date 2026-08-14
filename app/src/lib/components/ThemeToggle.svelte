@@ -178,10 +178,6 @@
 		.compact { display: inline-flex; }
 	}
 
-	@media (max-width: 30rem) {
-		.wide button { padding: 0 0.4rem; font-size: 0.66rem; }
-	}
-
 	@media (forced-colors: active) {
 		.theme.wide,
 		.compact {

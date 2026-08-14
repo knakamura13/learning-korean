@@ -386,6 +386,18 @@
 		margin-bottom: var(--s4);
 		flex-wrap: nowrap;
 		min-width: 0;
+		position: relative;
+	}
+
+	.rail-wrap::after {
+		content: '';
+		position: absolute;
+		right: 3.4rem;
+		top: 0.2rem;
+		bottom: 0.2rem;
+		width: 1.4rem;
+		pointer-events: none;
+		background: linear-gradient(90deg, transparent, var(--paper));
 	}
 
 	.rail {
@@ -419,7 +431,7 @@
 		border: 0;
 		border-radius: 0;
 		background: transparent;
-		min-width: 44px;
+		min-width: 2.25rem;
 		min-height: 44px;
 		padding: 0;
 		overflow: visible;
@@ -524,6 +536,7 @@
 	}
 
 	@media (forced-colors: active) {
+		.rail-wrap::after { display: none; }
 		.pip[data-kind='upcoming'] { color: GrayText; }
 		.pip[data-kind='right'] { color: Canvas; }
 		.pip[data-kind='right']::before { background: Highlight; border-color: Highlight; }
