@@ -46,6 +46,8 @@
 
 	const step = $derived(lab.steps[index]);
 	const isLast = $derived(index === lab.steps.length - 1);
+	const alreadyDone = $derived(progress.isUnlocked(lab.unlocks));
+	const compactHead = $derived(!ready || index > 0 || showResumeNote);
 	let choiceRef = $state<ChoiceStep | undefined>();
 
 	function segmentElapsed() {
@@ -193,6 +195,30 @@
 		}
 	}
 
+	/** Keep the current pip in view without scrolling the page. */
+	function keepSelectedVisible(node: HTMLOListElement, _index: number) {
+		function sync() {
+			const pip = node.querySelector<HTMLElement>('[data-selected]');
+			if (!pip) return;
+			const reduce =
+				typeof matchMedia === 'function' &&
+				matchMedia('(prefers-reduced-motion: reduce)').matches;
+			const pipRect = pip.getBoundingClientRect();
+			const railRect = node.getBoundingClientRect();
+			const delta = pipRect.left + pipRect.width / 2 - (railRect.left + railRect.width / 2);
+			node.scrollTo({
+				left: node.scrollLeft + delta,
+				behavior: reduce ? 'auto' : 'smooth'
+			});
+		}
+		sync();
+		return {
+			update(_next: number) {
+				sync();
+			}
+		};
+	}
+
 </script>
 
 <svelte:window onkeydown={onKey} />
@@ -223,20 +249,34 @@
 			<button class="btn ghost" onclick={restart}>Run the lab again</button>
 		</div>
 	</div>
-{:else if !ready}
-	<div class="card step loading" aria-busy="true">
-		<div class="skel line-ph" aria-hidden="true"></div>
-		<div class="skel work-ph" aria-hidden="true"></div>
-		<p class="muted">Loading the lab…</p>
-	</div>
 {:else}
+	<header class="head" class:compact={compactHead}>
+		<p class="eyebrow">
+			Lab {String(lab.number).padStart(2, '0')} · ~{lab.minutes} minutes
+			{#if alreadyDone}· completed{/if}
+			{#if showResumeNote}
+				· picking up at card {index + 1}
+			{/if}
+		</p>
+		<h1>{lab.title}</h1>
+		{#if !compactHead}
+			<p class="standfirst">{lab.standfirst}</p>
+		{/if}
+	</header>
+	{#if !ready}
+		<div class="card step loading" aria-busy="true">
+			<div class="skel line-ph" aria-hidden="true"></div>
+			<div class="skel work-ph" aria-hidden="true"></div>
+			<p class="muted">Loading the lab…</p>
+		</div>
+	{:else}
 	{#if showResumeNote}
-		<p class="resume" role="status">
+		<p class="vh" role="status">
 			Picking up at card {index + 1} of {lab.steps.length}.
 		</p>
 	{/if}
 	<nav class="rail-wrap" aria-label="Lab cards">
-		<ol class="rail">
+		<ol class="rail" use:keepSelectedVisible={index}>
 			{#each lab.steps as _, i (i)}
 				{@const kind = pipKind(i, outcomes, furthest)}
 				{@const selected = i === index}
@@ -316,29 +356,67 @@
 			{/if}
 		</div>
 	{/key}
+	{/if}
 {/if}
 
 <style>
+	.head { margin-bottom: var(--s5); }
+	.head.compact { margin-bottom: var(--s3); }
+	.head h1 { margin: var(--s2) 0 var(--s3); }
+	.head.compact h1 {
+		margin: 0;
+		font-size: 1.15rem;
+		line-height: 1.25;
+	}
+
+	.standfirst {
+		font-family: var(--serif);
+		font-size: 1.1rem;
+		font-style: italic;
+		color: var(--ink-soft);
+		line-height: 1.5;
+		margin: 0;
+		max-width: var(--measure);
+	}
+
 	.rail-wrap {
 		display: flex;
 		align-items: center;
 		gap: var(--s2);
-		margin-bottom: var(--s5);
-		flex-wrap: wrap;
+		margin-bottom: var(--s4);
+		flex-wrap: nowrap;
+		min-width: 0;
+		position: relative;
+	}
+
+	.rail-wrap::after {
+		content: '';
+		position: absolute;
+		right: 3.4rem;
+		top: 0.2rem;
+		bottom: 0.2rem;
+		width: 1.4rem;
+		pointer-events: none;
+		background: linear-gradient(90deg, transparent, var(--paper));
 	}
 
 	.rail {
 		display: flex;
 		align-items: center;
 		flex: 1 1 auto;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		min-width: 0;
 		margin: 0;
-		padding: 0;
+		padding: 0.45rem 0.15rem;
 		list-style: none;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: thin;
+		scrollbar-color: var(--ink-faint) transparent;
+		-webkit-overflow-scrolling: touch;
 	}
 
-	.rail li { display: flex; }
+	.rail li { display: flex; flex: 0 0 auto; }
 
 	.pip {
 		appearance: none;
@@ -353,7 +431,7 @@
 		border: 0;
 		border-radius: 0;
 		background: transparent;
-		min-width: 44px;
+		min-width: 2.25rem;
 		min-height: 44px;
 		padding: 0;
 		overflow: visible;
@@ -458,6 +536,7 @@
 	}
 
 	@media (forced-colors: active) {
+		.rail-wrap::after { display: none; }
 		.pip[data-kind='upcoming'] { color: GrayText; }
 		.pip[data-kind='right'] { color: Canvas; }
 		.pip[data-kind='right']::before { background: Highlight; border-color: Highlight; }
@@ -471,18 +550,14 @@
 	}
 
 	.where {
-		margin-left: auto;
+		flex: 0 0 auto;
+		margin-left: 0;
 		font-size: 0.68rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-faint);
 		font-variant-numeric: tabular-nums;
-	}
-
-	.resume {
-		margin: 0 0 var(--s3);
-		font-size: 0.82rem;
-		color: var(--ink-soft);
+		white-space: nowrap;
 	}
 
 	.loading {
@@ -554,6 +629,10 @@
 	}
 
 	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-left: auto; }
+
+	@media (pointer: coarse) {
+		.kb { display: none; }
+	}
 
 	/* --- finish --- */
 	.finish { padding: var(--s7) var(--s5); text-align: center; }

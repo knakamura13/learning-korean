@@ -130,12 +130,14 @@
 		</div>
 	{/if}
 
-	<div class="strip">
-		<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
-		<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
-		<div class="stat"><b>{stats.seen}</b><span>started</span></div>
-		<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
-	</div>
+	{#if ready && stats.unlocked > 0}
+		<div class="strip">
+			<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
+			<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
+			<div class="stat"><b>{stats.seen}</b><span>started</span></div>
+			<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
+		</div>
+	{/if}
 
 	{#if !ready}
 		<div class="card empty loading" aria-busy="true">
@@ -286,9 +288,13 @@
 
 	.strip {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+		grid-template-columns: repeat(2, 1fr);
 		gap: var(--s2);
 		margin-bottom: var(--s5);
+	}
+
+	@media (min-width: 40rem) {
+		.strip { grid-template-columns: repeat(4, 1fr); }
 	}
 	.stat {
 		border: 1px solid var(--rule);
@@ -435,6 +441,10 @@
 		color: var(--ink-faint);
 		align-self: center;
 		margin-left: auto;
+	}
+
+	@media (pointer: coarse) {
+		.kb { display: none; }
 	}
 
 	.empty { padding: var(--s7) var(--s5); text-align: center; }

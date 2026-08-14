@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isThemePref, resolvedTheme } from './theme';
+import { isThemePref, nextThemePref, resolvedTheme } from './theme';
 
 describe('isThemePref', () => {
 	it('accepts the three stored values', () => {
@@ -20,5 +20,13 @@ describe('resolvedTheme', () => {
 	it('follows the system flag when unset', () => {
 		expect(resolvedTheme('system', true)).toBe('dark');
 		expect(resolvedTheme('system', false)).toBe('light');
+	});
+});
+
+describe('nextThemePref', () => {
+	it('cycles light → dark → system → light', () => {
+		expect(nextThemePref('light')).toBe('dark');
+		expect(nextThemePref('dark')).toBe('system');
+		expect(nextThemePref('system')).toBe('light');
 	});
 });
