@@ -1,8 +1,14 @@
-import adapter from '@sveltejs/adapter-static';
+import adapterNode from '@sveltejs/adapter-node';
+import adapterStatic from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
+// Railway (and `ADAPTER=node`) need a process that listens on PORT.
+// Local `pnpm build` stays a static folder you can serve with anything.
+const useNodeAdapter =
+	process.env.RAILWAY_ENVIRONMENT != null || process.env.ADAPTER === 'node';
+
 /**
- * Static output on purpose.
+ * Static output on purpose, unless we're building the Railway Node server.
  *
  * The old app's best property was that it was just a folder: no server, works
  * offline, opens in five years. adapter-static keeps that — `pnpm build`
@@ -14,16 +20,18 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		adapter: adapter({
-			pages: 'build',
-			assets: 'build',
-			// `index.html` is the prerendered homepage. Using it as the SPA fallback
-			// made unknown URLs render Labs instead of +error.svelte. `404.html` is
-			// a separate shell so cold loads of missing paths can show the error page.
-			fallback: '404.html',
-			precompress: false,
-			strict: true
-		}),
+		adapter: useNodeAdapter
+			? adapterNode({ precompress: true })
+			: adapterStatic({
+					pages: 'build',
+					assets: 'build',
+					// `index.html` is the prerendered homepage. Using it as the SPA fallback
+					// made unknown URLs render Labs instead of +error.svelte. `404.html` is
+					// a separate shell so cold loads of missing paths can show the error page.
+					fallback: '404.html',
+					precompress: false,
+					strict: true
+				}),
 		prerender: { handleHttpError: 'fail' }
 	}
 };
