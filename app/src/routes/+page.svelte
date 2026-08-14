@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { LABS, LABS_BY_ID } from '$lib/content';
-	import { resumable } from '$lib/domain/labSession';
+	import { LABS } from '$lib/content';
+	import {
+		continueAction,
+		labCardState,
+		requiredLab,
+		toCourseLab,
+		type CourseNavView
+	} from '$lib/domain/courseNav';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
@@ -17,20 +23,26 @@
 	const stats = $derived(progress.stats);
 	const tiers = $derived(progress.tierProgress);
 	const sessions = $derived(labSession.all);
+	const course = LABS.map(toCourseLab);
 
-	const nextLabId = $derived.by(() => {
-		if (!ready) return null;
-		for (const lab of LABS) {
-			const done = progress.isUnlocked(lab.unlocks);
-			const blocked = !!lab.requires && !progress.isUnlocked(LABS_BY_ID[lab.requires].unlocks);
-			const mid = resumable(sessions[lab.id], lab.steps.length);
-			if (!done && !blocked && !mid) return lab.id;
-		}
-		return null;
+	const navView = $derived.by((): CourseNavView => {
+		const unlocked = new Set(course.filter((lab) => progress.isUnlocked(lab.unlocks)).map((lab) => lab.unlocks));
+		return {
+			ready,
+			isUnlocked: (tier) => unlocked.has(tier),
+			sessionFor: (id) => sessions[id],
+			queue: stats.queue
+		};
 	});
+
+	const next = $derived(continueAction(course, navView));
 
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
+	}
+
+	function pad(n: number) {
+		return String(n).padStart(2, '0');
 	}
 </script>
 
@@ -45,6 +57,17 @@
 			backed by a spaced-repetition deck that only ever asks about material you have met.
 		</p>
 	</header>
+
+	{#if next}
+		<a class="continue card" href={next.href} data-kind={next.kind}>
+			<div class="continue-copy">
+				<p class="eyebrow">{next.kicker}</p>
+				<strong class="continue-title">{next.title}</strong>
+				<span class="continue-detail">{next.detail}</span>
+			</div>
+			<span class="continue-go" aria-hidden="true">→</span>
+		</a>
+	{/if}
 
 	<section class="strip" aria-busy={!ready}>
 		<a class="stat hot" href="/review" class:quiet={!ready || stats.queue === 0}>
@@ -89,37 +112,52 @@
 		<h2 class="sec">Labs</h2>
 		<div class="labs">
 			{#each LABS as lab (lab.id)}
-				{@const done = progress.isUnlocked(lab.unlocks)}
-				{@const blocked = !!lab.requires && !progress.isUnlocked(LABS_BY_ID[lab.requires].unlocks)}
-				{@const mid = ready ? resumable(sessions[lab.id], lab.steps.length) : null}
-				<a
-					class="lab card"
-					href="/lab/{lab.id}"
-					class:done={ready && done && !mid}
-					class:ahead={ready && blocked && !mid}
-					class:resume={!!mid}
-				>
-					<div class="num">{String(lab.number).padStart(2, '0')}</div>
-					<div class="body">
-						<h3>{lab.title}</h3>
-						<p>{lab.standfirst}</p>
-						<div class="meta">
-							<span>~{lab.minutes} min</span>
-							<span>{lab.steps.length} cards</span>
-							<span class="flag">
-								{#if mid}
-									<span class="go">resume · card {mid.nextIndex + 1} of {lab.steps.length}</span>
-								{:else if ready && done}
-									<span class="ok">✓ completed</span>
-								{:else if ready && blocked}
-									<span class="wait">finish Lab {LABS_BY_ID[lab.requires!].number} first</span>
-								{:else if lab.id === nextLabId}
-									<span class="go">start here</span>
-								{/if}
-							</span>
+				{@const item = toCourseLab(lab)}
+				{@const card = labCardState(item, course, navView)}
+				{@const prior = requiredLab(course, lab.requires)}
+				{#if card.locked}
+					<article class="lab card ahead" aria-labelledby="lab-{lab.id}-title">
+						<div class="num">{pad(lab.number)}</div>
+						<div class="body">
+							<h3 id="lab-{lab.id}-title">{lab.title}</h3>
+							<p>{lab.standfirst}</p>
+							<div class="meta">
+								<span>~{lab.minutes} min</span>
+								<span>{lab.steps.length} cards</span>
+								<span class="flag">
+									<span class="wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
+								</span>
+							</div>
+							<a class="peek" href="/lab/{lab.id}">Open anyway</a>
 						</div>
-					</div>
-				</a>
+					</article>
+				{:else}
+					<a
+						class="lab card"
+						href="/lab/{lab.id}"
+						class:done={card.done}
+						class:resume={card.resumeAt !== null}
+					>
+						<div class="num">{pad(lab.number)}</div>
+						<div class="body">
+							<h3>{lab.title}</h3>
+							<p>{lab.standfirst}</p>
+							<div class="meta">
+								<span>~{lab.minutes} min</span>
+								<span>{lab.steps.length} cards</span>
+								<span class="flag">
+									{#if card.resumeAt !== null}
+										<span class="go">resume · card {card.resumeAt + 1} of {lab.steps.length}</span>
+									{:else if card.done}
+										<span class="ok">✓ completed</span>
+									{:else if card.startHere}
+										<span class="go">start here</span>
+									{/if}
+								</span>
+							</div>
+						</div>
+					</a>
+				{/if}
 			{/each}
 		</div>
 	</section>
@@ -149,9 +187,56 @@
 </div>
 
 <style>
-	.hero { margin-bottom: var(--s6); max-width: var(--measure); }
+	.hero { margin-bottom: var(--s5); max-width: var(--measure); }
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.lede { color: var(--ink-soft); font-size: 1rem; line-height: 1.65; }
+
+	.continue {
+		display: flex;
+		align-items: center;
+		gap: var(--s4);
+		padding: var(--s4);
+		margin-bottom: var(--s5);
+		text-decoration: none;
+		color: inherit;
+		border-color: var(--accent);
+		background: var(--accent-soft);
+		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
+			border-color var(--fast) var(--ease);
+	}
+	.continue:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-2);
+		color: inherit;
+	}
+	.continue-copy { min-width: 0; flex: 1 1 auto; }
+	.continue .eyebrow { margin-bottom: var(--s1); }
+	.continue-title {
+		display: block;
+		font-family: var(--serif);
+		font-size: 1.25rem;
+		font-weight: 400;
+		letter-spacing: -0.015em;
+		line-height: 1.25;
+		margin-bottom: var(--s1);
+	}
+	.continue-detail {
+		display: block;
+		font-size: 0.86rem;
+		color: var(--ink-soft);
+		line-height: 1.45;
+	}
+	.continue-go {
+		flex: 0 0 auto;
+		font-size: 1.4rem;
+		color: var(--accent);
+		line-height: 1;
+	}
+	.continue[data-kind='caught-up'] {
+		border-color: var(--rule);
+		background: var(--paper-raised);
+	}
+	.continue[data-kind='caught-up'] .continue-go { color: var(--ink-faint); }
 
 	.strip {
 		display: grid;
@@ -252,8 +337,17 @@
 	.meta .wait { color: var(--warn); }
 	.meta .go { color: var(--accent); }
 
-	/* Not blocked, just out of order — the link still works. */
-	.lab.ahead { opacity: 0.72; }
+	.lab.ahead { opacity: 0.78; }
+	.peek {
+		display: inline-block;
+		margin-top: var(--s2);
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--ink-soft);
+		text-decoration: none;
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	.peek:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 	.tiers { padding: var(--s4); }
 
@@ -318,7 +412,9 @@
 			border-color: Highlight;
 			background: Canvas;
 		}
+		.continue,
 		.lab.resume { border-color: Highlight; }
+		.continue { background: Canvas; }
 		.track { background: ButtonBorder; }
 		.track .m { background: Highlight; }
 		.track .y { background: ButtonText; }
@@ -329,5 +425,7 @@
 
 	@media (max-width: 34rem) {
 		.nm { flex-basis: 6.5rem; }
+		.continue { gap: var(--s3); padding: var(--s3); }
+		.continue-title { font-size: 1.1rem; }
 	}
 </style>
