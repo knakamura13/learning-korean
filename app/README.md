@@ -9,7 +9,7 @@ data fetching, works offline.
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:5173
+pnpm dev          # http://localhost:5199
 ```
 
 ```bash

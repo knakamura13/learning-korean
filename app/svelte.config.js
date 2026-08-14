@@ -2,10 +2,11 @@ import adapterNode from '@sveltejs/adapter-node';
 import adapterStatic from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-// Railway (and `ADAPTER=node`) need a process that listens on PORT.
 // Local `pnpm build` stays a static folder you can serve with anything.
+// Railway's Dockerfile sets ADAPTER=node at image build time. Railpack/Nixpacks
+// builds also see RAILWAY_ENVIRONMENT; `docker build` does not unless it is an ARG.
 const useNodeAdapter =
-	process.env.RAILWAY_ENVIRONMENT != null || process.env.ADAPTER === 'node';
+	process.env.ADAPTER === 'node' || process.env.RAILWAY_ENVIRONMENT != null;
 
 /**
  * Static output on purpose, unless we're building the Railway Node server.
