@@ -24,6 +24,20 @@ export function shouldIgnoreShortcut(target: EventTarget | null): boolean {
 	return true;
 }
 
+/**
+ * Arrow card-nav should still work when a pip or Next is focused.
+ * Only typing surfaces keep Left/Right.
+ */
+export function shouldIgnoreArrowNav(target: EventTarget | null): boolean {
+	if (!(target instanceof HTMLElement)) return false;
+	if (target.isContentEditable) return true;
+	const field = target.closest('input, textarea');
+	if (!(field instanceof HTMLInputElement) && !(field instanceof HTMLTextAreaElement)) {
+		return false;
+	}
+	return !field.disabled && !field.readOnly;
+}
+
 /** Focus `node` when `active` is true, including on mount. */
 export function focusWhen(node: HTMLElement, active: boolean) {
 	function apply(on: boolean) {

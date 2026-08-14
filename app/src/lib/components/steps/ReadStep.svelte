@@ -1,11 +1,12 @@
 <script lang="ts">
 	import Options from '../Options.svelte';
 	import type { ReadStep } from '$lib/content/types';
+	import { settleAdvancePick } from '$lib/domain/advancePick';
 	import { fly } from 'svelte/transition';
 
 	let { step, onSettle }: {
 		step: ReadStep;
-		onSettle: (teach?: string) => void;
+		onSettle: (teach?: string, correct?: boolean) => void;
 		onNudge: (html: string, soft?: boolean) => void;
 	} = $props();
 
@@ -18,6 +19,11 @@
 	function reveal(i: number) {
 		if (opened.has(i)) return;
 		opened = new Set([...opened, i]);
+	}
+
+	function handle(correct: boolean) {
+		const result = settleAdvancePick(correct, step);
+		onSettle(result.overrideTeach, result.correct);
 	}
 </script>
 
@@ -40,7 +46,7 @@
 
 {#if allOpen}
 	<div in:fly={{ y: 10, duration: 240 }}>
-		<Options options={step.options} answer={step.answer} onPick={() => onSettle()} />
+		<Options options={step.options} answer={step.answer} onPick={handle} />
 	</div>
 {/if}
 

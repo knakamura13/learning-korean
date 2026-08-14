@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { LABS, LABS_BY_ID } from '$lib/content';
+	import { resumable } from '$lib/domain/labSession';
+	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	// Prerendered HTML has no stored progress. Gate stats, completion badges,
@@ -14,6 +16,7 @@
 
 	const stats = $derived(progress.stats);
 	const tiers = $derived(progress.tierProgress);
+	const sessions = $derived(labSession.all);
 
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
@@ -77,11 +80,13 @@
 			{#each LABS as lab (lab.id)}
 				{@const done = progress.isUnlocked(lab.unlocks)}
 				{@const blocked = !!lab.requires && !progress.isUnlocked(LABS_BY_ID[lab.requires].unlocks)}
+				{@const mid = ready ? resumable(sessions[lab.id], lab.steps.length) : null}
 				<a
 					class="lab card"
 					href="/lab/{lab.id}"
-					class:done={ready && done}
-					class:ahead={ready && blocked}
+					class:done={ready && done && !mid}
+					class:ahead={ready && blocked && !mid}
+					class:resume={!!mid}
 				>
 					<div class="num">{String(lab.number).padStart(2, '0')}</div>
 					<div class="body">
@@ -91,7 +96,9 @@
 							<span>~{lab.minutes} min</span>
 							<span>{lab.steps.length} cards</span>
 							<span class="flag">
-								{#if ready && done}
+								{#if mid}
+									<span class="go">resume · card {mid.nextIndex + 1} of {lab.steps.length}</span>
+								{:else if ready && done}
 									<span class="ok">✓ completed</span>
 								{:else if ready && blocked}
 									<span class="wait">finish Lab {LABS_BY_ID[lab.requires!].number} first</span>
@@ -210,6 +217,8 @@
 		line-height: 1.2;
 	}
 	.lab.done .num { color: var(--good); }
+	.lab.resume { border-color: var(--accent); }
+	.lab.resume .num { color: var(--accent); }
 
 	.lab h3 { font-size: 1.15rem; margin-bottom: var(--s1); }
 	.lab p { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.55; }
@@ -224,6 +233,7 @@
 	.flag { min-height: 1em; }
 	.meta .ok { color: var(--good); }
 	.meta .wait { color: var(--warn); }
+	.meta .go { color: var(--accent); }
 
 	/* Not blocked, just out of order — the link still works. */
 	.lab.ahead { opacity: 0.72; }
@@ -291,6 +301,7 @@
 			border-color: Highlight;
 			background: Canvas;
 		}
+		.lab.resume { border-color: Highlight; }
 		.track { background: ButtonBorder; }
 		.track .m { background: Highlight; }
 		.track .y { background: ButtonText; }
