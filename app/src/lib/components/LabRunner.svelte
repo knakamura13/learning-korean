@@ -1,10 +1,21 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
-	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { focusWhen, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	import { withLangKo } from '$lib/a11y/lang';
+	import {
+		emptyOutcomes,
+		holdFurthest,
+		pipIsJumpTarget,
+		pipKind,
+		pipLabel,
+		stepCardIndex,
+		type CardOutcome
+	} from '$lib/domain/pipState';
 	import MouthStep from './steps/MouthStep.svelte';
 	import ChoiceStep from './steps/ChoiceStep.svelte';
 	import BuildStep from './steps/BuildStep.svelte';
@@ -21,8 +32,14 @@
 	let missedHere = $state(false);
 	let firstTry = $state(0);
 	let startedAt = $state(Date.now());
+	let elapsedMs = $state(0);
 	let finished = $state(false);
 	let released = $state(0);
+	let ready = $state(false);
+	let showResumeNote = $state(false);
+	let elapsedMinutes = $state(1);
+	let furthest = $state(0);
+	let outcomes = $state<(CardOutcome | null)[]>([]);
 
 	/** null = no feedback yet; `blocking` false means the learner may advance. */
 	let feedback = $state<{ tone: 'right' | 'wrong'; html: string; blocking: boolean } | null>(null);
@@ -31,22 +48,76 @@
 	const isLast = $derived(index === lab.steps.length - 1);
 	let choiceRef = $state<ChoiceStep | undefined>();
 
+	function segmentElapsed() {
+		return elapsedMs + Math.max(0, Date.now() - startedAt);
+	}
+
+	function persist(nextIndex: number, done = false) {
+		labSession.save(lab.id, {
+			nextIndex,
+			firstTry,
+			elapsedMs: segmentElapsed(),
+			finished: done,
+			outcomes: outcomes.slice()
+		});
+	}
+
+	onMount(() => {
+		const saved = labSession.forLab(lab.id);
+		if (saved) {
+			firstTry = saved.firstTry;
+			elapsedMs = saved.elapsedMs;
+			startedAt = Date.now();
+			outcomes = saved.outcomes.slice();
+			furthest = saved.nextIndex;
+			if (saved.finished || saved.nextIndex >= lab.steps.length) {
+				finish();
+			} else {
+				index = saved.nextIndex;
+				showResumeNote = saved.nextIndex > 0;
+			}
+		} else {
+			outcomes = emptyOutcomes(lab.steps.length);
+		}
+		ready = true;
+	});
+
+	onDestroy(() => {
+		if (!ready || finished || settled) return;
+		if (furthest === 0 && firstTry === 0 && outcomes.every((o) => o == null)) return;
+		// Mid-card leave: keep the furthest card, not a card the learner jumped back to.
+		persist(furthest);
+	});
+
 	/**
 	 * Resolve the step. `correct` is false only for step types where a wrong
-	 * answer still advances (choice cards teach through the explanation rather
-	 * than through retrying). An earlier miss dents the first-try tally but must
-	 * not turn a correct final answer into a "not quite" — the learner did get
-	 * there, and saying otherwise is just discouraging.
+	 * answer still advances (choice and read cards teach through the
+	 * explanation rather than through retrying). An earlier miss dents the
+	 * first-try tally but must not turn a correct final answer into a
+	 * "not quite" — the learner did get there, and saying otherwise is just
+	 * discouraging.
 	 */
 	function onSettle(overrideTeach?: string, correct = true) {
 		if (settled) return;
 		settled = true;
-		if (correct && !missedHere) firstTry += 1;
+		const firstVisit = outcomes[index] == null;
+		if (firstVisit && correct && !missedHere) firstTry += 1;
+		outcomes[index] = correct ? 'right' : 'wrong';
 		feedback = {
 			tone: correct ? 'right' : 'wrong',
 			html: overrideTeach ?? step.teach,
 			blocking: false
 		};
+		furthest = holdFurthest(furthest, index, true, lab.steps.length);
+		// Advance the saved place now so leaving before Next still resumes
+		// on the following card. Last card: unlock immediately so a Review
+		// peek cannot swallow the sitting.
+		if (isLast) {
+			released = progress.unlock([lab.unlocks]);
+			persist(lab.steps.length, true);
+		} else {
+			persist(furthest);
+		}
 	}
 
 	/** A wrong answer that should not advance. `soft` means "exploration, not error". */
@@ -60,28 +131,56 @@
 		if (!settled) return;
 		if (isLast) return finish();
 		index += 1;
+		furthest = holdFurthest(furthest, index, false, lab.steps.length);
 		settled = false;
 		missedHere = false;
 		feedback = null;
+		showResumeNote = false;
+	}
+
+	function jumpTo(i: number) {
+		if (i === index || i < 0 || i > furthest) return;
+		index = i;
+		settled = false;
+		missedHere = false;
+		feedback = null;
+		showResumeNote = false;
 	}
 
 	function finish() {
-		released = progress.unlock([lab.unlocks]);
+		elapsedMinutes = Math.max(1, Math.round(segmentElapsed() / 60_000));
+		if (released === 0) released = progress.unlock([lab.unlocks]);
 		finished = true;
+		labSession.clear(lab.id);
 	}
 
 	function restart() {
+		labSession.clear(lab.id);
 		index = 0;
+		furthest = 0;
+		outcomes = emptyOutcomes(lab.steps.length);
 		settled = false;
 		missedHere = false;
 		feedback = null;
 		firstTry = 0;
 		finished = false;
+		released = 0;
+		elapsedMs = 0;
+		elapsedMinutes = 1;
+		showResumeNote = false;
 		startedAt = Date.now();
 	}
 
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+			// Finish hides the pip rail; leave arrows to the browser there.
+			if (!ready || finished) return;
+			if (shouldIgnoreArrowNav(e.target)) return;
+			e.preventDefault();
+			jumpTo(stepCardIndex(index, e.key === 'ArrowLeft' ? -1 : 1, furthest));
+			return;
+		}
 		if (shouldIgnoreShortcut(e.target)) return;
 		if (settled && (e.key === 'Enter' || e.key === ' ')) {
 			e.preventDefault();
@@ -94,20 +193,19 @@
 		}
 	}
 
-	const minutes = $derived(Math.max(1, Math.round((Date.now() - startedAt) / 60000)));
 </script>
 
 <svelte:window onkeydown={onKey} />
 
 {#if finished}
-	<div class="done card" in:fly={{ y: 12, duration: 300 }}>
+	<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
 		<span class="seal" lang="ko">한글</span>
 		<h2>{lab.finish.title}</h2>
 		<p class="summary">{lab.finish.summary}</p>
 
 		<div class="tally">
 			<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
-			<div><b>~{minutes}m</b><span>elapsed</span></div>
+			<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
 			{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
 		</div>
 
@@ -125,20 +223,47 @@
 			<button class="btn ghost" onclick={restart}>Run the lab again</button>
 		</div>
 	</div>
-{:else}
-	<div
-		class="rail"
-		role="progressbar"
-		aria-label="progress"
-		aria-valuemin={1}
-		aria-valuemax={lab.steps.length}
-		aria-valuenow={index + 1}
-	>
-		{#each lab.steps as _, i (i)}
-			<span class="pip" class:done={i < index} class:now={i === index}></span>
-		{/each}
-		<span class="where">{index + 1} / {lab.steps.length}</span>
+{:else if !ready}
+	<div class="card step loading" aria-busy="true">
+		<div class="skel line-ph" aria-hidden="true"></div>
+		<div class="skel work-ph" aria-hidden="true"></div>
+		<p class="muted">Loading the lab…</p>
 	</div>
+{:else}
+	{#if showResumeNote}
+		<p class="resume" role="status">
+			Picking up at card {index + 1} of {lab.steps.length}.
+		</p>
+	{/if}
+	<nav class="rail-wrap" aria-label="Lab cards">
+		<ol class="rail">
+			{#each lab.steps as _, i (i)}
+				{@const kind = pipKind(i, outcomes, furthest)}
+				{@const selected = i === index}
+				<li>
+					{#if pipIsJumpTarget(kind) || selected}
+						<button
+							type="button"
+							class="pip"
+							data-kind={kind}
+							data-selected={selected || undefined}
+							aria-current={selected ? 'step' : undefined}
+							aria-label={pipLabel(kind, i + 1, selected)}
+							onclick={() => jumpTo(i)}
+						>
+							<span class="pip-n">{i + 1}</span>
+						</button>
+					{:else}
+						<span class="pip" data-kind={kind}>
+							<span class="pip-n" aria-hidden="true">{i + 1}</span>
+							<span class="vh">{pipLabel(kind, i + 1)}</span>
+						</span>
+					{/if}
+				</li>
+			{/each}
+		</ol>
+		<span class="where">{index + 1} / {lab.steps.length}</span>
+	</nav>
 
 	{#key index}
 		<div class="card step" in:fly={{ y: 10, duration: 260 }}>
@@ -163,6 +288,8 @@
 					<ClusterStep {step} {onSettle} {onNudge} />
 				{:else if step.type === 'read'}
 					<ReadStep {step} {onSettle} {onNudge} />
+				{:else}
+					{@const _exhaustive: never = step}
 				{/if}
 			</div>
 
@@ -192,28 +319,152 @@
 {/if}
 
 <style>
-	.rail {
+	.rail-wrap {
 		display: flex;
 		align-items: center;
-		gap: var(--s1);
+		gap: var(--s2);
 		margin-bottom: var(--s5);
 		flex-wrap: wrap;
 	}
 
-	.pip {
-		width: 1.6rem;
-		height: 3px;
-		border-radius: 2px;
-		background: var(--rule);
-		transition: background var(--slow) var(--ease);
+	.rail {
+		display: flex;
+		align-items: center;
+		flex: 1 1 auto;
+		flex-wrap: wrap;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
-	.pip.done { background: var(--good); }
-	.pip.now { background: var(--accent); }
+
+	.rail li { display: flex; }
+
+	.pip {
+		appearance: none;
+		-webkit-appearance: none;
+		box-sizing: border-box;
+		isolation: isolate;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		min-width: 44px;
+		min-height: 44px;
+		padding: 0;
+		overflow: visible;
+		font: inherit;
+		font-size: 0.72rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+		color: var(--ink-faint);
+		cursor: default;
+	}
+	button.pip { cursor: pointer; }
+	/* Hover filter stays off the selected pip so it cannot clip the glow. */
+	button.pip:not([data-selected]):hover { filter: brightness(1.08); }
+
+	/* Status mark. Centered with inset so selected pulse/glow can use
+	   transform + drop-shadow on this one box — no second ring. */
+	.pip::before {
+		content: '';
+		position: absolute;
+		display: block;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		margin: auto;
+		width: 1.55rem;
+		height: 1.55rem;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		background: transparent;
+		pointer-events: none;
+		transform-origin: center;
+		--pip-glow: var(--ink-faint);
+	}
+	.pip[data-kind='upcoming']::before { content: none; }
+
+	.pip[data-kind='right'] { color: var(--paper); }
+	.pip[data-kind='right']::before {
+		background: var(--good);
+		border-color: var(--good);
+		--pip-glow: var(--good);
+	}
+	.pip[data-kind='wrong'] { color: var(--bad); }
+	.pip[data-kind='wrong']::before {
+		background: transparent;
+		border-color: var(--bad);
+		--pip-glow: var(--bad);
+	}
+	.pip[data-kind='visited'] { color: var(--ink-soft); }
+	.pip[data-kind='visited']::before {
+		border-color: var(--rule-strong);
+		--pip-glow: var(--ink-faint);
+	}
+	.pip[data-kind='upcoming'] { font-weight: 500; }
+	.pip-n { position: relative; z-index: 1; }
+
+	button.pip:not([data-selected]):not(:focus-visible):hover::before {
+		transform: scale(1.03);
+	}
+
+	.pip[data-selected]::before,
+	button.pip:focus-visible::before {
+		filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pip-glow) 50%, transparent));
+		animation: pip-pulse 1.8s var(--ease-in-out) infinite;
+	}
+	.pip:focus-visible {
+		outline: none;
+		box-shadow: none;
+		border-radius: 0;
+	}
+
+	@keyframes pip-pulse {
+		0%,
+		100% { transform: scale(1); }
+		50% { transform: scale(1.08); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.pip[data-selected]::before,
+		button.pip:focus-visible::before {
+			animation: none;
+			width: calc(1.55rem + 2px);
+			height: calc(1.55rem + 2px);
+			border-width: 3px;
+		}
+		button.pip:not([data-selected]):not(:focus-visible):hover::before {
+			transform: none;
+		}
+	}
+
+	.vh {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
 
 	@media (forced-colors: active) {
-		.pip { background: GrayText; }
-		.pip.done { background: Highlight; }
-		.pip.now { background: ButtonText; }
+		.pip[data-kind='upcoming'] { color: GrayText; }
+		.pip[data-kind='right'] { color: Canvas; }
+		.pip[data-kind='right']::before { background: Highlight; border-color: Highlight; }
+		.pip[data-kind='wrong'] { color: ButtonText; }
+		.pip[data-kind='wrong']::before { background: Canvas; border-color: ButtonText; }
+		.pip[data-selected]::before,
+		button.pip:focus-visible::before { border-color: ButtonText; }
 		.fb { background: Canvas; border-left-color: ButtonBorder; }
 		.fb[data-tone='right'] { background: Canvas; border-left-color: Highlight; }
 		.fb[data-tone='wrong'] { background: Canvas; border-left-color: ButtonText; }
@@ -227,6 +478,33 @@
 		color: var(--ink-faint);
 		font-variant-numeric: tabular-nums;
 	}
+
+	.resume {
+		margin: 0 0 var(--s3);
+		font-size: 0.82rem;
+		color: var(--ink-soft);
+	}
+
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--s3);
+		padding: var(--s7) var(--s5);
+		text-align: center;
+	}
+	.loading .line-ph {
+		width: 14rem;
+		max-width: 80%;
+		height: 0.85rem;
+	}
+	.loading .work-ph {
+		width: 100%;
+		max-width: 22rem;
+		height: 8rem;
+		border-radius: var(--r-md);
+	}
+	.loading .muted { margin: var(--s2) 0 0; }
 
 	.step { padding: var(--s6) var(--s5) var(--s5); }
 
@@ -278,7 +556,7 @@
 	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-left: auto; }
 
 	/* --- finish --- */
-	.done { padding: var(--s7) var(--s5); text-align: center; }
+	.finish { padding: var(--s7) var(--s5); text-align: center; }
 
 	.seal {
 		font-family: var(--hangul);

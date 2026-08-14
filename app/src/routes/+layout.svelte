@@ -1,10 +1,15 @@
 <script lang="ts">
 	import '../app.css';
+	import { assets } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import { pageCanonical, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	let { children } = $props();
+
+	const canonical = $derived(pageCanonical(page.url.pathname));
+	const ogImage = $derived(siteAsset('/og.png') ?? `${assets}/og.png`);
 
 	const nav = [
 		{ href: '/', label: 'Labs' },
@@ -14,6 +19,18 @@
 
 	const queue = $derived(progress.stats.queue);
 </script>
+
+<svelte:head>
+	{#if canonical}
+		<link rel="canonical" href={canonical} />
+		<meta property="og:url" content={canonical} />
+	{/if}
+	<meta property="og:title" content="Korean — labs and review" />
+	<meta property="og:description" content="Interactive labs and spaced repetition for reading Korean." />
+	<meta property="og:image" content={ogImage} />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:image" content={ogImage} />
+</svelte:head>
 
 <a class="skip" href="#main">Skip to content</a>
 

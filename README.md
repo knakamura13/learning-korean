@@ -24,3 +24,5 @@ pnpm study        # build + preview on :8777
 pnpm test
 pnpm check
 ```
+
+When publishing to a stable origin, set `PUBLIC_SITE_URL` (see `app/.env.example`) so Open Graph / canonical tags can be absolute. There is no verified public host today — do not invent one.

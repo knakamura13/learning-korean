@@ -21,7 +21,9 @@
 		<p class="standfirst">{lab.standfirst}</p>
 	</header>
 
-	<LabRunner {lab} />
+	{#key lab.id}
+		<LabRunner {lab} />
+	{/key}
 
 	<aside class="ask">
 		<span class="h">Stuck on any card?</span>
