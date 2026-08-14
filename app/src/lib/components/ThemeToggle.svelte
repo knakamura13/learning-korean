@@ -9,12 +9,6 @@
 		type ThemePref
 	} from '$lib/theme';
 
-	const options = [
-		{ value: 'light', label: 'Light' },
-		{ value: 'dark', label: 'Dark' },
-		{ value: 'system', label: 'System' }
-	] as const;
-
 	let pref = $state<ThemePref>('system');
 
 	onMount(() => {
@@ -38,32 +32,12 @@
 		setPref(nextThemePref(pref));
 	}
 
-	const compactLabel = $derived(
+	const label = $derived(
 		`Theme: ${themePrefLabel(pref)}. Next: ${themePrefLabel(nextThemePref(pref))}`
 	);
 </script>
 
-<div class="theme wide" role="radiogroup" aria-label="Theme">
-	{#each options as option (option.value)}
-		<button
-			type="button"
-			role="radio"
-			aria-checked={pref === option.value}
-			class:on={pref === option.value}
-			onclick={() => setPref(option.value)}
-		>
-			{option.label}
-		</button>
-	{/each}
-</div>
-
-<button
-	type="button"
-	class="theme compact"
-	aria-label={compactLabel}
-	title={compactLabel}
-	onclick={cycle}
->
+<button type="button" class="theme" aria-label={label} title={label} onclick={cycle}>
 	{#if pref === 'light'}
 		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
 			<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
@@ -97,54 +71,20 @@
 				stroke="currentColor"
 				stroke-width="2"
 			/>
-			<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M8 21h8M12 18v3" />
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				d="M8 21h8M12 18v3"
+			/>
 		</svg>
 	{/if}
 </button>
 
 <style>
-	.theme.wide {
+	.theme {
 		display: inline-flex;
-		align-items: stretch;
-		border: 1px solid var(--rule);
-		border-radius: var(--r-sm);
-		background: var(--paper-sunk);
-		flex-shrink: 0;
-	}
-
-	.wide button {
-		appearance: none;
-		border: 0;
-		background: transparent;
-		color: var(--ink-soft);
-		min-width: 44px;
-		min-height: 44px;
-		padding: 0 0.55rem;
-		font-size: 0.72rem;
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		cursor: pointer;
-		border-radius: calc(var(--r-sm) - 1px);
-		transition: background var(--fast) var(--ease), color var(--fast) var(--ease),
-			transform var(--fast) var(--ease);
-	}
-
-	.wide button:hover { color: var(--ink); background: var(--paper-raised); }
-	.wide button:active { transform: translateY(0); }
-	.wide button.on {
-		background: var(--paper-raised);
-		color: var(--accent);
-		box-shadow: var(--shadow-1);
-	}
-	.wide button:focus-visible,
-	.wide button.on:focus-visible {
-		outline: 2px solid var(--paper);
-		outline-offset: 2px;
-		box-shadow: 0 0 0 4px var(--blue);
-	}
-
-	.compact {
-		display: none;
 		appearance: none;
 		align-items: center;
 		justify-content: center;
@@ -158,10 +98,15 @@
 		color: var(--accent);
 		cursor: pointer;
 		flex-shrink: 0;
-		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+		transition:
+			background var(--fast) var(--ease),
+			color var(--fast) var(--ease);
 	}
-	.compact:hover { background: var(--paper-raised); color: var(--ink); }
-	.compact:focus-visible {
+	.theme:hover {
+		background: var(--paper-raised);
+		color: var(--ink);
+	}
+	.theme:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
 		box-shadow: 0 0 0 4px var(--blue);
@@ -173,27 +118,13 @@
 		display: block;
 	}
 
-	@media (max-width: 40rem) {
-		.theme.wide { display: none; }
-		.compact { display: inline-flex; }
-	}
-
 	@media (forced-colors: active) {
-		.theme.wide,
-		.compact {
+		.theme {
 			background: Canvas;
 			border: 1px solid ButtonBorder;
 			color: ButtonText;
 		}
-		.wide button { color: ButtonText; background: Canvas; }
-		.wide button.on {
-			background: Highlight;
-			color: HighlightText;
-			box-shadow: none;
-		}
-		.wide button:focus-visible,
-		.wide button.on:focus-visible,
-		.compact:focus-visible {
+		.theme:focus-visible {
 			outline: 2px solid Highlight;
 			box-shadow: none;
 		}
