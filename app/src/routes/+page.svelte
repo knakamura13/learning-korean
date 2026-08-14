@@ -343,7 +343,11 @@
 		margin-top: var(--s2);
 		font-size: 0.78rem;
 		font-weight: 600;
+		color: var(--ink-soft);
+		text-decoration: none;
+		border-bottom: 1px solid var(--rule-strong);
 	}
+	.peek:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 	.tiers { padding: var(--s4); }
 
