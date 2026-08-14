@@ -201,7 +201,10 @@
 		container-type: size;
 	}
 
-	.hit {
+	/* Include :active so a global `button:active { transform }` cannot replace
+	   the centering translate — that jump drops the click on mouseup. */
+	.hit,
+	.hit:active:not(:disabled) {
 		appearance: none;
 		-webkit-appearance: none;
 		position: absolute;
