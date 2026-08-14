@@ -242,8 +242,7 @@ a {
 }
 a:hover { color: var(--accent); }
 
-a:active,
-button:not(:disabled):active {
+a:active {
 	transform: translateY(0);
 }
 
