@@ -3,10 +3,10 @@
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
 	import { focusWhen, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { labHtml } from '$lib/a11y/sanitize';
+	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
-
-	import { labHtml } from '$lib/a11y/sanitize';
 	import {
 		pipRailCenteredScrollLeft,
 		pipRailEdgeFades,
@@ -373,25 +373,36 @@
 				{/if}
 			</div>
 
-			{#if feedback}
+			{#if feedback || settled}
 				<div
-					class="fb"
-					data-tone={feedback.tone}
-					in:fade={{ duration: 180 }}
-					aria-live="polite"
-					aria-atomic="true"
+					class="advance"
+					use:revealAdvance={shouldRevealAdvance(settled, feedback?.tone)}
 				>
-					<span class="verdict">
-						{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
-					</span>
-					{@html labHtml(feedback.html)}
-				</div>
-			{/if}
+					{#if feedback}
+						<div
+							class="fb"
+							data-tone={feedback.tone}
+							in:fade={{ duration: 180 }}
+							aria-live="polite"
+							aria-atomic="true"
+						>
+							<span class="verdict">
+								{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
+							</span>
+							{@html labHtml(feedback.html)}
+						</div>
+					{/if}
 
-			{#if settled}
-				<div class="foot" in:fade={{ duration: 160 }}>
-					<button class="btn" use:focusWhen={true} onclick={next}>{isLast ? 'Finish' : 'Next'}</button>
-					<span class="kb">or press Enter</span>
+					{#if settled}
+						<div class="foot" in:fade={{ duration: 160 }}>
+							<button
+								class="btn"
+								use:focusWhen={{ active: true, preventScroll: true }}
+								onclick={next}
+							>{isLast ? 'Finish' : 'Next'}</button>
+							<span class="kb">or press Enter</span>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -697,6 +708,10 @@
 	}
 
 	.work { margin-top: var(--s4); }
+
+	.advance {
+		scroll-margin-bottom: max(var(--s4), env(safe-area-inset-bottom));
+	}
 
 	.fb {
 		margin-top: var(--s4);
