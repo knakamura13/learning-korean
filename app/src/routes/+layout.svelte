@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { assets } from '$app/paths';
 	import { page } from '$app/state';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 
@@ -54,6 +55,7 @@
 				</a>
 			{/each}
 		</nav>
+		<ThemeToggle />
 	</div>
 </header>
 
@@ -141,6 +143,7 @@
 	@media (max-width: 30rem) {
 		.inner {
 			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
+			gap: var(--s2);
 		}
 		.name { display: none; }
 	}

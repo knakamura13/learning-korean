@@ -9,6 +9,25 @@
 		<meta name="color-scheme" content="light dark" />
 		<meta name="theme-color" content="#fffef9" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#131316" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#fffef9" data-resolved />
+		<script>
+			(function () {
+				try {
+					var t = localStorage.getItem('korean-theme');
+					var dark =
+						t === 'dark' ||
+						(t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+					if (t === 'light' || t === 'dark') {
+						document.documentElement.setAttribute('data-theme', t);
+						document.documentElement.style.colorScheme = t;
+						var cs = document.querySelector('meta[name="color-scheme"]');
+						if (cs) cs.setAttribute('content', t);
+					}
+					var m = document.querySelector('meta[name="theme-color"][data-resolved]');
+					if (m) m.setAttribute('content', dark ? '#131316' : '#fffef9');
+				} catch (e) {}
+			})();
+		</script>
 		<meta name="description" content="Interactive labs and spaced repetition for reading Korean." />
 		%sveltekit.head%
 	</head>
