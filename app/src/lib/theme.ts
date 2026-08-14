@@ -36,7 +36,7 @@ export function resolvedTheme(pref: ThemePref, prefersDark = systemPrefersDark()
 	return pref;
 }
 
-/** Next value for the compact (single-button) theme control. */
+/** Next value for the single-button theme control. */
 export function nextThemePref(pref: ThemePref): ThemePref {
 	switch (pref) {
 		case 'light':
