@@ -1,5 +1,7 @@
 # Config-as-code for Railway. The SvelteKit app lives in `app/`; the Dockerfile
 # copies that tree so a GitHub-connected service does not need a Root Directory.
+# Process startup comes from the image CMD — do not set startCommand here
+# (Railway would override the Dockerfile entrypoint).
 #
 # After the first deploy: Settings → Networking → Generate Domain.
 
@@ -8,7 +10,6 @@ builder = "DOCKERFILE"
 watchPatterns = ["/app/**", "/Dockerfile", "/.dockerignore", "/railway.toml"]
 
 [deploy]
-startCommand = "node build/index.js"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"

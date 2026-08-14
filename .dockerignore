@@ -1,7 +1,14 @@
 .git
 .github
+.worktrees
 app/node_modules
 app/.svelte-kit
 app/build
 app/coverage
+app/.vscode
 **/.DS_Store
+.env
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example

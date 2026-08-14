@@ -33,10 +33,12 @@ Connect this GitHub repo as a new Railway service. The root `Dockerfile` and `ra
 2. Settings → Networking → Generate Domain
 3. Optional: set `ORIGIN` to that public URL (only needed if you add server form actions later)
 
-To run the same Node server locally:
+To run the same Node server locally (after `ADAPTER=node pnpm build`):
 
 ```bash
 cd app
 ADAPTER=node pnpm build
-pnpm start        # http://localhost:3000
+pnpm start        # http://localhost:3000 — needs the Node adapter output
 ```
+
+`pnpm start` is only valid after an `ADAPTER=node` build. A default `pnpm build` still writes a static folder, not `build/index.js`.
