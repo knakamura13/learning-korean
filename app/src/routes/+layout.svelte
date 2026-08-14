@@ -21,6 +21,13 @@
 </script>
 
 <svelte:head>
+	<link
+		rel="preload"
+		href="{assets}/fonts/NotoSansKR-subset.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
 	{#if canonical}
 		<link rel="canonical" href={canonical} />
 		<meta property="og:url" content={canonical} />
