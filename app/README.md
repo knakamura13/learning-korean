@@ -17,11 +17,13 @@ pnpm build        # -> build/
 pnpm preview      # serve the built output
 ```
 
-The build output is plain files. Anything can serve it:
+The default build output is plain files. Anything can serve it:
 
 ```bash
 cd build && python3 -m http.server 8777
 ```
+
+Railway uses `@sveltejs/adapter-node` instead (`ADAPTER=node` or `RAILWAY_ENVIRONMENT`). After that build, `pnpm start` runs `node build/index.js`.
 
 ## Checks
 
