@@ -8,6 +8,11 @@
 
 	import { labHtml } from '$lib/a11y/sanitize';
 	import {
+		pipRailCenteredScrollLeft,
+		pipRailEdgeFades,
+		pipRailMaxScroll
+	} from '$lib/domain/pipRail';
+	import {
 		emptyOutcomes,
 		holdFurthest,
 		pipIsJumpTarget,
@@ -49,6 +54,8 @@
 	const alreadyDone = $derived(progress.isUnlocked(lab.unlocks));
 	const compactHead = $derived(!ready || index > 0 || showResumeNote);
 	let choiceRef = $state<ChoiceStep | undefined>();
+	let fadeLeft = $state(false);
+	let fadeRight = $state(false);
 
 	function segmentElapsed() {
 		return elapsedMs + Math.max(0, Date.now() - startedAt);
@@ -195,28 +202,53 @@
 		}
 	}
 
-	/** Keep the current pip in view without scrolling the page. */
-	function keepSelectedVisible(node: HTMLOListElement, _index: number) {
-		function sync() {
+	/** Keep the current pip in view and fade only the overflowing rail edge. */
+	function keepSelectedVisible(node: HTMLOListElement) {
+		function applyFades() {
+			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
+			const fades = pipRailEdgeFades(node.scrollLeft, max);
+			fadeLeft = fades.left;
+			fadeRight = fades.right;
+		}
+
+		function scrollSelected() {
 			const pip = node.querySelector<HTMLElement>('[data-selected]');
-			if (!pip) return;
-			const reduce =
-				typeof matchMedia === 'function' &&
-				matchMedia('(prefers-reduced-motion: reduce)').matches;
+			if (!pip) {
+				applyFades();
+				return;
+			}
 			const pipRect = pip.getBoundingClientRect();
 			const railRect = node.getBoundingClientRect();
-			const delta = pipRect.left + pipRect.width / 2 - (railRect.left + railRect.width / 2);
-			node.scrollTo({
-				left: node.scrollLeft + delta,
-				behavior: reduce ? 'auto' : 'smooth'
-			});
+			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
+			node.scrollLeft = pipRailCenteredScrollLeft(
+				pipRect.left,
+				pipRect.width,
+				railRect.left,
+				railRect.width,
+				node.scrollLeft,
+				max
+			);
+			applyFades();
 		}
-		sync();
-		return {
-			update(_next: number) {
-				sync();
-			}
-		};
+
+		$effect(() => {
+			const ro =
+				typeof ResizeObserver === 'function'
+					? new ResizeObserver(() => scrollSelected())
+					: null;
+			ro?.observe(node);
+			node.addEventListener('scroll', applyFades, { passive: true });
+			return () => {
+				ro?.disconnect();
+				node.removeEventListener('scroll', applyFades);
+			};
+		});
+
+		$effect(() => {
+			void index;
+			const raf = requestAnimationFrame(() => scrollSelected());
+			return () => cancelAnimationFrame(raf);
+		});
 	}
 
 </script>
@@ -276,32 +308,34 @@
 		</p>
 	{/if}
 	<nav class="rail-wrap" aria-label="Lab cards">
-		<ol class="rail" use:keepSelectedVisible={index}>
-			{#each lab.steps as _, i (i)}
-				{@const kind = pipKind(i, outcomes, furthest)}
-				{@const selected = i === index}
-				<li>
-					{#if pipIsJumpTarget(kind) || selected}
-						<button
-							type="button"
-							class="pip"
-							data-kind={kind}
-							data-selected={selected || undefined}
-							aria-current={selected ? 'step' : undefined}
-							aria-label={pipLabel(kind, i + 1, selected)}
-							onclick={() => jumpTo(i)}
-						>
-							<span class="pip-n">{i + 1}</span>
-						</button>
-					{:else}
-						<span class="pip" data-kind={kind}>
-							<span class="pip-n" aria-hidden="true">{i + 1}</span>
-							<span class="vh">{pipLabel(kind, i + 1)}</span>
-						</span>
-					{/if}
-				</li>
-			{/each}
-		</ol>
+		<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
+			<ol class="rail" {@attach keepSelectedVisible}>
+				{#each lab.steps as _, i (i)}
+					{@const kind = pipKind(i, outcomes, furthest)}
+					{@const selected = i === index}
+					<li>
+						{#if pipIsJumpTarget(kind) || selected}
+							<button
+								type="button"
+								class="pip"
+								data-kind={kind}
+								data-selected={selected || undefined}
+								aria-current={selected ? 'step' : undefined}
+								aria-label={pipLabel(kind, i + 1, selected)}
+								onclick={() => jumpTo(i)}
+							>
+								<span class="pip-n">{i + 1}</span>
+							</button>
+						{:else}
+							<span class="pip" data-kind={kind}>
+								<span class="pip-n" aria-hidden="true">{i + 1}</span>
+								<span class="vh">{pipLabel(kind, i + 1)}</span>
+							</span>
+						{/if}
+					</li>
+				{/each}
+			</ol>
+		</div>
 		<span class="where">{index + 1} / {lab.steps.length}</span>
 	</nav>
 
@@ -386,34 +420,52 @@
 		margin-bottom: var(--s4);
 		flex-wrap: nowrap;
 		min-width: 0;
-		position: relative;
 	}
 
-	.rail-wrap::after {
+	.rail-clip {
+		position: relative;
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	/* Fade the overflowing rail edge itself — not a guessed gap before
+	   the "12 / 17" counter — so a clipped circle cannot read as "(|". */
+	.rail-clip.fade-right::after,
+	.rail-clip.fade-left::before {
 		content: '';
 		position: absolute;
-		right: 3.4rem;
-		top: 0.2rem;
-		bottom: 0.2rem;
-		width: 1.4rem;
+		top: 0;
+		bottom: 0;
+		width: 1.75rem;
 		pointer-events: none;
-		background: linear-gradient(90deg, transparent, var(--paper));
+		z-index: 1;
+	}
+	.rail-clip.fade-right::after {
+		right: 0;
+		background: linear-gradient(90deg, transparent 0%, var(--paper) 70%, var(--paper) 100%);
+	}
+	.rail-clip.fade-left::before {
+		left: 0;
+		background: linear-gradient(90deg, var(--paper) 0%, var(--paper) 30%, transparent 100%);
 	}
 
 	.rail {
 		display: flex;
 		align-items: center;
-		flex: 1 1 auto;
 		flex-wrap: nowrap;
 		min-width: 0;
 		margin: 0;
 		padding: 0.45rem 0.15rem;
 		list-style: none;
 		overflow-x: auto;
+		overflow-y: hidden;
 		overscroll-behavior-x: contain;
-		scrollbar-width: thin;
-		scrollbar-color: var(--ink-faint) transparent;
+		scrollbar-width: none;
 		-webkit-overflow-scrolling: touch;
+	}
+	.rail::-webkit-scrollbar {
+		display: none;
+		height: 0;
 	}
 
 	.rail li { display: flex; flex: 0 0 auto; }
@@ -536,7 +588,8 @@
 	}
 
 	@media (forced-colors: active) {
-		.rail-wrap::after { display: none; }
+		.rail-clip.fade-right::after,
+		.rail-clip.fade-left::before { display: none; }
 		.pip[data-kind='upcoming'] { color: GrayText; }
 		.pip[data-kind='right'] { color: Canvas; }
 		.pip[data-kind='right']::before { background: Highlight; border-color: Highlight; }
