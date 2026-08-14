@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
 	pipRailCenteredScrollLeft,
 	pipRailEdgeFades,
-	pipRailMaxScroll
+	pipRailMaxScroll,
+	pipRailSnapScrollLeft
 } from './pipRail';
 
 describe('pipRailMaxScroll', () => {
@@ -37,6 +38,11 @@ describe('pipRailEdgeFades', () => {
 		expect(pipRailEdgeFades(0.4, 180)).toEqual({ left: false, right: true });
 		expect(pipRailEdgeFades(179.6, 180)).toEqual({ left: true, right: false });
 	});
+
+	it('ignores a few leftover pixels so a fitted row does not grow an edge fade', () => {
+		expect(pipRailEdgeFades(0, 4)).toEqual({ left: false, right: false });
+		expect(pipRailEdgeFades(4, 4)).toEqual({ left: false, right: false });
+	});
 });
 
 describe('pipRailCenteredScrollLeft', () => {
@@ -55,5 +61,26 @@ describe('pipRailCenteredScrollLeft', () => {
 
 	it('clamps to the last reachable scroll so the end pip is not past the rail', () => {
 		expect(pipRailCenteredScrollLeft(500, 36, 0, 200, 0, 200)).toBe(200);
+	});
+});
+
+describe('pipRailSnapScrollLeft', () => {
+	it('does not move when already on a pip boundary', () => {
+		expect(pipRailSnapScrollLeft(152, 38, 400)).toBe(152);
+	});
+
+	it('scrolls back to the previous pip so a left-edge sliver becomes a whole mark', () => {
+		// 7.6 pips in: 0.6 of a pip is a 23px sliver on the left
+		expect(pipRailSnapScrollLeft(7.6 * 38, 38, 400)).toBe(7 * 38);
+	});
+
+	it('stays at 0 and at max scroll', () => {
+		expect(pipRailSnapScrollLeft(0, 38, 400)).toBe(0);
+		expect(pipRailSnapScrollLeft(400, 38, 400)).toBe(400);
+		expect(pipRailSnapScrollLeft(395, 38, 400)).toBe(380);
+	});
+
+	it('is a no-op when pips have no width yet', () => {
+		expect(pipRailSnapScrollLeft(40, 0, 400)).toBe(40);
 	});
 });
