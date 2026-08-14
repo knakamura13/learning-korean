@@ -203,7 +203,7 @@
 		}
 	}
 
-	/** Keep the current pip in view and fade only the overflowing rail edge. */
+	/** Keep the current pip in view and fade overflowing rail edges. */
 	function keepSelectedVisible(node: HTMLOListElement) {
 		function applyFades() {
 			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
@@ -221,7 +221,9 @@
 			const pipRect = pip.getBoundingClientRect();
 			const railRect = node.getBoundingClientRect();
 			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
-			const stride = node.querySelector('li')?.getBoundingClientRect().width ?? 0;
+			const first = node.querySelector('li');
+			const stride = first?.getBoundingClientRect().width ?? 0;
+			const startPad = first?.offsetLeft ?? 0;
 			node.scrollLeft = pipRailSnapScrollLeft(
 				pipRailCenteredScrollLeft(
 					pipRect.left,
@@ -232,7 +234,8 @@
 					max
 				),
 				stride,
-				max
+				max,
+				startPad
 			);
 			applyFades();
 		}
@@ -431,6 +434,7 @@
 	}
 
 	.rail-wrap {
+		--rail-feather: 0.75rem;
 		display: flex;
 		align-items: center;
 		gap: var(--s2);
@@ -444,26 +448,42 @@
 		flex: 1 1 auto;
 		min-width: 0;
 		overflow: hidden;
-		/* Mask the rail viewport, not a guessed gap before "12 / 17",
-		   so a clipped circle fades out instead of reading as "(|". */
+		background-color: var(--paper);
+		/* Always feather both ends so the selected pip's glow is not
+		   hard-clipped when that side has nothing left to scroll.
+		   Overflowing sides use a longer fade to hide pip slivers. */
 		-webkit-mask-repeat: no-repeat;
 		mask-repeat: no-repeat;
 		-webkit-mask-size: 100% 100%;
 		mask-size: 100% 100%;
-	}
-	.rail-clip.fade-right {
 		-webkit-mask-image: linear-gradient(
 			to right,
-			#000 0,
-			#000 calc(100% - 1.15rem),
-			transparent calc(100% - 0.18rem),
+			transparent,
+			#000 0.75rem,
+			#000 calc(100% - 0.75rem),
 			transparent
 		);
 		mask-image: linear-gradient(
 			to right,
-			#000 0,
+			transparent,
+			#000 0.75rem,
+			#000 calc(100% - 0.75rem),
+			transparent
+		);
+	}
+	.rail-clip.fade-right {
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 0.75rem,
 			#000 calc(100% - 1.15rem),
-			transparent calc(100% - 0.18rem),
+			transparent
+		);
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 0.75rem,
+			#000 calc(100% - 1.15rem),
 			transparent
 		);
 	}
@@ -471,35 +491,31 @@
 		-webkit-mask-image: linear-gradient(
 			to right,
 			transparent,
-			transparent 0.12rem,
-			#000 0.45rem,
-			#000 100%
+			#000 0.9rem,
+			#000 calc(100% - 0.75rem),
+			transparent
 		);
 		mask-image: linear-gradient(
 			to right,
 			transparent,
-			transparent 0.12rem,
-			#000 0.45rem,
-			#000 100%
+			#000 0.9rem,
+			#000 calc(100% - 0.75rem),
+			transparent
 		);
 	}
 	.rail-clip.fade-left.fade-right {
 		-webkit-mask-image: linear-gradient(
 			to right,
 			transparent,
-			transparent 0.12rem,
-			#000 0.45rem,
+			#000 0.9rem,
 			#000 calc(100% - 1.15rem),
-			transparent calc(100% - 0.18rem),
 			transparent
 		);
 		mask-image: linear-gradient(
 			to right,
 			transparent,
-			transparent 0.12rem,
-			#000 0.45rem,
+			#000 0.9rem,
 			#000 calc(100% - 1.15rem),
-			transparent calc(100% - 0.18rem),
 			transparent
 		);
 	}
@@ -510,13 +526,20 @@
 		flex-wrap: nowrap;
 		min-width: 0;
 		margin: 0;
-		padding: 0.45rem 0.15rem;
+		padding: 0.45rem 0;
 		list-style: none;
 		overflow-x: auto;
 		overflow-y: hidden;
 		overscroll-behavior-x: contain;
 		scrollbar-width: none;
-		-webkit-overflow-scrolling: touch;
+		background-color: var(--paper);
+	}
+	.rail::before,
+	.rail::after {
+		content: '';
+		flex: 0 0 var(--rail-feather);
+		align-self: stretch;
+		pointer-events: none;
 	}
 	.rail::-webkit-scrollbar {
 		display: none;
@@ -643,9 +666,7 @@
 	}
 
 	@media (forced-colors: active) {
-		.rail-clip.fade-right,
-		.rail-clip.fade-left,
-		.rail-clip.fade-left.fade-right {
+		.rail-clip {
 			-webkit-mask-image: none;
 			mask-image: none;
 		}

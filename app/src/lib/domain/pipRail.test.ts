@@ -83,4 +83,16 @@ describe('pipRailSnapScrollLeft', () => {
 	it('is a no-op when pips have no width yet', () => {
 		expect(pipRailSnapScrollLeft(40, 0, 400)).toBe(40);
 	});
+
+	it('accounts for a leading glow pad so snap still lands on a whole pip', () => {
+		const pad = 12;
+		const stride = 38;
+		expect(pipRailSnapScrollLeft(pad + 7.6 * stride, stride, 400, pad)).toBe(
+			pad + 7 * stride
+		);
+	});
+
+	it('snaps to the start when the desired offset is still inside the glow pad', () => {
+		expect(pipRailSnapScrollLeft(8, 38, 400, 12)).toBe(0);
+	});
 });
