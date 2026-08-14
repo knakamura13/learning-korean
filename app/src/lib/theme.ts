@@ -36,6 +36,37 @@ export function resolvedTheme(pref: ThemePref, prefersDark = systemPrefersDark()
 	return pref;
 }
 
+/** Next value for the compact (single-button) theme control. */
+export function nextThemePref(pref: ThemePref): ThemePref {
+	switch (pref) {
+		case 'light':
+			return 'dark';
+		case 'dark':
+			return 'system';
+		case 'system':
+			return 'light';
+		default: {
+			const _exhaustive: never = pref;
+			return _exhaustive;
+		}
+	}
+}
+
+export function themePrefLabel(pref: ThemePref): string {
+	switch (pref) {
+		case 'light':
+			return 'Light';
+		case 'dark':
+			return 'Dark';
+		case 'system':
+			return 'System';
+		default: {
+			const _exhaustive: never = pref;
+			return _exhaustive;
+		}
+	}
+}
+
 export function applyTheme(pref: ThemePref): void {
 	const root = document.documentElement;
 	if (pref === 'light' || pref === 'dark') {

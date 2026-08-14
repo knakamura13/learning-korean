@@ -18,6 +18,17 @@
 	const tiers = $derived(progress.tierProgress);
 	const sessions = $derived(labSession.all);
 
+	const nextLabId = $derived.by(() => {
+		if (!ready) return null;
+		for (const lab of LABS) {
+			const done = progress.isUnlocked(lab.unlocks);
+			const blocked = !!lab.requires && !progress.isUnlocked(LABS_BY_ID[lab.requires].unlocks);
+			const mid = resumable(sessions[lab.id], lab.steps.length);
+			if (!done && !blocked && !mid) return lab.id;
+		}
+		return null;
+	});
+
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
 	}
@@ -102,6 +113,8 @@
 									<span class="ok">✓ completed</span>
 								{:else if ready && blocked}
 									<span class="wait">finish Lab {LABS_BY_ID[lab.requires!].number} first</span>
+								{:else if lab.id === nextLabId}
+									<span class="go">start here</span>
 								{/if}
 							</span>
 						</div>
@@ -142,10 +155,14 @@
 
 	.strip {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+		grid-template-columns: repeat(2, 1fr);
 		gap: var(--s2);
 		margin-bottom: var(--s7);
 		min-height: 4.75rem;
+	}
+
+	@media (min-width: 40rem) {
+		.strip { grid-template-columns: repeat(4, 1fr); }
 	}
 
 	.stat {

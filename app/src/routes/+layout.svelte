@@ -120,7 +120,13 @@
 
 	.name { font-size: 0.9rem; letter-spacing: 0.01em; }
 
-	nav { display: flex; gap: var(--s2); margin-left: auto; }
+	nav {
+		display: flex;
+		gap: var(--s2);
+		margin-left: auto;
+		min-width: 0;
+		flex-shrink: 1;
+	}
 
 	nav a {
 		display: inline-flex;
@@ -132,6 +138,7 @@
 		font-size: 0.84rem;
 		text-decoration: none;
 		color: var(--ink-soft);
+		white-space: nowrap;
 		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
 	}
 	nav a:hover { background: var(--paper-sunk); color: var(--ink); }
@@ -145,6 +152,12 @@
 		border-radius: var(--r-pill);
 		padding: 0.05rem 0.36rem;
 		font-variant-numeric: tabular-nums;
+	}
+
+	@media (max-width: 40rem) {
+		.inner { gap: var(--s2); }
+		nav { gap: var(--s1); }
+		nav a { padding: 0.35rem 0.5rem; }
 	}
 
 	@media (max-width: 30rem) {
