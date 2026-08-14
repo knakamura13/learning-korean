@@ -6,7 +6,7 @@
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
-	import { withLangKo } from '$lib/a11y/lang';
+	import { labHtml } from '$lib/a11y/sanitize';
 	import {
 		emptyOutcomes,
 		holdFurthest,
@@ -268,8 +268,8 @@
 	{#key index}
 		<div class="card step" in:fly={{ y: 10, duration: 260 }}>
 			{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
-			<h2 class="do">{@html withLangKo(step.do)}</h2>
-			{#if step.hint}<p class="hint">{@html withLangKo(step.hint)}</p>{/if}
+			<h2 class="do">{@html labHtml(step.do)}</h2>
+			{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
 
 			<div class="work">
 				{#if step.type === 'mouth'}
@@ -304,7 +304,7 @@
 					<span class="verdict">
 						{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
 					</span>
-					{@html withLangKo(feedback.html)}
+					{@html labHtml(feedback.html)}
 				</div>
 			{/if}
 
