@@ -38,15 +38,20 @@ export function shouldIgnoreArrowNav(target: EventTarget | null): boolean {
 	return !field.disabled && !field.readOnly;
 }
 
+export type FocusWhenParam = boolean | { active: boolean; preventScroll?: boolean };
+
 /** Focus `node` when `active` is true, including on mount. */
-export function focusWhen(node: HTMLElement, active: boolean) {
-	function apply(on: boolean) {
-		if (on) node.focus();
+export function focusWhen(node: HTMLElement, param: FocusWhenParam) {
+	function apply(next: FocusWhenParam) {
+		const active = typeof next === 'boolean' ? next : next.active;
+		if (!active) return;
+		const preventScroll = typeof next === 'object' && next.preventScroll === true;
+		node.focus({ preventScroll });
 	}
-	apply(active);
+	apply(param);
 	return {
-		update(on: boolean) {
-			apply(on);
+		update(next: FocusWhenParam) {
+			apply(next);
 		}
 	};
 }
