@@ -8,6 +8,7 @@
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
+	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 
 	let queue = $state<Card[]>([]);
 	let index = $state(0);
@@ -128,9 +129,23 @@
 	{#if ready && !progress.durable}
 		<div class="warn card">
 			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
-			origin, so your review history will vanish when you close the tab. Serve the built app
-			over HTTP rather than opening the files directly.
+			origin, so your review history will vanish when you close the tab. Download a backup
+			below before you do anything else, and serve the built app over HTTP rather than
+			opening the files directly.
 		</div>
+	{/if}
+
+	{#if ready}
+		<details class="backup-card card" open={!progress.durable}>
+			<summary>Back up or restore your progress</summary>
+			<p class="backup-note">
+				Your deck lives only in this browser. Back it up before switching browsers or
+				devices, clearing site data, or resetting this one — {progress.durable
+					? 'as a precaution.'
+					: 'right now, since this browser will not keep it for you.'}
+			</p>
+			<ProgressBackup exportJson={() => progress.export()} importJson={(json) => progress.import(json)} />
+		</details>
 	{/if}
 
 	{#if ready && stats.unlocked > 0}
@@ -301,6 +316,29 @@
 		margin-bottom: var(--s4);
 		font-size: 0.86rem;
 		line-height: 1.55;
+	}
+
+	.backup-card {
+		padding: var(--s3) var(--s4);
+		margin-bottom: var(--s4);
+	}
+	.backup-card summary {
+		cursor: pointer;
+		font-size: 0.86rem;
+		font-weight: 600;
+		padding: var(--s1) 0;
+	}
+	.backup-card summary:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+		border-radius: 3px;
+	}
+	.backup-note {
+		font-size: 0.82rem;
+		color: var(--ink-soft);
+		line-height: 1.55;
+		margin: var(--s2) 0 0;
 	}
 
 	.strip {

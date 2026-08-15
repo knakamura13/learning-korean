@@ -93,6 +93,15 @@ New cards are capped at 10/day to hold sessions near the 10-minute budget.
 browsers. `storage.ts` probes on startup and `/review` shows a loud warning when
 writes will not survive. `progress.export()` / `progress.import()` are the escape hatch.
 
+**Fixed (2026-08-15):** that escape hatch had no UI — `export()`/`import()` sat
+unused since the rewrite, so the only way out of the durability warning, or to
+move a deck to a new browser/device, was the devtools console. `/review` now has
+a "Back up or restore your progress" disclosure (`ProgressBackup.svelte`,
+domain helpers in `domain/backup.ts`) that downloads the export as a dated JSON
+file and restores from one, with an inline (not `confirm()`) warning before a
+restore overwrites the current deck. Opens itself when storage is not durable,
+since that is exactly when backing up right now matters.
+
 ## The app was rebuilt in SvelteKit (2026-08-12)
 
 Kyle asked to rebuild with a modern framework, citing code quality, authoring
