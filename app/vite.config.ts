@@ -4,6 +4,11 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	build: {
+		// Vite 8's documented Baseline Widely Available target makes the
+		// browser-support policy explicit for contributors and deploys.
+		target: 'baseline-widely-available'
+	},
 	// Component tests import `mount` from `svelte`. Without the browser
 	// condition Vitest resolves the server entry and mount() throws.
 	resolve: (globalThis as { process?: { env?: { VITEST?: string } } }).process?.env?.VITEST

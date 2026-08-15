@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount, type Snippet } from 'svelte';
+	import { onDestroy, onMount, tick, type Snippet } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
 	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
@@ -66,6 +66,8 @@
 	let fadeLeft = $state(false);
 	let fadeRight = $state(false);
 	let cardEl = $state<HTMLDivElement>();
+	let confirmingRestart = $state(false);
+	let restartButton = $state<HTMLButtonElement>();
 
 	/**
 	 * Scroll and focus are managed in exactly one place: here. Advancing or
@@ -220,6 +222,21 @@
 		startedAt = Date.now();
 	}
 
+	function requestRestart() {
+		confirmingRestart = true;
+	}
+
+	async function cancelRestart() {
+		confirmingRestart = false;
+		await tick();
+		restartButton?.focus();
+	}
+
+	function confirmRestart() {
+		confirmingRestart = false;
+		restart();
+	}
+
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
 		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -327,7 +344,26 @@
 			{#if nextLab}
 				<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href="/lab/{nextLab.id}">Next lab</a>
 			{/if}
-			<button class="btn ghost" onclick={restart}>Run the lab again</button>
+			{#if confirmingRestart}
+				<div class="restart-confirm" role="group" aria-labelledby="restart-confirmation">
+					<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
+					<div class="restart-confirm-actions">
+						<button class="btn ghost" type="button" use:focusWhen={true} onclick={cancelRestart}>
+							Cancel
+						</button>
+						<button class="btn" type="button" onclick={confirmRestart}>Start over</button>
+					</div>
+				</div>
+			{:else}
+				<button
+					bind:this={restartButton}
+					class="btn ghost"
+					type="button"
+					onclick={requestRestart}
+				>
+					Run the lab again
+				</button>
+			{/if}
 		</div>
 	</div>
 {:else}
@@ -645,10 +681,7 @@
 		content: '';
 		position: absolute;
 		display: block;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
+		inset: 0;
 		margin: auto;
 		width: 1.55rem;
 		height: 1.55rem;
@@ -747,7 +780,7 @@
 
 	.where {
 		flex: 0 0 auto;
-		margin-left: 0;
+		margin-inline-start: 0;
 		min-width: 5.8rem;
 		font-size: 0.7rem;
 		letter-spacing: 0.03em;
@@ -755,7 +788,7 @@
 		color: var(--ink-faint);
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
-		text-align: right;
+		text-align: end;
 	}
 
 	.loading {
@@ -834,7 +867,7 @@
 		flex-wrap: wrap;
 	}
 
-	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-left: auto; }
+	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-inline-start: auto; }
 
 	@media (pointer: coarse) {
 		.kb { display: none; }
@@ -888,4 +921,14 @@
 	}
 
 	.actions { display: flex; gap: var(--s3); justify-content: center; flex-wrap: wrap; }
+	.restart-confirm {
+		display: grid;
+		gap: var(--s2);
+		padding: var(--s3);
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--r-md);
+		background: var(--paper-sunk);
+	}
+	.restart-confirm p { margin: 0; }
+	.restart-confirm-actions { display: flex; gap: var(--s2); flex-wrap: wrap; justify-content: center; }
 </style>
