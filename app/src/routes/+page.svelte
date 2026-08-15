@@ -9,6 +9,7 @@
 		type CourseNavView
 	} from '$lib/domain/courseNav';
 	import { labSession } from '$lib/stores/labSession.svelte';
+	import { tierCountLabel } from '$lib/domain/srs';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	// Prerendered HTML has no stored progress. Gate stats, completion badges,
@@ -106,6 +107,7 @@
 				{/if}
 			</b><span>day streak</span>
 		</div>
+		<p class="streak-note">Day streak counts review days, not finished labs.</p>
 	</section>
 
 	<section>
@@ -169,11 +171,14 @@
 				<div class="tier" class:locked={!ready || !tier.unlocked}>
 					<span class="nm">{tier.label}</span>
 					<span class="track">
-						<span class="m" style="width:{ready ? pct(tier.mature, tier.size) : 0}%"></span>
-						<span class="y" style="width:{ready ? pct(tier.young, tier.size) : 0}%"></span>
+						{#if ready && tier.unlocked}
+							<span class="m" style="width:{pct(tier.mature, tier.size)}%"></span>
+							<span class="y" style="width:{pct(tier.young, tier.size)}%"></span>
+							<span class="n" style="width:{pct(tier.unseen, tier.size)}%"></span>
+						{/if}
 					</span>
 					<span class="ct">
-						{#if ready && tier.unlocked}{tier.mature}/{tier.size}{:else}locked{/if}
+						{#if ready}{tierCountLabel(tier)}{:else}locked{/if}
 					</span>
 				</div>
 			{/each}
@@ -244,6 +249,13 @@
 		gap: var(--s2);
 		margin-bottom: var(--s7);
 		min-height: 4.75rem;
+	}
+	.streak-note {
+		grid-column: 1 / -1;
+		margin: 0;
+		font-size: 0.72rem;
+		line-height: 1.4;
+		color: var(--ink-faint);
 	}
 
 	@media (min-width: 40rem) {
@@ -373,9 +385,10 @@
 	}
 	.track .m { background: var(--good); }
 	.track .y { background: var(--accent); }
+	.track .n { background: var(--rule-strong); }
 	.ct {
 		flex: 0 0 auto;
-		min-width: 6ch;
+		min-width: 14ch;
 		text-align: right;
 		font-family: var(--mono);
 		font-size: 0.72rem;
@@ -400,7 +413,7 @@
 	}
 	.sw.m { background: var(--good); }
 	.sw.y { background: var(--accent); }
-	.sw.n { background: var(--rule); }
+	.sw.n { background: var(--rule-strong); }
 
 	@media (forced-colors: active) {
 		.stat {
@@ -415,12 +428,13 @@
 		.continue,
 		.lab.resume { border-color: Highlight; }
 		.continue { background: Canvas; }
-		.track { background: ButtonBorder; }
+		.track { background: Canvas; }
 		.track .m { background: Highlight; }
 		.track .y { background: ButtonText; }
+		.track .n { background: GrayText; }
 		.sw.m { background: Highlight; }
 		.sw.y { background: ButtonText; }
-		.sw.n { background: ButtonBorder; }
+		.sw.n { background: GrayText; }
 	}
 
 	@media (max-width: 34rem) {
