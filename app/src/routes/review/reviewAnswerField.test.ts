@@ -1,0 +1,18 @@
+import { describe, expect, it } from 'vitest';
+import src from './+page.svelte?raw';
+
+describe('review answer field', () => {
+	it('keeps a visible label associated with the input', () => {
+		expect(src).toMatch(/<label[^>]*\bfor="review-answer"/);
+		expect(src).toMatch(/id="review-answer"/);
+		expect(src).toMatch(/Your answer/);
+		expect(src).not.toMatch(/aria-label="your answer"/);
+	});
+
+	it('still flags empty submit and disables the field after an answer', () => {
+		expect(src).toMatch(/aria-invalid=\{emptyHint \? true : undefined\}/);
+		expect(src).toMatch(/id="empty-hint"/);
+		expect(src).toMatch(/disabled=\{answered\}/);
+		expect(src).toMatch(/checkAnswer\(card, value\)/);
+	});
+});
