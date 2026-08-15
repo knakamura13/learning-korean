@@ -421,7 +421,7 @@
 				{/each}
 			</ol>
 		</div>
-		<span class="where">{index + 1} / {lab.steps.length}</span>
+		<span class="where">Card {index + 1} of {lab.steps.length}</span>
 	</nav>
 
 	{#key index}
@@ -781,12 +781,14 @@
 	.where {
 		flex: 0 0 auto;
 		margin-inline-start: 0;
-		font-size: 0.68rem;
-		letter-spacing: 0.1em;
+		min-width: 5.8rem;
+		font-size: 0.7rem;
+		letter-spacing: 0.03em;
 		text-transform: uppercase;
 		color: var(--ink-faint);
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
+		text-align: end;
 	}
 
 	.loading {
