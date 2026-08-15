@@ -117,6 +117,11 @@
 
 	.chip:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
 	.chip:active:not(:disabled) { transform: translateY(0); }
+	.chip:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
 	.chip:disabled { cursor: default; opacity: 0.5; }
 
 	.chip.on {

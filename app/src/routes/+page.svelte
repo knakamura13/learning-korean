@@ -70,7 +70,7 @@
 		</a>
 	{/if}
 
-	<section class="strip" aria-busy={!ready}>
+	<section class="strip" aria-busy={!ready} aria-label="Course and review statistics">
 		<a class="stat hot" href="/review" class:quiet={!ready || stats.queue === 0}>
 			<b>
 				{#if ready}
@@ -110,8 +110,8 @@
 		<p class="streak-note">Day streak counts review days, not finished labs.</p>
 	</section>
 
-	<section>
-		<h2 class="sec">Labs</h2>
+	<section aria-labelledby="sec-labs-heading">
+		<h2 id="sec-labs-heading" class="sec">Labs</h2>
 		<div class="labs">
 			{#each LABS as lab (lab.id)}
 				{@const item = toCourseLab(lab)}
@@ -119,7 +119,7 @@
 				{@const prior = requiredLab(course, lab.requires)}
 				{#if card.locked}
 					<article class="lab card ahead" aria-labelledby="lab-{lab.id}-title">
-						<div class="num">{pad(lab.number)}</div>
+						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
 						<div class="body">
 							<h3 id="lab-{lab.id}-title">{lab.title}</h3>
 							<p>{lab.standfirst}</p>
@@ -127,10 +127,10 @@
 								<span>~{lab.minutes} min</span>
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
-									<span class="wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
+									<span class="chip-status wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
 								</span>
 							</div>
-							<a class="peek" href="/lab/{lab.id}">Open anyway</a>
+							<a class="peek" href="/lab/{lab.id}" aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
 						</div>
 					</article>
 				{:else}
@@ -139,21 +139,22 @@
 						href="/lab/{lab.id}"
 						class:done={card.done}
 						class:resume={card.resumeAt !== null}
+						aria-labelledby="lab-{lab.id}-title"
 					>
-						<div class="num">{pad(lab.number)}</div>
+						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
 						<div class="body">
-							<h3>{lab.title}</h3>
+							<h3 id="lab-{lab.id}-title">{lab.title}</h3>
 							<p>{lab.standfirst}</p>
 							<div class="meta">
 								<span>~{lab.minutes} min</span>
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									{#if card.resumeAt !== null}
-										<span class="go">resume · card {card.resumeAt + 1} of {lab.steps.length}</span>
+										<span class="chip-status go">resume · card {card.resumeAt + 1} of {lab.steps.length}</span>
 									{:else if card.done}
-										<span class="ok">✓ completed</span>
+										<span class="chip-status ok">✓ completed</span>
 									{:else if card.startHere}
-										<span class="go">start here</span>
+										<span class="chip-status go">start here</span>
 									{/if}
 								</span>
 							</div>
@@ -164,25 +165,33 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">Deck</h2>
-		<div class="tiers card">
+	<section aria-labelledby="sec-deck-heading">
+		<h2 id="sec-deck-heading" class="sec">Deck</h2>
+		<div class="tiers card" role="region" aria-label="Deck tier mastery breakdown">
 			{#each tiers as tier (tier.id)}
-				<div class="tier" class:locked={!ready || !tier.unlocked}>
+				{@const pctMature = pct(tier.mature, tier.size)}
+				{@const pctYoung = pct(tier.young, tier.size)}
+				{@const pctUnseen = pct(tier.unseen, tier.size)}
+				<div
+					class="tier"
+					class:locked={!ready || !tier.unlocked}
+					role="group"
+					aria-label="{tier.label}: {ready && tier.unlocked ? `${tier.mature} mastered, ${tier.young} learning, ${tier.unseen} not started (${tier.size} total)` : 'locked'}"
+				>
 					<span class="nm">{tier.label}</span>
-					<span class="track">
+					<span class="track" aria-hidden="true">
 						{#if ready && tier.unlocked}
-							<span class="m" style="width:{pct(tier.mature, tier.size)}%"></span>
-							<span class="y" style="width:{pct(tier.young, tier.size)}%"></span>
-							<span class="n" style="width:{pct(tier.unseen, tier.size)}%"></span>
+							<span class="m" style="width:{pctMature}%" title="{tier.mature} mastered ({pctMature}%)"></span>
+							<span class="y" style="width:{pctYoung}%" title="{tier.young} learning ({pctYoung}%)"></span>
+							<span class="n" style="width:{pctUnseen}%" title="{tier.unseen} not started ({pctUnseen}%)"></span>
 						{/if}
 					</span>
-					<span class="ct">
+					<span class="ct" aria-hidden="true">
 						{#if ready}{tierCountLabel(tier)}{:else}locked{/if}
 					</span>
 				</div>
 			{/each}
-			<p class="legend">
+			<p class="legend" aria-hidden="true">
 				<i class="sw m"></i> mastered (21+ day gap)
 				<i class="sw y"></i> learning
 				<i class="sw n"></i> not started
@@ -343,11 +352,34 @@
 		font-size: 0.7rem;
 		color: var(--ink-faint);
 		flex-wrap: wrap;
+		align-items: center;
 	}
-	.flag { min-height: 1em; }
-	.meta .ok { color: var(--good); }
-	.meta .wait { color: var(--warn); }
-	.meta .go { color: var(--accent); }
+	.flag { min-height: 1.4em; display: inline-flex; align-items: center; }
+	.chip-status {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.12rem 0.5rem;
+		border-radius: var(--r-pill);
+		font-size: 0.66rem;
+		font-weight: 600;
+		line-height: 1.2;
+		border: 1px solid transparent;
+	}
+	.chip-status.ok {
+		color: var(--good);
+		background: var(--good-soft);
+		border-color: color-mix(in srgb, var(--good) 30%, transparent);
+	}
+	.chip-status.wait {
+		color: var(--warn);
+		background: var(--warn-soft);
+		border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+	}
+	.chip-status.go {
+		color: var(--accent);
+		background: var(--accent-soft);
+		border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+	}
 
 	.lab.ahead { opacity: 0.78; }
 	.peek {
@@ -377,9 +409,9 @@
 	.nm { flex: 0 0 9rem; }
 	.track {
 		flex: 1 1 auto;
-		height: 6px;
+		height: 8px;
 		background: var(--rule);
-		border-radius: 3px;
+		border-radius: 4px;
 		overflow: hidden;
 		display: flex;
 	}

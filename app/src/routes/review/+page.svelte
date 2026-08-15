@@ -134,7 +134,7 @@
 	{/if}
 
 	{#if ready && stats.unlocked > 0}
-		<div class="strip">
+		<div class="strip" role="region" aria-label="Review session statistics">
 			<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
 			<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
 			<div class="stat"><b>{stats.seen}</b><span>started</span></div>
@@ -190,10 +190,18 @@
 		</div>
 	{:else}
 		{#key index}
-			<div class="card review" in:fly={{ y: 10, duration: 220 }}>
-				<div class="bar"><i style="width:{(index / queue.length) * 100}%"></i></div>
+			<div class="card review" in:fly={{ y: 10, duration: 220 }} aria-labelledby="review-card-tag">
+				<div
+					class="bar"
+					role="progressbar"
+					aria-label="Review progress"
+					aria-valuenow={index + 1}
+					aria-valuemin={1}
+					aria-valuemax={queue.length}
+					aria-valuetext="Card {index + 1} of {queue.length}"
+				><i style="width:{((index + 1) / queue.length) * 100}%"></i></div>
 
-				<p class="tag" class:isnew={sittingNew}>
+				<p id="review-card-tag" class="tag" class:isnew={sittingNew}>
 					{sittingNew ? 'new card' : 'review'} · {index + 1} of {queue.length}
 				</p>
 
@@ -400,6 +408,11 @@
 		font-family: var(--mono);
 		font-size: 1.15rem;
 		padding: 0.7rem 0.9rem;
+	}
+	.in:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 	}
 	.in:user-invalid,
 	.in[aria-invalid='true'] {

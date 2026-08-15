@@ -55,10 +55,21 @@
 			Generated from the same module the labs run on, so it cannot drift from what the app
 			teaches.
 		</p>
+		<nav class="quick-nav" aria-label="Reference sections">
+			<a href="#consonants">19 Consonants</a>
+			<a href="#simple-vowels">10 Simple Vowels</a>
+			<a href="#compound-vowels">11 Compounds</a>
+			<a href="#batchim">Batchim (7 Sounds)</a>
+			<a href="#clusters">11 Clusters</a>
+			<a href="#derivation">Derivation Map</a>
+			<a href="#block-layouts">Block Layouts</a>
+			<a href="#sound-changes">Sound Changes</a>
+			<a href="#dictionary-order">Dictionary Order</a>
+		</nav>
 	</header>
 
-	<section>
-		<h2 class="sec">19 consonants</h2>
+	<section id="consonants" aria-labelledby="sec-consonants-heading">
+		<h2 id="sec-consonants-heading" class="sec">19 consonants</h2>
 		<div class="grid">
 			{#each LEADS as c (c)}
 				<div class="cell">
@@ -74,8 +85,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">10 simple vowels</h2>
+	<section id="simple-vowels" aria-labelledby="sec-simple-vowels-heading">
+		<h2 id="sec-simple-vowels-heading" class="sec">10 simple vowels</h2>
 		<div class="grid">
 			{#each SIMPLE as v (v)}
 				<div class="cell">
@@ -87,8 +98,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">11 compound vowels</h2>
+	<section id="compound-vowels" aria-labelledby="sec-compounds-heading">
+		<h2 id="sec-compounds-heading" class="sec">11 compound vowels</h2>
 		<div class="grid">
 			{#each COMPOUNDS as v (v)}
 				{@const parts = fusionParts(v)}
@@ -103,8 +114,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">Batchim — 27 finals, 7 sounds</h2>
+	<section id="batchim" aria-labelledby="sec-batchim-heading">
+		<h2 id="sec-batchim-heading" class="sec">Batchim — 27 finals, 7 sounds</h2>
 		<div class="rows card">
 			{#each REPRESENTATIVE as r (r)}
 				<div class="row">
@@ -119,8 +130,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">11 clusters</h2>
+	<section id="clusters" aria-labelledby="sec-clusters-heading">
+		<h2 id="sec-clusters-heading" class="sec">11 clusters</h2>
 		<div class="rows card">
 			{#each CLUSTERS as c (c)}
 				{@const parts = clusterParts(c)}
@@ -159,8 +170,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">The derivation map</h2>
+	<section id="derivation" aria-labelledby="sec-derivation-heading">
+		<h2 id="sec-derivation-heading" class="sec">The derivation map</h2>
 		<p class="lede tiny muted">
 			Five shapes drawn from the articulators; a stroke adds breath, doubling adds tension.
 			Rebuilt here from the same map the labs use.
@@ -178,8 +189,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">Block layouts</h2>
+	<section id="block-layouts" aria-labelledby="sec-layouts-heading">
+		<h2 id="sec-layouts-heading" class="sec">Block layouts</h2>
 		<div class="rows card">
 			{#each BLOCK_LAYOUTS as l (l.kind)}
 				<div class="row wrap">
@@ -194,8 +205,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">The eight sound changes</h2>
+	<section id="sound-changes" aria-labelledby="sec-sound-changes-heading">
+		<h2 id="sec-sound-changes-heading" class="sec">The eight sound changes</h2>
 		<p class="lede tiny muted">
 			Korean spelling preserves what a word <em>is</em>; these rules are how it sounds. They
 			are the roadmap for everything after Lab 05.
@@ -224,8 +235,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">Dictionary order (<span lang="ko">가나다순</span>)</h2>
+	<section id="dictionary-order" aria-labelledby="sec-ganada-heading">
+		<h2 id="sec-ganada-heading" class="sec">Dictionary order (<span lang="ko">가나다순</span>)</h2>
 		<div class="card ganada">
 			<p class="glabel">consonants</p>
 			<p class="hg grow" lang="ko">{GANADA_CONSONANTS.join(' ')}</p>
@@ -238,8 +249,8 @@
 		</div>
 	</section>
 
-	<section>
-		<h2 class="sec">Sources</h2>
+	<section id="sources" aria-labelledby="sec-sources-heading">
+		<h2 id="sec-sources-heading" class="sec">Sources</h2>
 		<ul class="src">
 			<li>
 				<a href="https://www.korean.go.kr/"
@@ -273,7 +284,38 @@
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.lede { color: var(--ink-soft); }
 
-	section { margin-bottom: var(--s7); }
+	.quick-nav {
+		display: flex;
+		gap: var(--s2);
+		flex-wrap: wrap;
+		margin-top: var(--s4);
+		padding: var(--s2) 0;
+	}
+	.quick-nav a {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.65rem;
+		border-radius: var(--r-pill);
+		background: var(--paper-sunk);
+		border: 1px solid var(--rule);
+		font-size: 0.74rem;
+		font-weight: 500;
+		text-decoration: none;
+		color: var(--ink-soft);
+		white-space: nowrap;
+		transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease),
+			color var(--fast) var(--ease);
+	}
+	.quick-nav a:hover {
+		background: var(--paper-raised);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+
+	section {
+		margin-bottom: var(--s7);
+		scroll-margin-top: calc(var(--s7) + 2rem);
+	}
 
 	.sec {
 		font-family: var(--sans);

@@ -278,7 +278,7 @@
 		<h2>{lab.finish.title}</h2>
 		<p class="summary">{lab.finish.summary}</p>
 
-		<div class="tally">
+		<div class="tally" role="region" aria-label="Lab results summary">
 			<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
 			<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
 			{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
@@ -325,7 +325,7 @@
 			Picking up at card {index + 1} of {lab.steps.length}.
 		</p>
 	{/if}
-	<nav class="rail-wrap" aria-label="Lab cards">
+	<nav class="rail-wrap" aria-label="Lab card navigation">
 		<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
 			<ol class="rail" {@attach keepSelectedVisible}>
 				{#each lab.steps as _, i (i)}
@@ -660,8 +660,9 @@
 		animation: pip-pulse 1.8s var(--ease-in-out) infinite;
 	}
 	.pip:focus-visible {
-		outline: none;
-		box-shadow: none;
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 		border-radius: 0;
 	}
 

@@ -69,7 +69,7 @@
 	<PlayButton jamo={current} />
 </div>
 
-<div class="tools">
+<div class="tools" role="group" aria-label="Derivation tools">
 	<button class="tool" disabled={!canStroke} onclick={() => apply('stroke')}>+ stroke</button>
 	<button class="tool" disabled={!canDouble} onclick={() => apply('double')}>× double</button>
 	<button class="tool undo" disabled={path.length < 2 || won} onclick={undo}>undo</button>
@@ -130,6 +130,11 @@
 	.tool:disabled { opacity: 0.32; cursor: default; border-color: var(--rule); color: var(--ink-faint); }
 	.tool.undo { border-color: var(--rule-strong); color: var(--ink-soft); }
 	.tool.undo:hover:not(:disabled) { background: var(--paper-sunk); }
+	.tool:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
 
 	@media (forced-colors: active) {
 		.tool,

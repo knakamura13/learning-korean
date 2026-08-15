@@ -9,6 +9,12 @@ describe('review answer field', () => {
 		expect(src).not.toMatch(/aria-label="your answer"/);
 	});
 
+	it('includes progressbar attributes for session orientation', () => {
+		expect(src).toMatch(/role="progressbar"/);
+		expect(src).toMatch(/aria-valuenow=\{index \+ 1\}/);
+		expect(src).toMatch(/aria-valuemax=\{queue\.length\}/);
+	});
+
 	it('still flags empty submit and disables the field after an answer', () => {
 		expect(src).toMatch(/aria-invalid=\{emptyHint \? true : undefined\}/);
 		expect(src).toMatch(/id="empty-hint"/);

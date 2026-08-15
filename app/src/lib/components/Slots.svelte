@@ -107,6 +107,13 @@
 
 	.slot.filled .slot-name { color: var(--accent); }
 
+	.slot:focus-visible,
+	.out:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
+
 	.slot-value { line-height: 1; }
 
 	.slot.bottom {
