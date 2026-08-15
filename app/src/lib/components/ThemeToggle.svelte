@@ -61,22 +61,19 @@
 		</svg>
 	{:else}
 		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-			<rect
-				x="3"
-				y="4"
-				width="18"
-				height="14"
-				rx="2"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-			/>
 			<path
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
 				stroke-linecap="round"
-				d="M8 21h8M12 18v3"
+				d="M12 3v2M5 12H3M6.2 6.2 7.6 7.6M6.2 17.8 7.6 16.4M12 19v2"
+			/>
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linejoin="round"
+				d="M12 8a4 4 0 1 0 4 4 6 6 0 0 1-4-4z"
 			/>
 		</svg>
 	{/if}
