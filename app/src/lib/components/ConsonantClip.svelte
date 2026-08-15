@@ -91,7 +91,7 @@
 	.play:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
-		box-shadow: 0 0 0 4px var(--blue);
+		box-shadow: var(--focus-ring);
 	}
 	.play[aria-pressed='true'] {
 		border-color: var(--accent);

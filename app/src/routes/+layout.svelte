@@ -47,17 +47,19 @@
 			<span class="mark" lang="ko">한</span>
 			<span class="name">Korean</span>
 		</a>
-		<nav>
+		<nav aria-label="Main navigation">
 			{#each nav as item (item.href)}
+				{@const isActive = item.href === '/'
+					? page.url.pathname === '/'
+					: page.url.pathname.startsWith(item.href)}
 				<a
 					href={item.href}
-					class:active={item.href === '/'
-						? page.url.pathname === '/'
-						: page.url.pathname.startsWith(item.href)}
+					class:active={isActive}
+					aria-current={isActive ? 'page' : undefined}
 				>
 					{item.label}
 					{#if item.href === '/review' && queue > 0}
-						<span class="badge">{queue}</span>
+						<span class="badge" aria-label="{queue} cards due for review">{queue}</span>
 					{/if}
 				</a>
 			{/each}

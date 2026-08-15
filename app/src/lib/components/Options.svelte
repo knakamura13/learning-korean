@@ -72,8 +72,9 @@
 			class:dim={settled && !choice.correct && picked !== i}
 			disabled={settled || disabled}
 			onclick={() => pick(i)}
+			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {choice.text}"
 		>
-			<span class="key"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
+			<span class="key" aria-hidden="true"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
 			<span class="txt" lang={hasHangul(choice.text) ? 'ko' : undefined}>{choice.text}</span>
 		</button>
 	{/each}
@@ -148,6 +149,11 @@
 	.opt:active:not(:disabled) {
 		transform: translateY(0);
 		box-shadow: none;
+	}
+	.opt:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 	}
 	.opt:disabled { cursor: default; }
 

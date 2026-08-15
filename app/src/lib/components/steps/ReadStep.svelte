@@ -27,16 +27,22 @@
 	}
 </script>
 
-<div class="word">
+<div class="word" role="group" aria-label="Syllable blocks to decode">
 	{#each step.blocks as b, i (i)}
-		<button class="blk" class:open={opened.has(i)} onclick={() => reveal(i)}>
+		<button
+			class="blk"
+			class:open={opened.has(i)}
+			onclick={() => reveal(i)}
+			aria-expanded={opened.has(i)}
+			aria-label="Block {i + 1}: {b.block}{opened.has(i) ? `, reading: ${b.reading}` : ', click to reveal reading'}"
+		>
 			<span class="ch" lang="ko">{b.block}</span>
 			<span class="rd">{opened.has(i) ? b.reading : ''}</span>
 		</button>
 	{/each}
 </div>
 
-<p class="note">
+<p class="note" role="status">
 	{#if allOpen}
 		Now — what is it?
 	{:else}
@@ -73,6 +79,11 @@
 	}
 	.blk:hover { background: var(--paper-sunk); border-color: var(--rule); transform: translateY(-1px); }
 	.blk:active { transform: translateY(0); }
+	.blk:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
 
 	.ch {
 		font-family: var(--hangul);

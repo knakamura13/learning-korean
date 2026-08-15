@@ -37,7 +37,7 @@
 	them is pronounced. Which?
 </p>
 
-<div class="picks">
+<div class="picks" role="group" aria-label="Surviving consonant choices">
 	{#each parts as jamo (jamo)}
 		<button
 			class="pick"
@@ -47,6 +47,7 @@
 			disabled={solved}
 			onclick={() => pick(jamo)}
 			lang="ko"
+			aria-label="Choose consonant {jamo}"
 		>{jamo}</button>
 	{/each}
 </div>
@@ -112,6 +113,11 @@
 	}
 	.pick:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
 	.pick:active:not(:disabled) { transform: translateY(0); }
+	.pick:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
 	.pick:disabled { cursor: default; }
 	.pick.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	.pick.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
