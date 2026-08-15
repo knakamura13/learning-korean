@@ -1,5 +1,10 @@
 <script lang="ts">
 	import { hasHangul } from '$lib/a11y/lang';
+	import {
+		choiceIndexFromKey,
+		choiceKeyLabel,
+		choiceKeyScheme
+	} from '$lib/a11y/choiceKeys';
 
 	/**
 	 * A grid of answer buttons with right/wrong reveal.
@@ -39,6 +44,8 @@
 	const choices = $derived(
 		shuffled(options.map((text, i) => ({ text, correct: i === answer })))
 	);
+	// Digit chips collide with numeric answers after shuffle (Lab 04/05 counts).
+	const keyScheme = $derived(choiceKeyScheme(options));
 
 	let picked = $state<number | null>(null);
 	const settled = $derived(picked !== null);
@@ -49,8 +56,9 @@
 		onPick(choices[i].correct, i);
 	}
 
-	export function keyPick(n: number) {
-		if (n >= 1 && n <= choices.length) pick(n - 1);
+	export function keyPick(key: string) {
+		const i = choiceIndexFromKey(keyScheme, key, choices.length);
+		if (i !== null) pick(i);
 	}
 </script>
 
@@ -65,7 +73,7 @@
 			disabled={settled || disabled}
 			onclick={() => pick(i)}
 		>
-			<span class="key">{i + 1}</span>
+			<span class="key"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
 			<span class="txt" lang={hasHangul(choice.text) ? 'ko' : undefined}>{choice.text}</span>
 		</button>
 	{/each}
@@ -98,19 +106,39 @@
 			transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
 	}
 
-	.opts:not(.stack) .opt { justify-content: center; text-align: center; }
+	.opts:not(.stack) .opt {
+		position: relative;
+		justify-content: center;
+		text-align: center;
+	}
+	.opts:not(.stack) .txt { width: 100%; }
+	.opts:not(.stack) .key {
+		position: absolute;
+		left: 20px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
 
 	.opt.hangul { font-family: var(--hangul); font-size: 1.9rem; font-weight: 500; min-height: 4rem; }
 
 	.key {
+		box-sizing: border-box;
 		font-family: var(--mono);
-		font-size: 0.62rem;
+		font-size: 0.44rem;
+		font-weight: 600;
+		line-height: 1;
 		color: var(--ink-faint);
 		border: 1px solid var(--rule);
-		border-radius: 3px;
-		padding: 0.05rem 0.3rem;
+		border-radius: 2px;
+		min-width: 1.4em;
+		height: 1.4em;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		flex: 0 0 auto;
 	}
+	.key span { transform: translateY(1.5px); }
 
 	.opt:hover:not(:disabled) {
 		border-color: var(--accent);

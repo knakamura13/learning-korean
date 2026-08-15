@@ -2,6 +2,7 @@
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
+	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
 	import { focusWhen, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
@@ -204,9 +205,9 @@
 			next();
 			return;
 		}
-		if (!settled && /^[1-9]$/.test(e.key) && step.type === 'choice') {
+		if (!settled && step.type === 'choice' && isChoiceShortcutKey(e.key, step.options)) {
 			e.preventDefault();
-			choiceRef?.key(Number(e.key));
+			choiceRef?.key(e.key);
 		}
 	}
 
