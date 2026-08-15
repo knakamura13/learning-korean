@@ -19,8 +19,8 @@
 		onSettle(result.overrideTeach, result.correct);
 	}
 
-	export function key(n: number) {
-		picker?.keyPick(n);
+	export function key(k: string) {
+		picker?.keyPick(k);
 	}
 </script>
 

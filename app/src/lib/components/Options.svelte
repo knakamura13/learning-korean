@@ -1,5 +1,10 @@
 <script lang="ts">
 	import { hasHangul } from '$lib/a11y/lang';
+	import {
+		choiceIndexFromKey,
+		choiceKeyLabel,
+		choiceKeyScheme
+	} from '$lib/a11y/choiceKeys';
 
 	/**
 	 * A grid of answer buttons with right/wrong reveal.
@@ -39,6 +44,8 @@
 	const choices = $derived(
 		shuffled(options.map((text, i) => ({ text, correct: i === answer })))
 	);
+	// Digit chips collide with numeric answers after shuffle (Lab 04/05 counts).
+	const keyScheme = $derived(choiceKeyScheme(options));
 
 	let picked = $state<number | null>(null);
 	const settled = $derived(picked !== null);
@@ -49,8 +56,9 @@
 		onPick(choices[i].correct, i);
 	}
 
-	export function keyPick(n: number) {
-		if (n >= 1 && n <= choices.length) pick(n - 1);
+	export function keyPick(key: string) {
+		const i = choiceIndexFromKey(keyScheme, key, choices.length);
+		if (i !== null) pick(i);
 	}
 </script>
 
@@ -65,7 +73,7 @@
 			disabled={settled || disabled}
 			onclick={() => pick(i)}
 		>
-			<span class="key">{i + 1}</span>
+			<span class="key">{choiceKeyLabel(keyScheme, i)}</span>
 			<span class="txt" lang={hasHangul(choice.text) ? 'ko' : undefined}>{choice.text}</span>
 		</button>
 	{/each}
