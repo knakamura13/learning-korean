@@ -209,9 +209,12 @@ what the SRS deck is for") is deliberate and Kyle responds to it.
 The page is now fully covered. What remains is how the page *sounds* when letters
 meet, which is where reading turns into hearing. Suggested order:
 
-1. **Liaison (연음)** — batchim + ㅇ moves forward: 한국어 → [한구거]. Highest leverage
-   single rule; it is why spoken Korean does not sound like the spelling. Also the
-   payoff for Lab 04's "spelling preserves identity" aside. (Next.)
+1. **Liaison (연음)** — planned in detail (not built yet):
+   `docs/superpowers/specs/2026-08-15-lab06-liaison-design.md` and
+   `docs/superpowers/plans/2026-08-15-lab06-liaison.md`.
+   Batchim + ㅇ moves forward: 한국어 → [한구거]. Highest leverage single rule;
+   it is why spoken Korean does not sound like the spelling. Also the payoff
+   for Lab 04's "spelling preserves identity" aside. (Next to implement.)
 2. **Tensification + nasalisation** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
    that most often make a known word unrecognisable by ear.
 3. **Aspiration, ㅎ-deletion, palatalisation, ㄹ assimilation** — the remaining four.
