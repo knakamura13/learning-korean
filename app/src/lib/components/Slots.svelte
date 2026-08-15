@@ -12,6 +12,8 @@
 		value: string | null;
 		/** The batchim slot sits lower and is drawn in blue. */
 		bottom?: boolean;
+		/** Tray name this slot belongs to — shown so readout matches the chip. */
+		name?: string;
 	}
 
 	let { slots, result, state = 'empty' }: {
@@ -25,12 +27,14 @@
 	{#each slots as slot, i (i)}
 		{#if i > 0}<span class="op">+</span>{/if}
 		<div
-			class="slot"
-			class:filled={!!slot.value}
-			class:bottom={slot.bottom}
+			class={['slot', slot.value && 'filled', slot.value && 'on', slot.bottom && 'bottom']}
 			lang={hasHangul(slot.value ?? '') ? 'ko' : undefined}
+			aria-label={slot.name ? `${slot.name}: ${slot.value ?? 'empty'}` : undefined}
 		>
-			{slot.value ?? ''}
+			{#if slot.name}
+				<span class="slot-name">{slot.name}</span>
+			{/if}
+			<span class="slot-value">{slot.value ?? ''}</span>
 		</div>
 	{/each}
 	<span class="op">=</span>
@@ -68,12 +72,15 @@
 		border: 2px dashed var(--rule-strong);
 		border-radius: var(--r-md);
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		gap: 0.1rem;
 		font-family: var(--hangul);
 		font-size: 2.3rem;
 		font-weight: 500;
 		color: var(--ink-faint);
+		position: relative;
 		transition: border-color var(--med) var(--ease), color var(--med) var(--ease),
 			background var(--med) var(--ease);
 	}
@@ -83,6 +90,24 @@
 		border-color: var(--accent);
 		color: var(--ink);
 	}
+
+	.slot.on {
+		box-shadow: 0 0 0 2px var(--accent-soft);
+	}
+
+	.slot-name {
+		font-family: var(--sans);
+		font-size: 0.5rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		line-height: 1;
+		color: var(--ink-faint);
+	}
+
+	.slot.filled .slot-name { color: var(--accent); }
+
+	.slot-value { line-height: 1; }
 
 	.slot.bottom {
 		align-self: flex-end;

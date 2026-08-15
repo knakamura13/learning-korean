@@ -36,8 +36,15 @@
 
 	const slots = $derived(
 		hasFinal
-			? [{ value: lead }, { value: vowel }, { value: final, bottom: true }]
-			: [{ value: lead }, { value: vowel }]
+			? [
+					{ value: lead, name: 'consonant' },
+					{ value: vowel, name: 'vowel' },
+					{ value: final, name: 'batchim', bottom: true }
+				]
+			: [
+					{ value: lead, name: 'consonant' },
+					{ value: vowel, name: 'vowel' }
+				]
 	);
 </script>
 
