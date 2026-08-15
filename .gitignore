@@ -2,3 +2,8 @@
 .worktrees/
 node_modules
 
+# Local tooling and audit artifacts (playwright-cli sessions, UX evidence)
+.playwright-cli/
+.tmp-screenshots/
+output/
+
