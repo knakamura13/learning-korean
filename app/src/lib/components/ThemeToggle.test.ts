@@ -44,6 +44,6 @@ describe('ThemeToggle glyphs', () => {
 		expect(system).not.toMatch(/<rect\b/);
 		expect(system).not.toMatch(/M8 21h8/);
 		expect(system).toMatch(/M12 3v2/);
-		expect(system).toMatch(/a6 6 0 0 1-4-4/);
+		expect(system).toMatch(/a4 4 0 1 0 4 4 6 6 0 0 1-4-4z/);
 	});
 });
