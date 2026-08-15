@@ -334,6 +334,57 @@ export interface Stats {
 	tiers: string[];
 }
 
+export interface TierMeta {
+	id: string;
+	size: number;
+}
+
+export interface TierReviewProgress {
+	id: string;
+	size: number;
+	unlocked: boolean;
+	mature: number;
+	young: number;
+	unseen: number;
+	seen: number;
+}
+
+/** Per-tier mastered / learning / not-started counts from existing card state. */
+export function tierReviewProgress<T extends SchedulableCard>(
+	state: SrsState,
+	deck: T[],
+	tiers: readonly TierMeta[]
+): TierReviewProgress[] {
+	return tiers.map((tier) => {
+		const cards = deck.filter((c) => c.tier === tier.id);
+		let mature = 0;
+		let young = 0;
+		for (const c of cards) {
+			const cs = state.cards[c.id];
+			if (!cs) continue;
+			if (cs.ivl >= MATURE_DAYS) mature++;
+			else young++;
+		}
+		const seen = mature + young;
+		return {
+			id: tier.id,
+			size: tier.size,
+			unlocked: isUnlocked(state, tier.id),
+			mature,
+			young,
+			unseen: cards.length - seen,
+			seen
+		};
+	});
+}
+
+/** Home deck row label: locked vs not-started vs seen/size. */
+export function tierCountLabel(row: Pick<TierReviewProgress, 'unlocked' | 'seen' | 'size'>): string {
+	if (!row.unlocked) return 'locked';
+	if (row.seen === 0) return `${row.size} not started`;
+	return `${row.seen}/${row.size}`;
+}
+
 export function stats<T extends SchedulableCard>(
 	state: SrsState,
 	deck: T[],

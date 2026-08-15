@@ -205,7 +205,9 @@
 					}}
 				>
 					<div class="field">
+						<label class="answer-label" for="review-answer">Your answer</label>
 						<input
+							id="review-answer"
 							bind:this={input}
 							bind:value={typed}
 							class="in"
@@ -219,7 +221,6 @@
 							autocorrect="off"
 							spellcheck="false"
 							placeholder="type the romanisation"
-							aria-label="your answer"
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
 							oninvalid={(e) => {
@@ -360,6 +361,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--s1);
+	}
+
+	.answer-label {
+		font-size: 0.62rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
 	}
 
 	.empty-hint {

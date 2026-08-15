@@ -3,6 +3,7 @@ import {
 	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS, DEFAULT_NEW_PER_DAY,
 	emptyState, reviveState, unlock, isUnlocked, grade, gradeFromAttempt,
 	due, pinNewForDay, nextDueAt, stats, streak, weakest, isoDay,
+	tierCountLabel, tierReviewProgress,
 	type SrsState, type SchedulableCard
 } from './srs';
 
@@ -283,6 +284,12 @@ describe('stats', () => {
 		expect(seen().young).toBe(0);
 	});
 
+	it('does not treat unlocking a lab as a review day', () => {
+		const s = unlock(emptyState(), ['lab01']);
+		expect(streak(s, T0)).toBe(0);
+		expect(stats(s, deck, T0).streak).toBe(0);
+	});
+
 	it('tracks a streak across consecutive days and breaks on a gap', () => {
 		let s = unlock(emptyState(), ['lab01']);
 		s = grade(s, 'c0', GOOD, T0).state;
@@ -304,6 +311,55 @@ describe('stats', () => {
 		const st = stats(s, deck, T0);
 		expect(st.unlocked).toBe(19);
 		expect(st.total).toBe(29);
+	});
+});
+
+describe('tier review progress', () => {
+	const tiers = [
+		{ id: 'lab01', size: 19 },
+		{ id: 'lab02', size: 10 }
+	];
+
+	it('treats an unlocked unreviewed tier as not started, not as a zeroed bar', () => {
+		const s = unlock(emptyState(), ['lab01']);
+		const [lab01, lab02] = tierReviewProgress(s, deck, tiers);
+		expect(lab01).toMatchObject({
+			unlocked: true,
+			mature: 0,
+			young: 0,
+			unseen: 19,
+			seen: 0,
+			size: 19
+		});
+		expect(lab02.unlocked).toBe(false);
+		expect(tierCountLabel(lab01)).toBe('19 not started');
+		expect(tierCountLabel(lab02)).toBe('locked');
+	});
+
+	it('counts learning cards as seen, not only mature ones', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		s = grade(s, 'c0', GOOD, T0).state;
+		const [lab01] = tierReviewProgress(s, deck, tiers);
+		expect(lab01.young).toBe(1);
+		expect(lab01.mature).toBe(0);
+		expect(lab01.seen).toBe(1);
+		expect(lab01.unseen).toBe(18);
+		expect(tierCountLabel(lab01)).toBe('1/19');
+	});
+
+	it('splits mastered from still-learning on the same unlocked tier', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		let now = T0;
+		for (let i = 0; i < 5; i++) {
+			s = grade(s, 'c0', GOOD, now).state;
+			now += 30 * DAY_MS;
+		}
+		s = grade(s, 'c1', GOOD, now).state;
+		const [lab01] = tierReviewProgress(s, deck, tiers);
+		expect(lab01.mature).toBe(1);
+		expect(lab01.young).toBe(1);
+		expect(lab01.unseen).toBe(17);
+		expect(tierCountLabel(lab01)).toBe('2/19');
 	});
 });
 

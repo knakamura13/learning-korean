@@ -10,7 +10,7 @@ import { browser } from '$app/environment';
 import {
 	emptyState, reviveState, unlock as unlockTiers, isUnlocked,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
-	weakest as weakestCards, gradeFromAttempt,
+	weakest as weakestCards, gradeFromAttempt, tierReviewProgress,
 	type SrsState, type Grade, type Stats
 } from '$lib/domain/srs';
 import { DECK, TIERS, cardsOfTier, type Card } from '$lib/domain/deck';
@@ -78,24 +78,8 @@ function createProgress() {
 
 		/** Per-tier progress for the dashboard. */
 		get tierProgress() {
-			return TIERS.map((tier) => {
-				const cards = cardsOfTier(tier.id);
-				let mature = 0;
-				let young = 0;
-				for (const c of cards) {
-					const cs = state.cards[c.id];
-					if (!cs) continue;
-					if (cs.ivl >= 21) mature++;
-					else young++;
-				}
-				return {
-					...tier,
-					unlocked: isUnlocked(state, tier.id),
-					mature,
-					young,
-					unseen: cards.length - mature - young
-				};
-			});
+			const rows = tierReviewProgress(state, DECK, TIERS);
+			return TIERS.map((tier, i) => ({ ...tier, ...rows[i] }));
 		},
 
 		/** Returns how many cards this actually released. */
