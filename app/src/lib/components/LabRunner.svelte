@@ -65,6 +65,37 @@
 	let choiceRef = $state<ChoiceStep | undefined>();
 	let fadeLeft = $state(false);
 	let fadeRight = $state(false);
+	let cardEl = $state<HTMLDivElement>();
+
+	/**
+	 * Scroll and focus are managed in exactly one place: here. Advancing or
+	 * pip-jumping remounts the card via {#key index}, which would otherwise
+	 * keep whatever scroll depth the previous card happened to leave (burying
+	 * the new instruction above the fold) and drop focus to <body>, so
+	 * keyboard users resume from a browser heuristic and screen-reader users
+	 * hear nothing. On every card change we focus the new instruction heading
+	 * (without scrolling) and park the card just under the sticky header.
+	 * Settle reveals are revealAdvance's job; settle focus is focusWhen's.
+	 */
+	let managedIndex: number | null = null;
+	$effect(() => {
+		const i = index;
+		if (!ready || finished) return;
+		const el = cardEl;
+		if (!el) return;
+		// First ready render (fresh load or resume) is not a card change:
+		// leave scroll and focus where the browser put them.
+		if (managedIndex === null || managedIndex === i) {
+			managedIndex = i;
+			return;
+		}
+		managedIndex = i;
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const chrome = document.querySelector('header.bar')?.getBoundingClientRect().bottom ?? 0;
+		const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - chrome - 8);
+		el.querySelector('h2')?.focus({ preventScroll: true });
+		window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+	});
 
 	function segmentElapsed() {
 		return elapsedMs + Math.max(0, Date.now() - startedAt);
@@ -358,9 +389,9 @@
 	</nav>
 
 	{#key index}
-		<div class="card step" in:fly={{ y: 10, duration: 260 }}>
+		<div class="card step" bind:this={cardEl} in:fly={{ y: 10, duration: 260 }}>
 			{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
-			<h2 class="do">{@html labHtml(step.do)}</h2>
+			<h2 class="do" tabindex="-1">{@html labHtml(step.do)}</h2>
 			{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
 
 			<div class="work">
@@ -753,6 +784,10 @@
 		line-height: 1.34;
 		margin: var(--s2) 0 var(--s1);
 	}
+
+	/* Programmatically focused on card change for SR/keyboard orientation;
+	   it is not an interactive control, so no ring. */
+	.do:focus { outline: none; }
 
 	.hint {
 		font-size: 0.86rem;
