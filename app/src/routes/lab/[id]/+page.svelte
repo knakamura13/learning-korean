@@ -42,14 +42,16 @@
 	{/if}
 
 	{#key lab.id}
-		<LabRunner {lab} />
+		<LabRunner {lab}>
+			{#snippet letterAsk()}
+				<aside class="ask">
+					<span class="h">Need a letter?</span>
+					The <a href="/reference">reference</a> lists every jamo and rule, generated from the same
+					module these cards use.
+				</aside>
+			{/snippet}
+		</LabRunner>
 	{/key}
-
-	<aside class="ask">
-		<span class="h">Need a letter?</span>
-		The <a href="/reference">reference</a> lists every jamo and rule, generated from the same
-		module these cards use.
-	</aside>
 </div>
 
 <style>

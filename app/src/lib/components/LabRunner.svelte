@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
 	import { focusWhen, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
@@ -13,6 +13,9 @@
 		pipRailMaxScroll,
 		pipRailSnapScrollLeft
 	} from '$lib/domain/pipRail';
+	import { followingLab, toCourseLab } from '$lib/domain/courseNav';
+	import { labFinishCopy } from '$lib/domain/labFinishCopy';
+	import { LABS } from '$lib/content';
 	import {
 		emptyOutcomes,
 		holdFurthest,
@@ -31,7 +34,7 @@
 	import ClusterStep from './steps/ClusterStep.svelte';
 	import ReadStep from './steps/ReadStep.svelte';
 
-	let { lab }: { lab: Lab } = $props();
+	let { lab, letterAsk }: { lab: Lab; letterAsk?: Snippet } = $props();
 
 	let index = $state(0);
 	let settled = $state(false);
@@ -54,6 +57,10 @@
 	const isLast = $derived(index === lab.steps.length - 1);
 	const alreadyDone = $derived(progress.isUnlocked(lab.unlocks));
 	const compactHead = $derived(!ready || index > 0 || showResumeNote);
+	const course = LABS.map(toCourseLab);
+	const nextLab = $derived(followingLab(course, lab.id));
+	const finishCopy = $derived(labFinishCopy(released, progress.stats));
+	const dueNow = $derived(progress.stats.queue);
 	let choiceRef = $state<ChoiceStep | undefined>();
 	let fadeLeft = $state(false);
 	let fadeRight = $state(false);
@@ -277,16 +284,17 @@
 		</div>
 
 		<p class="unlocked">
-			{#if released > 0}
-				<strong>{released} new cards</strong> just entered your review deck.
-			{:else}
-				These cards are already in your deck.
-			{/if}
-			You have <strong>{progress.stats.queue}</strong> waiting.
+			{finishCopy.lead}
+			{finishCopy.detail}
 		</p>
 
 		<div class="actions">
-			<a class="btn" href="/review">Review now →</a>
+			{#if dueNow > 0}
+				<a class="btn" href="/review">Review now →</a>
+			{/if}
+			{#if nextLab}
+				<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href="/lab/{nextLab.id}">Next lab</a>
+			{/if}
 			<button class="btn ghost" onclick={restart}>Run the lab again</button>
 		</div>
 	</div>
@@ -411,6 +419,10 @@
 		</div>
 	{/key}
 	{/if}
+{/if}
+
+{#if !finished}
+	{@render letterAsk?.()}
 {/if}
 
 <style>
@@ -544,6 +556,24 @@
 	.rail::-webkit-scrollbar {
 		display: none;
 		height: 0;
+	}
+
+	/* Narrow viewports: later pips are off-screen. Keep a thin scrollbar so
+	   remaining cards are discoverable; upcoming pips stay non-buttons. */
+	@media (max-width: 30rem) {
+		.rail {
+			scrollbar-width: thin;
+			scrollbar-color: var(--rule-strong) transparent;
+			padding-bottom: 0.35rem;
+		}
+		.rail::-webkit-scrollbar {
+			display: block;
+			height: 4px;
+		}
+		.rail::-webkit-scrollbar-thumb {
+			background: var(--rule-strong);
+			border-radius: 2px;
+		}
 	}
 
 	.rail li { display: flex; flex: 0 0 auto; }

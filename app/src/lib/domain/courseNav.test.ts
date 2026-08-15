@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	continueAction,
+	followingLab,
 	labCardState,
 	nextLabId,
 	showPrerequisiteGate,
@@ -166,6 +167,14 @@ describe('labCardState', () => {
 			resumeAt: 2,
 			startHere: false
 		});
+	});
+});
+
+describe('followingLab', () => {
+	it('returns the next lab in course order, and nothing after the last', () => {
+		expect(followingLab(labs, '0001')?.id).toBe('0002');
+		expect(followingLab(labs, '0003')).toBeNull();
+		expect(followingLab(labs, 'missing')).toBeNull();
 	});
 });
 

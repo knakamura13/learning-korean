@@ -175,6 +175,13 @@ export function continueAction(labs: CourseLab[], view: CourseNavView): Continue
 	};
 }
 
+/** The next lab in course order after `currentId`, or null on the last lab. */
+export function followingLab(labs: CourseLab[], currentId: string): CourseLab | null {
+	const i = labs.findIndex((lab) => lab.id === currentId);
+	if (i < 0 || i === labs.length - 1) return null;
+	return labs[i + 1] ?? null;
+}
+
 export function requiredLab(labs: CourseLab[], requires: string | undefined): CourseLab | null {
 	if (!requires) return null;
 	return labs.find((lab) => lab.id === requires) ?? null;
