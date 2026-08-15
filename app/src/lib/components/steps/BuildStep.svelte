@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PlayButton from '../PlayButton.svelte';
 	import Target from '../Target.svelte';
 	import { derive, derivations } from '$lib/domain/hangul';
 	import type { BuildStep } from '$lib/content/types';
@@ -64,6 +65,10 @@
 	{/each}
 </div>
 
+<div class="hear">
+	<PlayButton jamo={current} />
+</div>
+
 <div class="tools">
 	<button class="tool" disabled={!canStroke} onclick={() => apply('stroke')}>+ stroke</button>
 	<button class="tool" disabled={!canDouble} onclick={() => apply('double')}>× double</button>
@@ -97,6 +102,12 @@
 		font-size: 0.68rem;
 		color: var(--accent);
 		padding-bottom: 0.9rem;
+	}
+
+	.hear {
+		display: flex;
+		justify-content: center;
+		margin: 0 0 var(--s4);
 	}
 
 	.tools { display: flex; gap: var(--s2); justify-content: center; flex-wrap: wrap; }

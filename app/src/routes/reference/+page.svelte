@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PlayButton from '$lib/components/PlayButton.svelte';
 	import KoText from '$lib/components/KoText.svelte';
 	import {
 		LEADS, VOWELS, REPRESENTATIVE, CLUSTERS, SOUND_CHANGES, BLOCK_LAYOUTS,
@@ -65,6 +66,9 @@
 					<span class="rom2">{SOUND[c]}</span>
 					<span class="nm" lang="ko">{NAMES[c]}</span>
 					<span class="fin">final: {batchimSound(c) || '—'}</span>
+					<div class="hear">
+						<PlayButton jamo={c} />
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -257,7 +261,8 @@
 			</li>
 			<li>
 				<a href="https://www.howtostudykorean.com/unit0/unit-0-lesson-1/">How To Study Korean, Unit 0</a>
-				— free, with audio for every letter. Still the best answer to this app's biggest gap.
+				— free, with native audio for every letter. This app now ships a first slice of
+				isolated consonant clips; vowel and batchim audio are still ahead.
 			</li>
 		</ul>
 	</section>
@@ -311,6 +316,11 @@
 		font-size: 0.6rem;
 		color: var(--ink-faint);
 		display: block;
+	}
+	.cell .hear {
+		display: flex;
+		justify-content: center;
+		margin-top: var(--s2);
 	}
 
 	.rows { padding: var(--s2) var(--s4); }
