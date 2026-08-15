@@ -59,6 +59,8 @@ export interface SrsState {
 	days: Record<string, number>;
 	newDate: string;
 	newCount: number;
+	/** Unseen card ids chosen for `newDate`. Empty until a draw that day. */
+	newIds: string[];
 }
 
 export interface SchedulableCard {
@@ -67,7 +69,7 @@ export interface SchedulableCard {
 }
 
 export function emptyState(): SrsState {
-	return { version: 1, unlocked: [], cards: {}, days: {}, newDate: '', newCount: 0 };
+	return { version: 1, unlocked: [], cards: {}, days: {}, newDate: '', newCount: 0, newIds: [] };
 }
 
 /**
@@ -90,7 +92,8 @@ export function reviveState(raw: unknown): SrsState {
 		cards: s.cards && typeof s.cards === 'object' ? s.cards : {},
 		days: s.days && typeof s.days === 'object' ? s.days : {},
 		newDate: typeof s.newDate === 'string' ? s.newDate : '',
-		newCount: typeof s.newCount === 'number' ? s.newCount : 0
+		newCount: typeof s.newCount === 'number' ? s.newCount : 0,
+		newIds: Array.isArray(s.newIds) ? s.newIds.filter((id) => typeof id === 'string') : []
 	};
 }
 
@@ -171,7 +174,8 @@ export interface GradeResult {
 
 export function grade(state: SrsState, id: string, g: Grade, now: number): GradeResult {
 	const today = isoDay(now);
-	const rolled = state.newDate === today ? state : { ...state, newDate: today, newCount: 0 };
+	const rolled =
+		state.newDate === today ? state : { ...state, newDate: today, newCount: 0, newIds: [] };
 
 	const wasNew = !rolled.cards[id];
 	const card = nextCard(rolled.cards[id], g, now);
@@ -207,9 +211,70 @@ const defaultShuffle = <T>(items: T[]): T[] => {
 	return a;
 };
 
+function sameIds(a: string[], b: string[]): boolean {
+	if (a.length !== b.length) return false;
+	return a.every((id, i) => id === b[i]);
+}
+
+function splitQueue<T extends SchedulableCard>(
+	state: SrsState,
+	deck: T[],
+	now: number
+): { reviews: T[]; fresh: T[] } {
+	const reviews: T[] = [];
+	const fresh: T[] = [];
+	for (const card of pool(state, deck)) {
+		const st = state.cards[card.id];
+		if (!st) fresh.push(card);
+		else if (st.due <= now) reviews.push(card);
+	}
+	reviews.sort((a, b) => state.cards[a.id].due - state.cards[b.id].due);
+	return { reviews, fresh };
+}
+
+function rollNewDay(state: SrsState, today: string): SrsState {
+	if (state.newDate === today) return state;
+	return { ...state, newDate: today, newCount: 0, newIds: [] };
+}
+
+/**
+ * Persist today’s unseen draw on state. Call before `due()` so reloads and
+ * later visits the same calendar day keep the same new cards.
+ */
+export function pinNewForDay<T extends SchedulableCard>(
+	state: SrsState,
+	deck: T[],
+	now: number,
+	opts: QueueOptions = {}
+): SrsState {
+	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
+	const shuffle = opts.shuffle ?? defaultShuffle;
+	const today = isoDay(now);
+	const rolled = rollNewDay(state, today);
+	const room = Math.max(0, newPerDay - rolled.newCount);
+	const { fresh } = splitQueue(rolled, deck, now);
+	const unseen = new Set(fresh.map((c) => c.id));
+	const kept = rolled.newIds.filter((id) => unseen.has(id)).slice(0, room);
+
+	let newIds = kept;
+	if (kept.length < room) {
+		const have = new Set(kept);
+		const drawn = shuffle(fresh.filter((c) => !have.has(c.id)))
+			.slice(0, room - kept.length)
+			.map((c) => c.id);
+		newIds = [...kept, ...drawn];
+	}
+
+	if (rolled === state && sameIds(newIds, state.newIds)) return state;
+	return { ...rolled, newIds };
+}
+
 /**
  * Everything overdue, then a capped trickle of unseen cards. Reviews come
  * first: clearing debt matters more than taking on new material.
+ *
+ * When `state.newIds` is pinned for today, those ids are used instead of a
+ * fresh shuffle so `/review` does not reshuffle unseen cards on every load.
  */
 export function due<T extends SchedulableCard>(
 	state: SrsState,
@@ -221,18 +286,22 @@ export function due<T extends SchedulableCard>(
 	const shuffle = opts.shuffle ?? defaultShuffle;
 	const today = isoDay(now);
 	const usedToday = state.newDate === today ? state.newCount : 0;
+	const { reviews, fresh } = splitQueue(state, deck, now);
+	const room = Math.max(0, newPerDay - usedToday);
 
-	const reviews: T[] = [];
-	const fresh: T[] = [];
-	for (const card of pool(state, deck)) {
-		const st = state.cards[card.id];
-		if (!st) fresh.push(card);
-		else if (st.due <= now) reviews.push(card);
+	const pin = state.newDate === today ? state.newIds : [];
+	if (pin.length === 0) {
+		return [...reviews, ...shuffle(fresh).slice(0, room)];
 	}
 
-	reviews.sort((a, b) => state.cards[a.id].due - state.cards[b.id].due);
-	const room = Math.max(0, newPerDay - usedToday);
-	return [...reviews, ...shuffle(fresh).slice(0, room)];
+	const byId = new Map(fresh.map((c) => [c.id, c]));
+	const pinned: T[] = [];
+	for (const id of pin) {
+		if (pinned.length >= room) break;
+		const card = byId.get(id);
+		if (card) pinned.push(card);
+	}
+	return [...reviews, ...pinned];
 }
 
 /** Epoch ms of the soonest upcoming card, or null when nothing is scheduled. */
@@ -263,6 +332,57 @@ export interface Stats {
 	streak: number;
 	reviewedToday: number;
 	tiers: string[];
+}
+
+export interface TierMeta {
+	id: string;
+	size: number;
+}
+
+export interface TierReviewProgress {
+	id: string;
+	size: number;
+	unlocked: boolean;
+	mature: number;
+	young: number;
+	unseen: number;
+	seen: number;
+}
+
+/** Per-tier mastered / learning / not-started counts from existing card state. */
+export function tierReviewProgress<T extends SchedulableCard>(
+	state: SrsState,
+	deck: T[],
+	tiers: readonly TierMeta[]
+): TierReviewProgress[] {
+	return tiers.map((tier) => {
+		const cards = deck.filter((c) => c.tier === tier.id);
+		let mature = 0;
+		let young = 0;
+		for (const c of cards) {
+			const cs = state.cards[c.id];
+			if (!cs) continue;
+			if (cs.ivl >= MATURE_DAYS) mature++;
+			else young++;
+		}
+		const seen = mature + young;
+		return {
+			id: tier.id,
+			size: tier.size,
+			unlocked: isUnlocked(state, tier.id),
+			mature,
+			young,
+			unseen: cards.length - seen,
+			seen
+		};
+	});
+}
+
+/** Home deck row label: locked vs not-started vs seen/size. */
+export function tierCountLabel(row: Pick<TierReviewProgress, 'unlocked' | 'seen' | 'size'>): string {
+	if (!row.unlocked) return 'locked';
+	if (row.seen === 0) return `${row.size} not started`;
+	return `${row.seen}/${row.size}`;
 }
 
 export function stats<T extends SchedulableCard>(

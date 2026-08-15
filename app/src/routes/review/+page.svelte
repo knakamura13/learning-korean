@@ -17,6 +17,7 @@
 	let answered = $state(false);
 	let verdict = $state<{ ok: boolean; speed: string; when: string } | null>(null);
 	let startedAt = 0;
+	let sittingNew = $state(false);
 	let input = $state<HTMLInputElement | undefined>();
 	let ready = $state(false);
 	let emptyHint = $state(false);
@@ -45,6 +46,8 @@
 		verdict = null;
 		emptyHint = false;
 		startedAt = Date.now();
+		const current = queue[index];
+		sittingNew = Boolean(current && !progress.state.cards[current.id]);
 		await tick();
 		input?.focus();
 	}
@@ -60,7 +63,6 @@
 
 		const ms = Date.now() - startedAt;
 		const ok = checkAnswer(card, value);
-		const wasNew = !progress.state.cards[card.id];
 		const result = progress.answer(card.id, ok, ms);
 
 		answered = true;
@@ -78,7 +80,6 @@
 						? 'again in 1 day'
 						: `again in ${Math.round(ivl)} days`
 		};
-		void wasNew;
 	}
 
 	function next() {
@@ -192,8 +193,8 @@
 			<div class="card review" in:fly={{ y: 10, duration: 220 }}>
 				<div class="bar"><i style="width:{(index / queue.length) * 100}%"></i></div>
 
-				<p class="tag" class:isnew={!progress.state.cards[card.id]}>
-					{progress.state.cards[card.id] ? 'review' : 'new card'} · {index + 1} of {queue.length}
+				<p class="tag" class:isnew={sittingNew}>
+					{sittingNew ? 'new card' : 'review'} · {index + 1} of {queue.length}
 				</p>
 
 				<div class="glyph-row">
@@ -211,7 +212,9 @@
 					}}
 				>
 					<div class="field">
+						<label class="answer-label" for="review-answer">Your answer</label>
 						<input
+							id="review-answer"
 							bind:this={input}
 							bind:value={typed}
 							class="in"
@@ -225,7 +228,6 @@
 							autocorrect="off"
 							spellcheck="false"
 							placeholder="type the romanisation"
-							aria-label="your answer"
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
 							oninvalid={(e) => {
@@ -373,6 +375,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--s1);
+	}
+
+	.answer-label {
+		font-size: 0.62rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
 	}
 
 	.empty-hint {

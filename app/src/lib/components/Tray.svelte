@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { hasHangul } from '$lib/a11y/lang';
 
-	/** A labelled row of selectable chips — the input for every composer step. */
+	/** A labelled row of selectable chips — one independent composer slot. */
 	let {
 		label,
 		items,
@@ -20,21 +20,46 @@
 		tone?: 'accent' | 'blue';
 		onSelect: (value: string) => void;
 	} = $props();
+
+	const uid = $props.id();
+	const labelId = `${uid}-label`;
+	const picked = $derived(selected != null && selected !== '');
+	/** Short tag on the selected chip so duplicate glyphs still name their row. */
+	const mark = $derived(slotMark(label));
+
+	function slotMark(name: string): string {
+		const head = name.split(/[—]/)[0]?.trim() ?? name;
+		const words = head.split(/\s+/).filter(Boolean);
+		if (words[0] === 'first' || words[0] === 'second') return words[0];
+		return words[0] ?? name;
+	}
 </script>
 
-<div class="tray" class:off={disabled}>
-	<div class="label">{label}</div>
+<div
+	class={['tray', disabled && 'off', picked && 'picked']}
+	role="radiogroup"
+	aria-labelledby={labelId}
+	aria-disabled={disabled ? 'true' : undefined}
+>
+	<div class="label" id={labelId}>{label}</div>
 	<div class="row">
 		{#each items as item (item)}
+			{@const on = selected === item}
 			<button
-				class="chip"
-				class:text
-				class:on={selected === item}
-				class:blue={tone === 'blue'}
+				type="button"
+				class={['chip', text && 'text', on && 'on', tone === 'blue' && 'blue']}
+				role="radio"
+				aria-checked={on}
+				aria-label="{label}: {item}"
 				{disabled}
 				lang={hasHangul(item) ? 'ko' : undefined}
 				onclick={() => onSelect(item)}
-			>{item}</button>
+			>
+				<span class="glyph">{item}</span>
+				{#if on}
+					<span class="mark">{mark}</span>
+				{/if}
+			</button>
 		{/each}
 	</div>
 </div>
@@ -49,6 +74,12 @@
 		text-transform: uppercase;
 		color: var(--ink-faint);
 		margin-bottom: var(--s1);
+		font-weight: 500;
+	}
+
+	.tray.picked .label {
+		font-weight: 700;
+		color: var(--ink);
 	}
 
 	.row { display: flex; gap: var(--s2); flex-wrap: wrap; }
@@ -66,6 +97,11 @@
 		font-weight: 500;
 		line-height: 1.2;
 		cursor: pointer;
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.08rem;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			transform var(--fast) var(--ease), color var(--fast) var(--ease);
 	}
@@ -87,8 +123,18 @@
 		border-color: var(--accent);
 		background: var(--accent-soft);
 		color: var(--accent);
+		border-width: 2px;
 	}
 	.chip.on.blue { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+
+	.mark {
+		font-family: var(--sans);
+		font-size: 0.52rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		line-height: 1;
+	}
 
 	@media (forced-colors: active) {
 		.chip {

@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
-	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS,
+	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS, DEFAULT_NEW_PER_DAY,
 	emptyState, reviveState, unlock, isUnlocked, grade, gradeFromAttempt,
-	due, nextDueAt, stats, streak, weakest, isoDay,
+	due, pinNewForDay, nextDueAt, stats, streak, weakest, isoDay,
+	tierCountLabel, tierReviewProgress,
 	type SrsState, type SchedulableCard
 } from './srs';
 
@@ -44,8 +45,21 @@ describe('state hygiene', () => {
 		expect(Object.keys(revived.cards)).toEqual(['c0']);
 		expect(revived.days['2026-03-01']).toBe(12);
 		expect(revived.newCount).toBe(10);
+		expect(revived.newIds).toEqual([]);
 		// and the migrated state must still schedule correctly
 		expect(stats(revived, deck, T0).seen).toBe(1);
+	});
+
+	it('treats a missing new-card pin as empty so old payloads still revive', () => {
+		const revived = reviveState({
+			version: 1,
+			unlocked: ['lab01'],
+			cards: {},
+			days: {},
+			newDate: '2026-03-01',
+			newCount: 0
+		});
+		expect(revived.newIds).toEqual([]);
 	});
 
 	it('unlocks tiers idempotently', () => {
@@ -62,6 +76,7 @@ describe('state hygiene', () => {
 		const snapshot = JSON.stringify(s);
 		grade(s, 'c0', GOOD, T0);
 		due(s, deck, T0);
+		pinNewForDay(s, deck, T0);
 		stats(s, deck, T0);
 		expect(JSON.stringify(s)).toBe(snapshot);
 	});
@@ -181,6 +196,59 @@ describe('the queue', () => {
 		expect(q[0].id).toBe('c5');
 	});
 
+	it('pins today’s new cards so later due() calls do not reshuffle them', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		const reverse = <T>(items: T[]) => items.slice().reverse();
+		s = pinNewForDay(s, deck, T0, { shuffle: reverse });
+		const first = due(s, deck, T0, { shuffle: noShuffle }).map((c) => c.id);
+		expect(first).toHaveLength(DEFAULT_NEW_PER_DAY);
+		expect(first).toEqual(
+			due(s, deck, T0, { shuffle: noShuffle }).map((c) => c.id)
+		);
+		// A different shuffle must not replace the pin.
+		expect(due(s, deck, T0, { shuffle: reverse }).map((c) => c.id)).toEqual(first);
+		expect(s.newIds).toEqual(first);
+	});
+
+	it('draws a new pin on a new day, still capped', () => {
+		let s = unlock(emptyState(), ['lab01', 'lab02']);
+		s = pinNewForDay(s, deck, T0, { shuffle: noShuffle });
+		const dayOne = due(s, deck, T0, { shuffle: noShuffle }).map((c) => c.id);
+		expect(dayOne).toHaveLength(DEFAULT_NEW_PER_DAY);
+
+		for (const id of dayOne) s = grade(s, id, GOOD, T0).state;
+
+		const tomorrow = T0 + DAY_MS + 60_000;
+		s = pinNewForDay(s, deck, tomorrow, { shuffle: noShuffle });
+		const q = due(s, deck, tomorrow, { shuffle: noShuffle });
+		const fresh = q.filter((c) => !s.cards[c.id]).map((c) => c.id);
+		expect(fresh).toHaveLength(DEFAULT_NEW_PER_DAY);
+		expect(fresh.some((id) => dayOne.includes(id))).toBe(false);
+		expect(s.newDate).toBe(isoDay(tomorrow));
+		expect(s.newIds).toEqual(fresh);
+	});
+
+	it('keeps the same-day pin when more cards unlock, and fills leftover room', () => {
+		const tiny: SchedulableCard[] = [
+			{ id: 'a', tier: 'lab01' },
+			{ id: 'b', tier: 'lab01' },
+			{ id: 'c', tier: 'lab02' },
+			{ id: 'd', tier: 'lab02' }
+		];
+		let s = unlock(emptyState(), ['lab01']);
+		s = pinNewForDay(s, tiny, T0, { shuffle: noShuffle, newPerDay: 3 });
+		expect(s.newIds).toEqual(['a', 'b']);
+
+		s = unlock(s, ['lab02']);
+		s = pinNewForDay(s, tiny, T0, { shuffle: noShuffle, newPerDay: 3 });
+		expect(s.newIds).toEqual(['a', 'b', 'c']);
+		expect(due(s, tiny, T0, { shuffle: noShuffle, newPerDay: 3 }).map((c) => c.id)).toEqual([
+			'a',
+			'b',
+			'c'
+		]);
+	});
+
 	it('orders reviews by how overdue they are', () => {
 		let s = unlock(emptyState(), ['lab01']);
 		s = grade(s, 'c1', GOOD, T0).state;          // due T0 + 1d
@@ -216,6 +284,12 @@ describe('stats', () => {
 		expect(seen().young).toBe(0);
 	});
 
+	it('does not treat unlocking a lab as a review day', () => {
+		const s = unlock(emptyState(), ['lab01']);
+		expect(streak(s, T0)).toBe(0);
+		expect(stats(s, deck, T0).streak).toBe(0);
+	});
+
 	it('tracks a streak across consecutive days and breaks on a gap', () => {
 		let s = unlock(emptyState(), ['lab01']);
 		s = grade(s, 'c0', GOOD, T0).state;
@@ -237,6 +311,55 @@ describe('stats', () => {
 		const st = stats(s, deck, T0);
 		expect(st.unlocked).toBe(19);
 		expect(st.total).toBe(29);
+	});
+});
+
+describe('tier review progress', () => {
+	const tiers = [
+		{ id: 'lab01', size: 19 },
+		{ id: 'lab02', size: 10 }
+	];
+
+	it('treats an unlocked unreviewed tier as not started, not as a zeroed bar', () => {
+		const s = unlock(emptyState(), ['lab01']);
+		const [lab01, lab02] = tierReviewProgress(s, deck, tiers);
+		expect(lab01).toMatchObject({
+			unlocked: true,
+			mature: 0,
+			young: 0,
+			unseen: 19,
+			seen: 0,
+			size: 19
+		});
+		expect(lab02.unlocked).toBe(false);
+		expect(tierCountLabel(lab01)).toBe('19 not started');
+		expect(tierCountLabel(lab02)).toBe('locked');
+	});
+
+	it('counts learning cards as seen, not only mature ones', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		s = grade(s, 'c0', GOOD, T0).state;
+		const [lab01] = tierReviewProgress(s, deck, tiers);
+		expect(lab01.young).toBe(1);
+		expect(lab01.mature).toBe(0);
+		expect(lab01.seen).toBe(1);
+		expect(lab01.unseen).toBe(18);
+		expect(tierCountLabel(lab01)).toBe('1/19');
+	});
+
+	it('splits mastered from still-learning on the same unlocked tier', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		let now = T0;
+		for (let i = 0; i < 5; i++) {
+			s = grade(s, 'c0', GOOD, now).state;
+			now += 30 * DAY_MS;
+		}
+		s = grade(s, 'c1', GOOD, now).state;
+		const [lab01] = tierReviewProgress(s, deck, tiers);
+		expect(lab01.mature).toBe(1);
+		expect(lab01.young).toBe(1);
+		expect(lab01.unseen).toBe(17);
+		expect(tierCountLabel(lab01)).toBe('2/19');
 	});
 });
 

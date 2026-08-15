@@ -9,8 +9,8 @@
 import { browser } from '$app/environment';
 import {
 	emptyState, reviveState, unlock as unlockTiers, isUnlocked,
-	grade as gradeCard, due as dueCards, nextDueAt, stats as computeStats,
-	weakest as weakestCards, gradeFromAttempt,
+	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
+	weakest as weakestCards, gradeFromAttempt, tierReviewProgress,
 	type SrsState, type Grade, type Stats
 } from '$lib/domain/srs';
 import { DECK, TIERS, cardsOfTier, type Card } from '$lib/domain/deck';
@@ -35,6 +35,11 @@ function createProgress() {
 	let state = $state<SrsState>(load(store));
 	let now = $state(Date.now());
 
+	function persistPin() {
+		const next = pinNewForDay(state, DECK, now);
+		if (next !== state) commit(next);
+	}
+
 	function commit(next: SrsState) {
 		state = next;
 		store.write(JSON.stringify(next));
@@ -45,13 +50,17 @@ function createProgress() {
 		get durable() { return store.durable; },
 
 		/** Re-read the clock so `due` and `stats` recompute. */
-		tick() { now = Date.now(); },
+		tick() {
+			now = Date.now();
+			persistPin();
+		},
 
 		get stats(): Stats {
 			return computeStats(state, DECK, now);
 		},
 
 		get queue(): Card[] {
+			persistPin();
 			return dueCards(state, DECK, now);
 		},
 
@@ -69,24 +78,8 @@ function createProgress() {
 
 		/** Per-tier progress for the dashboard. */
 		get tierProgress() {
-			return TIERS.map((tier) => {
-				const cards = cardsOfTier(tier.id);
-				let mature = 0;
-				let young = 0;
-				for (const c of cards) {
-					const cs = state.cards[c.id];
-					if (!cs) continue;
-					if (cs.ivl >= 21) mature++;
-					else young++;
-				}
-				return {
-					...tier,
-					unlocked: isUnlocked(state, tier.id),
-					mature,
-					young,
-					unseen: cards.length - mature - young
-				};
-			});
+			const rows = tierReviewProgress(state, DECK, TIERS);
+			return TIERS.map((tier, i) => ({ ...tier, ...rows[i] }));
 		},
 
 		/** Returns how many cards this actually released. */
@@ -95,6 +88,7 @@ function createProgress() {
 			const next = unlockTiers(state, tiers);
 			if (next === state) return 0;
 			commit(next);
+			persistPin();
 			return tiers
 				.filter((t) => !state.unlocked.slice(0, before).includes(t))
 				.reduce((n, t) => n + cardsOfTier(t).length, 0);
