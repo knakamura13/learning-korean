@@ -55,6 +55,9 @@
 </script>
 
 <div class="mouth-wrap">
+	<p class="instruction" id="mouth-instruction">
+		Choose one of the labeled places. The labels are interactive.
+	</p>
 	<svg
 		class="mouth"
 		viewBox="0 0 440 300"
@@ -106,7 +109,7 @@
 		{/each}
 	</svg>
 
-	<div class="zones" role="group" aria-label="place of articulation">
+	<div class="zones" role="group" aria-label="place of articulation" aria-describedby="mouth-instruction">
 		{#each ZONES as z (z.id)}
 			{@const label = labelFor(z.id)}
 			{@const isPrior = priorLabels.has(z.id) && !(solved && z.id === step.zone)}
@@ -243,8 +246,9 @@
 		font-weight: 600;
 		letter-spacing: 0.04em;
 		color: var(--ink-soft);
-		white-space: nowrap;
-		line-height: 1;
+		max-width: min(9rem, 30vw);
+		white-space: normal;
+		line-height: 1.15;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			color var(--fast) var(--ease);
 	}
@@ -263,6 +267,13 @@
 	.hit:focus-visible .callout {
 		border-color: var(--accent);
 		color: var(--ink);
+		background: var(--paper);
+		transform: scale(1.04);
+	}
+
+	.hit:active:not(:disabled) .callout {
+		background: var(--paper-sunk);
+		transform: scale(0.98);
 	}
 
 	.hit.wrong .callout {
@@ -284,6 +295,18 @@
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
+	}
+
+	.instruction {
+		margin: 0 0 var(--s3);
+		padding: var(--s2) var(--s3);
+		border: 1px solid var(--rule);
+		border-radius: var(--r-md);
+		background: var(--paper-sunk);
+		color: var(--ink-soft);
+		font-size: 0.84rem;
+		line-height: 1.45;
+		text-align: center;
 	}
 	.hit:focus-visible .dot {
 		box-shadow: var(--focus-ring);
@@ -329,6 +352,14 @@
 		.hit:focus-visible .callout {
 			outline: 2px solid Highlight;
 			box-shadow: none;
+		}
+	}
+
+	@media (max-width: 30rem) {
+		.callout {
+			max-width: 6.75rem;
+			padding-inline: 0.45rem;
+			font-size: 0.68rem;
 		}
 	}
 </style>
