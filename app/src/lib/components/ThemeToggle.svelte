@@ -103,6 +103,7 @@
 		background: var(--paper-raised);
 		color: var(--ink);
 	}
+	.theme:active { transform: translateY(1px); }
 	.theme:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
