@@ -50,7 +50,7 @@
 <Target target={step.target} name={step.targetName} verb="Fuse" />
 
 <Slots
-	slots={[{ value: a }, { value: b }]}
+	slots={[{ value: a, name: 'first' }, { value: b, name: 'second' }]}
 	result={result}
 	state={won ? 'win' : impossible ? 'dead' : result ? 'partial' : 'empty'}
 />

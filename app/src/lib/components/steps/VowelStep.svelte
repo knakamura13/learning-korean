@@ -42,7 +42,10 @@
 <Target target={step.target} name={step.targetName} />
 
 <Slots
-	slots={[{ value: base }, { value: ticks === 0 ? '—' : side ? String(ticks) : null }]}
+	slots={[
+		{ value: base, name: 'base' },
+		{ value: ticks === 0 ? '—' : side ? String(ticks) : null, name: 'ticks' }
+	]}
 	result={result}
 	state={won ? 'win' : result ? 'partial' : 'empty'}
 />
