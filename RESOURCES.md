@@ -72,10 +72,10 @@ Not yet raised with Kyle — these are candidates, not commitments.
 
 ## Gaps
 
-- **No audio in this workspace.** The single biggest hole. Lessons can teach the
-  writing system cold, but the plain/aspirated/tense contrast and the ㅓ/ㅗ/ㅡ vowel
-  distinctions cannot be learned from text. Currently outsourced to How To Study
-  Korean. Worth finding a source with minimal-pair audio specifically.
+- **Audio is only the 19 Lab 01 consonant leads.** Isolated C+으 clips ship in
+  `app/static/audio/consonants/` (see LICENSE there). Vowels, compounds, batchim,
+  and native-speaker recordings are still the gap. How To Study Korean remains the
+  best external model for those.
 - **No handwriting/stroke-order source yet.** Kyle flagged handwriting as a
   secondary interest; nothing authoritative on stroke order is bookmarked.
 - **No corpus of real beginner-readable text.** Loanwords carried Lesson 01, but a

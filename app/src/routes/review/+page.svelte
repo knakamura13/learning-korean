@@ -3,6 +3,8 @@
 	import { fly, fade } from 'svelte/transition';
 	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
+	import PlayButton from '$lib/components/PlayButton.svelte';
+	import { isConsonantLead } from '$lib/audio/consonants';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
@@ -194,7 +196,12 @@
 					{progress.state.cards[card.id] ? 'review' : 'new card'} · {index + 1} of {queue.length}
 				</p>
 
-				<div class="glyph" lang="ko">{card.front}</div>
+				<div class="glyph-row">
+					<div class="glyph" lang="ko">{card.front}</div>
+					{#if card.kind === 'consonant' || isConsonantLead(card.front)}
+						<PlayButton jamo={card.front} />
+					{/if}
+				</div>
 				<p class="ask">{card.ask}</p>
 
 				<form
@@ -340,13 +347,20 @@
 	}
 	.tag.isnew { color: var(--blue); }
 
+	.glyph-row {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--s2);
+		margin: var(--s3) 0 var(--s2);
+	}
+
 	.glyph {
 		font-family: var(--hangul);
 		font-size: clamp(3.2rem, 10vw + 1.5rem, 6.5rem);
 		font-weight: 500;
 		line-height: 1.05;
 		text-align: center;
-		margin: var(--s3) 0 var(--s2);
 	}
 
 	.ask { text-align: center; font-size: 0.84rem; color: var(--ink-soft); margin: 0 0 var(--s4); }

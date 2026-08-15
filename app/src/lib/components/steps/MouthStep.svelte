@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import PlayButton from '../PlayButton.svelte';
 	import type { MouthStep, ZoneId } from '$lib/content/types';
 
 	let { step, onSettle, onNudge }: {
@@ -140,6 +141,12 @@
 		<p class="local-miss">Not there. Try another spot.</p>
 	{/if}
 </div>
+
+{#if solved}
+	<div class="hear">
+		<PlayButton jamo={step.jamo} />
+	</div>
+{/if}
 
 <style>
 	.mouth-wrap {
@@ -293,6 +300,12 @@
 		font-size: 0.82rem;
 		font-weight: 600;
 		color: var(--bad);
+	}
+
+	.hear {
+		display: flex;
+		justify-content: center;
+		margin-top: var(--s3);
 	}
 
 	@media (forced-colors: active) {

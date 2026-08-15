@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { isConsonantLead } from '$lib/audio/consonants';
+	import PlayButton from './PlayButton.svelte';
 	import type { StageItem } from '$lib/content/types';
 
 	let { items, vs, size = 'lg' }: {
@@ -9,6 +11,9 @@
 
 	// More than two glyphs on the stage would overflow at full size.
 	const scale = $derived(size === 'md' || items.length > 3 ? 'md' : 'lg');
+	// Choice cards with a whole family on stage would spam a speaker on every
+	// letter. Audio is a check for the one or two jamo the card is about.
+	const playSubjects = $derived(items.length <= 2);
 </script>
 
 <div class="stage" class:md={scale === 'md'}>
@@ -19,6 +24,11 @@
 		<div class="item">
 			<span class="glyph" lang="ko">{item.glyph}</span>
 			{#if item.caption}<span class="cap">{item.caption}</span>{/if}
+			{#if playSubjects && isConsonantLead(item.glyph)}
+				<div class="hear">
+					<PlayButton jamo={item.glyph} />
+				</div>
+			{/if}
 		</div>
 	{/each}
 </div>
@@ -51,6 +61,12 @@
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-faint);
+		margin-top: var(--s2);
+	}
+
+	.hear {
+		display: flex;
+		justify-content: center;
 		margin-top: var(--s2);
 	}
 

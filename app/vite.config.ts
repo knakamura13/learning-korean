@@ -4,6 +4,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	// Component tests import `mount` from Svelte's client build.
+	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {
 		// The domain layer is pure and runs in node; component tests opt into
 		// jsdom individually via an environment docblock.
