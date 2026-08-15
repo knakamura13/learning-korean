@@ -73,7 +73,7 @@
 			disabled={settled || disabled}
 			onclick={() => pick(i)}
 		>
-			<span class="key">{choiceKeyLabel(keyScheme, i)}</span>
+			<span class="key"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
 			<span class="txt" lang={hasHangul(choice.text) ? 'ko' : undefined}>{choice.text}</span>
 		</button>
 	{/each}
@@ -106,19 +106,39 @@
 			transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
 	}
 
-	.opts:not(.stack) .opt { justify-content: center; text-align: center; }
+	.opts:not(.stack) .opt {
+		position: relative;
+		justify-content: center;
+		text-align: center;
+	}
+	.opts:not(.stack) .txt { width: 100%; }
+	.opts:not(.stack) .key {
+		position: absolute;
+		left: 33.333%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
 
 	.opt.hangul { font-family: var(--hangul); font-size: 1.9rem; font-weight: 500; min-height: 4rem; }
 
 	.key {
+		box-sizing: border-box;
 		font-family: var(--mono);
-		font-size: 0.62rem;
+		font-size: 0.44rem;
+		font-weight: 600;
+		line-height: 1;
 		color: var(--ink-faint);
 		border: 1px solid var(--rule);
-		border-radius: 3px;
-		padding: 0.05rem 0.3rem;
+		border-radius: 2px;
+		min-width: 1.4em;
+		height: 1.4em;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		flex: 0 0 auto;
 	}
+	.key span { transform: translateY(1.5px); }
 
 	.opt:hover:not(:disabled) {
 		border-color: var(--accent);
