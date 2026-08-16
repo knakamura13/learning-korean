@@ -55,6 +55,7 @@
 			Generated from the same module the labs run on, so it cannot drift from what the app
 			teaches.
 		</p>
+		<p class="quick-nav-label">Jump to section</p>
 		<nav class="quick-nav" aria-label="Reference sections">
 			<a href="#consonants">19 Consonants</a>
 			<a href="#simple-vowels">10 Simple Vowels</a>
@@ -284,16 +285,24 @@
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.lede { color: var(--ink-soft); }
 
+	.quick-nav-label {
+		margin: var(--s4) 0 var(--s1);
+		color: var(--ink-faint);
+		font-size: 0.66rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
 	.quick-nav {
 		display: flex;
 		gap: var(--s2);
 		flex-wrap: wrap;
-		margin-top: var(--s4);
 		padding: var(--s2) 0;
 	}
 	.quick-nav a {
 		display: inline-flex;
 		align-items: center;
+		min-height: 2.75rem;
 		padding: 0.25rem 0.65rem;
 		border-radius: var(--r-pill);
 		background: var(--paper-sunk);
@@ -310,6 +319,32 @@
 		background: var(--paper-raised);
 		border-color: var(--accent);
 		color: var(--accent);
+	}
+
+	@media (max-width: 40rem) {
+		.quick-nav {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overscroll-behavior-inline: contain;
+			scroll-padding-inline: var(--s2);
+			scroll-snap-type: inline proximity;
+			scrollbar-color: var(--rule) transparent;
+			scrollbar-width: thin;
+			-webkit-overflow-scrolling: touch;
+			mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2rem), transparent);
+			padding-right: 2rem;
+		}
+		.quick-nav a {
+			flex: 0 0 auto;
+			scroll-snap-align: start;
+		}
+		.quick-nav::-webkit-scrollbar {
+			height: 0.35rem;
+		}
+		.quick-nav::-webkit-scrollbar-thumb {
+			border-radius: var(--r-pill);
+			background: var(--rule);
+		}
 	}
 
 	section {
