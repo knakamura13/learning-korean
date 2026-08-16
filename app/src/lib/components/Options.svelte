@@ -108,16 +108,8 @@
 	}
 
 	.opts:not(.stack) .opt {
-		position: relative;
 		justify-content: center;
 		text-align: center;
-	}
-	.opts:not(.stack) .txt { width: 100%; }
-	.opts:not(.stack) .key {
-		position: absolute;
-		left: 20px;
-		top: 50%;
-		transform: translateY(-50%);
 	}
 
 	.opt.hangul { font-family: var(--hangul); font-size: 1.9rem; font-weight: 500; min-height: 4rem; }
