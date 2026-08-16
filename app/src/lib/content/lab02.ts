@@ -129,7 +129,7 @@ export const lab02: Lab = {
 			type: 'vowel',
 			act: 'Act 4 · no tick at all',
 			do: 'The two long strokes are vowels by themselves. Build the bare earth stroke.',
-			hint: 'Set the ticks to none.',
+			hint: 'Just the earth stroke — no ticks.',
 			target: 'ㅡ',
 			targetName: 'eu',
 			teach:
