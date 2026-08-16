@@ -270,6 +270,7 @@
 			>
 				{#if stamp === 'tick'}
 					<span class="tick-mark" aria-hidden="true"></span>
+					<span class="mark">tick</span>
 				{:else}
 					<span class="glyph">{stamp}</span>
 				{/if}
@@ -318,20 +319,24 @@
 		align-items: center;
 		justify-content: center;
 		font-family: var(--hangul);
-		font-size: 4.4rem;
+		font-size: 5rem;
 		font-weight: 500;
 		line-height: 1;
+		color: var(--ink);
 		pointer-events: none;
+		z-index: 0;
 	}
+	.zone.win .glyph { color: var(--good); }
 
 	.dock {
 		appearance: none;
 		position: absolute;
+		z-index: 1;
 		width: 2.75rem;
 		height: 2.75rem;
 		margin: 0;
 		padding: 0;
-		border: 2px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
 		border-radius: 50%;
 		background: transparent;
 		transform: translate(-50%, -50%);
@@ -343,12 +348,14 @@
 		border-radius: var(--r-md);
 	}
 	.dock.held {
-		border-style: solid;
-		border-color: var(--accent);
-		background: var(--accent-soft);
+		border-style: dotted;
+		border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 	}
+	.zone.filled .dock { opacity: 0.4; }
+	.zone.filled .dock:hover,
+	.zone.filled .dock:focus-visible { opacity: 1; }
 	.zone.win .dock {
-		border-color: color-mix(in srgb, var(--good) 45%, transparent);
+		border-color: color-mix(in srgb, var(--good) 40%, transparent);
 	}
 	.dock:focus-visible {
 		outline: 2px solid var(--paper);
@@ -384,8 +391,10 @@
 		line-height: 1.2;
 		cursor: pointer;
 		display: inline-flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		gap: 0.08rem;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			transform var(--fast) var(--ease);
 	}
@@ -405,10 +414,18 @@
 
 	.tick-mark {
 		display: block;
-		width: 1.15rem;
-		height: 0.22rem;
+		width: 0.7rem;
+		height: 0.2rem;
 		border-radius: 2px;
 		background: currentColor;
+	}
+	.mark {
+		font-family: var(--sans);
+		font-size: 0.52rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		line-height: 1;
 	}
 
 	.ghost {
