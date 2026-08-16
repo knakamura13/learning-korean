@@ -146,6 +146,78 @@ describe('Tray', () => {
 		flushSync();
 		expect(onSelect).not.toHaveBeenCalled();
 	});
+
+	it('gives only the checked chip a tab stop, or the first chip when nothing is picked', () => {
+		render(Tray, {
+			label: 'base stroke',
+			items: ['ㅣ', 'ㅡ'],
+			selected: null,
+			onSelect: () => {}
+		});
+		const unpicked = labelledGroup(document.body, 'base stroke');
+		expect(radioNamed(unpicked, 'ㅣ').getAttribute('tabindex')).toBe('0');
+		expect(radioNamed(unpicked, 'ㅡ').getAttribute('tabindex')).toBe('-1');
+
+		render(Tray, {
+			label: 'first vowel',
+			items: ['ㅏ', 'ㅓ'],
+			selected: 'ㅓ',
+			onSelect: () => {}
+		});
+		const picked = labelledGroup(document.body, 'first vowel');
+		expect(radioNamed(picked, 'ㅏ').getAttribute('tabindex')).toBe('-1');
+		expect(radioNamed(picked, 'ㅓ').getAttribute('tabindex')).toBe('0');
+	});
+
+	it('moves focus and picks with the arrow keys, wrapping past either end', () => {
+		const onSelect = vi.fn();
+		render(Tray, {
+			label: 'ticks',
+			items: ['none', 'one', 'two'],
+			selected: null,
+			text: true,
+			onSelect
+		});
+		const group = labelledGroup(document.body, 'ticks');
+		const [none, one, two] = radios(group);
+
+		none.focus();
+		none.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+		expect(document.activeElement).toBe(one);
+		expect(onSelect).toHaveBeenLastCalledWith('one');
+
+		one.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+		expect(document.activeElement).toBe(two);
+		expect(onSelect).toHaveBeenLastCalledWith('two');
+
+		two.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+		expect(document.activeElement).toBe(none);
+		expect(onSelect).toHaveBeenLastCalledWith('none');
+
+		none.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+		expect(document.activeElement).toBe(two);
+		expect(onSelect).toHaveBeenLastCalledWith('two');
+
+		two.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+		expect(document.activeElement).toBe(one);
+		expect(onSelect).toHaveBeenLastCalledWith('one');
+	});
+
+	it('ignores arrow keys while disabled', () => {
+		const onSelect = vi.fn();
+		render(Tray, {
+			label: 'tick side',
+			items: ['left', 'right'],
+			selected: null,
+			text: true,
+			disabled: true,
+			onSelect
+		});
+		const group = labelledGroup(document.body, 'tick side');
+		const [left] = radios(group);
+		left.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+		expect(onSelect).not.toHaveBeenCalled();
+	});
 });
 
 describe('FusionStep trays', () => {
