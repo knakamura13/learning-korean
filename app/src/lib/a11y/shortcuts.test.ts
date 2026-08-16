@@ -54,4 +54,20 @@ describe('shortcuts guards', () => {
 		input.remove();
 		button.remove();
 	});
+
+	it('keeps all four arrows for an enabled radio chip, so a Tray can rove between them', () => {
+		const group = document.createElement('div');
+		group.setAttribute('role', 'radiogroup');
+		const radio = document.createElement('button');
+		radio.setAttribute('role', 'radio');
+		group.appendChild(radio);
+		document.body.appendChild(group);
+
+		expect(shouldIgnoreArrowNav(radio)).toBe(true);
+
+		radio.disabled = true;
+		expect(shouldIgnoreArrowNav(radio)).toBe(false);
+
+		group.remove();
+	});
 });

@@ -33,6 +33,35 @@
 		if (words[0] === 'first' || words[0] === 'second') return words[0];
 		return words[0] ?? name;
 	}
+
+	/**
+	 * Roving tabindex for the radiogroup: only one chip is a Tab stop — the
+	 * checked one, or the first when nothing is picked yet — matching how a
+	 * native radio group behaves. Arrow keys move that stop and pick as they
+	 * go, same as native radios.
+	 */
+	const activeIndex = $derived.by(() => {
+		const i = selected == null ? -1 : items.indexOf(selected);
+		return i >= 0 ? i : 0;
+	});
+
+	let groupEl = $state<HTMLDivElement>();
+
+	/** Roving tabindex lives on the radiogroup element itself, per the ARIA pattern. */
+	function onGroupKeydown(e: KeyboardEvent) {
+		if (disabled || e.metaKey || e.ctrlKey || e.altKey) return;
+		let delta = 0;
+		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') delta = 1;
+		else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') delta = -1;
+		else return;
+		const chips = groupEl ? [...groupEl.querySelectorAll<HTMLButtonElement>('.chip')] : [];
+		const from = e.target instanceof HTMLButtonElement ? chips.indexOf(e.target) : -1;
+		if (chips.length === 0 || from < 0) return;
+		e.preventDefault();
+		const next = chips[(from + delta + chips.length) % chips.length];
+		next.focus();
+		onSelect(items[chips.indexOf(next)]);
+	}
 </script>
 
 <div
@@ -40,10 +69,13 @@
 	role="radiogroup"
 	aria-labelledby={labelId}
 	aria-disabled={disabled ? 'true' : undefined}
+	tabindex="-1"
+	bind:this={groupEl}
+	onkeydown={onGroupKeydown}
 >
 	<div class="label" id={labelId}>{label}</div>
 	<div class="row">
-		{#each items as item (item)}
+		{#each items as item, i (item)}
 			{@const on = selected === item}
 			<button
 				type="button"
@@ -51,6 +83,7 @@
 				role="radio"
 				aria-checked={on}
 				aria-label="{label}: {item}"
+				tabindex={i === activeIndex ? 0 : -1}
 				{disabled}
 				lang={hasHangul(item) ? 'ko' : undefined}
 				onclick={() => onSelect(item)}
