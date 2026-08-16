@@ -21,4 +21,9 @@ describe('review answer field', () => {
 		expect(src).toMatch(/disabled=\{answered\}/);
 		expect(src).toMatch(/checkAnswer\(card, value\)/);
 	});
+
+	it('uses a spoken-form placeholder for pronunciation cards', () => {
+		expect(src).toMatch(/card\?\.kind === 'pron'/);
+		expect(src).toMatch(/hyphenated cuts, or Hangul/);
+	});
 });
