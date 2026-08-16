@@ -94,6 +94,12 @@ export interface ClusterStep extends BaseStep {
 	gloss?: string;
 }
 
+export interface LiaisonStep extends BaseStep {
+	type: 'liaison';
+	word: string;
+	gloss?: string;
+}
+
 /** Decode a real word block by block, then identify it. */
 export interface ReadStep extends BaseStep {
 	type: 'read';
@@ -110,6 +116,7 @@ export type Step =
 	| VowelStep
 	| FusionStep
 	| ClusterStep
+	| LiaisonStep
 	| ReadStep;
 
 export interface Lab {
