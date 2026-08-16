@@ -130,6 +130,11 @@ export function applyStamp(state: BoardState, dock: DockId, stamp: Stamp): Board
 	return applyLift(state, dock, { stamp, count: 1 });
 }
 
+/** Stamps that would seat on this dock, in palette order. */
+export function compatibleStamps(state: BoardState, dock: DockId): Stamp[] {
+	return PALETTE.filter((stamp) => applyStamp(state, dock, stamp) !== null);
+}
+
 export function clearDock(state: BoardState, dock: DockId): BoardState {
 	if (dock === 'base') return EMPTY_BOARD;
 	const side = sideOfDock(dock);

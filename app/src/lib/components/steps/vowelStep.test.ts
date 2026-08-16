@@ -125,8 +125,50 @@ describe('VowelStep dock board', () => {
 		flushSync();
 		const base = dock('base');
 		base.focus();
-		base.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-		flushSync();
+		press(base, 'Enter');
+		expect(document.querySelector('[data-shape-picker]')).toBeTruthy();
+		expect(onSettle).not.toHaveBeenCalled();
+		press(base, 'Enter');
+		expect(onSettle).toHaveBeenCalled();
+	});
+
+	it('cycles the dock picker with arrows and wraps', () => {
+		const onSettle = vi.fn();
+		render(VowelStep, { step: step('ㅡ', 'eu'), onSettle, onNudge: () => {} });
+		const base = dock('base');
+		base.focus();
+		press(base, 'Enter');
+		const picker = document.querySelector('[data-shape-picker]');
+		expect(picker).toBeTruthy();
+		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅣ');
+		press(base, 'ArrowRight');
+		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅡ');
+		press(base, 'ArrowRight');
+		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅣ');
+		press(base, 'ArrowRight');
+		press(base, 'Enter');
+		expect(onSettle).toHaveBeenCalled();
+		expect(document.querySelector('[data-shape-picker]')).toBeNull();
+		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅡ');
+	});
+
+	it('places a tick immediately when the dock only accepts a tick', () => {
+		const onSettle = vi.fn();
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle, onNudge: () => {} });
+		const base = dock('base');
+		base.focus();
+		press(base, 'Enter');
+		press(base, 'Enter');
+		expect(onSettle).not.toHaveBeenCalled();
+		const right = dock('right');
+		right.focus();
+		press(right, 'Enter');
+		expect(document.querySelector('[data-shape-picker]')).toBeNull();
 		expect(onSettle).toHaveBeenCalled();
 	});
 });
+
+function press(el: HTMLElement, key: string) {
+	el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+	flushSync();
+}

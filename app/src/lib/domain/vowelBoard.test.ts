@@ -6,6 +6,7 @@ import {
 	applyLift,
 	applyStamp,
 	clearDock,
+	compatibleStamps,
 	dockPosition,
 	liftDock,
 	occupant,
@@ -195,11 +196,13 @@ describe('vowelOf', () => {
 });
 
 describe('palette and positions', () => {
-	it('exposes the three stamps', () => {
-		expect(PALETTE).toEqual(['ㅣ', 'ㅡ', 'tick']);
-		expect(stampLabel('ㅣ')).toBe('standing stroke');
-		expect(stampLabel('ㅡ')).toBe('earth stroke');
-		expect(stampLabel('tick')).toBe('tick');
+	it('lists stamps a dock will actually accept', () => {
+		expect(compatibleStamps(EMPTY_BOARD, 'base')).toEqual(['ㅣ', 'ㅡ']);
+		expect(compatibleStamps(EMPTY_BOARD, 'right')).toEqual([]);
+		const withI = applyStamp(EMPTY_BOARD, 'base', 'ㅣ')!;
+		expect(compatibleStamps(withI, 'right')).toEqual(['tick']);
+		expect(compatibleStamps(withI, 'base')).toEqual(['ㅣ', 'ㅡ']);
+		expect(compatibleStamps(withI, 'above')).toEqual([]);
 	});
 
 	it('places every dock on the unit square', () => {

@@ -8,6 +8,7 @@
 		applyLift,
 		applyStamp,
 		clearDock,
+		compatibleStamps,
 		dockPosition,
 		liftDock,
 		occupant,
@@ -48,15 +49,18 @@
 		x: number;
 		y: number;
 	} | null>(null);
+	let picker = $state<{ dock: DockId; index: number } | null>(null);
 
 	const result = $derived(vowelOf(board));
 	const won = $derived(result === step.target);
 	const docks = $derived(visibleDocks(board));
 	const selectedIndex = $derived(Math.max(0, PALETTE.indexOf(selected)));
+	const pickerOptions = $derived(picker ? compatibleStamps(board, picker.dock) : []);
 
 	$effect(() => {
 		if (won && !solved) {
 			solved = true;
+			picker = null;
 			onSettle();
 		} else if (result && !won && !solved) {
 			onNudge(
@@ -70,6 +74,32 @@
 		if (solved) return;
 		const next = applyStamp(board, dock, selected);
 		if (next) board = next;
+	}
+
+	function seat(dock: DockId, stamp: Stamp) {
+		if (solved) return;
+		const next = applyStamp(board, dock, stamp);
+		if (next) board = next;
+		selected = stamp;
+		picker = null;
+	}
+
+	function activateDock(dock: DockId) {
+		if (solved) return;
+		const options = compatibleStamps(board, dock);
+		if (options.length === 0) return;
+		if (options.length === 1) {
+			seat(dock, options[0]);
+			return;
+		}
+		picker = { dock, index: 0 };
+	}
+
+	function confirmPicker() {
+		if (!picker) return;
+		const stamp = pickerOptions[picker.index];
+		if (!stamp) return;
+		seat(picker.dock, stamp);
 	}
 
 	function dockName(id: DockId): string {
@@ -104,6 +134,27 @@
 		const id = e.target instanceof HTMLElement ? e.target.dataset.dock : undefined;
 		const i = id ? docks.indexOf(id as DockId) : -1;
 		if (i < 0) return;
+		if (picker) {
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				picker = null;
+				return;
+			}
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				confirmPicker();
+				return;
+			}
+			let cycle = 0;
+			if (e.key === 'ArrowRight' || e.key === 'ArrowDown') cycle = 1;
+			else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') cycle = -1;
+			else return;
+			e.preventDefault();
+			const n = pickerOptions.length;
+			if (n === 0) return;
+			picker = { ...picker, index: (picker.index + cycle + n) % n };
+			return;
+		}
 		if (e.key === 'Delete' || e.key === 'Backspace') {
 			e.preventDefault();
 			board = clearDock(board, docks[i]);
@@ -111,7 +162,7 @@
 		}
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
-			place(docks[i]);
+			activateDock(docks[i]);
 			return;
 		}
 		let delta = 0;
@@ -209,6 +260,10 @@
 			skipClick = false;
 			return;
 		}
+		if (picker) {
+			picker = null;
+			return;
+		}
 		place(id);
 	}
 </script>
@@ -236,12 +291,50 @@
 			style:left="{pos.x * 100}%"
 			style:top="{pos.y * 100}%"
 			aria-label={dockAria(id)}
+			aria-haspopup="listbox"
+			aria-expanded={picker?.dock === id}
+			aria-controls={picker?.dock === id ? 'vowel-shape-picker' : undefined}
 			disabled={solved}
 			onkeydown={onBoardKey}
 			onpointerdown={(e) => startDockDrag(id, e)}
 			onclick={() => onDockClick(id)}
 		></button>
 	{/each}
+	{#if picker}
+		{@const openDock = picker.dock}
+		{@const pos = dockPosition(openDock)}
+		<div
+			id="vowel-shape-picker"
+			class="picker"
+			data-shape-picker
+			role="listbox"
+			tabindex="-1"
+			aria-label="choose a stroke"
+			aria-activedescendant="vowel-pick-{picker.index}"
+			style:left="{pos.x * 100}%"
+			style:top="{pos.y * 100}%"
+		>
+			{#each pickerOptions as stamp, i (stamp)}
+				<button
+					id="vowel-pick-{i}"
+					type="button"
+					tabindex="-1"
+					class={['choice', i === picker.index && 'on']}
+					role="option"
+					data-stamp={stamp}
+					aria-selected={i === picker.index}
+					lang={hasHangul(stamp) ? 'ko' : undefined}
+					onclick={() => seat(openDock, stamp)}
+				>
+					{#if stamp === 'tick'}
+						<span class="tick-mark"></span>
+					{:else}
+						{stamp}
+					{/if}
+				</button>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <div
@@ -364,6 +457,41 @@
 	}
 	.dock:disabled {
 		cursor: default;
+	}
+
+	.picker {
+		position: absolute;
+		z-index: 6;
+		display: flex;
+		gap: 0.28rem;
+		padding: 0.28rem;
+		border: 1px solid var(--accent);
+		border-radius: var(--r-sm);
+		background: var(--paper-raised);
+		box-shadow: var(--shadow-2);
+		transform: translate(-50%, calc(-100% - 0.5rem));
+	}
+	.choice {
+		appearance: none;
+		min-width: 2.4rem;
+		min-height: 2.4rem;
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--r-sm);
+		background: var(--paper-raised);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--hangul);
+		font-size: 1.35rem;
+		cursor: pointer;
+	}
+	.choice.on {
+		border-color: var(--accent);
+		border-width: 2px;
+		background: var(--accent-soft);
+		color: var(--accent);
 	}
 
 	.palette { margin-bottom: var(--s3); }
