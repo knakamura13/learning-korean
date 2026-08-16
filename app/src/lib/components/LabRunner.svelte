@@ -33,6 +33,7 @@
 	import VowelStep from './steps/VowelStep.svelte';
 	import FusionStep from './steps/FusionStep.svelte';
 	import ClusterStep from './steps/ClusterStep.svelte';
+	import LiaisonStep from './steps/LiaisonStep.svelte';
 	import ReadStep from './steps/ReadStep.svelte';
 
 	let { lab, letterAsk }: { lab: Lab; letterAsk?: Snippet } = $props();
@@ -143,10 +144,10 @@
 	/**
 	 * Resolve the step. `correct` is false only for step types where a wrong
 	 * answer still advances (choice and read cards teach through the
-	 * explanation rather than through retrying). An earlier miss dents the
-	 * first-try tally but must not turn a correct final answer into a
-	 * "not quite" — the learner did get there, and saying otherwise is just
-	 * discouraging.
+	 * explanation rather than through retrying). Cluster and liaison are
+	 * retry-until-correct. An earlier miss dents the first-try tally but must
+	 * not turn a correct final answer into a "not quite" — the learner did get
+	 * there, and saying otherwise is just discouraging.
 	 */
 	function onSettle(overrideTeach?: string, correct = true) {
 		if (settled) return;
@@ -445,6 +446,8 @@
 					<FusionStep {step} {onSettle} {onNudge} />
 				{:else if step.type === 'cluster'}
 					<ClusterStep {step} {onSettle} {onNudge} />
+				{:else if step.type === 'liaison'}
+					<LiaisonStep {step} {onSettle} {onNudge} />
 				{:else if step.type === 'read'}
 					<ReadStep {step} {onSettle} {onNudge} />
 				{:else}

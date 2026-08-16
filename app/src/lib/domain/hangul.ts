@@ -255,6 +255,116 @@ export function clusterRule(final: string): ClusterRule | null {
 }
 
 /* ------------------------------------------------------------------ *
+ * Liaison (연음) — Articles 13–14
+ * ------------------------------------------------------------------ */
+
+/**
+ * Move a batchim into the following placeholder ㅇ.
+ *
+ * Articles 13–14 only. Does not palatalise (밭이 → 바티, not 바치),
+ * does not drop ㅎ, and does not apply Article 15 representative-sound
+ * liaison across content morphemes. Cluster-final ㅅ tenses to ㅆ
+ * when it jumps; other tensification is out of scope.
+ */
+export function applyLiaison(word: string): string {
+	const chars = [...word];
+	if (chars.length === 0) return word;
+	const parts = chars.map((ch) => decompose(ch));
+	if (parts.some((p) => p === null)) return word;
+
+	const out = parts.map((p) => ({ ...p! }));
+	for (let i = 0; i < out.length - 1; i++) {
+		const cur = out[i];
+		const next = out[i + 1];
+		if (!cur.final || next.lead !== 'ㅇ') continue;
+		if (cur.final === 'ㅇ' || cur.final === 'ㅎ') continue;
+		const cluster = clusterParts(cur.final);
+		if (cluster) {
+			if (cluster[1] === 'ㅎ') continue;
+			cur.final = cluster[0];
+			next.lead = cluster[1] === 'ㅅ' ? 'ㅆ' : cluster[1];
+		} else {
+			next.lead = cur.final;
+			cur.final = '';
+		}
+	}
+	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+}
+
+/** Written batchim letters that could jump (cluster members, not tensed ㅆ). */
+export function liaisonSources(word: string): string[] {
+	const parts = [...word].map((ch) => decompose(ch));
+	const sources: string[] = [];
+	for (let i = 0; i < parts.length - 1; i++) {
+		const cur = parts[i];
+		const next = parts[i + 1];
+		if (!cur || !next || !cur.final || next.lead !== 'ㅇ') continue;
+		if (cur.final === 'ㅎ') continue;
+		const cluster = clusterParts(cur.final);
+		if (cluster) {
+			if (cluster[1] === 'ㅎ') continue;
+			sources.push(cluster[0], cluster[1]);
+		} else {
+			sources.push(cur.final);
+		}
+	}
+	return sources;
+}
+
+export type LiaisonAction = { type: 'stay' } | { type: 'move'; jamo: string };
+
+/** The one tap the widget should accept for this written word. */
+export function liaisonAction(word: string): LiaisonAction {
+	if (applyLiaison(word) === word) return { type: 'stay' };
+	const before = [...word].map((ch) => decompose(ch));
+	const after = [...applyLiaison(word)].map((ch) => decompose(ch));
+	for (let i = 0; i < before.length; i++) {
+		const a = before[i];
+		const b = after[i];
+		if (!a || !b || a.final === b.final) continue;
+		const parts = clusterParts(a.final);
+		if (parts) return { type: 'move', jamo: parts[1] };
+		return { type: 'move', jamo: a.final };
+	}
+	return { type: 'stay' };
+}
+
+const LEAD_RR: Record<string, string> = {
+	'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
+	'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '', 'ㅈ': 'j', 'ㅉ': 'jj',
+	'ㅊ': 'ch', 'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 'h'
+};
+
+const VOWEL_RR: Record<string, string> = {
+	'ㅏ': 'a', 'ㅐ': 'ae', 'ㅑ': 'ya', 'ㅒ': 'yae', 'ㅓ': 'eo', 'ㅔ': 'e',
+	'ㅕ': 'yeo', 'ㅖ': 'ye', 'ㅗ': 'o', 'ㅘ': 'wa', 'ㅙ': 'wae', 'ㅚ': 'oe',
+	'ㅛ': 'yo', 'ㅜ': 'u', 'ㅝ': 'wo', 'ㅞ': 'we', 'ㅟ': 'wi', 'ㅠ': 'yu',
+	'ㅡ': 'eu', 'ㅢ': 'ui', 'ㅣ': 'i'
+};
+
+const FINAL_RR: Record<string, string> = {
+	'': '', 'ㄱ': 'k', 'ㄲ': 'k', 'ㄳ': 'k', 'ㄴ': 'n', 'ㄵ': 'n', 'ㄶ': 'n',
+	'ㄷ': 't', 'ㄹ': 'l', 'ㄺ': 'k', 'ㄻ': 'm', 'ㄼ': 'l', 'ㄽ': 'l', 'ㄾ': 'l',
+	'ㄿ': 'p', 'ㅀ': 'l', 'ㅁ': 'm', 'ㅂ': 'p', 'ㅄ': 'p', 'ㅅ': 't', 'ㅆ': 't',
+	'ㅇ': 'ng', 'ㅈ': 't', 'ㅊ': 't', 'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 't'
+};
+
+export function romanizeSyllable(ch: string): string {
+	const parts = decompose(ch);
+	if (!parts) return '';
+	return `${LEAD_RR[parts.lead] ?? ''}${VOWEL_RR[parts.vowel] ?? ''}${FINAL_RR[parts.final] ?? ''}`;
+}
+
+/** Hyphenated RR of each block. Empty if any character is not a syllable. */
+export function romanizeWord(word: string): string {
+	const chars = [...word];
+	if (chars.length === 0) return '';
+	const parts = chars.map((ch) => romanizeSyllable(ch));
+	if (parts.some((p) => p === '')) return '';
+	return parts.join('-');
+}
+
+/* ------------------------------------------------------------------ *
  * Sound changes
  * ------------------------------------------------------------------ */
 

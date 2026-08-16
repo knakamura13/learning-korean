@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
-	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS,
+	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS, SOUND_CHANGES,
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
-	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster
+	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
+	applyLiaison, liaisonSources, liaisonAction,
+	romanizeSyllable, romanizeWord
 } from './hangul';
 
 describe('syllable composition', () => {
@@ -203,5 +205,112 @@ describe('clusters', () => {
 		for (const ex of CLUSTER_EXCEPTIONS) {
 			expect(ex.says).not.toBe(batchimSound(ex.cluster));
 		}
+	});
+});
+
+describe('liaison (Articles 13–14)', () => {
+	it('moves a simple batchim into a following placeholder ㅇ', () => {
+		expect(applyLiaison('옷이')).toBe('오시');
+		expect(applyLiaison('밭에')).toBe('바테');
+		expect(applyLiaison('앞에')).toBe('아페');
+		expect(applyLiaison('부엌에')).toBe('부어케');
+		expect(applyLiaison('음악')).toBe('으막');
+		expect(applyLiaison('한국어')).toBe('한구거');
+		expect(applyLiaison('한글을')).toBe('한그를');
+		expect(applyLiaison('마음에')).toBe('마으메');
+	});
+
+	it('moves 쌍받침 as itself', () => {
+		expect(applyLiaison('밖에')).toBe('바께');
+		expect(applyLiaison('있어')).toBe('이써');
+	});
+
+	it('splits a cluster: first stays, second jumps', () => {
+		expect(applyLiaison('읽어요')).toBe('일거요');
+		expect(applyLiaison('앉아')).toBe('안자');
+		expect(applyLiaison('닭을')).toBe('달글');
+		expect(applyLiaison('젊어')).toBe('절머');
+		expect(applyLiaison('핥아')).toBe('할타');
+		expect(applyLiaison('읊어')).toBe('을퍼');
+	});
+
+	it('tenses a cluster-final ㅅ when it jumps (Article 14)', () => {
+		expect(applyLiaison('없어')).toBe('업써');
+		expect(applyLiaison('넋이')).toBe('넉씨');
+		expect(applyLiaison('값을')).toBe('갑쓸');
+	});
+
+	it('leaves ㅇ-batchim in place so ng is not silenced', () => {
+		expect(applyLiaison('강이')).toBe('강이');
+		expect(applyLiaison('영어')).toBe('영어');
+	});
+
+	it('does not implement ㅎ-deletion or palatalisation', () => {
+		expect(applyLiaison('좋아요')).toBe('좋아요');
+		expect(applyLiaison('많아')).toBe('많아');
+		expect(applyLiaison('밭이')).toBe('바티');
+		expect(applyLiaison('같이')).toBe('가티');
+	});
+
+	it('documents Article 15 as out of scope (written letter, not 대표음)', () => {
+		// Real Korean: 밭 아래 → [바다래]. This function is particles/endings only.
+		expect(applyLiaison('밭아래')).toBe('바타래');
+	});
+
+	it('agrees with the reference-page liaison examples', () => {
+		const liaison = SOUND_CHANGES.find((s) => s.id === 'liaison');
+		expect(liaison).toBeDefined();
+		for (const ex of liaison!.examples) {
+			expect(applyLiaison(ex.written), ex.written).toBe(ex.spoken);
+		}
+	});
+
+	it('returns the input unchanged when any character is not a syllable', () => {
+		expect(applyLiaison('옷이!')).toBe('옷이!');
+		expect(applyLiaison('')).toBe('');
+	});
+
+	it('lists written source jamo, not the tensed result', () => {
+		expect(liaisonSources('음악')).toEqual(['ㅁ']);
+		expect(liaisonSources('읽어요')).toEqual(['ㄹ', 'ㄱ']);
+		expect(liaisonSources('없어')).toEqual(['ㅂ', 'ㅅ']);
+		expect(liaisonSources('강이')).toEqual(['ㅇ']);
+		expect(liaisonSources('좋아요')).toEqual([]);
+	});
+
+	it('derives stay vs the written jumper', () => {
+		expect(liaisonAction('강이')).toEqual({ type: 'stay' });
+		expect(liaisonAction('좋아요')).toEqual({ type: 'stay' });
+		expect(liaisonAction('음악')).toEqual({ type: 'move', jamo: 'ㅁ' });
+		expect(liaisonAction('옷이')).toEqual({ type: 'move', jamo: 'ㅅ' });
+		expect(liaisonAction('읽어요')).toEqual({ type: 'move', jamo: 'ㄱ' });
+		expect(liaisonAction('없어')).toEqual({ type: 'move', jamo: 'ㅅ' });
+	});
+});
+
+describe('romanise spoken syllables', () => {
+	it('uses lab conventions: onset g/d/b/r, batchim k/t/p/l/ng, silent ㅇ-onset', () => {
+		expect(romanizeSyllable('한')).toBe('han');
+		expect(romanizeSyllable('국')).toBe('guk');
+		expect(romanizeSyllable('거')).toBe('geo');
+		expect(romanizeSyllable('으')).toBe('eu');
+		expect(romanizeSyllable('막')).toBe('mak');
+		expect(romanizeSyllable('를')).toBe('reul');
+		expect(romanizeSyllable('써')).toBe('sseo');
+		expect(romanizeSyllable('께')).toBe('kke');
+		expect(romanizeSyllable('이')).toBe('i');
+	});
+
+	it('joins blocks with hyphens', () => {
+		expect(romanizeWord('한구거')).toBe('han-gu-geo');
+		expect(romanizeWord('강이')).toBe('gang-i');
+		expect(romanizeWord(applyLiaison('없어'))).toBe('eop-sseo');
+		expect(romanizeWord(applyLiaison('한글을'))).toBe('han-geu-reul');
+		expect(romanizeWord(applyLiaison('읽어요'))).toBe('il-geo-yo');
+	});
+
+	it('returns empty string for a non-syllable', () => {
+		expect(romanizeSyllable('ㄱ')).toBe('');
+		expect(romanizeWord('한!')).toBe('');
 	});
 });

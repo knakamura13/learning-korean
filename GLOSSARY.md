@@ -72,7 +72,9 @@ _Avoid_: default sound, base sound
 
 **Liaison** (연음):
 A batchim moving into the next syllable when that syllable begins with the
-placeholder ㅇ. 한국어 → [한구거].
+placeholder ㅇ. 한국어 → [한구거]. Taught in Lab 06; batchim ㅇ does not jump
+(already _ng_), and clusters split rather than sacrifice a letter (표준 발음법
+Article 14).
 _Avoid_: linking, carry-over, resyllabification (correct but heavier)
 
 **Neutralisation**:

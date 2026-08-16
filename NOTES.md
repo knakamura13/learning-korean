@@ -85,7 +85,7 @@ Kyle asked for SRS to master every letter, sound, and compound. Built as:
    card is not secure.
 3. **Tier gating.** Cards only enter rotation when the lab teaching them is finished,
    so the deck never quizzes unmet material. Lab 01 unlocks `lab01` (19 consonants);
-   labs 02–05 unlock vowels, compounds, batchim, clusters.
+   labs 02–06 unlock vowels, compounds, batchim, clusters, liaison.
 
 New cards are capped at 10/day to hold sessions near the 10-minute budget.
 
@@ -149,13 +149,13 @@ of that session only — treat it as gone. Everything below is in `app/`.
   `hangul.ts` (phonology, orthography, derivation, sound changes), `srs.ts` (SM-2
   with an injected clock), `deck.ts` (the 72 cards), `storage.ts` (persistence port).
 - `src/lib/content/` — lessons as typed data. `types.ts` defines the step union;
-  `lab01..lab05.ts` are the course. `content.test.ts` validates the whole course
+  `lab01..lab06.ts` are the course. `content.test.ts` validates the whole course
   against the domain.
 - `src/lib/components/` — `LabRunner.svelte` plus one component per step type:
-  `mouth`, `choice`, `build`, `assemble`, `vowel`, `fusion`, `cluster`, `read`.
-  Wrong answers on `mouth`, `build`, `assemble`, `vowel`, `fusion` and `cluster` do
-  *not* advance; `choice` and `read` resolve either way, because their teaching is in
-  the explanation rather than in retrying.
+  `mouth`, `choice`, `build`, `assemble`, `vowel`, `fusion`, `cluster`, `liaison`,
+  `read`. Wrong answers on `mouth`, `build`, `assemble`, `vowel`, `fusion`,
+  `cluster` and `liaison` do *not* advance; `choice` and `read` resolve either way,
+  because their teaching is in the explanation rather than in retrying.
 - `src/routes/` — `/` dashboard, `/lab/[id]`, `/review`, `/reference`.
 
 **`onNudge(html, soft)`** — composer widgets pass `soft: true` so valid intermediate
@@ -179,7 +179,8 @@ seven-word option among five- and six-word distractors).
 
 **Built:** Lab 01 (consonants, `lab01`) · Lab 02 (basic vowels, `lab02`) ·
 Lab 03 (compound vowels, `lab03`) · Lab 04 (batchim, `lab04`) · Lab 05 (clusters,
-`lab05`). **All 72 deck cards are now reachable — the writing system is fully covered.**
+`lab05`) · Lab 06 (liaison, `lab06`). **All 72 letter cards are reachable — the
+writing system is fully covered.** Lab 06 adds ten `lab06` pronunciation cards.
 
 Lab 02 scope note: it teaches the **10 basic vowels only**, deliberately matching deck
 tier `lab02`. Compound vowels and the mergers were split out into Lab 03 rather than
@@ -213,31 +214,25 @@ Lab 05 also states plainly that Rule A vs Rule B **is not derivable** — it is 
 eleven-item list. Do not invent a mnemonic rule for it; the honest framing ("this is
 what the SRS deck is for") is deliberate and Kyle responds to it.
 
+Lab 06 scope note: the `liaison` step type derives jump/stay/split from
+`liaisonAction()` and `applyLiaison()` — the card cannot disagree with the phonology
+map. Batchim ㅇ stays put (already _ng_); clusters split per 표준 발음법 Article 14
+rather than dropping a letter. The finish card names ㅎ-deletion (좋아요) as *not*
+liaison so it does not get crammed into this rule. Keep that boundary in later labs.
+
 ### Beyond the writing system — sound changes
 
-The page is now fully covered. What remains is how the page *sounds* when letters
-meet, which is where reading turns into hearing. Suggested order:
+The page is now fully covered. Lab 06 (liaison) is built. What remains is how the
+page *sounds* when letters meet beyond that first rule. Suggested order:
 
-1. **Liaison (연음)** — batchim + ㅇ moves forward: 한국어 → [한구거]. Highest leverage
-   single rule; it is why spoken Korean does not sound like the spelling. Also the
-   payoff for Lab 04's "spelling preserves identity" aside. (Next.)
-2. **Tensification + nasalisation** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
-   that most often make a known word unrecognisable by ear.
-3. **Aspiration, ㅎ-deletion, palatalisation, ㄹ assimilation** — the remaining four.
-4. **Names, part 2** — full names, honorific suffixes, and how Korean addresses people.
+1. **Tensification + nasalisation** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
+   that most often make a known word unrecognisable by ear. **Next to implement.**
+2. **Aspiration, ㅎ-deletion, palatalisation, ㄹ assimilation** — the remaining four.
+3. **Names, part 2** — full names, honorific suffixes, and how Korean addresses people.
    Ties off the "people in my life" half of the mission.
-5. **Handwriting** — stroke order, one session.
-6. **Romanisation traps** — why RR misleads, so he stops trusting it entirely.
+4. **Handwriting** — stroke order, one session.
+5. **Romanisation traps** — why RR misleads, so he stops trusting it entirely.
 
-A **new deck tier** will be needed for sound-change cards (tier `lab06`+). These are
-rule-application cards, not letter cards, so the front should be a written word and
-the answer its pronunciation — consider a `pron` card kind in `deck.js`.
-4. **Liaison** — the single highest-leverage sound rule for understanding speech.
-5. **Clusters** — Rule A / Rule B, and the three exceptions.
-6. **Nasalisation + tensification** — the two changes that make spoken Korean
-   unrecognisable from the page.
-7. **Names** — reading real Korean surnames and given names. Ties directly to the
-   "people in my life" half of the mission; needs batchim first (김, 박, 정, 강).
-8. **Handwriting** — stroke order, one session.
-9. **Romanisation traps** — why Revised Romanization misleads (ㅡ as "eu",
-   initial ㄱ as "g" vs "k"), so he stops trusting it and reads Hangul directly.
+Sound-change deck tiers (`lab06`+) use rule-application cards: front is a written
+word, answer is its pronunciation. Lab 06 established the `pron` card kind in
+`deck.ts` (ten `lab06` cards).

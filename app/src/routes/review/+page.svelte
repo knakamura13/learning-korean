@@ -24,6 +24,7 @@
 	let emptyHint = $state(false);
 
 	const card = $derived(queue[index]);
+	const pronCard = $derived(card?.kind === 'pron');
 	const finishedSession = $derived(ready && queue.length > 0 && index >= queue.length);
 
 	onMount(() => {
@@ -250,7 +251,7 @@
 							autocapitalize="off"
 							autocorrect="off"
 							spellcheck="false"
-							placeholder="type the romanisation"
+							placeholder={pronCard ? 'han-gu-geo or 한구거' : 'type the romanisation'}
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
 							oninvalid={(e) => {
@@ -263,7 +264,9 @@
 						/>
 						{#if emptyHint}
 							<p id="empty-hint" class="empty-hint" role="status">
-								Type a romanisation, then Check.
+								{pronCard
+									? 'Type hyphenated cuts, or Hangul, then Check.'
+									: 'Type a romanisation, then Check.'}
 							</p>
 						{/if}
 					</div>

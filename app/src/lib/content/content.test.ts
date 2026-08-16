@@ -13,7 +13,7 @@ import type { Lab, Step, ZoneId } from './types';
 import { TIERS, cardsOfTier } from '$lib/domain/deck';
 import {
 	compose, decompose, derive, derivations, buildVowel, sidesFor, fuse,
-	batchimSound, clusterParts, type TickSide
+	batchimSound, clusterParts, applyLiaison, liaisonAction, type TickSide
 } from '$lib/domain/hangul';
 
 const ALL_STEPS: { lab: Lab; step: Step; i: number }[] = LABS.flatMap((lab) =>
@@ -202,6 +202,45 @@ describe('cluster steps agree with the phonology', () => {
 				step.cluster
 			);
 		}
+	});
+});
+
+describe('liaison steps agree with the phonology', () => {
+	it('uses real syllables and derives speech from applyLiaison', () => {
+		for (const { lab, step, i } of ALL_STEPS) {
+			if (step.type !== 'liaison') continue;
+			for (const ch of [...step.word]) {
+				expect(decompose(ch), `${where(lab, i)}: ${ch}`).not.toBeNull();
+			}
+			const spoken = applyLiaison(step.word);
+			expect(spoken.length, `${where(lab, i)}: applyLiaison returned empty`).toBeGreaterThan(0);
+			for (const ch of [...spoken]) {
+				expect(decompose(ch), `${where(lab, i)}: spoken ${ch}`).not.toBeNull();
+			}
+			const action = liaisonAction(step.word);
+			if (action.type === 'move') {
+				expect(spoken, `${where(lab, i)}: ${step.word} should change`).not.toBe(step.word);
+			} else {
+				expect(spoken, `${where(lab, i)}: ${step.word} should stay`).toBe(step.word);
+			}
+		}
+	});
+
+	it('never uses 좋아요 or 밭이 as a liaison widget (wrong rule / palatalisation)', () => {
+		for (const { step } of ALL_STEPS) {
+			if (step.type !== 'liaison') continue;
+			expect(step.word).not.toBe('좋아요');
+			expect(step.word).not.toBe('밭이');
+		}
+	});
+
+	it('includes Stay-correct 강이 and a jumping cluster', () => {
+		const words = ALL_STEPS.filter((s) => s.step.type === 'liaison').map((s) =>
+			s.step.type === 'liaison' ? s.step.word : ''
+		);
+		expect(words).toContain('강이');
+		expect(words).toContain('읽어요');
+		expect(liaisonAction('강이')).toEqual({ type: 'stay' });
 	});
 });
 
