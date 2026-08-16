@@ -13,7 +13,7 @@ import type { Lab, Step, ZoneId } from './types';
 import { TIERS, cardsOfTier } from '$lib/domain/deck';
 import {
 	compose, decompose, derive, derivations, buildVowel, sidesFor, fuse,
-	batchimSound, clusterParts, applyLiaison, liaisonAction, liaisonSources, type TickSide
+	batchimSound, clusterParts, applyLiaison, liaisonAction, type TickSide
 } from '$lib/domain/hangul';
 
 const ALL_STEPS: { lab: Lab; step: Step; i: number }[] = LABS.flatMap((lab) =>
@@ -212,8 +212,17 @@ describe('liaison steps agree with the phonology', () => {
 			for (const ch of [...step.word]) {
 				expect(decompose(ch), `${where(lab, i)}: ${ch}`).not.toBeNull();
 			}
-			expect(liaisonAction(step.word).type === 'stay' || liaisonSources(step.word).length)
-				.toBeTruthy();
+			const spoken = applyLiaison(step.word);
+			expect(spoken.length, `${where(lab, i)}: applyLiaison returned empty`).toBeGreaterThan(0);
+			for (const ch of [...spoken]) {
+				expect(decompose(ch), `${where(lab, i)}: spoken ${ch}`).not.toBeNull();
+			}
+			const action = liaisonAction(step.word);
+			if (action.type === 'move') {
+				expect(spoken, `${where(lab, i)}: ${step.word} should change`).not.toBe(step.word);
+			} else {
+				expect(spoken, `${where(lab, i)}: ${step.word} should stay`).toBe(step.word);
+			}
 		}
 	});
 
