@@ -255,6 +255,81 @@ export function clusterRule(final: string): ClusterRule | null {
 }
 
 /* ------------------------------------------------------------------ *
+ * Liaison (연음) — Articles 13–14
+ * ------------------------------------------------------------------ */
+
+/**
+ * Move a batchim into the following placeholder ㅇ.
+ *
+ * Articles 13–14 only. Does not palatalise (밭이 → 바티, not 바치),
+ * does not drop ㅎ, and does not apply Article 15 representative-sound
+ * liaison across content morphemes. Cluster-final ㅅ tenses to ㅆ
+ * when it jumps; other tensification is out of scope.
+ */
+export function applyLiaison(word: string): string {
+	const chars = [...word];
+	if (chars.length === 0) return word;
+	const parts = chars.map((ch) => decompose(ch));
+	if (parts.some((p) => p === null)) return word;
+
+	const out = parts.map((p) => ({ ...p! }));
+	for (let i = 0; i < out.length - 1; i++) {
+		const cur = out[i];
+		const next = out[i + 1];
+		if (!cur.final || next.lead !== 'ㅇ') continue;
+		if (cur.final === 'ㅇ' || cur.final === 'ㅎ') continue;
+		const cluster = clusterParts(cur.final);
+		if (cluster) {
+			if (cluster[1] === 'ㅎ') continue;
+			cur.final = cluster[0];
+			next.lead = cluster[1] === 'ㅅ' ? 'ㅆ' : cluster[1];
+		} else {
+			next.lead = cur.final;
+			cur.final = '';
+		}
+	}
+	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+}
+
+/** Written batchim letters that could jump (cluster members, not tensed ㅆ). */
+export function liaisonSources(word: string): string[] {
+	const parts = [...word].map((ch) => decompose(ch));
+	const sources: string[] = [];
+	for (let i = 0; i < parts.length - 1; i++) {
+		const cur = parts[i];
+		const next = parts[i + 1];
+		if (!cur || !next || !cur.final || next.lead !== 'ㅇ') continue;
+		if (cur.final === 'ㅎ') continue;
+		const cluster = clusterParts(cur.final);
+		if (cluster) {
+			if (cluster[1] === 'ㅎ') continue;
+			sources.push(cluster[0], cluster[1]);
+		} else {
+			sources.push(cur.final);
+		}
+	}
+	return sources;
+}
+
+export type LiaisonAction = { type: 'stay' } | { type: 'move'; jamo: string };
+
+/** The one tap the widget should accept for this written word. */
+export function liaisonAction(word: string): LiaisonAction {
+	if (applyLiaison(word) === word) return { type: 'stay' };
+	const before = [...word].map((ch) => decompose(ch));
+	const after = [...applyLiaison(word)].map((ch) => decompose(ch));
+	for (let i = 0; i < before.length; i++) {
+		const a = before[i];
+		const b = after[i];
+		if (!a || !b || a.final === b.final) continue;
+		const parts = clusterParts(a.final);
+		if (parts) return { type: 'move', jamo: parts[1] };
+		return { type: 'move', jamo: a.final };
+	}
+	return { type: 'stay' };
+}
+
+/* ------------------------------------------------------------------ *
  * Sound changes
  * ------------------------------------------------------------------ */
 
