@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DECK, CARDS_BY_ID, TIERS, cardsOfTier, checkAnswer, normalise } from './deck';
-import { batchimSound, fusionParts, CLUSTERS } from './hangul';
+import { applyLiaison, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
 
 describe('deck integrity', () => {
 	it('has no duplicate ids', () => {
@@ -99,5 +99,40 @@ describe('answers derived from the phonology module', () => {
 			// The jamo form is always accepted alongside the romanised one.
 			expect(checkAnswer(c, `${parts![0]}+${parts![1]}`)).toBe(true);
 		}
+	});
+});
+
+describe('liaison / pron cards', () => {
+	it('unlocks ten lab06 cards derived from applyLiaison', () => {
+		const cards = cardsOfTier('lab06');
+		expect(cards).toHaveLength(10);
+		expect(TIERS.find((t) => t.id === 'lab06')).toMatchObject({ lab: '0006', size: 10 });
+		for (const c of cards) {
+			expect(c.kind).toBe('pron');
+			const spoken = applyLiaison(c.front);
+			expect(c.answers).toContain(spoken);
+			expect(c.answers).toContain(romanizeWord(spoken));
+		}
+	});
+
+	it('requires hyphenated ASCII so spelling-RR cannot pass', () => {
+		const card = CARDS_BY_ID['p-한국어'];
+		expect(checkAnswer(card, 'han-gu-geo')).toBe(true);
+		expect(checkAnswer(card, '한구거')).toBe(true);
+		expect(checkAnswer(card, '[한구거]')).toBe(true);
+		expect(checkAnswer(card, 'hangugeo')).toBe(false);
+		expect(checkAnswer(card, 'han-guk-eo')).toBe(false);
+	});
+
+	it('accepts stay-words as themselves', () => {
+		const card = CARDS_BY_ID['p-강이'];
+		expect(checkAnswer(card, 'gang-i')).toBe(true);
+		expect(checkAnswer(card, '강이')).toBe(true);
+		expect(checkAnswer(card, 'ga-i')).toBe(false);
+	});
+
+	it('leaves existing letter-card grading alone', () => {
+		expect(checkAnswer(CARDS_BY_ID['c-g'], 'g')).toBe(true);
+		expect(checkAnswer(CARDS_BY_ID['v-eu'], 'eu')).toBe(true);
 	});
 });

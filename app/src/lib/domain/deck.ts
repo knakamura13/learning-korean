@@ -11,9 +11,9 @@
  * teaches it is finished — the deck never quizzes unmet material.
  */
 
-import { batchimSound, fusionParts } from './hangul';
+import { applyLiaison, batchimSound, fusionParts, romanizeWord } from './hangul';
 
-export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster';
+export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster' | 'pron';
 
 export interface Card {
 	id: string;
@@ -164,10 +164,39 @@ const clusters: Card[] = Object.keys(CLUSTER_NOTES).map((jamo) =>
 	)
 );
 
+/* ---------- tier lab06: liaison (written word → spoken form) ---------- */
+
+const LIAISON_NOTES: Record<string, string> = {
+	'한국어': 'ㄱ jumps into the placeholder. han-guk-eo is the spelling; [한구거] is the sound.',
+	'음악': 'ㅁ would rather be an onset than an unreleased stop: [으막].',
+	'옷이': 'Isolation flattened ㅅ to ㄷ. A vowel brings ㅅ back: [오시], not [오디].',
+	'밭에': 'ㅌ comes back as ㅌ: [바테]. 밭이 palatalises later — that is not this card.',
+	'부엌에': 'ㅋ comes back as ㅋ, not ㄱ: [부어케].',
+	'강이': 'ㅇ-batchim is already ng. Moving it would silence it. [강이], not [가이].',
+	'읽어요': 'Cluster splits: ㄹ stays, ㄱ jumps. [일거요]. Rule B was isolation only.',
+	'앉아': '앉다 threw ㅈ away. Here it jumps: [안자].',
+	'없어': 'ㅂ stays; ㅅ jumps and tenses. [업써]. Article 14 just says so.',
+	'한글을': 'Particle 을. ㄹ jumps: [한그를].'
+};
+
+const liaison: Card[] = Object.keys(LIAISON_NOTES).map((written) => {
+	const spoken = applyLiaison(written);
+	return card(
+		`p-${written}`,
+		written,
+		'how is this said? (hyphenated cuts, or Hangul)',
+		[romanizeWord(spoken), spoken],
+		LIAISON_NOTES[written],
+		'lab06',
+		'pron'
+	);
+});
+
 /* ---------- assembly ---------- */
 
 export const DECK: Card[] = [
-	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters
+	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters,
+	...liaison
 ];
 
 export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
@@ -186,7 +215,8 @@ export const TIERS: Tier[] = [
 	{ id: 'lab02', label: 'Basic vowels', lab: '0002', size: vowels.length },
 	{ id: 'lab03', label: 'Compound vowels', lab: '0003', size: compounds.length + construction.length },
 	{ id: 'lab04', label: 'Batchim', lab: '0004', size: batchim.length },
-	{ id: 'lab05', label: 'Clusters', lab: '0005', size: clusters.length }
+	{ id: 'lab05', label: 'Clusters', lab: '0005', size: clusters.length },
+	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length }
 ];
 
 export function cardsOfTier(tier: string): Card[] {
@@ -198,7 +228,15 @@ export function normalise(input: string): string {
 	return input.toLowerCase().replace(/\s+/g, '').replace(/[.,!?]/g, '');
 }
 
+export function normalisePron(input: string): string {
+	return input.normalize('NFC').toLowerCase().replace(/\s+/g, '').replace(/[\[\].,!?]/g, '');
+}
+
 export function checkAnswer(card: Card, typed: string): boolean {
+	if (card.kind === 'pron') {
+		const t = normalisePron(typed);
+		return t.length > 0 && card.answers.some((a) => normalisePron(a) === t);
+	}
 	const t = normalise(typed);
 	return t.length > 0 && card.answers.some((a) => normalise(a) === t);
 }
