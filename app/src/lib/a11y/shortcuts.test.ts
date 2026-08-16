@@ -70,4 +70,19 @@ describe('shortcuts guards', () => {
 
 		group.remove();
 	});
+
+	it('keeps arrows for an enabled control on the vowel dock board', () => {
+		const board = document.createElement('div');
+		board.setAttribute('data-dock-board', '');
+		const dock = document.createElement('button');
+		board.appendChild(dock);
+		document.body.appendChild(board);
+
+		expect(shouldIgnoreArrowNav(dock)).toBe(true);
+
+		dock.disabled = true;
+		expect(shouldIgnoreArrowNav(dock)).toBe(false);
+
+		board.remove();
+	});
 });

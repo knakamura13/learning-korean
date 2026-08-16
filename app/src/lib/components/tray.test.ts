@@ -9,8 +9,7 @@ import { flushSync, mount, unmount, type Component } from 'svelte';
 import Tray from './Tray.svelte';
 import FusionStep from './steps/FusionStep.svelte';
 import AssembleStep from './steps/AssembleStep.svelte';
-import VowelStep from './steps/VowelStep.svelte';
-import type { AssembleStep as AssembleStepData, FusionStep as FusionStepData, VowelStep as VowelStepData } from '$lib/content/types';
+import type { AssembleStep as AssembleStepData, FusionStep as FusionStepData } from '$lib/content/types';
 
 type Mounted = Record<string, never>;
 const mounted: Mounted[] = [];
@@ -83,14 +82,6 @@ const assembleStep: AssembleStepData = {
 	consonants: ['ㅂ', 'ㄷ', 'ㅁ'],
 	vowels: ['ㅏ', 'ㅜ'],
 	finals: ['ㅂ', 'ㄱ', 'ㅅ']
-};
-
-const vowelStep: VowelStepData = {
-	type: 'vowel',
-	do: 'Build',
-	teach: 'ok',
-	target: 'ㅣ',
-	targetName: 'i'
 };
 
 describe('Tray', () => {
@@ -281,39 +272,5 @@ describe('AssembleStep trays', () => {
 		expect(slotLead).toBe('ㅁ');
 		expect(slotVowel).toBe('ㅏ');
 		expect(slotFinal).toBe('ㅂ');
-	});
-});
-
-describe('VowelStep trays', () => {
-	it('disables tick side when ticks is none and still builds the bare stroke', () => {
-		const onSettle = vi.fn();
-		const root = render(VowelStep, {
-			step: vowelStep,
-			onSettle,
-			onNudge: () => {}
-		});
-
-		const base = labelledGroup(root, 'base stroke');
-		const ticks = labelledGroup(root, 'ticks');
-		const side = labelledGroup(root, 'tick side');
-
-		radioNamed(base, 'ㅣ').click();
-		flushSync();
-		radioNamed(ticks, 'none').click();
-		flushSync();
-
-		expect(side.getAttribute('aria-disabled')).toBe('true');
-		for (const chip of radios(side)) {
-			expect((chip as HTMLButtonElement).disabled).toBe(true);
-		}
-
-		radioNamed(side, 'left').click();
-		flushSync();
-		expect(radioNamed(side, 'left').getAttribute('aria-checked')).toBe('false');
-
-		const [slotBase, slotTicks] = slotValues(root);
-		expect(slotBase).toBe('ㅣ');
-		expect(slotTicks).toBe('—');
-		expect(onSettle).toHaveBeenCalled();
 	});
 });

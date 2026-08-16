@@ -26,16 +26,19 @@ export function shouldIgnoreShortcut(target: EventTarget | null): boolean {
 
 /**
  * Arrow card-nav should still work when a pip or Next is focused.
- * Typing surfaces keep Left/Right, and a `role="radio"` chip (Tray) keeps
- * all four arrows for the roving-tabindex pattern its group implements —
+ * Typing surfaces keep Left/Right, a `role="radio"` chip (Tray) keeps
+ * all four arrows for the roving-tabindex pattern its group implements,
+ * and vowel dock buttons keep arrows so they can move between docks —
  * without this, the global card-jump listener would fire on the same
- * keypress a Tray uses to move the selection between chips.
+ * keypress those widgets use to move.
  */
 export function shouldIgnoreArrowNav(target: EventTarget | null): boolean {
 	if (!(target instanceof HTMLElement)) return false;
 	if (target.isContentEditable) return true;
 	const radio = target.closest('[role="radio"]');
 	if (radio) return !isDisabledControl(radio);
+	const dockBoard = target.closest('[data-dock-board]');
+	if (dockBoard) return !isDisabledControl(target);
 	const field = target.closest('input, textarea');
 	if (!(field instanceof HTMLInputElement) && !(field instanceof HTMLTextAreaElement)) {
 		return false;

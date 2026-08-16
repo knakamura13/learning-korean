@@ -68,7 +68,7 @@ export interface AssembleStep extends BaseStep {
 	finals?: string[];
 }
 
-/** Build a simple vowel from a base stroke, tick count and side. */
+/** Stamp strokes onto docks to build a simple vowel. */
 export interface VowelStep extends BaseStep {
 	type: 'vowel';
 	target: string;
