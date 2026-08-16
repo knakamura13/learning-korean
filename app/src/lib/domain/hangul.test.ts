@@ -3,7 +3,8 @@ import {
 	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS, SOUND_CHANGES,
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
-	applyLiaison, liaisonSources, liaisonAction
+	applyLiaison, liaisonSources, liaisonAction,
+	romanizeSyllable, romanizeWord
 } from './hangul';
 
 describe('syllable composition', () => {
@@ -284,5 +285,32 @@ describe('liaison (Articles 13–14)', () => {
 		expect(liaisonAction('옷이')).toEqual({ type: 'move', jamo: 'ㅅ' });
 		expect(liaisonAction('읽어요')).toEqual({ type: 'move', jamo: 'ㄱ' });
 		expect(liaisonAction('없어')).toEqual({ type: 'move', jamo: 'ㅅ' });
+	});
+});
+
+describe('romanise spoken syllables', () => {
+	it('uses lab conventions: onset g/d/b/r, batchim k/t/p/l/ng, silent ㅇ-onset', () => {
+		expect(romanizeSyllable('한')).toBe('han');
+		expect(romanizeSyllable('국')).toBe('guk');
+		expect(romanizeSyllable('거')).toBe('geo');
+		expect(romanizeSyllable('으')).toBe('eu');
+		expect(romanizeSyllable('막')).toBe('mak');
+		expect(romanizeSyllable('를')).toBe('reul');
+		expect(romanizeSyllable('써')).toBe('sseo');
+		expect(romanizeSyllable('께')).toBe('kke');
+		expect(romanizeSyllable('이')).toBe('i');
+	});
+
+	it('joins blocks with hyphens', () => {
+		expect(romanizeWord('한구거')).toBe('han-gu-geo');
+		expect(romanizeWord('강이')).toBe('gang-i');
+		expect(romanizeWord(applyLiaison('없어'))).toBe('eop-sseo');
+		expect(romanizeWord(applyLiaison('한글을'))).toBe('han-geu-reul');
+		expect(romanizeWord(applyLiaison('읽어요'))).toBe('il-geo-yo');
+	});
+
+	it('returns empty string for a non-syllable', () => {
+		expect(romanizeSyllable('ㄱ')).toBe('');
+		expect(romanizeWord('한!')).toBe('');
 	});
 });

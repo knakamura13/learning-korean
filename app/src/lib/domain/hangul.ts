@@ -329,6 +329,41 @@ export function liaisonAction(word: string): LiaisonAction {
 	return { type: 'stay' };
 }
 
+const LEAD_RR: Record<string, string> = {
+	'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
+	'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '', 'ㅈ': 'j', 'ㅉ': 'jj',
+	'ㅊ': 'ch', 'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 'h'
+};
+
+const VOWEL_RR: Record<string, string> = {
+	'ㅏ': 'a', 'ㅐ': 'ae', 'ㅑ': 'ya', 'ㅒ': 'yae', 'ㅓ': 'eo', 'ㅔ': 'e',
+	'ㅕ': 'yeo', 'ㅖ': 'ye', 'ㅗ': 'o', 'ㅘ': 'wa', 'ㅙ': 'wae', 'ㅚ': 'oe',
+	'ㅛ': 'yo', 'ㅜ': 'u', 'ㅝ': 'wo', 'ㅞ': 'we', 'ㅟ': 'wi', 'ㅠ': 'yu',
+	'ㅡ': 'eu', 'ㅢ': 'ui', 'ㅣ': 'i'
+};
+
+const FINAL_RR: Record<string, string> = {
+	'': '', 'ㄱ': 'k', 'ㄲ': 'k', 'ㄳ': 'k', 'ㄴ': 'n', 'ㄵ': 'n', 'ㄶ': 'n',
+	'ㄷ': 't', 'ㄹ': 'l', 'ㄺ': 'k', 'ㄻ': 'm', 'ㄼ': 'l', 'ㄽ': 'l', 'ㄾ': 'l',
+	'ㄿ': 'p', 'ㅀ': 'l', 'ㅁ': 'm', 'ㅂ': 'p', 'ㅄ': 'p', 'ㅅ': 't', 'ㅆ': 't',
+	'ㅇ': 'ng', 'ㅈ': 't', 'ㅊ': 't', 'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 't'
+};
+
+export function romanizeSyllable(ch: string): string {
+	const parts = decompose(ch);
+	if (!parts) return '';
+	return `${LEAD_RR[parts.lead] ?? ''}${VOWEL_RR[parts.vowel] ?? ''}${FINAL_RR[parts.final] ?? ''}`;
+}
+
+/** Hyphenated RR of each block. Empty if any character is not a syllable. */
+export function romanizeWord(word: string): string {
+	const chars = [...word];
+	if (chars.length === 0) return '';
+	const parts = chars.map((ch) => romanizeSyllable(ch));
+	if (parts.some((p) => p === '')) return '';
+	return parts.join('-');
+}
+
 /* ------------------------------------------------------------------ *
  * Sound changes
  * ------------------------------------------------------------------ */
