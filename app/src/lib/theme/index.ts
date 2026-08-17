@@ -72,6 +72,22 @@ export function themePrefLabel(pref: ThemePref): string {
 	}
 }
 
+/** Colophon labels: Paper / Forest / System. */
+export function themeJournalLabel(pref: ThemePref): string {
+	switch (pref) {
+		case 'light':
+			return 'Paper';
+		case 'dark':
+			return 'Forest';
+		case 'system':
+			return 'System';
+		default: {
+			const _exhaustive: never = pref;
+			return _exhaustive;
+		}
+	}
+}
+
 export function applyTheme(pref: ThemePref): void {
 	const root = document.documentElement;
 	if (pref === 'light' || pref === 'dark') {

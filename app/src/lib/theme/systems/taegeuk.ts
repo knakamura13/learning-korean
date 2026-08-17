@@ -1,6 +1,7 @@
 import type { DesignSystem, Palette } from '../types.ts';
 
-const SERIF = "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
+const DISPLAY = "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
+const SERIF = DISPLAY;
 const SANS = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
 const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
@@ -26,6 +27,7 @@ const light: Palette = {
 	warn: '#8a6316',
 	warnSoft: '#faf2e0',
 	rose: '#a4342b',
+	roseInk: '#ffffff',
 	roseSoft: '#f9ece9',
 	shadow1: '0 1px 2px rgba(26, 26, 24, 0.05), 0 1px 3px rgba(26, 26, 24, 0.04)',
 	shadow2: '0 2px 6px rgba(26, 26, 24, 0.07), 0 8px 20px rgba(26, 26, 24, 0.05)',
@@ -53,13 +55,14 @@ const dark: Palette = {
 	warn: '#d8b055',
 	warnSoft: '#2a2312',
 	rose: '#e28379',
+	roseInk: '#1a1a18',
 	roseSoft: '#2d1e1c',
 	shadow1: '0 1px 2px rgba(0, 0, 0, 0.4)',
 	shadow2: '0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3)',
 	shadow3: '0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35)'
 };
 
-/** Current ink-and-paper system (태극 red / blue). */
+/** Unused sibling system (태극 red / blue). Botanical Korea is live. */
 export const taegeuk: DesignSystem = {
 	id: 'taegeuk',
 	name: 'Taegeuk',
@@ -72,6 +75,7 @@ export const taegeuk: DesignSystem = {
 		rPill: '999px'
 	},
 	type: {
+		display: DISPLAY,
 		serif: SERIF,
 		sans: SANS,
 		mono: MONO,

@@ -3,6 +3,7 @@
 	import Target from '../Target.svelte';
 	import { hasHangul } from '$lib/a11y/lang';
 	import type { VowelStep } from '$lib/content/types';
+	import { labDraggable } from '$lib/dnd/labDraggable';
 	import {
 		EMPTY_BOARD,
 		PALETTE,
@@ -39,21 +40,6 @@
 	let boardEl = $state<HTMLDivElement>();
 	let paletteEl = $state<HTMLDivElement>();
 	let skipClick = $state(false);
-	let pending = $state<{
-		kind: 'palette' | 'dock';
-		stamp: Stamp;
-		dock: DockId | null;
-		x: number;
-		y: number;
-		target: HTMLElement;
-	} | null>(null);
-	let drag = $state<{
-		lift: Lift;
-		origin: typeof EMPTY_BOARD;
-		fromBoard: boolean;
-		x: number;
-		y: number;
-	} | null>(null);
 	let picker = $state<{ dock: DockId; index: number } | null>(null);
 	let tip = $state<DockId | null>(null);
 	let activeDock = $state<DockId>('base');
@@ -282,99 +268,6 @@
 		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${next}"]`)?.focus();
 	}
 
-	function startPaletteDrag(stamp: Stamp, e: PointerEvent) {
-		if (solved) return;
-		selected = stamp;
-		pending = {
-			kind: 'palette',
-			stamp,
-			dock: null,
-			x: e.clientX,
-			y: e.clientY,
-			target: e.currentTarget as HTMLElement
-		};
-	}
-
-	function startDockDrag(id: DockId, e: PointerEvent) {
-		if (solved || !occupant(board, id)) return;
-		pending = {
-			kind: 'dock',
-			stamp: occupant(board, id)!,
-			dock: id,
-			x: e.clientX,
-			y: e.clientY,
-			target: e.currentTarget as HTMLElement
-		};
-	}
-
-	function beginDrag(e: PointerEvent) {
-		if (!pending || drag) return;
-		if (Math.hypot(e.clientX - pending.x, e.clientY - pending.y) < 8) return;
-		const start = pending;
-		pending = null;
-		start.target.setPointerCapture(e.pointerId);
-		if (start.kind === 'palette') {
-			drag = {
-				lift: { stamp: start.stamp, count: 1 },
-				origin: board,
-				fromBoard: false,
-				x: e.clientX,
-				y: e.clientY
-			};
-			return;
-		}
-		if (!start.dock) return;
-		const lifted = liftDock(board, start.dock);
-		if (!lifted) return;
-		drag = { lift: lifted.lift, origin: board, fromBoard: true, x: e.clientX, y: e.clientY };
-		board = lifted.remaining;
-	}
-
-	function onPointerMove(e: PointerEvent) {
-		if (pending && !drag) beginDrag(e);
-		if (!drag) return;
-		drag = { ...drag, x: e.clientX, y: e.clientY };
-	}
-
-	function onPointerUp(e: PointerEvent) {
-		pending = null;
-		if (!drag) return;
-		armClickSkip();
-		const active = drag;
-		drag = null;
-		const rect = boardEl?.getBoundingClientRect();
-		if (!rect) {
-			if (active.fromBoard) board = active.origin;
-			return;
-		}
-		const next = snapDock(
-			board,
-			active.lift,
-			e.clientX - rect.left,
-			e.clientY - rect.top,
-			rect.width,
-			docks
-		);
-		if (next) {
-			const seated = applyLift(board, next, active.lift);
-			if (seated) {
-				board = seated;
-				tip = null;
-				focusNextOpen();
-			} else if (active.fromBoard) board = active.origin;
-		} else if (active.fromBoard) {
-			board = active.origin;
-		}
-	}
-
-	function onPointerCancel() {
-		pending = null;
-		if (!drag) return;
-		const active = drag;
-		drag = null;
-		if (active.fromBoard) board = active.origin;
-	}
-
 	function onDockClick(id: DockId, e: MouseEvent) {
 		if (skipClick) {
 			skipClick = false;
@@ -389,135 +282,193 @@
 		}
 		place(id);
 	}
+
+	const vowelDrag = labDraggable({
+		draggable: '.stamp:not(:disabled), .dock.held:not(:disabled)',
+		canDrag: () => !solved,
+		decorateMirror: (mirror, source) => {
+			const dockId = source.dataset.dock as DockId | undefined;
+			if (!dockId) return; // palette clones already look like stamps
+			const piece = occupant(board, dockId);
+			if (!piece) return;
+			mirror.classList.add('lab-glyph-mirror');
+			mirror.replaceChildren();
+			switch (piece) {
+				case 'tick': {
+					const mark = document.createElement('span');
+					mark.className = tickUpright ? 'tick-mark upright' : 'tick-mark';
+					mirror.append(mark);
+					return;
+				}
+				case 'ㅣ':
+				case 'ㅡ':
+					mirror.lang = 'ko';
+					mirror.textContent = piece;
+					return;
+				default: {
+					const _exhaustive: never = piece;
+					return _exhaustive;
+				}
+			}
+		},
+		onStart: ({ source }) => {
+			const stamp = source.dataset.stamp as Stamp | undefined;
+			if (stamp) selected = stamp;
+		},
+		onStop: () => {
+			armClickSkip();
+		},
+		onDrop: ({ source, x, y }) => {
+			if (solved) return;
+			const rect = boardEl?.getBoundingClientRect();
+			if (!rect) return;
+			const dockId = source.dataset.dock as DockId | undefined;
+			const stamp = (source.dataset.stamp as Stamp | undefined) ?? null;
+			let lift: Lift;
+			let remaining = board;
+			if (dockId) {
+				const lifted = liftDock(board, dockId);
+				if (!lifted) return;
+				lift = lifted.lift;
+				remaining = lifted.remaining;
+			} else if (stamp) {
+				lift = { stamp, count: 1 };
+			} else {
+				return;
+			}
+			const next = snapDock(
+				remaining,
+				lift,
+				x - rect.left,
+				y - rect.top,
+				rect.width,
+				docks
+			);
+			if (next) {
+				const seated = applyLift(remaining, next, lift);
+				if (seated) {
+					board = seated;
+					tip = null;
+					focusNextOpen();
+				}
+			}
+		}
+	});
 </script>
 
-<svelte:window
-	onpointermove={onPointerMove}
-	onpointerup={onPointerUp}
-	onpointercancel={onPointerCancel}
-	onkeydown={onWindowKey}
-/>
+<svelte:window onkeydown={onWindowKey} />
 
 <Target target={step.target} name={step.targetName} />
 
-{#if tip}
-	<div class="tick-hint" data-tick-hint role="status">
-		{tickBeforeBaseHint(step.target)}
-	</div>
-{/if}
-
-<div
-	class={['zone', won && 'win', result && 'filled']}
-	bind:this={boardEl}
-	data-dock-board
-	role="group"
-	aria-label="vowel board"
-	onfocusout={onBoardFocusOut}
->
-	{#if result}
-		<span class="glyph" lang="ko">{result}</span>
+<div class="vowel-lab" {@attach vowelDrag}>
+	{#if tip}
+		<div class="tick-hint" data-tick-hint role="status">
+			{tickBeforeBaseHint(step.target)}
+		</div>
 	{/if}
-	{#each docks as id (id)}
-		{@const pos = dockPosition(id, docks)}
-		<button
-			type="button"
-			class={['dock', occupant(board, id) ? 'held' : 'open', id === 'base' && 'base']}
-			data-dock={id}
-			tabindex={solved ? -1 : id === tabDock ? 0 : -1}
-			style:left="{pos.x * 100}%"
-			style:top="{pos.y * 100}%"
-			aria-label={dockAria(id)}
-			aria-haspopup={compatibleStamps(board, id).length > 1 ? 'listbox' : undefined}
-			aria-expanded={picker?.dock === id}
-			aria-controls={picker?.dock === id ? 'vowel-shape-picker' : undefined}
-			disabled={solved}
-			onfocus={() => (activeDock = id)}
-			onkeydown={onBoardKey}
-			onpointerdown={(e) => startDockDrag(id, e)}
-			onclick={(e) => onDockClick(id, e)}
-		></button>
-	{/each}
-	{#if picker}
-		{@const openDock = picker.dock}
-		{@const pos = dockPosition(openDock, docks)}
-		<div
-			id="vowel-shape-picker"
-			class="picker"
-			data-shape-picker
-			role="listbox"
-			tabindex="-1"
-			aria-label="choose a stroke"
-			aria-activedescendant="vowel-pick-{picker.index}"
-			style:left="{pos.x * 100}%"
-			style:top="{pos.y * 100}%"
-		>
-			{#each pickerOptions as stamp, i (stamp)}
+
+	<div
+		class={['zone', won && 'win', result && 'filled']}
+		bind:this={boardEl}
+		data-dock-board
+		role="group"
+		aria-label="vowel board"
+		onfocusout={onBoardFocusOut}
+	>
+		{#if result}
+			<span class="glyph" lang="ko">{result}</span>
+		{/if}
+		{#each docks as id (id)}
+			{@const pos = dockPosition(id, docks)}
+			<button
+				type="button"
+				class={['dock', occupant(board, id) ? 'held' : 'open', id === 'base' && 'base']}
+				data-dock={id}
+				tabindex={solved ? -1 : id === tabDock ? 0 : -1}
+				style:left="{pos.x * 100}%"
+				style:top="{pos.y * 100}%"
+				aria-label={dockAria(id)}
+				aria-haspopup={compatibleStamps(board, id).length > 1 ? 'listbox' : undefined}
+				aria-expanded={picker?.dock === id}
+				aria-controls={picker?.dock === id ? 'vowel-shape-picker' : undefined}
+				disabled={solved}
+				onfocus={() => (activeDock = id)}
+				onkeydown={onBoardKey}
+				onclick={(e) => onDockClick(id, e)}
+			></button>
+		{/each}
+		{#if picker}
+			{@const openDock = picker.dock}
+			{@const pos = dockPosition(openDock, docks)}
+			<div
+				id="vowel-shape-picker"
+				class="picker"
+				data-shape-picker
+				role="listbox"
+				tabindex="-1"
+				aria-label="choose a stroke"
+				aria-activedescendant="vowel-pick-{picker.index}"
+				style:left="{pos.x * 100}%"
+				style:top="{pos.y * 100}%"
+			>
+				{#each pickerOptions as stamp, i (stamp)}
+					<button
+						id="vowel-pick-{i}"
+						type="button"
+						tabindex="-1"
+						class={['choice', i === picker.index && 'on']}
+						role="option"
+						data-stamp={stamp}
+						aria-selected={i === picker.index}
+						lang={hasHangul(stamp) ? 'ko' : undefined}
+						onclick={() => seat(openDock, stamp)}
+					>
+						{#if stamp === 'tick'}
+							<span class={['tick-mark', tickUpright && 'upright']}></span>
+						{:else}
+							{stamp}
+						{/if}
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
+	<div
+		class="palette"
+		role="radiogroup"
+		aria-labelledby="vowel-strokes-label"
+		aria-disabled={solved ? 'true' : undefined}
+		tabindex="-1"
+		bind:this={paletteEl}
+		onkeydown={onPaletteKey}
+	>
+		<div class="label" id="vowel-strokes-label">strokes</div>
+		<div class="row">
+			{#each PALETTE as stamp, i (stamp)}
 				<button
-					id="vowel-pick-{i}"
 					type="button"
-					tabindex="-1"
-					class={['choice', i === picker.index && 'on']}
-					role="option"
-					data-stamp={stamp}
-					aria-selected={i === picker.index}
+					class={['stamp', selected === stamp && 'on', stamp === 'tick' && 'tick']}
+					role="radio"
+					aria-checked={selected === stamp}
+					aria-label="strokes: {stamp}"
+					tabindex={i === selectedIndex ? 0 : -1}
 					lang={hasHangul(stamp) ? 'ko' : undefined}
-					onclick={() => seat(openDock, stamp)}
+					disabled={solved}
+					data-stamp={stamp}
+					onclick={() => (selected = stamp)}
 				>
 					{#if stamp === 'tick'}
-						<span class={['tick-mark', tickUpright && 'upright']}></span>
+						<span class={['tick-mark', tickUpright && 'upright']} aria-hidden="true"></span>
+						<span class="mark">tick</span>
 					{:else}
-						{stamp}
+						<span class="glyph">{stamp}</span>
 					{/if}
 				</button>
 			{/each}
 		</div>
-	{/if}
-</div>
-
-<div
-	class="palette"
-	role="radiogroup"
-	aria-labelledby="vowel-strokes-label"
-	aria-disabled={solved ? 'true' : undefined}
-	tabindex="-1"
-	bind:this={paletteEl}
-	onkeydown={onPaletteKey}
->
-	<div class="label" id="vowel-strokes-label">strokes</div>
-	<div class="row">
-		{#each PALETTE as stamp, i (stamp)}
-			<button
-				type="button"
-				class={['stamp', selected === stamp && 'on', stamp === 'tick' && 'tick']}
-				role="radio"
-				aria-checked={selected === stamp}
-				aria-label="strokes: {stamp}"
-				tabindex={i === selectedIndex ? 0 : -1}
-				lang={hasHangul(stamp) ? 'ko' : undefined}
-				disabled={solved}
-				onpointerdown={(e) => startPaletteDrag(stamp, e)}
-				onclick={() => (selected = stamp)}
-			>
-				{#if stamp === 'tick'}
-					<span class={['tick-mark', tickUpright && 'upright']} aria-hidden="true"></span>
-					<span class="mark">tick</span>
-				{:else}
-					<span class="glyph">{stamp}</span>
-				{/if}
-			</button>
-		{/each}
 	</div>
 </div>
-
-{#if drag}
-	<div class="ghost" style:left="{drag.x}px" style:top="{drag.y}px" aria-hidden="true">
-		{#if drag.lift.stamp === 'tick'}
-			<span class={['tick-mark', tickUpright && 'upright']}></span>
-		{:else}
-			<span class="glyph" lang="ko">{drag.lift.stamp}</span>
-		{/if}
-	</div>
-{/if}
 
 <style>
 	.zone {
@@ -581,6 +532,8 @@
 		border: none;
 		background: transparent;
 		cursor: grab;
+		touch-action: none;
+		user-select: none;
 	}
 	.dock.open {
 		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
@@ -679,6 +632,8 @@
 		gap: 0.08rem;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			transform var(--fast) var(--ease);
+		touch-action: none;
+		user-select: none;
 	}
 	.stamp:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
 	.stamp:active:not(:disabled) { transform: translateY(0); }
@@ -715,17 +670,6 @@
 		line-height: 1;
 		padding-inline: 0.2rem;
 		text-align: center;
-	}
-
-	.ghost {
-		position: fixed;
-		z-index: 20;
-		pointer-events: none;
-		transform: translate(-50%, -50%);
-		font-family: var(--hangul);
-		font-size: 2rem;
-		color: var(--accent);
-		filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--ink) 18%, transparent));
 	}
 
 	@media (forced-colors: active) {

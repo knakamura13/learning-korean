@@ -187,6 +187,20 @@ export function requiredLab(labs: CourseLab[], requires: string | undefined): Co
 	return labs.find((lab) => lab.id === requires) ?? null;
 }
 
+export function buildCourseNavView(args: {
+	ready: boolean;
+	isUnlocked: (tier: string) => boolean;
+	sessionFor: (labId: string) => LabProgress | undefined;
+	queue: number;
+}): CourseNavView {
+	return {
+		ready: args.ready,
+		isUnlocked: args.isUnlocked,
+		sessionFor: args.sessionFor,
+		queue: args.queue
+	};
+}
+
 /** True when this lab should show a "prerequisite first" banner. */
 export function showPrerequisiteGate(
 	lab: CourseLab,

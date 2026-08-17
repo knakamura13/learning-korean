@@ -33,6 +33,7 @@ function paint(paper: string, ink: string): Palette {
 		warn: ink,
 		warnSoft: paper,
 		rose: ink,
+		roseInk: paper,
 		roseSoft: paper,
 		shadow1: 'none',
 		shadow2: 'none',
@@ -67,6 +68,7 @@ const fixture: DesignSystem = {
 	leading: '1.5',
 	shape: { rSm: '1px', rMd: '2px', rLg: '3px', rPill: '4px' },
 	type: {
+		display: 'Fixture Display',
 		serif: 'Fixture Serif',
 		sans: 'Fixture Sans',
 		mono: 'Fixture Mono',
@@ -112,6 +114,7 @@ describe('designSystemCss', () => {
 	});
 
 	it('declares type stacks once from DesignSystem.type, not from each palette', () => {
+		expect(css).toContain('--display: Fixture Display');
 		expect(css).toContain('--serif: Fixture Serif');
 		expect(css).toContain('--sans: Fixture Sans');
 		expect(css.match(/--serif:/g)?.length).toBe(1);
@@ -147,8 +150,9 @@ describe('designSystemCss', () => {
 		expect(more).not.toContain('--paper:');
 	});
 
-	it('emits rose and rose-soft from the palette', () => {
+	it('emits rose, rose-ink, and rose-soft from the palette', () => {
 		expect(css).toContain('--rose: #010101');
+		expect(css).toContain('--rose-ink: #fefefe');
 		expect(css).toContain('--rose-soft: #fefefe');
 	});
 

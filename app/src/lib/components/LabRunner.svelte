@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount, tick, type Snippet } from 'svelte';
-	import { fly, fade } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import type { Lab } from '$lib/content/types';
 	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
@@ -8,6 +8,7 @@
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
 	import { labSession } from '$lib/stores/labSession.svelte';
+	import { fascicle } from '$lib/stores/fascicle.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 	import {
 		pipRailCenteredScrollLeft,
@@ -36,6 +37,8 @@
 	import ClusterStep from './steps/ClusterStep.svelte';
 	import LiaisonStep from './steps/LiaisonStep.svelte';
 	import ReadStep from './steps/ReadStep.svelte';
+	import FascicleSpread from './shell/FascicleSpread.svelte';
+	import SpecimenWell from './shell/SpecimenWell.svelte';
 
 	let { lab, letterAsk }: { lab: Lab; letterAsk?: Snippet } = $props();
 
@@ -67,9 +70,23 @@
 	let choiceRef = $state<ChoiceStep | undefined>();
 	let fadeLeft = $state(false);
 	let fadeRight = $state(false);
-	let cardEl = $state<HTMLDivElement>();
+	let cardEl = $state<HTMLDivElement | undefined>();
 	let confirmingRestart = $state(false);
-	let restartButton = $state<HTMLButtonElement>();
+	let restartButton = $state<HTMLButtonElement | undefined>();
+
+	function bindCard(node: HTMLDivElement) {
+		cardEl = node;
+		return () => {
+			if (cardEl === node) cardEl = undefined;
+		};
+	}
+
+	function bindRestartButton(node: HTMLButtonElement) {
+		restartButton = node;
+		return () => {
+			if (restartButton === node) restartButton = undefined;
+		};
+	}
 
 	/**
 	 * Scroll and focus are managed in exactly one place: here. Advancing or
@@ -95,7 +112,7 @@
 		}
 		managedIndex = i;
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		const chrome = document.querySelector('header.bar')?.getBoundingClientRect().bottom ?? 0;
+		const chrome = document.querySelector('header.running-head')?.getBoundingClientRect().bottom ?? 0;
 		const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - chrome - 8);
 		el.querySelector('h2')?.focus({ preventScroll: true });
 		window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
@@ -136,10 +153,19 @@
 	});
 
 	onDestroy(() => {
+		fascicle.setLiveLab(null);
 		if (!ready || finished || settled) return;
 		if (furthest === 0 && firstTry === 0 && outcomes.every((o) => o == null)) return;
 		// Mid-card leave: keep the furthest card, not a card the learner jumped back to.
 		persist(furthest);
+	});
+
+	$effect(() => {
+		if (!ready || finished) {
+			fascicle.setLiveLab(null);
+			return;
+		}
+		fascicle.setLiveLab({ number: lab.number, card: index + 1, total: lab.steps.length });
 	});
 
 	/**
@@ -349,184 +375,201 @@
 
 <svelte:window onkeydown={onKey} />
 
-{#if finished}
-	<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
-		<span class="seal" lang="ko">한글</span>
-		<h1>{lab.finish.title}</h1>
-		<p class="summary">{lab.finish.summary}</p>
+<FascicleSpread>
+	{#snippet article()}
+		{#if finished}
+			<div class="finish">
+				<p class="kicker">Plate set</p>
+				<h1>{lab.finish.title}</h1>
+				<p class="summary">{lab.finish.summary}</p>
 
-		<div class="tally" role="region" aria-label="Lab results summary">
-			<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
-			<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
-			{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
-		</div>
+				<div class="tally" role="region" aria-label="Lab results summary">
+					<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
+					<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
+					{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
+				</div>
 
-		<p class="unlocked">
-			{finishCopy.lead}
-			{finishCopy.detail}
-		</p>
+				<p class="unlocked">
+					{finishCopy.lead}
+					{finishCopy.detail}
+				</p>
 
-		<div class="actions">
-			{#if dueNow > 0}
-				<a class="btn" href={resolve('/review')}>Review now →</a>
-			{/if}
-			{#if nextLab}
-				<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href={resolve('/lab/[id]', { id: nextLab.id })}>Next lab</a>
-			{/if}
-			{#if confirmingRestart}
-				<dialog
-					class="restart-confirm"
-					aria-labelledby="restart-confirmation"
-					{@attach openRestartDialog}
-				>
-					<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
-					<div class="restart-confirm-actions">
-						<button class="btn ghost" type="button" use:focusWhen={true} onclick={cancelRestart}>
-							Cancel
-						</button>
-						<button class="btn" type="button" onclick={confirmRestart}>Start over</button>
-					</div>
-				</dialog>
-			{:else}
-				<button
-					bind:this={restartButton}
-					class="btn ghost"
-					type="button"
-					onclick={requestRestart}
-				>
-					Run the lab again
-				</button>
-			{/if}
-		</div>
-	</div>
-{:else}
-	<header class="head" class:compact={compactHead}>
-		<p class="eyebrow">
-			Lab {String(lab.number).padStart(2, '0')} · ~{lab.minutes} minutes
-			{#if alreadyDone}· completed{/if}
-			{#if showResumeNote}
-				· picking up at card {index + 1}
-			{/if}
-		</p>
-		<h1>{lab.title}</h1>
-		{#if !compactHead}
-			<p class="standfirst">{lab.standfirst}</p>
-		{/if}
-	</header>
-	{#if !ready}
-		<div class="card step loading" aria-busy="true">
-			<div class="skel line-ph" aria-hidden="true"></div>
-			<div class="skel work-ph" aria-hidden="true"></div>
-			<p class="muted">Loading the lab…</p>
-		</div>
-	{:else}
-	{#if showResumeNote}
-		<p class="vh" role="status">
-			Picking up at card {index + 1} of {lab.steps.length}.
-		</p>
-	{/if}
-	<nav class="rail-wrap" aria-label="Lab card navigation">
-		<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
-			<ol class="rail" {@attach keepSelectedVisible}>
-				{#each lab.steps as _, i (i)}
-					{@const kind = pipKind(i, outcomes, furthest)}
-					{@const selected = i === index}
-					<li>
-						{#if pipIsJumpTarget(kind) || selected}
-							<button
-								type="button"
-								class="pip"
-								data-kind={kind}
-								data-selected={selected || undefined}
-								aria-current={selected ? 'step' : undefined}
-								aria-label={pipLabel(kind, i + 1, selected)}
-								onclick={() => jumpTo(i)}
-							>
-								<span class="pip-n">{i + 1}</span>
-							</button>
-						{:else}
-							<span class="pip" data-kind={kind}>
-								<span class="pip-n" aria-hidden="true">{i + 1}</span>
-								<span class="vh">{pipLabel(kind, i + 1)}</span>
-							</span>
-						{/if}
-					</li>
-				{/each}
-			</ol>
-		</div>
-		<span class="where">Card {index + 1} of {lab.steps.length}</span>
-	</nav>
-
-	{#key index}
-		<div class="card step" bind:this={cardEl} in:fly={{ y: 10, duration: 260 }}>
-			{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
-			<h2 class="do" tabindex="-1">{@html labHtml(step.do)}</h2>
-			{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
-
-			<div class="work">
-				{#if step.type === 'mouth'}
-					<MouthStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'choice'}
-					<ChoiceStep bind:this={choiceRef} {step} {onSettle} {onNudge} />
-				{:else if step.type === 'build'}
-					<BuildStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'assemble'}
-					<AssembleStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'vowel'}
-					<VowelStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'fusion'}
-					<FusionStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'cluster'}
-					<ClusterStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'liaison'}
-					<LiaisonStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'read'}
-					<ReadStep {step} {onSettle} {onNudge} />
-				{:else}
-					{@const _exhaustive: never = step}
-				{/if}
-			</div>
-
-			{#if feedback || settled}
-				<div
-					class="advance"
-					use:revealAdvance={shouldRevealAdvance(settled, feedback?.tone)}
-				>
-					{#if feedback}
-						<div
-							class="fb"
-							data-tone={feedback.tone}
-							in:fade={{ duration: 180 }}
-							aria-live="polite"
-							aria-atomic="true"
-						>
-							<span class="verdict">
-								{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
-							</span>
-							{@html labHtml(feedback.html)}
-						</div>
+				<div class="actions">
+					{#if dueNow > 0}
+						<a class="btn rose" href={resolve('/review')}>Review now →</a>
 					{/if}
-
-					{#if settled}
-						<div class="foot" in:fade={{ duration: 160 }}>
-							<button
-								class="btn"
-								use:focusWhen={{ active: true, preventScroll: true }}
-								onclick={next}
-							>{isLast ? 'Finish' : 'Next'}</button>
-							<span class="kb">or press Enter</span>
-						</div>
+					{#if nextLab}
+						<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href={resolve('/lab/[id]', { id: nextLab.id })}>Next lab</a>
+					{/if}
+					{#if confirmingRestart}
+						<dialog
+							class="restart-confirm"
+							aria-labelledby="restart-confirmation"
+							{@attach openRestartDialog}
+						>
+							<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
+							<div class="restart-confirm-actions">
+								<button class="btn ghost" type="button" use:focusWhen={true} onclick={cancelRestart}>
+									Cancel
+								</button>
+								<button class="btn" type="button" onclick={confirmRestart}>Start over</button>
+							</div>
+						</dialog>
+					{:else}
+						<button
+							{@attach bindRestartButton}
+							class="btn ghost"
+							type="button"
+							onclick={requestRestart}
+						>
+							Run the lab again
+						</button>
 					{/if}
 				</div>
-			{/if}
-		</div>
-	{/key}
-	{/if}
-{/if}
+			</div>
+		{:else}
+			<header class="head" class:compact={compactHead}>
+				<p class="kicker">
+					Lab {String(lab.number).padStart(2, '0')} · ~{lab.minutes} minutes
+					{#if alreadyDone}· completed{/if}
+					{#if showResumeNote}
+						· picking up at card {index + 1}
+					{/if}
+				</p>
+				<h1>{lab.title}</h1>
+				{#if !compactHead}
+					<p class="standfirst">{lab.standfirst}</p>
+				{/if}
+			</header>
+			{#if !ready}
+				<div class="loading" aria-busy="true">
+					<div class="skel line-ph" aria-hidden="true"></div>
+					<p class="muted">Loading the lab…</p>
+				</div>
+			{:else}
+				{#if showResumeNote}
+					<p class="vh" role="status">
+						Picking up at card {index + 1} of {lab.steps.length}.
+					</p>
+				{/if}
+				<nav class="rail-wrap" aria-label="Lab card navigation">
+					<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
+						<ol class="rail" {@attach keepSelectedVisible}>
+							{#each lab.steps as _, i (i)}
+								{@const kind = pipKind(i, outcomes, furthest)}
+								{@const selected = i === index}
+								<li>
+									{#if pipIsJumpTarget(kind) || selected}
+										<button
+											type="button"
+											class="pip"
+											data-kind={kind}
+											data-selected={selected || undefined}
+											aria-current={selected ? 'step' : undefined}
+											aria-label={pipLabel(kind, i + 1, selected)}
+											onclick={() => jumpTo(i)}
+										>
+											<span class="pip-n">{i + 1}</span>
+										</button>
+									{:else}
+										<span class="pip" data-kind={kind}>
+											<span class="pip-n" aria-hidden="true">{i + 1}</span>
+											<span class="vh">{pipLabel(kind, i + 1)}</span>
+										</span>
+									{/if}
+								</li>
+							{/each}
+						</ol>
+					</div>
+					<span class="where">Card {index + 1} of {lab.steps.length}</span>
+				</nav>
 
-{#if !finished}
-	{@render letterAsk?.()}
-{/if}
+				{#key index}
+					<div class="prompt" {@attach bindCard} in:fade={{ duration: 240 }}>
+						{#if step.act}<p class="kicker">{step.act}</p>{/if}
+						<h2 class="do" tabindex="-1">{@html labHtml(step.do)}</h2>
+						{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
+
+						{#if feedback || settled}
+							<div
+								class="advance"
+								use:revealAdvance={shouldRevealAdvance(settled, feedback?.tone)}
+							>
+								{#if feedback}
+									<div
+										class="fb"
+										data-tone={feedback.tone}
+										in:fade={{ duration: 180 }}
+										aria-live="polite"
+										aria-atomic="true"
+									>
+										<span class="verdict">
+											{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
+										</span>
+										{@html labHtml(feedback.html)}
+									</div>
+								{/if}
+
+								{#if settled}
+									<div class="foot" in:fade={{ duration: 160 }}>
+										<button
+											class="btn"
+											use:focusWhen={{ active: true, preventScroll: true }}
+											onclick={next}
+										>{isLast ? 'Finish' : 'Next'}</button>
+										<span class="kb">or press Enter</span>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{/key}
+			{/if}
+		{/if}
+		{#if !finished}
+			{@render letterAsk?.()}
+		{/if}
+	{/snippet}
+
+	{#snippet well()}
+		{#if finished}
+			<SpecimenWell>
+				<span class="seal" lang="ko">한글</span>
+			</SpecimenWell>
+		{:else if !ready}
+			<SpecimenWell variant="empty" />
+		{:else}
+			{#key index}
+				<SpecimenWell>
+					<div class="work" in:fade={{ duration: 240 }}>
+						{#if step.type === 'mouth'}
+							<MouthStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'choice'}
+							<ChoiceStep bind:this={choiceRef} {step} {onSettle} {onNudge} />
+						{:else if step.type === 'fusion'}
+							<FusionStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'cluster'}
+							<ClusterStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'liaison'}
+							<LiaisonStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'read'}
+							<ReadStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'build'}
+							<BuildStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'assemble'}
+							<AssembleStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'vowel'}
+							<VowelStep {step} {onSettle} {onNudge} />
+						{:else}
+							{@const _exhaustive: never = step}
+						{/if}
+					</div>
+				</SpecimenWell>
+			{/key}
+		{/if}
+	{/snippet}
+</FascicleSpread>
+
 
 <style>
 	.head { margin-bottom: var(--s5); }
@@ -536,6 +579,15 @@
 		margin: 0;
 		font-size: 1.15rem;
 		line-height: 1.25;
+	}
+
+	.kicker {
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--accent);
+		margin: 0;
 	}
 
 	.standfirst {
@@ -832,25 +884,17 @@
 	.loading {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
 		gap: var(--s3);
-		padding: var(--s7) var(--s5);
-		text-align: center;
+		padding: var(--s4) 0;
 	}
 	.loading .line-ph {
 		width: 14rem;
 		max-width: 80%;
 		height: 0.85rem;
 	}
-	.loading .work-ph {
-		width: 100%;
-		max-width: 22rem;
-		height: 8rem;
-		border-radius: var(--r-md);
-	}
 	.loading .muted { margin: var(--s2) 0 0; }
 
-	.step { padding: var(--s6) var(--s5) var(--s5); }
+	.prompt { padding: 0 0 var(--s4); }
 
 	.do {
 		font-size: clamp(1.15rem, 2.8vw, 1.45rem);
@@ -868,7 +912,7 @@
 		margin: 0 0 var(--s4);
 	}
 
-	.work { margin-top: var(--s4); }
+	.work { min-height: 8rem; }
 
 	.advance {
 		scroll-margin-bottom: max(var(--s4), env(safe-area-inset-bottom));
@@ -912,10 +956,10 @@
 	}
 
 	/* --- finish --- */
-	.finish { padding: var(--s7) var(--s5); text-align: center; }
+	.finish { padding: 0 0 var(--s5); }
 	.finish h1 {
 		font-size: clamp(1.35rem, 3vw, 1.6rem);
-		margin: 0 0 var(--s3);
+		margin: var(--s3) 0;
 	}
 
 	.seal {
@@ -923,7 +967,8 @@
 		font-size: 3.4rem;
 		line-height: 1;
 		display: block;
-		margin-bottom: var(--s3);
+		text-align: center;
+		color: var(--accent);
 	}
 
 	.summary {
@@ -931,12 +976,11 @@
 		color: var(--ink-soft);
 		line-height: 1.65;
 		max-width: 32rem;
-		margin: 0 auto var(--s5);
+		margin: 0 0 var(--s5);
 	}
 
 	.tally {
 		display: flex;
-		justify-content: center;
 		gap: var(--s6);
 		flex-wrap: wrap;
 		margin-bottom: var(--s4);
@@ -959,10 +1003,10 @@
 		font-size: 0.88rem;
 		color: var(--ink-soft);
 		max-width: 30rem;
-		margin: 0 auto var(--s5);
+		margin: 0 0 var(--s5);
 	}
 
-	.actions { display: flex; gap: var(--s3); justify-content: center; flex-wrap: wrap; }
+	.actions { display: flex; gap: var(--s3); flex-wrap: wrap; }
 	.restart-confirm {
 		display: grid;
 		gap: var(--s2);

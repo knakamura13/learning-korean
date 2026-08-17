@@ -1,27 +1,105 @@
 <script lang="ts">
 	import '../app.css';
-	import { assets, resolve } from '$app/paths';
+	import { onMount } from 'svelte';
+	import { assets } from '$app/paths';
 	import { page } from '$app/state';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { labSession } from '$lib/stores/labSession.svelte';
+	import { fascicle } from '$lib/stores/fascicle.svelte';
 	import { activeSystem } from '$lib/theme/active';
+	import { LABS } from '$lib/content';
+	import {
+		buildCourseNavView,
+		continueAction,
+		labCardState,
+		toCourseLab,
+		type ContinueAction
+	} from '$lib/domain/courseNav';
+	import { jamoIndexEntries } from '$lib/domain/jamoIndex';
+	import { plateViews } from '$lib/domain/plateCatalog';
+	import {
+		labIdFromPath,
+		shellFolio,
+		type LiveLabFolio
+	} from '$lib/domain/sitting';
+	import RunningHead from '$lib/components/shell/RunningHead.svelte';
+	import PlateRail from '$lib/components/shell/PlateRail.svelte';
+	import TocFlyleaf from '$lib/components/shell/TocFlyleaf.svelte';
 
 	let { children } = $props();
 
 	const canonical = $derived(pageCanonical(page.url.pathname));
 	const ogImage = $derived(siteAsset('/og.png'));
 
-	const nav = [
-		{ href: '/', label: 'Labs' },
-		{ href: '/review', label: 'Review' },
-		{ href: '/reference', label: 'Reference' }
-	] as const;
+	let ready = $state(false);
+	onMount(() => {
+		progress.tick();
+		ready = true;
+	});
 
-	const queue = $derived(progress.stats.queue);
+	const course = LABS.map(toCourseLab);
+	const navView = $derived(
+		buildCourseNavView({
+			ready,
+			isUnlocked: (tier) => progress.isUnlocked(tier),
+			sessionFor: (id) => labSession.forLab(id),
+			queue: progress.stats.queue
+		})
+	);
+	const action = $derived(continueAction(course, navView));
+	const currentLabId = $derived(labIdFromPath(page.url.pathname));
+	const sittingKind = $derived.by((): ContinueAction['kind'] | null => {
+		if (page.url.pathname.includes('/review')) {
+			return progress.stats.queue > 0 ? 'review' : 'caught-up';
+		}
+		if (currentLabId) {
+			const lab = course.find((item) => item.id === currentLabId);
+			if (!lab) return action?.kind ?? null;
+			const card = labCardState(lab, course, navView);
+			return card.resumeAt !== null ? 'resume' : 'start';
+		}
+		return action?.kind ?? null;
+	});
+	const plates = $derived(
+		plateViews(course, navView, { currentLabId, sittingKind })
+	);
+	const indexEntries = $derived(jamoIndexEntries(course, navView, currentLabId));
+
+	const resumeCard = $derived.by((): LiveLabFolio | null => {
+		for (const lab of course) {
+			const card = labCardState(lab, course, navView);
+			if (card.resumeAt !== null) {
+				return { number: lab.number, card: card.resumeAt + 1, total: lab.stepCount };
+			}
+		}
+		if (action?.kind === 'start') {
+			const lab = course.find((item) => action.href.endsWith(item.id));
+			if (lab) return { number: lab.number, card: 1, total: lab.stepCount };
+		}
+		return null;
+	});
+
+	const folio = $derived(
+		shellFolio({
+			pathname: page.url.pathname,
+			action,
+			liveLab: fascicle.liveLab,
+			queue: progress.stats.queue,
+			resumeCard
+		})
+	);
+
+	const sittingTitle = $derived(action?.title ?? 'Korean');
+
+	const latinFonts =
+		'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;600&family=Newsreader:ital,opsz,wght@0,16..72,300;0,16..72,400;1,16..72,400&family=Source+Serif+4:opsz,wght@8..60,400&display=swap';
 </script>
 
 <svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link rel="stylesheet" href={latinFonts} />
 	{#each activeSystem.fonts as face (face.file)}
 		<link
 			rel="preload"
@@ -50,36 +128,16 @@
 
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="bar">
-	<div class="inner">
-		<a class="brand" href={resolve('/')}>
-			<span class="mark" lang="ko">한</span>
-			<span class="name">Korean</span>
-		</a>
-		<nav aria-label="Main navigation">
-			{#each nav as item (item.href)}
-				{@const isActive = item.href === '/'
-					? page.url.pathname === '/'
-					: page.url.pathname.startsWith(item.href)}
-				<a
-					href={resolve(item.href)}
-					class:active={isActive}
-					aria-current={isActive ? 'page' : undefined}
-				>
-					{item.label}
-					{#if item.href === '/review' && queue > 0}
-						<span class="badge" aria-label="{queue} cards due for review">{queue}</span>
-					{/if}
-				</a>
-			{/each}
-		</nav>
-		<ThemeToggle />
-	</div>
-</header>
+<RunningHead folio={folio.text} pip={folio.pip} kind={folio.kind} {sittingTitle} />
 
-<main id="main">
-	{@render children()}
-</main>
+<div class="spread">
+	<PlateRail {plates} />
+	<main id="main">
+		{@render children()}
+	</main>
+</div>
+
+<TocFlyleaf {plates} entries={indexEntries} />
 
 <style>
 	.skip {
@@ -93,105 +151,8 @@
 	}
 	.skip:focus { inset-inline-start: var(--s3); inset-block-start: var(--s3); }
 
-	.bar {
-		position: sticky;
-		top: 0;
-		z-index: 5;
-		padding-top: env(safe-area-inset-top);
-		background: color-mix(in srgb, var(--paper) 88%, transparent);
-		backdrop-filter: blur(10px);
-		border-bottom: 1px solid var(--rule);
-	}
-
-	.inner {
-		max-width: var(--shell);
-		margin: 0 auto;
-		padding-block: var(--s2);
-		padding-inline: max(var(--s5), env(safe-area-inset-left)) max(var(--s5), env(safe-area-inset-right));
-		display: flex;
-		align-items: center;
-		gap: var(--s5);
-	}
-
-	.brand {
-		display: flex;
-		align-items: center;
-		gap: var(--s2);
-		text-decoration: none;
-		color: var(--ink);
-		font-weight: 600;
-	}
-
-	.mark {
-		font-family: var(--hangul);
-		font-size: 1.4rem;
-		color: var(--accent);
-		line-height: 1;
-	}
-
-	.name { font-size: 0.9rem; letter-spacing: 0.01em; }
-
-	nav {
-		display: flex;
-		gap: var(--s2);
-		margin-inline-start: auto;
-		min-width: 0;
-		flex-shrink: 1;
-	}
-
-	nav a {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--s1);
-		min-height: 44px;
-		padding: 0.35rem 0.7rem;
-		border-radius: var(--r-sm);
-		font-size: 0.84rem;
-		text-decoration: none;
-		color: var(--ink-soft);
-		white-space: nowrap;
-		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
-	}
-	nav a:hover { background: var(--paper-sunk); color: var(--ink); }
-	nav a:active { background: var(--rule); color: var(--ink); }
-	nav a.active { color: var(--accent); background: var(--accent-soft); }
-
-	.badge {
-		font-family: var(--mono);
-		font-size: 0.62rem;
-		background: var(--rose);
-		color: var(--accent-ink);
-		border-radius: var(--r-pill);
-		padding: 0.05rem 0.36rem;
-		font-variant-numeric: tabular-nums;
-	}
-
-	@media (max-width: 40rem) {
-		.inner { gap: var(--s2); }
-		nav { gap: var(--s1); }
-		nav a { padding: 0.35rem 0.5rem; }
-	}
-
-	@media (max-width: 30rem) {
-		.inner {
-			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
-			gap: var(--s2);
-		}
-		.name { display: none; }
-	}
-
 	@media (forced-colors: active) {
-		.bar {
-			background: Canvas;
-			color: CanvasText;
-			border-bottom: 1px solid ButtonBorder;
-			backdrop-filter: none;
-		}
-		.badge {
-			background: Highlight;
-			color: HighlightText;
-		}
-		nav a.active {
+		.skip:focus {
 			background: Highlight;
 			color: HighlightText;
 		}

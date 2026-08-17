@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { fly, fade } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -8,8 +8,8 @@
 	import { isConsonantLead } from '$lib/audio/consonants';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
-	import { LABS } from '$lib/content';
-	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
+	import FascicleSpread from '$lib/components/shell/FascicleSpread.svelte';
+	import SpecimenWell from '$lib/components/shell/SpecimenWell.svelte';
 
 	let queue = $state<Card[]>([]);
 	let index = $state(0);
@@ -17,12 +17,19 @@
 	let right = $state(0);
 	let typed = $state('');
 	let answered = $state(false);
-	let verdict = $state<{ ok: boolean; speed: string; when: string } | null>(null);
+	let verdict = $state<{ ok: boolean; speed: 'fast' | 'steady' | 'slow' | ''; when: string } | null>(null);
 	let startedAt = 0;
 	let sittingNew = $state(false);
 	let input = $state<HTMLInputElement | undefined>();
 	let ready = $state(false);
 	let emptyHint = $state(false);
+
+	function bindAnswer(node: HTMLInputElement) {
+		input = node;
+		return () => {
+			if (input === node) input = undefined;
+		};
+	}
 
 	const card = $derived(queue[index]);
 	const pronCard = $derived(card?.kind === 'pron');
@@ -86,7 +93,6 @@
 	}
 
 	function next() {
-		// A missed card returns at the end of this sitting, not only in 10 minutes.
 		if (verdict && !verdict.ok && queue.length < 60 && queue.lastIndexOf(card) === index) {
 			queue = [...queue, card];
 		}
@@ -113,74 +119,55 @@
 		const days = Math.round(hours / 24);
 		return `in ${days} day${days === 1 ? '' : 's'}`;
 	});
+
+	const latencyTone = $derived.by(() => {
+		if (!verdict) return null;
+		if (!verdict.ok) return 'bad';
+		switch (verdict.speed) {
+			case 'fast':
+				return 'good';
+			case 'steady':
+				return 'warn';
+			case 'slow':
+				return 'bad';
+			case '':
+				return 'good';
+			default: {
+				const _exhaustive: never = verdict.speed;
+				return _exhaustive;
+			}
+		}
+	});
 </script>
 
 <svelte:head><title>Daily review</title></svelte:head>
 <svelte:window onkeydown={onKey} />
 
-<div class="shell narrow">
-	<header class="head">
-		<p class="eyebrow">Spaced repetition</p>
-		<h1>Daily Review</h1>
-		<p class="standfirst">
-			Type the sound. The clock grades you — a slow correct answer comes back sooner than a
-			fast one, because hesitation is the honest signal.
-		</p>
-	</header>
-
-	{#if ready && !progress.durable}
-		<div class="warn card">
-			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
-			origin, so your review history will vanish when you close the tab. Download a backup
-			below before you do anything else, and serve the built app over HTTP rather than
-			opening the files directly.
-		</div>
-	{/if}
-
-	{#if ready}
-		<details class="backup-card card" open={!progress.durable}>
-			<summary>Back up or restore your progress</summary>
-			<p class="backup-note">
-				Your deck lives only in this browser. Back it up before switching browsers or
-				devices, clearing site data, or resetting this one — {progress.durable
-					? 'as a precaution.'
-					: 'right now, since this browser will not keep it for you.'}
-			</p>
-			<ProgressBackup exportJson={() => progress.export()} importJson={(json) => progress.import(json)} />
-		</details>
-	{/if}
-
-	{#if ready && stats.unlocked > 0}
-		<div class="strip" role="region" aria-label="Review session statistics">
-			<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
-			<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
-			<div class="stat"><b>{stats.seen}</b><span>started</span></div>
-			<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
-		</div>
-	{/if}
-
-	{#if !ready}
-		<div class="card empty loading" aria-busy="true">
-			<div class="skel glyph-ph" aria-hidden="true"></div>
-			<div class="skel line-ph" aria-hidden="true"></div>
-			<div class="skel field-ph" aria-hidden="true"></div>
-			<p class="muted">Loading your deck…</p>
-		</div>
-	{:else if stats.unlocked === 0}
-		<div class="card empty" in:fade>
-			<span class="big" lang="ko">한</span>
-			<h2>Nothing in the deck yet</h2>
-			<p>
+<FascicleSpread>
+	{#snippet article()}
+		<p class="kicker" class:hot={stats.queue > 0}>Due today</p>
+		<h1>
+			{#if !ready}
+				Review
+			{:else if stats.unlocked === 0}
+				Nothing in the deck yet
+			{:else if finishedSession}
+				{right} of {shown} first time
+			{:else if queue.length === 0}
+				Deck clear
+			{:else}
+				Review {queue.length} card{queue.length === 1 ? '' : 's'}
+			{/if}
+		</h1>
+		<p class="lead">
+			{#if ready && !progress.durable}
+				This browser will not keep a record. You can still sit; progress will not persist.
+			{:else if !ready}
+				Type the sound. The clock grades hesitation, not just accuracy.
+			{:else if stats.unlocked === 0}
 				Cards unlock as you finish labs, so the deck never quizzes you on something you have
-				not met. Finish Lab 01 and {LABS[0].steps.length > 0 ? 19 : 0} consonants drop in.
-			</p>
-			<a class="btn" href={resolve('/lab/[id]', { id: '0001' })}>Start Lab 01</a>
-		</div>
-	{:else if finishedSession}
-		<div class="card empty" in:fade>
-			<span class="big" lang="ko">{right / Math.max(shown, 1) >= 0.8 ? '좋아' : '또'}</span>
-			<h2>{right} of {shown} first time</h2>
-			<p>
+				not met. Finish Lab 01 and consonants drop in.
+			{:else if finishedSession}
 				{#if right / Math.max(shown, 1) >= 0.9}
 					That deck is in good shape. The gaps will stretch out on their own.
 				{:else if right / Math.max(shown, 1) >= 0.6}
@@ -190,200 +177,174 @@
 					A rough round means the material is still fresh, not that it is lost — missed cards
 					come back fast on purpose.
 				{/if}
-			</p>
-			<button class="btn" onclick={start}>Check for more</button>
-		</div>
-	{:else if queue.length === 0}
-		<div class="card empty" in:fade>
-			<span class="big" lang="ko">쉬어</span>
-			<h2>Deck clear</h2>
-			<p>Nothing is due. The next card comes back <strong>{whenNext}</strong>.</p>
-			<p class="muted tiny">
-				Reviewing early would only weaken the spacing — the gap is doing the work.
+			{:else if queue.length === 0}
+				Nothing is due. The next card comes back <strong>{whenNext}</strong>.
+				The gap is doing the work.
 				{#if stats.newLeft === 0 && stats.unseen > 0}
-					You have also hit today’s cap of {DEFAULT_NEW_PER_DAY} new cards, which keeps sessions short.
+					You have also hit today’s cap of {DEFAULT_NEW_PER_DAY} new cards.
 				{/if}
-			</p>
-		</div>
-	{:else}
-		{#key index}
-			<div class="card review" in:fly={{ y: 10, duration: 220 }} aria-labelledby="review-card-tag">
-				<div
-					class="bar"
-					role="progressbar"
-					aria-label="Review progress"
-					aria-valuenow={index + 1}
-					aria-valuemin={1}
-					aria-valuemax={queue.length}
-					aria-valuetext="Card {index + 1} of {queue.length}"
-				><i style="width:{((index + 1) / queue.length) * 100}%"></i></div>
+			{:else}
+				Type the sound. The clock grades hesitation, not just accuracy.
+			{/if}
+		</p>
+		{#if ready && stats.unlocked === 0}
+			<a class="btn" href={resolve('/lab/[id]', { id: '0001' })}>Start Lab 01</a>
+		{:else if finishedSession}
+			<button class="btn rose" onclick={start}>Check for more</button>
+		{/if}
+	{/snippet}
 
-				<p id="review-card-tag" class="tag" class:isnew={sittingNew}>
-					{sittingNew ? 'new card' : 'review'} · {index + 1} of {queue.length}
-				</p>
-
-				<div class="glyph-row">
-					<div class="glyph" lang="ko">{card.front}</div>
-					{#if card.kind === 'consonant' || isConsonantLead(card.front)}
-						<PlayButton jamo={card.front} />
-					{/if}
+	{#snippet well()}
+		{#if !ready}
+			<SpecimenWell variant="quiz">
+				<div class="loading" aria-busy="true">
+					<div class="skel glyph-ph" aria-hidden="true"></div>
+					<div class="skel field-ph" aria-hidden="true"></div>
+					<p class="muted">Loading your deck…</p>
 				</div>
-				<p class="ask">{card.ask}</p>
+			</SpecimenWell>
+		{:else if stats.unlocked === 0}
+			<SpecimenWell variant="empty" />
+		{:else if finishedSession}
+			<SpecimenWell variant="caught-up">
+				<span class="big" lang="ko">{right / Math.max(shown, 1) >= 0.8 ? '좋아' : '또'}</span>
+			</SpecimenWell>
+		{:else if queue.length === 0}
+			<SpecimenWell variant="caught-up" />
+		{:else}
+			{#key index}
+				<SpecimenWell variant="quiz">
+					<div class="quiz" in:fade={{ duration: 240 }} aria-labelledby="review-card-tag">
+						<div
+							class="bar"
+							role="progressbar"
+							aria-label="Review progress"
+							aria-valuenow={index + 1}
+							aria-valuemin={1}
+							aria-valuemax={queue.length}
+							aria-valuetext="Card {index + 1} of {queue.length}"
+						><i style="width:{((index + 1) / queue.length) * 100}%"></i></div>
 
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						submit();
-					}}
-				>
-					<label class="answer-label" for="review-answer">Your answer</label>
-					<div class="answer-controls">
-						<input
-							id="review-answer"
-							bind:this={input}
-							bind:value={typed}
-							class="in"
-							class:right={verdict?.ok}
-							class:wrong={verdict && !verdict.ok}
-							disabled={answered}
-							required
-							type="text"
-							inputmode="text"
-							autocapitalize="off"
-							autocorrect="off"
-							spellcheck="false"
-							placeholder={pronCard ? 'han-gu-geo or 한구거' : 'type the romanization'}
-							aria-describedby={emptyHint ? 'empty-hint' : undefined}
-							aria-invalid={emptyHint ? true : undefined}
-							oninvalid={(e) => {
+						<p id="review-card-tag" class="tag" class:isnew={sittingNew}>
+							{sittingNew ? 'new card' : 'review'} · {index + 1} of {queue.length}
+						</p>
+
+						<div class="glyph-row">
+							<div class="glyph" lang="ko">{card.front}</div>
+							{#if card.kind === 'consonant' || isConsonantLead(card.front)}
+								<PlayButton jamo={card.front} />
+							{/if}
+						</div>
+						<p class="ask">{card.ask}</p>
+
+						<form
+							onsubmit={(e) => {
 								e.preventDefault();
-								emptyHint = true;
+								submit();
 							}}
-							oninput={() => {
-								emptyHint = false;
-							}}
-						/>
-						<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
-						{#if answered}
-							<span class="kb">or press Enter</span>
+						>
+							<label class="answer-label" for="review-answer">Your answer</label>
+							<div class="answer-controls">
+								<input
+									id="review-answer"
+									{@attach bindAnswer}
+									bind:value={typed}
+									class="in"
+									class:right={verdict?.ok}
+									class:wrong={verdict && !verdict.ok}
+									disabled={answered}
+									required
+									type="text"
+									inputmode="text"
+									autocapitalize="off"
+									autocorrect="off"
+									spellcheck="false"
+									placeholder={pronCard ? 'han-gu-geo or 한구거' : 'type the romanization'}
+									aria-describedby={emptyHint ? 'empty-hint' : undefined}
+									aria-invalid={emptyHint ? true : undefined}
+									oninvalid={(e) => {
+										e.preventDefault();
+										emptyHint = true;
+									}}
+									oninput={() => {
+										emptyHint = false;
+									}}
+								/>
+								<button class="btn rose" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
+								{#if answered}
+									<span class="kb">or press Enter</span>
+								{/if}
+							</div>
+							{#if emptyHint}
+								<p id="empty-hint" class="empty-hint" role="status">
+									{pronCard
+										? 'Type hyphenated cuts, or Hangul, then Check.'
+										: 'Type a romanization, then Check.'}
+								</p>
+							{/if}
+						</form>
+
+						{#if latencyTone}
+							<span class="chip" data-tone={latencyTone} title="Hesitation is the grade.">
+								{verdict?.ok ? verdict.speed : 'missed'}
+							</span>
+						{/if}
+
+						{#if verdict}
+							<div
+								class="fb"
+								data-tone={verdict.ok ? 'right' : 'wrong'}
+								in:fade={{ duration: 150 }}
+								aria-live="polite"
+								aria-atomic="true"
+							>
+								<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
+								<span class="ans">
+									{card.answers[0]}
+									{#if card.answers.length > 1}
+										<em>also: {card.answers.slice(1).join(', ')}</em>
+									{/if}
+								</span>
+								<span class="note">{card.note}</span>
+								<span class="sched">{verdict.ok ? '' : 'reset — '}{verdict.when}</span>
+							</div>
 						{/if}
 					</div>
-					{#if emptyHint}
-						<p id="empty-hint" class="empty-hint" role="status">
-							{pronCard
-								? 'Type hyphenated cuts, or Hangul, then Check.'
-								: 'Type a romanization, then Check.'}
-						</p>
-					{/if}
-				</form>
-
-				{#if verdict}
-					<div
-						class="fb"
-						data-tone={verdict.ok ? 'right' : 'wrong'}
-						in:fade={{ duration: 150 }}
-						aria-live="polite"
-						aria-atomic="true"
-					>
-						<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
-						<span class="ans">
-							{card.answers[0]}
-							{#if card.answers.length > 1}
-								<em>also: {card.answers.slice(1).join(', ')}</em>
-							{/if}
-						</span>
-						<span class="note">{card.note}</span>
-						<span class="sched">{verdict.ok ? '' : 'reset — '}{verdict.when}</span>
-					</div>
-				{/if}
-			</div>
-		{/key}
-	{/if}
-</div>
+				</SpecimenWell>
+			{/key}
+		{/if}
+	{/snippet}
+</FascicleSpread>
 
 <style>
-	.narrow { max-width: 40rem; }
-	.head { margin-bottom: var(--s5); }
-	h1 { margin: var(--s2) 0 var(--s3); }
-	.standfirst {
-		font-family: var(--serif);
-		font-style: italic;
-		font-size: 1.05rem;
-		color: var(--ink-soft);
-		margin: 0;
-	}
-
-	.warn {
-		border-color: var(--bad);
-		background: var(--bad-soft);
-		padding: var(--s3) var(--s4);
-		margin-bottom: var(--s4);
-		font-size: 0.86rem;
-		line-height: 1.55;
-	}
-
-	.backup-card {
-		padding: var(--s3) var(--s4);
-		margin-bottom: var(--s4);
-	}
-	.backup-card summary {
-		display: flex;
-		align-items: center;
-		min-height: 44px;
-		cursor: pointer;
-		font-size: 0.86rem;
+	.kicker {
+		margin: 0 0 var(--s5);
+		font-size: 11px;
 		font-weight: 600;
-		padding: var(--s1) 0;
-	}
-	.backup-card summary:active {
-		color: var(--ink);
-	}
-	.backup-card summary:focus-visible {
-		outline: 2px solid var(--paper);
-		outline-offset: 2px;
-		box-shadow: var(--focus-ring);
-		border-radius: 3px;
-	}
-	.backup-note {
-		font-size: 0.82rem;
-		color: var(--ink-soft);
-		line-height: 1.55;
-		margin: var(--s2) 0 0;
-	}
-
-	.strip {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: var(--s2);
-		margin-bottom: var(--s5);
-	}
-
-	@media (min-width: 40rem) {
-		.strip { grid-template-columns: repeat(4, 1fr); }
-	}
-	.stat {
-		border: 1px solid var(--rule);
-		border-radius: var(--r-md);
-		background: var(--paper-raised);
-		padding: var(--s3) var(--s2);
-		text-align: center;
-	}
-	.stat.hot { border-color: var(--rose); background: var(--rose-soft); }
-	.stat.hot b { color: var(--rose); }
-	.stat b {
-		font-family: var(--mono);
-		font-size: 1.35rem;
-		display: block;
-		font-variant-numeric: tabular-nums;
-	}
-	.stat span {
-		font-size: 0.58rem;
-		letter-spacing: 0.1em;
+		letter-spacing: 0.16em;
 		text-transform: uppercase;
-		color: var(--ink-faint);
+		color: var(--ink-soft);
+	}
+	.kicker.hot { color: var(--rose); }
+
+	h1 {
+		margin: 0 0 var(--s4);
+		font-size: 28px;
+		display: -webkit-box;
+		line-clamp: 2;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
-	.review { padding: var(--s5); }
+	.lead {
+		font-family: var(--serif);
+		font-size: 18px;
+		line-height: 1.6;
+		margin: 0 0 var(--s6);
+	}
+
+	.quiz { min-width: 0; }
 
 	.bar {
 		height: 3px;
@@ -392,15 +353,15 @@
 		overflow: hidden;
 		margin-bottom: var(--s4);
 	}
-	.bar i { display: block; height: 100%; background: var(--accent); transition: width var(--med) var(--ease); }
+	.bar i { display: block; height: 100%; background: var(--rose); transition: width var(--med) var(--ease); }
 
 	.tag {
 		text-align: center;
-		font-size: 0.62rem;
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 600;
 		letter-spacing: 0.13em;
 		text-transform: uppercase;
-		color: var(--accent);
+		color: var(--rose);
 		margin: 0;
 	}
 	.tag.isnew { color: var(--blue); }
@@ -415,10 +376,14 @@
 
 	.glyph {
 		font-family: var(--hangul);
-		font-size: clamp(3.2rem, 10vw + 1.5rem, 6.5rem);
+		font-size: 72px;
 		font-weight: 500;
-		line-height: 1.05;
+		line-height: 1;
 		text-align: center;
+	}
+
+	@media (min-width: 72rem) {
+		.glyph { font-size: 96px; }
 	}
 
 	.ask { text-align: center; font-size: 0.84rem; color: var(--ink-soft); margin: 0 0 var(--s4); }
@@ -449,8 +414,8 @@
 	}
 
 	.answer-label {
-		font-size: 0.62rem;
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 600;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-faint);
@@ -465,11 +430,12 @@
 	.in {
 		width: 100%;
 		border: 1px solid var(--rule-strong);
-		border-radius: var(--r-md);
-		background: var(--paper-sunk);
+		border-radius: var(--r-sm);
+		background: var(--paper-raised);
 		color: var(--ink);
 		font-family: var(--mono);
-		font-size: 1.15rem;
+		font-size: 22px;
+		font-variant-numeric: tabular-nums;
 		padding: 0.7rem 0.9rem;
 	}
 	.in:focus-visible {
@@ -484,30 +450,27 @@
 	.in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	.in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
-	@media (forced-colors: active) {
-		.stat {
-			background: Canvas;
-			color: CanvasText;
-			border-color: ButtonBorder;
-		}
-		.stat.hot { border-color: Highlight; background: Canvas; }
-		.bar { background: ButtonBorder; }
-		.bar i { background: Highlight; }
-		.in {
-			background: Canvas;
-			color: CanvasText;
-			border-color: ButtonBorder;
-		}
-		.in.right { border-color: Highlight; background: Canvas; color: CanvasText; }
-		.in.wrong { border-color: ButtonText; background: Canvas; color: CanvasText; }
+	.chip {
+		display: inline-flex;
+		align-self: center;
+		margin-top: var(--s3);
+		padding: 0.2rem 0.55rem;
+		border-radius: var(--r-pill);
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
+	.chip[data-tone='good'] { color: var(--good); background: var(--good-soft); }
+	.chip[data-tone='warn'] { color: var(--warn); background: var(--warn-soft); }
+	.chip[data-tone='bad'] { color: var(--bad); background: var(--bad-soft); }
 
 	.fb {
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
 		border-radius: var(--r-md);
 		border-inline-start: 3px solid var(--rule-strong);
-		background: var(--paper-sunk);
+		background: var(--paper-raised);
 		font-size: 0.87rem;
 		line-height: 1.6;
 	}
@@ -516,8 +479,8 @@
 
 	.v {
 		display: block;
-		font-size: 0.62rem;
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 600;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		margin-bottom: var(--s1);
@@ -547,10 +510,7 @@
 		.kb { display: none; }
 	}
 
-	.empty { padding: var(--s7) var(--s5); text-align: center; }
-	.empty .big { font-family: var(--hangul); font-size: 3.2rem; display: block; margin-bottom: var(--s3); }
-	.empty h2 { margin-bottom: var(--s2); }
-	.empty p { color: var(--ink-soft); font-size: 0.92rem; max-width: 28rem; margin: 0 auto var(--s4); }
+	.big { font-family: var(--hangul); font-size: 3.2rem; display: block; text-align: center; color: var(--accent); }
 
 	.loading {
 		display: flex;
@@ -561,18 +521,26 @@
 	.loading .glyph-ph {
 		width: 4.5rem;
 		height: 4.5rem;
-		border-radius: var(--r-md);
-	}
-	.loading .line-ph {
-		width: 12rem;
-		max-width: 80%;
-		height: 0.7rem;
+		border-radius: var(--r-sm);
 	}
 	.loading .field-ph {
 		width: 100%;
 		max-width: 22rem;
 		height: 2.8rem;
-		border-radius: var(--r-md);
+		border-radius: var(--r-sm);
 	}
 	.loading .muted { margin: var(--s2) 0 0; }
+
+	@media (forced-colors: active) {
+		.kicker.hot { color: LinkText; }
+		.bar { background: ButtonBorder; }
+		.bar i { background: LinkText; }
+		.in {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.chip[data-tone='good'] { color: Highlight; background: Canvas; }
+		.chip[data-tone='bad'] { color: ButtonText; background: Canvas; }
+	}
 </style>

@@ -355,6 +355,12 @@ export function romanizeSyllable(ch: string): string {
 	return `${LEAD_RR[parts.lead] ?? ''}${VOWEL_RR[parts.vowel] ?? ''}${FINAL_RR[parts.final] ?? ''}`;
 }
 
+/** Isolated jamo romanization for catalog lookup. Empty-initial ㅇ is "ng" as a final, else "—". */
+export function romanizeJamo(jamo: string): string {
+	if (jamo === 'ㅇ') return '—';
+	return LEAD_RR[jamo] || VOWEL_RR[jamo] || FINAL_RR[jamo] || '';
+}
+
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
 export function romanizeWord(word: string): string {
 	const chars = [...word];

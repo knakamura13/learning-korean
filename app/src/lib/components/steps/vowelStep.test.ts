@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount, type Component } from 'svelte';
 import VowelStep from './VowelStep.svelte';
 import type { VowelStep as VowelStepData } from '$lib/content/types';
+import { fireMouseDrag } from '$lib/dnd/fireMouseDrag';
 
 const mounted: Record<string, never>[] = [];
 
@@ -276,17 +277,33 @@ describe('VowelStep dock board', () => {
 	it('still places on the next click after a drag that missed the board', async () => {
 		const onSettle = vi.fn();
 		render(VowelStep, { step: step('ㅣ', 'i'), onSettle, onNudge: () => {} });
-		const chip = stamp('ㅣ');
-		chip.setPointerCapture = () => {};
-		firePointer(chip, 'pointerdown', 8, 8);
-		firePointer(window, 'pointermove', 80, 80);
+		await fireMouseDrag(stamp('ㅣ'), { x: 80, y: 80 }, { x: 8, y: 8 });
 		flushSync();
-		firePointer(window, 'pointerup', 80, 80);
-		flushSync();
-		await Promise.resolve();
 		dock('base').click();
 		flushSync();
 		expect(onSettle).toHaveBeenCalled();
+	});
+
+	it('seats a dragged standing stroke on the base dock', async () => {
+		const onSettle = vi.fn();
+		render(VowelStep, { step: step('ㅣ', 'i'), onSettle, onNudge: () => {} });
+		const board = document.querySelector<HTMLElement>('[data-dock-board]');
+		if (!board) throw new Error('no board');
+		vi.spyOn(board, 'getBoundingClientRect').mockReturnValue({
+			left: 0,
+			top: 0,
+			right: 200,
+			bottom: 200,
+			width: 200,
+			height: 200,
+			x: 0,
+			y: 0,
+			toJSON() {}
+		} as DOMRect);
+		await fireMouseDrag(stamp('ㅣ'), { x: 100, y: 100 });
+		flushSync();
+		expect(onSettle).toHaveBeenCalled();
+		expect(board.textContent).toContain('ㅣ');
 	});
 
 	it('teaches that the earth stroke must be seated before a tick on ㅗ', () => {
@@ -329,10 +346,4 @@ describe('VowelStep dock board', () => {
 function press(el: HTMLElement, key: string) {
 	el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
 	flushSync();
-}
-
-function firePointer(target: EventTarget, type: string, x: number, y: number) {
-	const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y });
-	Object.defineProperty(event, 'pointerId', { value: 1, configurable: true });
-	target.dispatchEvent(event);
 }

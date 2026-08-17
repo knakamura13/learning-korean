@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { hasHangul } from '$lib/a11y/lang';
-	import { movedEnough, snapSlot, type SlotBox } from '$lib/domain/composerSnap';
+	import { snapSlot, type SlotBox } from '$lib/domain/composerSnap';
+	import { labDraggable } from '$lib/dnd/labDraggable';
 	import { trayLift } from './trayLift.svelte';
 
 	/** A labeled row of selectable chips — one independent composer slot. */
@@ -51,11 +52,34 @@
 		return i >= 0 ? i : 0;
 	});
 
-	let groupEl = $state<HTMLDivElement>();
-	let pending = $state<{ item: string; x: number; y: number } | null>(null);
-	let drag = $state<{ item: string; x: number; y: number } | null>(null);
 	/** Swallow the click that follows a pointer drag so a missed drop does not auto-fill. */
 	let skipClick = false;
+
+	const trayDrag = labDraggable({
+		draggable: '.chip.draggable:not(:disabled)',
+		canDrag: () => Boolean(dock) && !disabled,
+		onStart: ({ source, x, y }) => {
+			const item = source.dataset.item;
+			if (!item || !dock) return;
+			skipClick = true;
+			trayLift.current = { dock, item, x, y };
+		},
+		onMove: ({ source, x, y }) => {
+			const item = source.dataset.item;
+			if (!item || !dock) return;
+			trayLift.current = { dock, item, x, y };
+		},
+		onStop: () => {
+			skipClick = true;
+			trayLift.current = null;
+		},
+		onDrop: ({ source, x, y }) => {
+			const item = source.dataset.item;
+			if (!item || !dock) return;
+			const hit = snapSlot(slotBoxes(), x, y, dock);
+			if (hit) onSelect(item);
+		}
+	});
 
 	/** Roving tabindex lives on the radiogroup element itself, per the ARIA pattern. */
 	function onGroupKeydown(e: KeyboardEvent) {
@@ -64,35 +88,15 @@
 		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') delta = 1;
 		else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') delta = -1;
 		else return;
-		const chips = groupEl ? [...groupEl.querySelectorAll<HTMLButtonElement>('.chip')] : [];
+		const group = e.currentTarget;
+		if (!(group instanceof HTMLElement)) return;
+		const chips = [...group.querySelectorAll<HTMLButtonElement>('.chip')];
 		const from = e.target instanceof HTMLButtonElement ? chips.indexOf(e.target) : -1;
 		if (chips.length === 0 || from < 0) return;
 		e.preventDefault();
 		const next = chips[(from + delta + chips.length) % chips.length];
 		next.focus();
 		onSelect(items[chips.indexOf(next)]);
-	}
-
-	function startLift(item: string, e: PointerEvent) {
-		if (disabled || !dock || e.button !== 0) return;
-		skipClick = false;
-		pending = { item, x: e.clientX, y: e.clientY };
-	}
-
-	function beginDrag(e: PointerEvent) {
-		if (!pending || drag || !dock) return;
-		if (!movedEnough(pending.x, pending.y, e.clientX, e.clientY)) return;
-		const item = pending.item;
-		pending = null;
-		drag = { item, x: e.clientX, y: e.clientY };
-		trayLift.current = { dock, item, x: e.clientX, y: e.clientY };
-	}
-
-	function onPointerMove(e: PointerEvent) {
-		if (pending && !drag) beginDrag(e);
-		if (!drag || !dock) return;
-		drag = { ...drag, x: e.clientX, y: e.clientY };
-		trayLift.current = { dock, item: drag.item, x: e.clientX, y: e.clientY };
 	}
 
 	function slotBoxes(): SlotBox[] {
@@ -108,18 +112,6 @@
 		});
 	}
 
-	function endLift(e: PointerEvent) {
-		pending = null;
-		if (!drag) return;
-		skipClick = true;
-		const item = drag.item;
-		drag = null;
-		trayLift.current = null;
-		if (!dock) return;
-		const hit = snapSlot(slotBoxes(), e.clientX, e.clientY, dock);
-		if (hit) onSelect(item);
-	}
-
 	function onChipClick(item: string) {
 		if (skipClick) {
 			skipClick = false;
@@ -133,16 +125,14 @@
 	});
 </script>
 
-<svelte:window onpointermove={onPointerMove} onpointerup={endLift} onpointercancel={endLift} />
-
 <div
 	class={['tray', disabled && 'off', picked && 'picked']}
 	role="radiogroup"
 	aria-labelledby={labelId}
 	aria-disabled={disabled ? 'true' : undefined}
 	tabindex="-1"
-	bind:this={groupEl}
 	onkeydown={onGroupKeydown}
+	{@attach dock ? trayDrag : undefined}
 >
 	<div class="label" id={labelId}>{label}</div>
 	<div class="row">
@@ -150,21 +140,14 @@
 			{@const on = selected === item}
 			<button
 				type="button"
-				class={[
-					'chip',
-					text && 'text',
-					on && 'on',
-					tone === 'blue' && 'blue',
-					dock && 'draggable',
-					drag?.item === item && 'lifted'
-				]}
+				class={['chip', text && 'text', on && 'on', tone === 'blue' && 'blue', dock && 'draggable']}
 				role="radio"
 				aria-checked={on}
 				aria-label="{label}: {item}"
 				tabindex={i === activeIndex ? 0 : -1}
 				{disabled}
+				data-item={item}
 				lang={hasHangul(item) ? 'ko' : undefined}
-				onpointerdown={(e) => startLift(item, e)}
 				onclick={() => onChipClick(item)}
 			>
 				<span class="glyph">{item}</span>
@@ -175,12 +158,6 @@
 		{/each}
 	</div>
 </div>
-
-{#if drag}
-	<div class="ghost" style:left="{drag.x}px" style:top="{drag.y}px" aria-hidden="true">
-		<span class={['glyph', text && 'text']}>{drag.item}</span>
-	</div>
-{/if}
 
 <style>
 	.tray { margin-bottom: var(--s3); }
@@ -251,7 +228,6 @@
 	.chip.on.blue { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
 
 	.chip.draggable { touch-action: none; user-select: none; }
-	.chip.lifted { opacity: 0.4; }
 
 	.mark {
 		font-family: var(--sans);
@@ -262,22 +238,6 @@
 		line-height: 1;
 		padding-inline: 0.2rem;
 		text-align: center;
-	}
-
-	.ghost {
-		position: fixed;
-		z-index: 20;
-		pointer-events: none;
-		transform: translate(-50%, -50%);
-		font-family: var(--hangul);
-		font-size: 2rem;
-		color: var(--accent);
-		filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--ink) 18%, transparent));
-	}
-	.ghost .text {
-		font-family: var(--sans);
-		font-size: 0.84rem;
-		font-weight: 600;
 	}
 
 	@media (forced-colors: active) {

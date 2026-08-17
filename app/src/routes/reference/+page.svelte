@@ -7,6 +7,8 @@
 		batchimSound, clusterParts, clusterRule, fusionParts, mergedWith, harmony,
 		derive, baseShapeOf
 	} from '$lib/domain/hangul';
+	import FascicleSpread from '$lib/components/shell/FascicleSpread.svelte';
+	import SpecimenWell from '$lib/components/shell/SpecimenWell.svelte';
 
 	/** The five families, rebuilt from the derivation map rather than listed. */
 	const FAMILIES = BASE_SHAPES.map((base) => ({
@@ -47,7 +49,9 @@
 
 <svelte:head><title>Reference — every letter and rule</title></svelte:head>
 
-<div class="shell">
+<FascicleSpread>
+	{#snippet article()}
+		<div class="ref">
 	<header class="head">
 		<p class="eyebrow">Reference</p>
 		<h1>Every letter and rule</h1>
@@ -278,10 +282,16 @@
 			</li>
 		</ul>
 	</section>
-</div>
+		</div>
+	{/snippet}
+	{#snippet well()}
+		<SpecimenWell caption="Full plate text — generated from the same module the labs use." />
+	{/snippet}
+</FascicleSpread>
 
 <style>
-	.head { margin-bottom: var(--s6); max-width: var(--measure); }
+	.ref { min-width: 0; }
+	.head { margin-bottom: var(--s6); }
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.lede { color: var(--ink-soft); }
 
@@ -320,9 +330,6 @@
 		border-color: var(--accent);
 		color: var(--accent);
 	}
-	.quick-nav a:active {
-		transform: translateY(1px);
-	}
 
 	@media (max-width: 40rem) {
 		.quick-nav {
@@ -334,7 +341,7 @@
 			scrollbar-color: var(--rule) transparent;
 			scrollbar-width: thin;
 			-webkit-overflow-scrolling: touch;
-			mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2rem), transparent);
+			mask-image: linear-gradient(to right, var(--ink) 0, var(--ink) calc(100% - 2rem), transparent);
 			padding-inline-end: 2rem;
 		}
 		.quick-nav a {

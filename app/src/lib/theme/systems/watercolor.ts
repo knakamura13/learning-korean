@@ -27,6 +27,7 @@ const light: Palette = {
 	warn: '#8d6945',
 	warnSoft: '#f4ece4',
 	rose: '#8a4a44',
+	roseInk: '#fffef8',
 	roseSoft: '#f6ebe9',
 	shadow1: '0 2px 8px rgba(74, 85, 104, 0.08), 0 1px 3px rgba(74, 85, 104, 0.08)',
 	shadow2: '0 4px 15px rgba(74, 85, 104, 0.12), 0 4px 20px rgba(74, 85, 104, 0.08)',
@@ -54,6 +55,7 @@ const dark: Palette = {
 	warn: '#ddb892',
 	warnSoft: '#2a2318',
 	rose: '#e8a8a2',
+	roseInk: '#1a1e26',
 	roseSoft: '#3a2428',
 	shadow1: '0 1px 2px rgba(26, 30, 38, 0.45)',
 	shadow2: '0 2px 8px rgba(26, 30, 38, 0.5), 0 10px 24px rgba(74, 85, 104, 0.28)',
@@ -78,6 +80,7 @@ export const watercolor: DesignSystem = {
 		rPill: '40% 60% 55% 45% / 55% 45% 55% 45%'
 	},
 	type: {
+		display: SERIF,
 		serif: SERIF,
 		sans: SANS,
 		mono: MONO,

@@ -25,8 +25,9 @@ export interface Palette {
 	badSoft: string;
 	warn: string;
 	warnSoft: string;
-	/** Due/resume chrome. Distinct from moss `--accent`. */
+	/** Mugunghwa rose — due, resume, hot review. Distinct from moss `--accent`. */
 	rose: string;
+	roseInk: string;
 	roseSoft: string;
 	shadow1: string;
 	shadow2: string;
@@ -34,7 +35,9 @@ export interface Palette {
 }
 
 export interface TypeStacks {
-	/** Headings. */
+	/** Journal nameplate and sitting titles (Newsreader). Named `--display`. */
+	display: string;
+	/** Article body (Source Serif 4). Headings fall back here if display is unset. */
 	serif: string;
 	/** Body and UI chrome. Named `--sans` in CSS for historical reasons. */
 	sans: string;
@@ -66,6 +69,7 @@ export interface FontFaceSpec {
 	style?: 'normal' | 'italic';
 	weight?: string;
 	display?: 'auto' | 'block' | 'swap' | 'fallback' | 'optional';
+	unicodeRange?: string;
 }
 
 export interface DesignSystem {
@@ -104,6 +108,7 @@ export const PALETTE_CSS_VARS = {
 	warn: '--warn',
 	warnSoft: '--warn-soft',
 	rose: '--rose',
+	roseInk: '--rose-ink',
 	roseSoft: '--rose-soft',
 	shadow1: '--shadow-1',
 	shadow2: '--shadow-2',
@@ -111,6 +116,7 @@ export const PALETTE_CSS_VARS = {
 } as const satisfies Record<keyof Palette, string>;
 
 export const TYPE_CSS_VARS = {
+	display: '--display',
 	serif: '--serif',
 	sans: '--sans',
 	mono: '--mono',

@@ -8,6 +8,11 @@ import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import options from './components/Options.svelte?raw';
 import themeToggle from './components/ThemeToggle.svelte?raw';
+import runningHead from './components/shell/RunningHead.svelte?raw';
+import plateRail from './components/shell/PlateRail.svelte?raw';
+import tocFlyleaf from './components/shell/TocFlyleaf.svelte?raw';
+import colophon from './components/shell/Colophon.svelte?raw';
+import sittingArticle from './components/shell/SittingArticle.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
@@ -81,14 +86,29 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(consonantClip)).toMatch(/\.play:active\s*\{/);
 		expect(styleBlock(vowelStep)).toMatch(/\.stamp:active:not\(:disabled\)\s*\{/);
 		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
-		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
-		expect(styleBlock(review)).toMatch(/\.backup-card summary:active\s*\{/);
+		expect(styleBlock(runningHead)).toMatch(/\.head-link:active\s*\{/);
+		expect(styleBlock(colophon)).toMatch(/\.toggle:active\s*\{/);
 	});
 
 	it('uses logical properties in shared directional layout', () => {
 		expect(appCss).not.toMatch(/\bmargin-left\s*:/);
 		expect(labRunner).not.toMatch(/\bleft\s*:\s*0/);
-		const chrome = [appCss, labRunner, progressBackup, layout, home, review, reference, options, errorPage];
+		const chrome = [
+			appCss,
+			labRunner,
+			progressBackup,
+			layout,
+			home,
+			review,
+			reference,
+			options,
+			errorPage,
+			runningHead,
+			plateRail,
+			tocFlyleaf,
+			colophon,
+			sittingArticle
+		];
 		for (const src of chrome) {
 			expect(physicalBoxProps(src)).toEqual([]);
 			expect(src).not.toMatch(/text-align:\s*(?:left|right)/);
@@ -96,10 +116,13 @@ describe('polish audit regressions', () => {
 		expect(physicalLeftRight(styleBlock(layout))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(labRunner))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(progressBackup))).toEqual([]);
-		expect(physicalLeftRight(styleBlock(home))).toEqual([]);
+		if (home.includes('<style>')) {
+			expect(physicalLeftRight(styleBlock(home))).toEqual([]);
+		}
 		expect(physicalLeftRight(styleBlock(review))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(reference))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(errorPage))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(runningHead))).toEqual([]);
 	});
 
 	it('prevents a late Hangul font swap from causing layout shift', () => {
@@ -118,12 +141,14 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
-	it('self-hosts Noto Serif KR for headings with optional display', () => {
-		expect(existsSync(new URL('../../static/fonts/NotoSerifKR-subset.woff2', import.meta.url))).toBe(true);
-		expect(systemCss).toMatch(/font-family: 'Noto Serif KR'/);
-		expect(systemCss).toMatch(/NotoSerifKR-subset\.woff2/);
+	it('self-hosts Hangul and loads Latin faces from the layout', () => {
+		expect(existsSync(new URL('../../static/fonts/NotoSansKR-subset.woff2', import.meta.url))).toBe(true);
+		expect(systemCss).toMatch(/font-family: 'Noto Sans KR'/);
+		expect(systemCss).toMatch(/NotoSansKR-subset\.woff2/);
 		expect(systemCss).toMatch(/font-display:\s*optional/);
+		expect(systemCss).toMatch(/Newsreader/);
 		expect(layout).toMatch(/activeSystem\.fonts/);
+		expect(layout).toMatch(/fonts\.googleapis\.com/);
 	});
 
 	it('makes the Baseline Widely Available browser target explicit', () => {
@@ -133,6 +158,11 @@ describe('polish audit regressions', () => {
 	it('keeps caption-size ink-faint at least 7:1 against paper', () => {
 		expect(contrastRatio(activeSystem.light.inkFaint, activeSystem.light.paper)).toBeGreaterThanOrEqual(7);
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
+	});
+
+	it('keeps body ink at least 4.5:1 against paper', () => {
+		expect(contrastRatio(activeSystem.light.ink, activeSystem.light.paper)).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(activeSystem.dark.ink, activeSystem.dark.paper)).toBeGreaterThanOrEqual(4.5);
 	});
 
 	it('uses moss and rose under prefers-contrast, not 태극 red', () => {
@@ -171,11 +201,22 @@ describe('polish audit regressions', () => {
 		}
 	});
 
-	it('sizes peek, backup summary, and pip hits to at least 44px with pip buffers', () => {
-		expect(styleBlock(home)).toMatch(/\.peek\s*\{[^}]*min-height:\s*44px/s);
-		expect(styleBlock(review)).toMatch(/\.backup-card summary\s*\{[^}]*min-height:\s*44px/s);
+	it('sizes ToC rows, colophon toggle, and pip hits to at least 44px with pip buffers', () => {
+		expect(styleBlock(tocFlyleaf)).toMatch(/\.plate\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(colophon)).toMatch(/\.toggle\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
+		expect(styleBlock(plateRail)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(runningHead)).toMatch(/min-height:\s*44px/);
+	});
+
+	it('does not present Labs, Review, and Reference as peer tabs', () => {
+		expect(layout).not.toMatch(/label: 'Labs'/);
+		expect(layout).not.toMatch(/Main navigation/);
+		expect(runningHead).toMatch(/ToC/);
+		expect(runningHead).toMatch(/¶/);
+		expect(home).not.toMatch(/sec-labs-heading/);
+		expect(home).not.toMatch(/to review/);
 	});
 
 	it('uses an h1 on the error page and the lab finish screen', () => {
@@ -192,24 +233,22 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(/\.card::after/);
 		expect(appCss).toMatch(/body\s*\{[\s\S]*background-image:/);
 		expect(appCss).not.toMatch(/body::before[\s\S]{0,200}z-index:\s*1000/);
-		expect(appCss).toMatch(/width='400'\s+height='400'/);
-		expect(appCss).toMatch(/background-size:\s*400px\s+400px/);
+		expect(appCss).toMatch(/--grain:/);
+		expect(appCss).toMatch(/background-image:\s*var\(--grain\)/);
 	});
 
 	it('paints due and resume rose, and keeps primary actions moss', () => {
-		const homeCss = styleBlock(home);
-		const layoutCss = styleBlock(layout);
+		const articleCss = styleBlock(sittingArticle);
+		const railCss = styleBlock(plateRail);
+		const headCss = styleBlock(runningHead);
 		const reviewCss = styleBlock(review);
-		expect(home).toMatch(/chip-status due/);
-		expect(homeCss).toMatch(/\.chip-status\.due\s*\{[^}]*var\(--rose\)/s);
-		expect(homeCss).toMatch(/a\.stat\.hot:not\(\.quiet\)[^}]*var\(--rose\)/s);
-		expect(homeCss).toMatch(/\.lab\.resume\s*\{[^}]*var\(--rose\)/s);
-		expect(homeCss).toMatch(/a\.lab\.resume:hover\s*\{[^}]*var\(--rose\)/s);
-		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*var\(--accent\)/s);
-		expect(homeCss).toMatch(/\.continue\s*\{[^}]*var\(--accent\)/s);
-		expect(layoutCss).toMatch(/\.badge\s*\{[^}]*var\(--rose\)/s);
-		expect(layoutCss).toMatch(/nav a\.active\s*\{[^}]*var\(--accent\)/s);
-		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
+		expect(articleCss).toMatch(/\.kicker\[data-kind='review'\]\s*\{[^}]*var\(--rose\)/s);
+		expect(articleCss).toMatch(/var\(--accent\)/);
+		expect(railCss).toMatch(/\.pip\[data-tone='due'\]\s*\{[^}]*var\(--rose\)/s);
+		expect(railCss).toMatch(/\.pip\[data-tone='current'\]\s*\{[^}]*var\(--accent\)/s);
+		expect(headCss).toMatch(/\.pip\[data-tone='rose'\]\s*\{[^}]*var\(--rose\)/s);
+		expect(headCss).toMatch(/\.pip\[data-tone='moss'\]\s*\{[^}]*var\(--accent\)/s);
+		expect(reviewCss).toMatch(/\.kicker\.hot\s*\{[^}]*var\(--rose\)/s);
 	});
 
 	it('ships moss raster icons and OG, not 태극 red marks', () => {

@@ -31,65 +31,34 @@
 	<title>Lab {lab.number} — {lab.title}</title>
 </svelte:head>
 
-<div class="shell narrow">
-	{#if gated && prior}
-		<aside class="gate card" role="status">
-			<strong>Lab {String(prior.number).padStart(2, '0')} comes first.</strong>
-			This lab assumes you have finished
-			<a href="/lab/{prior.id}">{prior.title}</a>.
-			You can still look around — the cards will make more sense in order.
-		</aside>
-	{/if}
+{#if gated && prior}
+	<aside class="gate" role="status">
+		<strong>Lab {String(prior.number).padStart(2, '0')} comes first.</strong>
+		This lab assumes you have finished
+		<a href="/lab/{prior.id}">{prior.title}</a>.
+		You can still look around — the cards will make more sense in order.
+	</aside>
+{/if}
 
-	{#key lab.id}
-		<LabRunner {lab}>
-			{#snippet letterAsk()}
-				<aside class="ask">
-					<span class="h">Need a letter?</span>
-					The <a href="/reference">reference</a> lists every jamo and rule, generated from the same
-					module these cards use.
-				</aside>
-			{/snippet}
-		</LabRunner>
-	{/key}
-</div>
+{#key lab.id}
+	<LabRunner {lab} />
+{/key}
 
 <style>
-	.narrow { max-width: 44rem; }
-
 	.gate {
-		border-color: var(--warn);
+		max-width: var(--measure);
+		border: 1px solid var(--warn);
 		background: var(--warn-soft);
 		padding: var(--s3) var(--s4);
-		margin-bottom: var(--s4);
+		margin: var(--s5) 0 0;
 		font-size: 0.86rem;
 		line-height: 1.55;
+		border-radius: var(--r-sm);
 	}
 	.gate strong {
 		display: block;
 		margin-bottom: var(--s1);
 		color: var(--warn);
-	}
-
-	.ask {
-		margin-top: var(--s7);
-		padding: var(--s4);
-		border: 1px dashed var(--rule-strong);
-		border-radius: var(--r-md);
-		background: var(--paper-sunk);
-		font-size: 0.86rem;
-		line-height: 1.6;
-		color: var(--ink-soft);
-	}
-
-	.ask .h {
-		display: block;
-		font-weight: 700;
-		font-size: 0.64rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--accent);
-		margin-bottom: var(--s1);
 	}
 
 	@media (forced-colors: active) {

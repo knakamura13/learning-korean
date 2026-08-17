@@ -4,7 +4,7 @@ import {
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
-	romanizeSyllable, romanizeWord
+	romanizeSyllable, romanizeWord, romanizeJamo
 } from './hangul';
 
 describe('syllable composition', () => {
@@ -312,5 +312,11 @@ describe('romanize spoken syllables', () => {
 	it('returns empty string for a non-syllable', () => {
 		expect(romanizeSyllable('ㄱ')).toBe('');
 		expect(romanizeWord('한!')).toBe('');
+	});
+
+	it('romanizes isolated jamo for the plate index', () => {
+		expect(romanizeJamo('ㄱ')).toBe('g');
+		expect(romanizeJamo('ㅏ')).toBe('a');
+		expect(romanizeJamo('ㅇ')).toBe('—');
 	});
 });
