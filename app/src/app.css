@@ -243,6 +243,29 @@ button { font: inherit; color: inherit; }
 }
 .btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; }
 
+/* Shopify Draggable mirror — follows the pointer on lab trays and vowel stamps. */
+.draggable-mirror.ghost {
+	z-index: 20;
+	pointer-events: none !important;
+	font-family: var(--hangul);
+	font-size: 2rem;
+	color: var(--accent);
+	filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--ink) 18%, transparent));
+}
+
+.draggable-mirror .tick-mark {
+	display: block;
+	width: 0.7rem;
+	height: 0.2rem;
+	border-radius: 2px;
+	background: currentColor;
+}
+
+.draggable-mirror .tick-mark.upright {
+	width: 0.2rem;
+	height: 0.7rem;
+}
+
 @media (forced-colors: active) {
 	:focus-visible {
 		outline: 2px solid Highlight;

@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import Target from '../Target.svelte';
 	import { hasHangul } from '$lib/a11y/lang';
+	import { labDrag, type LabDragPoint } from '../labDrag';
 	import type { VowelStep } from '$lib/content/types';
 	import {
 		EMPTY_BOARD,
@@ -38,22 +39,7 @@
 	let solved = $state(false);
 	let boardEl = $state<HTMLDivElement>();
 	let paletteEl = $state<HTMLDivElement>();
-	let skipClick = $state(false);
-	let pending = $state<{
-		kind: 'palette' | 'dock';
-		stamp: Stamp;
-		dock: DockId | null;
-		x: number;
-		y: number;
-		target: HTMLElement;
-	} | null>(null);
-	let drag = $state<{
-		lift: Lift;
-		origin: typeof EMPTY_BOARD;
-		fromBoard: boolean;
-		x: number;
-		y: number;
-	} | null>(null);
+	let skipClick = false;
 	let picker = $state<{ dock: DockId; index: number } | null>(null);
 	let tip = $state<DockId | null>(null);
 	let activeDock = $state<DockId>('base');
@@ -282,98 +268,112 @@
 		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${next}"]`)?.focus();
 	}
 
-	function startPaletteDrag(stamp: Stamp, e: PointerEvent) {
-		if (solved) return;
-		selected = stamp;
-		pending = {
-			kind: 'palette',
-			stamp,
-			dock: null,
-			x: e.clientX,
-			y: e.clientY,
-			target: e.currentTarget as HTMLElement
-		};
-	}
+	let activeLift: { lift: Lift; fromBoard: boolean; dock?: DockId } | null = null;
 
-	function startDockDrag(id: DockId, e: PointerEvent) {
-		if (solved || !occupant(board, id)) return;
-		pending = {
-			kind: 'dock',
-			stamp: occupant(board, id)!,
-			dock: id,
-			x: e.clientX,
-			y: e.clientY,
-			target: e.currentTarget as HTMLElement
-		};
-	}
-
-	function beginDrag(e: PointerEvent) {
-		if (!pending || drag) return;
-		if (Math.hypot(e.clientX - pending.x, e.clientY - pending.y) < 8) return;
-		const start = pending;
-		pending = null;
-		start.target.setPointerCapture(e.pointerId);
-		if (start.kind === 'palette') {
-			drag = {
-				lift: { stamp: start.stamp, count: 1 },
-				origin: board,
-				fromBoard: false,
-				x: e.clientX,
-				y: e.clientY
-			};
-			return;
+	function asStamp(value: string | undefined): Stamp | null {
+		switch (value) {
+			case 'ㅣ':
+			case 'ㅡ':
+			case 'tick':
+				return value;
+			default:
+				return null;
 		}
-		if (!start.dock) return;
-		const lifted = liftDock(board, start.dock);
-		if (!lifted) return;
-		drag = { lift: lifted.lift, origin: board, fromBoard: true, x: e.clientX, y: e.clientY };
-		board = lifted.remaining;
 	}
 
-	function onPointerMove(e: PointerEvent) {
-		if (pending && !drag) beginDrag(e);
-		if (!drag) return;
-		drag = { ...drag, x: e.clientX, y: e.clientY };
-	}
-
-	function onPointerUp(e: PointerEvent) {
-		pending = null;
-		if (!drag) return;
+	function finishDrag(point: LabDragPoint) {
 		armClickSkip();
-		const active = drag;
-		drag = null;
+		const active = activeLift;
+		activeLift = null;
+		if (!active) return;
+		if (!active.fromBoard) selected = active.lift.stamp;
+		const working = active.fromBoard && active.dock
+			? (liftDock(board, active.dock)?.remaining ?? null)
+			: board;
+		if (!working) return;
 		const rect = boardEl?.getBoundingClientRect();
-		if (!rect) {
-			if (active.fromBoard) board = active.origin;
-			return;
-		}
+		if (!rect) return;
+		const shown = boardDocks(working, step.target);
 		const next = snapDock(
-			board,
+			working,
 			active.lift,
-			e.clientX - rect.left,
-			e.clientY - rect.top,
+			point.x - rect.left,
+			point.y - rect.top,
 			rect.width,
-			docks
+			shown
 		);
 		if (next) {
-			const seated = applyLift(board, next, active.lift);
+			const seated = applyLift(working, next, active.lift);
 			if (seated) {
 				board = seated;
 				tip = null;
 				focusNextOpen();
-			} else if (active.fromBoard) board = active.origin;
-		} else if (active.fromBoard) {
-			board = active.origin;
+			}
 		}
 	}
 
-	function onPointerCancel() {
-		pending = null;
-		if (!drag) return;
-		const active = drag;
-		drag = null;
-		if (active.fromBoard) board = active.origin;
+	function onPaletteStart(point: LabDragPoint) {
+		if (solved) return false;
+		const stamp = asStamp(point.originalSource.dataset.stamp);
+		if (!stamp) return false;
+		activeLift = { lift: { stamp, count: 1 }, fromBoard: false };
 	}
+
+	function asDockId(value: string | undefined): DockId | null {
+		switch (value) {
+			case 'base':
+			case 'left':
+			case 'left2':
+			case 'right':
+			case 'right2':
+			case 'above':
+			case 'above2':
+			case 'below':
+			case 'below2':
+				return value;
+			default:
+				return null;
+		}
+	}
+
+	function onDockStart(point: LabDragPoint) {
+		if (solved) return false;
+		const id = asDockId(point.originalSource.dataset.dock);
+		if (!id || !occupant(board, id)) return false;
+		const lifted = liftDock(board, id);
+		if (!lifted) return false;
+		activeLift = { lift: lifted.lift, fromBoard: true, dock: id };
+	}
+
+	function decorateDockMirror(mirror: HTMLElement, original: HTMLElement) {
+		const stamp = asStamp(original.dataset.stamp);
+		if (!stamp || !original.dataset.dock) return;
+		mirror.replaceChildren();
+		if (stamp === 'tick') {
+			const mark = document.createElement('span');
+			mark.className = tickUpright ? 'tick-mark upright' : 'tick-mark';
+			mirror.append(mark);
+		} else {
+			const glyph = document.createElement('span');
+			glyph.className = 'glyph';
+			glyph.lang = 'ko';
+			glyph.textContent = stamp;
+			mirror.append(glyph);
+		}
+	}
+
+	const paletteDrag = labDrag({
+		draggable: '.stamp',
+		onStart: onPaletteStart,
+		onStop: finishDrag
+	});
+
+	const boardDrag = labDrag({
+		draggable: '.dock.held',
+		onStart: onDockStart,
+		onStop: finishDrag,
+		decorateMirror: decorateDockMirror
+	});
 
 	function onDockClick(id: DockId, e: MouseEvent) {
 		if (skipClick) {
@@ -391,12 +391,7 @@
 	}
 </script>
 
-<svelte:window
-	onpointermove={onPointerMove}
-	onpointerup={onPointerUp}
-	onpointercancel={onPointerCancel}
-	onkeydown={onWindowKey}
-/>
+<svelte:window onkeydown={onWindowKey} />
 
 <Target target={step.target} name={step.targetName} />
 
@@ -409,6 +404,7 @@
 <div
 	class={['zone', won && 'win', result && 'filled']}
 	bind:this={boardEl}
+	{@attach !solved && boardDrag}
 	data-dock-board
 	role="group"
 	aria-label="vowel board"
@@ -423,6 +419,7 @@
 			type="button"
 			class={['dock', occupant(board, id) ? 'held' : 'open', id === 'base' && 'base']}
 			data-dock={id}
+			data-stamp={occupant(board, id) ?? undefined}
 			tabindex={solved ? -1 : id === tabDock ? 0 : -1}
 			style:left="{pos.x * 100}%"
 			style:top="{pos.y * 100}%"
@@ -433,7 +430,6 @@
 			disabled={solved}
 			onfocus={() => (activeDock = id)}
 			onkeydown={onBoardKey}
-			onpointerdown={(e) => startDockDrag(id, e)}
 			onclick={(e) => onDockClick(id, e)}
 		></button>
 	{/each}
@@ -481,6 +477,7 @@
 	aria-disabled={solved ? 'true' : undefined}
 	tabindex="-1"
 	bind:this={paletteEl}
+	{@attach !solved && paletteDrag}
 	onkeydown={onPaletteKey}
 >
 	<div class="label" id="vowel-strokes-label">strokes</div>
@@ -492,10 +489,10 @@
 				role="radio"
 				aria-checked={selected === stamp}
 				aria-label="strokes: {stamp}"
+				data-stamp={stamp}
 				tabindex={i === selectedIndex ? 0 : -1}
 				lang={hasHangul(stamp) ? 'ko' : undefined}
 				disabled={solved}
-				onpointerdown={(e) => startPaletteDrag(stamp, e)}
 				onclick={() => (selected = stamp)}
 			>
 				{#if stamp === 'tick'}
@@ -508,16 +505,6 @@
 		{/each}
 	</div>
 </div>
-
-{#if drag}
-	<div class="ghost" style:left="{drag.x}px" style:top="{drag.y}px" aria-hidden="true">
-		{#if drag.lift.stamp === 'tick'}
-			<span class={['tick-mark', tickUpright && 'upright']}></span>
-		{:else}
-			<span class="glyph" lang="ko">{drag.lift.stamp}</span>
-		{/if}
-	</div>
-{/if}
 
 <style>
 	.zone {
@@ -581,6 +568,8 @@
 		border: none;
 		background: transparent;
 		cursor: grab;
+		touch-action: none;
+		user-select: none;
 	}
 	.dock.open {
 		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
@@ -679,6 +668,8 @@
 		gap: 0.08rem;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			transform var(--fast) var(--ease);
+		touch-action: none;
+		user-select: none;
 	}
 	.stamp:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
 	.stamp:active:not(:disabled) { transform: translateY(0); }
@@ -715,17 +706,6 @@
 		line-height: 1;
 		padding-inline: 0.2rem;
 		text-align: center;
-	}
-
-	.ghost {
-		position: fixed;
-		z-index: 20;
-		pointer-events: none;
-		transform: translate(-50%, -50%);
-		font-family: var(--hangul);
-		font-size: 2rem;
-		color: var(--accent);
-		filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--ink) 18%, transparent));
 	}
 
 	@media (forced-colors: active) {

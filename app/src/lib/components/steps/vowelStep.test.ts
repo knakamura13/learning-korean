@@ -3,6 +3,20 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount, type Component } from 'svelte';
 import VowelStep from './VowelStep.svelte';
 import type { VowelStep as VowelStepData } from '$lib/content/types';
+import { flushLabDrag } from '../labDrag';
+
+if (typeof PointerEvent === 'undefined') {
+	class PointerEventPolyfill extends MouseEvent {
+		pointerId: number;
+		pointerType: string;
+		constructor(type: string, init: MouseEventInit & { pointerId?: number; pointerType?: string } = {}) {
+			super(type, init);
+			this.pointerId = init.pointerId ?? 0;
+			this.pointerType = init.pointerType ?? '';
+		}
+	}
+	Object.defineProperty(globalThis, 'PointerEvent', { value: PointerEventPolyfill });
+}
 
 const mounted: Record<string, never>[] = [];
 
@@ -276,17 +290,52 @@ describe('VowelStep dock board', () => {
 	it('still places on the next click after a drag that missed the board', async () => {
 		const onSettle = vi.fn();
 		render(VowelStep, { step: step('ㅣ', 'i'), onSettle, onNudge: () => {} });
+		await flushLabDrag();
 		const chip = stamp('ㅣ');
-		chip.setPointerCapture = () => {};
 		firePointer(chip, 'pointerdown', 8, 8);
 		firePointer(window, 'pointermove', 80, 80);
+		await frame();
 		flushSync();
 		firePointer(window, 'pointerup', 80, 80);
+		await frame();
 		flushSync();
 		await Promise.resolve();
 		dock('base').click();
 		flushSync();
 		expect(onSettle).toHaveBeenCalled();
+	});
+
+	it('seats a dragged standing stroke onto the base dock', async () => {
+		const onSettle = vi.fn();
+		render(VowelStep, { step: step('ㅣ', 'i'), onSettle, onNudge: () => {} });
+		await flushLabDrag();
+		const board = document.querySelector<HTMLElement>('[data-dock-board]');
+		if (!board) throw new Error('no board');
+		vi.spyOn(board, 'getBoundingClientRect').mockReturnValue({
+			left: 0,
+			top: 0,
+			right: 200,
+			bottom: 200,
+			width: 200,
+			height: 200,
+			x: 0,
+			y: 0,
+			toJSON() {}
+		} as DOMRect);
+
+		const chip = stamp('ㅣ');
+		firePointer(chip, 'pointerdown', 10, 10);
+		firePointer(window, 'pointermove', 18, 10);
+		await frame();
+		flushSync();
+		firePointer(window, 'pointermove', 100, 100);
+		await frame();
+		flushSync();
+		firePointer(window, 'pointerup', 100, 100);
+		await frame();
+		flushSync();
+		expect(onSettle).toHaveBeenCalled();
+		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅣ');
 	});
 
 	it('teaches that the earth stroke must be seated before a tick on ㅗ', () => {
@@ -332,7 +381,19 @@ function press(el: HTMLElement, key: string) {
 }
 
 function firePointer(target: EventTarget, type: string, x: number, y: number) {
-	const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y });
-	Object.defineProperty(event, 'pointerId', { value: 1, configurable: true });
-	target.dispatchEvent(event);
+	target.dispatchEvent(
+		new PointerEvent(type, {
+			bubbles: true,
+			cancelable: true,
+			button: 0,
+			clientX: x,
+			clientY: y,
+			pointerId: 1,
+			pointerType: 'mouse'
+		})
+	);
+}
+
+async function frame() {
+	await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
