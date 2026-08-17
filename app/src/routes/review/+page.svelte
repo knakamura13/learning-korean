@@ -235,8 +235,8 @@
 						submit();
 					}}
 				>
-					<div class="field">
-						<label class="answer-label" for="review-answer">Your answer</label>
+					<label class="answer-label" for="review-answer">Your answer</label>
+					<div class="answer-controls">
 						<input
 							id="review-answer"
 							bind:this={input}
@@ -262,17 +262,17 @@
 								emptyHint = false;
 							}}
 						/>
-						{#if emptyHint}
-							<p id="empty-hint" class="empty-hint" role="status">
-								{pronCard
-									? 'Type hyphenated cuts, or Hangul, then Check.'
-									: 'Type a romanization, then Check.'}
-							</p>
+						<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
+						{#if answered}
+							<span class="kb">or press Enter</span>
 						{/if}
 					</div>
-					<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
-					{#if answered}
-						<span class="kb">or press Enter</span>
+					{#if emptyHint}
+						<p id="empty-hint" class="empty-hint" role="status">
+							{pronCard
+								? 'Type hyphenated cuts, or Hangul, then Check.'
+								: 'Type a romanization, then Check.'}
+						</p>
 					{/if}
 				</form>
 
@@ -416,14 +416,29 @@
 
 	.ask { text-align: center; font-size: 0.84rem; color: var(--ink-soft); margin: 0 0 var(--s4); }
 
-	form { display: flex; gap: var(--s2); align-items: flex-start; flex-wrap: wrap; }
-
-	.field {
-		flex: 1 1 auto;
-		min-width: 0;
+	form {
 		display: flex;
 		flex-direction: column;
+		align-items: stretch;
 		gap: var(--s1);
+	}
+
+	.answer-controls {
+		display: flex;
+		align-items: stretch;
+		flex-wrap: wrap;
+		gap: var(--s2);
+	}
+
+	.answer-controls .in {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.answer-controls .btn {
+		flex: 0 0 auto;
+		align-self: stretch;
+		height: auto;
 	}
 
 	.answer-label {
