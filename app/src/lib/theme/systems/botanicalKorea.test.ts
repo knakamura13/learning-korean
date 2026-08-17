@@ -1,7 +1,8 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from '../contrast';
 import { designSystemCss } from '../css';
-import { botanicalKorea } from './botanicalKorea';
+import { botanicalKorea, LATIN_UNICODE_RANGE } from './botanicalKorea';
 
 describe('botanicalKorea', () => {
 	it('uses moss for go and mugunghwa rose for due', () => {
@@ -33,6 +34,26 @@ describe('botanicalKorea', () => {
 		expect(botanicalKorea.type.display).toContain('Newsreader');
 		expect(botanicalKorea.type.serif).toContain('Source Serif 4');
 		expect(botanicalKorea.type.mono).toContain('IBM Plex Mono');
+		expect(botanicalKorea.type.sans).toContain('Inter');
+		expect(botanicalKorea.type.hangul).not.toMatch(/Newsreader|Source Serif|Noto Serif/);
+	});
+
+	it('self-hosts Latin woff2 subsets with a Latin unicode-range', () => {
+		const fontsDir = new URL('../../../../static/fonts/', import.meta.url);
+		for (const face of botanicalKorea.fonts) {
+			expect(existsSync(new URL(face.file, fontsDir)), face.file).toBe(true);
+		}
+		const latin = botanicalKorea.fonts.filter((face) => face.file !== 'NotoSansKR-subset.woff2');
+		expect(latin.map((face) => face.family)).toEqual(
+			expect.arrayContaining(['Newsreader', 'Source Serif 4', 'Inter', 'IBM Plex Mono'])
+		);
+		for (const face of latin) {
+			expect(face.unicodeRange).toBe(LATIN_UNICODE_RANGE);
+		}
+		const css = designSystemCss(botanicalKorea);
+		expect(css).toContain('unicode-range:');
+		expect(css).toContain('Newsreader-latin.woff2');
+		expect(css).not.toMatch(/fonts\.googleapis|fonts\.gstatic/);
 	});
 
 	it('puts moss and rose contrast-more deltas on the system, not a full palette dump', () => {

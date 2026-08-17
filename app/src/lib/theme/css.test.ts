@@ -105,6 +105,14 @@ describe('designSystemCss', () => {
 		expect(css).toContain(`--paper: ${fixture.dark.paper}`);
 	});
 
+	it('emits unicode-range when a face declares it', () => {
+		const ranged = designSystemCss({
+			...fixture,
+			fonts: [{ ...fixture.fonts[0], unicodeRange: 'U+0000-00FF' }]
+		});
+		expect(ranged).toContain('unicode-range: U+0000-00FF');
+	});
+
 	it('emits webfonts from the system, including display and weight', () => {
 		expect(css).toContain("font-family: 'Test Face'");
 		expect(css).toContain("url('/fonts/test.woff2')");

@@ -141,14 +141,30 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
-	it('self-hosts Hangul and loads Latin faces from the layout', () => {
-		expect(existsSync(new URL('../../static/fonts/NotoSansKR-subset.woff2', import.meta.url))).toBe(true);
+	it('self-hosts Hangul and Latin faces without a Google Fonts CDN', () => {
+		const fontsDir = new URL('../../static/fonts/', import.meta.url);
+		expect(existsSync(new URL('NotoSansKR-subset.woff2', fontsDir))).toBe(true);
+		for (const file of [
+			'Newsreader-latin.woff2',
+			'Newsreader-Italic-latin.woff2',
+			'SourceSerif4-latin.woff2',
+			'Inter-latin.woff2',
+			'IBMPlexMono-Regular-latin.woff2',
+			'IBMPlexMono-Medium-latin.woff2'
+		]) {
+			expect(existsSync(new URL(file, fontsDir)), file).toBe(true);
+		}
 		expect(systemCss).toMatch(/font-family: 'Noto Sans KR'/);
 		expect(systemCss).toMatch(/NotoSansKR-subset\.woff2/);
 		expect(systemCss).toMatch(/font-display:\s*optional/);
 		expect(systemCss).toMatch(/Newsreader/);
+		expect(systemCss).toMatch(/SourceSerif4-latin/);
+		expect(systemCss).toMatch(/Inter-latin/);
+		expect(systemCss).toMatch(/IBMPlexMono/);
+		expect(systemCss).toMatch(/unicode-range:/);
 		expect(layout).toMatch(/activeSystem\.fonts/);
-		expect(layout).toMatch(/fonts\.googleapis\.com/);
+		expect(layout).not.toMatch(/fonts\.googleapis\.com|fonts\.gstatic\.com/);
+		expect(systemCss).not.toMatch(/fonts\.googleapis\.com|fonts\.gstatic\.com/);
 	});
 
 	it('makes the Baseline Widely Available browser target explicit', () => {

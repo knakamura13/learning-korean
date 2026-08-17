@@ -1,0 +1,23 @@
+Self-hosted Latin subsets (OFL)
+================================
+
+These woff2 files were subset from official OFL sources (Google Fonts mirrors
+of upstream) by `app/scripts/vendor-latin-fonts.py`. Hangul remains
+`NotoSansKR-subset.woff2`. The SIL Open Font License text is in OFL.txt.
+
+Newsreader
+  Copyright 2020 The Newsreader Project Authors
+  https://github.com/productiontype/Newsreader
+  Files: Newsreader-latin.woff2, Newsreader-Italic-latin.woff2
+
+Source Serif 4
+  Copyright 2014–2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'
+  Files: SourceSerif4-latin.woff2
+
+Inter
+  Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
+  Files: Inter-latin.woff2
+
+IBM Plex Mono
+  Copyright 2017 IBM Corp. with Reserved Font Name "Plex"
+  Files: IBMPlexMono-Regular-latin.woff2, IBMPlexMono-Medium-latin.woff2

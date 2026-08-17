@@ -91,15 +91,9 @@
 	);
 
 	const sittingTitle = $derived(action?.title ?? 'Korean');
-
-	const latinFonts =
-		'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;600&family=Newsreader:ital,opsz,wght@0,16..72,300;0,16..72,400;1,16..72,400&family=Source+Serif+4:opsz,wght@8..60,400&display=swap';
 </script>
 
 <svelte:head>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link rel="stylesheet" href={latinFonts} />
 	{#each activeSystem.fonts as face (face.file)}
 		<link
 			rel="preload"
