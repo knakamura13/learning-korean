@@ -106,6 +106,37 @@ describe('polish audit regressions', () => {
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
+	it('locks Botanical Korea paper, moss, and rose with WCAG floors', () => {
+		const light = {
+			paper: '#faf5ee',
+			inkFaint: '#5c5047',
+			accent: '#315c45',
+			accentInk: '#fffdf8',
+			rose: '#7a3e46',
+			good: '#2f6b45',
+			blue: '#3d5a7a',
+			warn: '#7a5e18'
+		};
+		const dark = {
+			paper: '#1a2420',
+			inkFaint: '#b8c4b0',
+			accent: '#a6c1ae',
+			accentInk: '#1a2420',
+			rose: '#e8b4ba',
+			good: '#83c99e',
+			blue: '#8ab7e0',
+			warn: '#d8b055'
+		};
+		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(4.5);
+		for (const name of ['rose', 'good', 'blue', 'warn'] as const) {
+			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(4.5);
+			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(4.5);
+		}
+	});
+
 	it('sizes peek, backup summary, and pip hits to at least 44px with pip buffers', () => {
 		expect(styleBlock(home)).toMatch(/\.peek\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(review)).toMatch(/\.backup-card summary\s*\{[^}]*min-height:\s*44px/s);
