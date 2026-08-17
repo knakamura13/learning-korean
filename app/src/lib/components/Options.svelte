@@ -102,7 +102,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--s2);
-		text-align: left;
+		text-align: start;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
 	}

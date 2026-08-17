@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { focusWhen } from '$lib/a11y/shortcuts';
 	import { backupFilename, exportedStatus, importedStatus, type BackupStatus } from '$lib/domain/backup';
 
 	/**
@@ -93,8 +94,28 @@
 	/>
 
 	{#if pending}
-		<div class="confirm" role="alertdialog" aria-label="Confirm restore">
-			<p>
+		<dialog
+			class="confirm"
+			aria-labelledby="restore-copy"
+			{@attach (node: HTMLDialogElement) => {
+				try {
+					node.showModal();
+				} catch {
+					node.setAttribute('open', '');
+				}
+				const onCancel = () => cancelRestore();
+				node.addEventListener('cancel', onCancel);
+				return () => {
+					node.removeEventListener('cancel', onCancel);
+					try {
+						if (node.open) node.close();
+					} catch {
+						node.removeAttribute('open');
+					}
+				};
+			}}
+		>
+			<p id="restore-copy">
 				Replace current progress with <strong>{pending.name}</strong>? Everything you have
 				reviewed since that backup will be lost.
 			</p>
@@ -102,9 +123,17 @@
 				<button type="button" class="btn" disabled={busy} onclick={confirmRestore}>
 					{busy ? 'Restoring…' : 'Replace progress'}
 				</button>
-				<button type="button" class="btn ghost" disabled={busy} onclick={cancelRestore}>Cancel</button>
+				<button
+					type="button"
+					class="btn ghost"
+					disabled={busy}
+					use:focusWhen={true}
+					onclick={cancelRestore}
+				>
+					Cancel
+				</button>
 			</div>
-		</div>
+		</dialog>
 	{/if}
 
 	{#if status}
@@ -136,11 +165,18 @@
 	.confirm {
 		margin-top: var(--s3);
 		padding: var(--s3) var(--s4);
+		max-width: 36rem;
+		width: min(36rem, calc(100% - 2rem));
 		border-radius: var(--r-md);
-		border-left: 3px solid var(--warn);
+		border: none;
+		border-inline-start: 3px solid var(--warn);
 		background: var(--warn-soft);
+		color: inherit;
 		font-size: 0.87rem;
 		line-height: 1.6;
+	}
+	.confirm::backdrop {
+		background: color-mix(in srgb, var(--ink) 35%, transparent);
 	}
 	.confirm p { margin: 0 0 var(--s3); }
 	.confirm .actions { margin: 0; }
@@ -151,16 +187,16 @@
 		border-radius: var(--r-sm);
 		font-size: 0.85rem;
 		line-height: 1.5;
-		border-left: 3px solid var(--rule-strong);
+		border-inline-start: 3px solid var(--rule-strong);
 		background: var(--paper-sunk);
 	}
-	.status[data-tone='right'] { border-left-color: var(--good); background: var(--good-soft); color: var(--good); }
-	.status[data-tone='wrong'] { border-left-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+	.status[data-tone='right'] { border-inline-start-color: var(--good); background: var(--good-soft); color: var(--good); }
+	.status[data-tone='wrong'] { border-inline-start-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
 	@media (forced-colors: active) {
-		.confirm { background: Canvas; border-left-color: ButtonText; }
-		.status { background: Canvas; border-left-color: ButtonBorder; }
-		.status[data-tone='right'] { border-left-color: Highlight; color: CanvasText; }
-		.status[data-tone='wrong'] { border-left-color: ButtonText; color: CanvasText; }
+		.confirm { background: Canvas; border-inline-start-color: ButtonText; }
+		.status { background: Canvas; border-inline-start-color: ButtonBorder; }
+		.status[data-tone='right'] { border-inline-start-color: Highlight; color: CanvasText; }
+		.status[data-tone='wrong'] { border-inline-start-color: ButtonText; color: CanvasText; }
 	}
 </style>

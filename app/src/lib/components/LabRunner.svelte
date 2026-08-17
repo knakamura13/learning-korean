@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount, tick, type Snippet } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
+	import { resolve } from '$app/paths';
 	import type { Lab } from '$lib/content/types';
 	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
 	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
@@ -242,6 +243,29 @@
 		restart();
 	}
 
+	/** Native modal; jsdom has no showModal, so fall back to the open attribute. */
+	function openRestartDialog(node: HTMLDialogElement) {
+		try {
+			node.showModal();
+		} catch {
+			node.setAttribute('open', '');
+		}
+		const onCancel = () => {
+			void cancelRestart();
+		};
+		node.addEventListener('cancel', onCancel);
+		return () => {
+			node.removeEventListener('cancel', onCancel);
+			if (node.open) {
+				try {
+					node.close();
+				} catch {
+					node.removeAttribute('open');
+				}
+			}
+		};
+	}
+
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
 		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -328,7 +352,7 @@
 {#if finished}
 	<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
 		<span class="seal" lang="ko">한글</span>
-		<h2>{lab.finish.title}</h2>
+		<h1>{lab.finish.title}</h1>
 		<p class="summary">{lab.finish.summary}</p>
 
 		<div class="tally" role="region" aria-label="Lab results summary">
@@ -344,13 +368,17 @@
 
 		<div class="actions">
 			{#if dueNow > 0}
-				<a class="btn" href="/review">Review now →</a>
+				<a class="btn" href={resolve('/review')}>Review now →</a>
 			{/if}
 			{#if nextLab}
-				<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href="/lab/{nextLab.id}">Next lab</a>
+				<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href={resolve('/lab/[id]', { id: nextLab.id })}>Next lab</a>
 			{/if}
 			{#if confirmingRestart}
-				<div class="restart-confirm" role="group" aria-labelledby="restart-confirmation">
+				<dialog
+					class="restart-confirm"
+					aria-labelledby="restart-confirmation"
+					{@attach openRestartDialog}
+				>
 					<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
 					<div class="restart-confirm-actions">
 						<button class="btn ghost" type="button" use:focusWhen={true} onclick={cancelRestart}>
@@ -358,7 +386,7 @@
 						</button>
 						<button class="btn" type="button" onclick={confirmRestart}>Start over</button>
 					</div>
-				</div>
+				</dialog>
 			{:else}
 				<button
 					bind:this={restartButton}
@@ -651,7 +679,7 @@
 		}
 	}
 
-	.rail li { display: flex; flex: 0 0 auto; }
+	.rail li { display: flex; flex: 0 0 auto; padding-inline: 0.2rem; }
 
 	.pip {
 		appearance: none;
@@ -666,7 +694,7 @@
 		border: 0;
 		border-radius: 0;
 		background: transparent;
-		min-width: 2.25rem;
+		min-width: 44px;
 		min-height: 44px;
 		padding: 0;
 		overflow: visible;
@@ -681,6 +709,9 @@
 	button.pip { cursor: pointer; }
 	/* Hover filter stays off the selected pip so it cannot clip the glow. */
 	button.pip:not([data-selected]):hover { filter: brightness(1.08); }
+	button.pip:not([data-selected]):active {
+		filter: brightness(0.96);
+	}
 
 	/* Status mark. Centered with inset so selected pulse/glow can use
 	   transform + drop-shadow on this one box — no second ring. */
@@ -780,9 +811,9 @@
 		.pip[data-kind='wrong']::before { background: Canvas; border-color: ButtonText; }
 		.pip[data-selected]::before,
 		button.pip:focus-visible::before { border-color: ButtonText; }
-		.fb { background: Canvas; border-left-color: ButtonBorder; }
-		.fb[data-tone='right'] { background: Canvas; border-left-color: Highlight; }
-		.fb[data-tone='wrong'] { background: Canvas; border-left-color: ButtonText; }
+		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
+		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
+		.fb[data-tone='wrong'] { background: Canvas; border-inline-start-color: ButtonText; }
 	}
 
 	.where {
@@ -847,13 +878,13 @@
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
 		border-radius: var(--r-md);
-		border-left: 3px solid var(--rule-strong);
+		border-inline-start: 3px solid var(--rule-strong);
 		background: var(--paper-sunk);
 		font-size: 0.9rem;
 		line-height: 1.6;
 	}
-	.fb[data-tone='right'] { border-left-color: var(--good); background: var(--good-soft); }
-	.fb[data-tone='wrong'] { border-left-color: var(--bad); background: var(--bad-soft); }
+	.fb[data-tone='right'] { border-inline-start-color: var(--good); background: var(--good-soft); }
+	.fb[data-tone='wrong'] { border-inline-start-color: var(--bad); background: var(--bad-soft); }
 
 	.verdict {
 		display: block;
@@ -882,6 +913,10 @@
 
 	/* --- finish --- */
 	.finish { padding: var(--s7) var(--s5); text-align: center; }
+	.finish h1 {
+		font-size: clamp(1.35rem, 3vw, 1.6rem);
+		margin: 0 0 var(--s3);
+	}
 
 	.seal {
 		font-family: var(--hangul);
@@ -935,6 +970,16 @@
 		border: 1px solid var(--rule-strong);
 		border-radius: var(--r-md);
 		background: var(--paper-sunk);
+		color: inherit;
+		inset: 0;
+		width: min(22rem, calc(100% - 2rem));
+		max-width: 100%;
+		height: fit-content;
+		margin: auto;
+		box-shadow: var(--shadow-2);
+	}
+	.restart-confirm::backdrop {
+		background: color-mix(in srgb, var(--ink) 42%, transparent);
 	}
 	.restart-confirm p { margin: 0; }
 	.restart-confirm-actions { display: flex; gap: var(--s2); flex-wrap: wrap; justify-content: center; }

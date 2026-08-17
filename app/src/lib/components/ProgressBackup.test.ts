@@ -84,14 +84,16 @@ describe('ProgressBackup — restore', () => {
 		const file = new File(['{"version":1}'], 'my-backup.json', { type: 'application/json' });
 		await selectFile(root, file);
 
-		expect(root.querySelector('.confirm')?.textContent).toContain('my-backup.json');
+		const dialog = root.querySelector('dialog.confirm');
+		expect(dialog).toBeTruthy();
+		expect(dialog?.textContent).toContain('my-backup.json');
 		expect(importJson).not.toHaveBeenCalled();
 
 		const [, cancel] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
 		cancel.click();
 		flushSync();
 
-		expect(root.querySelector('.confirm')).toBeNull();
+		expect(root.querySelector('dialog.confirm')).toBeNull();
 		expect(importJson).not.toHaveBeenCalled();
 	});
 
@@ -108,7 +110,7 @@ describe('ProgressBackup — restore', () => {
 		await waitFor(() => importJson.mock.calls.length > 0);
 
 		expect(importJson).toHaveBeenCalledWith('{"version":1}');
-		expect(root.querySelector('.confirm')).toBeNull();
+		expect(root.querySelector('dialog.confirm')).toBeNull();
 		const status = root.querySelector('.status');
 		expect(status?.getAttribute('data-tone')).toBe('right');
 	});

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
+	import type { Pathname } from '$app/types';
 	import { LABS } from '$lib/content';
 	import {
 		continueAction,
@@ -60,7 +62,7 @@
 	</header>
 
 	{#if next}
-		<a class="continue card" href={next.href} data-kind={next.kind}>
+		<a class="continue card" href={resolve(next.href as Pathname)} data-kind={next.kind}>
 			<div class="continue-copy">
 				<p class="eyebrow">{next.kicker}</p>
 				<strong class="continue-title">{next.title}</strong>
@@ -71,7 +73,7 @@
 	{/if}
 
 	<section class="strip" aria-busy={!ready} aria-label="Course and review statistics">
-		<a class="stat hot" href="/review" class:quiet={!ready || stats.queue === 0}>
+		<a class="stat hot" href={resolve('/review')} class:quiet={!ready || stats.queue === 0}>
 			<b>
 				{#if ready}
 					{stats.queue}
@@ -128,7 +130,7 @@
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									<span class="chip-status wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
-									<a class="peek" href="/lab/{lab.id}" aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
+									<a class="peek" href={resolve('/lab/[id]', { id: lab.id })} aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
 								</span>
 							</div>
 						</div>
@@ -136,7 +138,7 @@
 				{:else}
 					<a
 						class="lab card"
-						href="/lab/{lab.id}"
+						href={resolve('/lab/[id]', { id: lab.id })}
 						class:done={card.done}
 						class:resume={card.resumeAt !== null}
 						aria-labelledby="lab-{lab.id}-title"
@@ -389,7 +391,9 @@
 
 	.lab.ahead { opacity: 0.78; }
 	.peek {
-		display: inline-block;
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
 		font-size: 0.66rem;
 		font-weight: 500;
 		color: var(--ink-faint);
@@ -427,7 +431,7 @@
 	.ct {
 		flex: 0 0 auto;
 		min-width: 14ch;
-		text-align: right;
+		text-align: end;
 		font-family: var(--mono);
 		font-size: 0.72rem;
 		color: var(--ink-faint);
@@ -447,7 +451,7 @@
 		width: 0.6rem;
 		height: 0.6rem;
 		border-radius: 2px;
-		margin-right: var(--s1);
+		margin-inline-end: var(--s1);
 	}
 	.sw.m { background: var(--good); }
 	.sw.y { background: var(--accent); }

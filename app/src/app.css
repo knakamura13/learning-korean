@@ -18,7 +18,7 @@
 	/* --- ink & paper --- */
 	--ink: #1a1a18;
 	--ink-soft: #55534e;
-	--ink-faint: #6f6c64;
+	--ink-faint: #585650;
 	--paper: #fffef9;
 	--paper-sunk: #f4f2ea;
 	--paper-raised: #ffffff;
@@ -84,7 +84,7 @@
 :root[data-theme='dark'] {
 	--ink: #e9e7e0;
 	--ink-soft: #a8a49a;
-	--ink-faint: #8a8680;
+	--ink-faint: #a5a099;
 	--paper: #131316;
 	--paper-sunk: #1b1b20;
 	--paper-raised: #212127;
@@ -113,7 +113,7 @@
 	:root:not([data-theme='light']) {
 		--ink: #e9e7e0;
 		--ink-soft: #a8a49a;
-		--ink-faint: #8a8680;
+		--ink-faint: #a5a099;
 		--paper: #131316;
 		--paper-sunk: #1b1b20;
 		--paper-raised: #212127;
@@ -141,7 +141,7 @@
 
 @media (prefers-contrast: more) {
 	:root {
-		--ink-faint: #55534e;
+		--ink-faint: #4f4d48;
 		--rule: #b8b19f;
 		--rule-strong: #9a937f;
 		--accent: #8a2a22;
@@ -149,7 +149,7 @@
 	}
 
 	:root[data-theme='dark'] {
-		--ink-faint: #a8a49a;
+		--ink-faint: #b0aca2;
 		--rule: #5c5c68;
 		--rule-strong: #767684;
 		--accent: #f09990;
@@ -159,7 +159,7 @@
 
 @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
 	:root:not([data-theme='light']) {
-		--ink-faint: #a8a49a;
+		--ink-faint: #b0aca2;
 		--rule: #5c5c68;
 		--rule-strong: #767684;
 		--accent: #f09990;
