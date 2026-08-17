@@ -1,0 +1,14 @@
+import { academia } from './systems/academia.ts';
+
+/**
+ * The design system currently painted onto the app.
+ *
+ * To prototype a new look:
+ * 1. Add `src/lib/theme/systems/<name>.ts` exporting a `DesignSystem`
+ * 2. Point `activeSystem` at it
+ * 3. Reload — CSS tokens, theme-color, and manifests stay in lockstep
+ *
+ * Components keep using `var(--ink)` / `var(--paper)` / `var(--accent)`.
+ * Swap `academia` for `taegeuk` to restore the previous palette.
+ */
+export const activeSystem = academia;

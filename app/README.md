@@ -43,9 +43,18 @@ src/lib/domain/     pure logic, no framework, no I/O
 src/lib/content/    lessons as typed data
   types.ts            the step union every lab is built from
   lab01..lab05.ts     the course
+src/lib/theme/      swappable design systems (tokens + CSS)
+  active.ts           one-line switch for the current look
+  systems/academia.ts Light Academia / Dark Academia palettes
 src/lib/components/ the runner and one component per step type
 src/routes/         dashboard, /lab/[id], /review, /reference
 ```
+
+Visual tokens are a `DesignSystem` object. Components only use semantic CSS
+variables (`--ink`, `--paper`, `--accent`, `--serif`, …). To prototype a new
+look, add `src/lib/theme/systems/<name>.ts` and point `activeSystem` at it.
+The previous Taegeuk palette is still in `systems/taegeuk.ts` as a one-line
+switch-back.
 
 ## Two rules worth keeping
 

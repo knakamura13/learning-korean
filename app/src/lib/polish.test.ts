@@ -14,55 +14,18 @@ import reference from '../routes/reference/+page.svelte?raw';
 import errorPage from '../routes/+error.svelte?raw';
 import appHtml from '../app.html?raw';
 import manifest from '../../static/manifest.webmanifest?raw';
+import { activeSystem } from './theme/active';
+import { contrastRatio } from './theme/contrast';
+import { designSystemCss } from './theme/css';
+import { applyPaperPlaceholders } from './theme/placeholders';
 
 const appCss = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
+const systemCss = designSystemCss(activeSystem);
 
 function styleBlock(markup: string): string {
 	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
 	if (!match) throw new Error('no style block');
 	return match[1];
-}
-
-function cssBlock(css: string, prelude: string): string {
-	const start = css.indexOf(prelude);
-	if (start < 0) throw new Error(`missing ${prelude}`);
-	const brace = css.indexOf('{', start);
-	let depth = 0;
-	for (let i = brace; i < css.length; i++) {
-		if (css[i] === '{') depth += 1;
-		else if (css[i] === '}') {
-			depth -= 1;
-			if (depth === 0) return css.slice(brace + 1, i);
-		}
-	}
-	throw new Error(`unclosed ${prelude}`);
-}
-
-function token(block: string, name: string): string {
-	const match = block.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{3,8})`));
-	if (!match) throw new Error(`missing ${name}`);
-	return match[1];
-}
-
-function relativeLuminance(hex: string): number {
-	const raw = hex.replace('#', '');
-	const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
-	const toLinear = (channel: number) => {
-		const c = channel / 255;
-		return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-	};
-	const r = toLinear(parseInt(full.slice(0, 2), 16));
-	const g = toLinear(parseInt(full.slice(2, 4), 16));
-	const b = toLinear(parseInt(full.slice(4, 6), 16));
-	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function contrastRatio(a: string, b: string): number {
-	const l1 = relativeLuminance(a);
-	const l2 = relativeLuminance(b);
-	const hi = Math.max(l1, l2);
-	const lo = Math.min(l1, l2);
-	return (hi + 0.05) / (lo + 0.05);
 }
 
 function physicalBoxProps(src: string): string[] {
@@ -119,7 +82,13 @@ describe('polish audit regressions', () => {
 	});
 
 	it('prevents a late Hangul font swap from causing layout shift', () => {
-		expect(appCss).toMatch(/font-display:\s*optional/);
+		expect(systemCss).toMatch(/font-family: 'Noto Sans KR'/);
+		expect(systemCss).toMatch(/font-display:\s*optional/);
+	});
+
+	it('loads tokens from the active design system rather than hard-coding a palette', () => {
+		expect(appCss).toMatch(/@import\s+'virtual:design-system\.css'/);
+		expect(appCss).not.toMatch(/--paper:\s*#/);
 	});
 
 	it('makes the Baseline Widely Available browser target explicit', () => {
@@ -127,10 +96,8 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps caption-size ink-faint at least 7:1 against paper', () => {
-		const light = cssBlock(appCss, ':root {');
-		const dark = cssBlock(appCss, ":root[data-theme='dark']");
-		expect(contrastRatio(token(light, '--ink-faint'), token(light, '--paper'))).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(token(dark, '--ink-faint'), token(dark, '--paper'))).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(activeSystem.light.inkFaint, activeSystem.light.paper)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
 	it('sizes peek, backup summary, and pip hits to at least 44px with pip buffers', () => {
@@ -158,11 +125,15 @@ describe('polish audit regressions', () => {
 		expect(layout).toMatch(/name="twitter:title"/);
 		expect(appHtml).toMatch(/manifest-dark\.webmanifest/);
 		expect(appHtml).toMatch(/prefers-color-scheme:\s*dark/);
-		expect(manifest).toMatch(/"theme_color":\s*"#fffef9"/);
+		expect(appHtml).toContain('%%DESIGN_PAPER_LIGHT%%');
+		const resolvedHtml = applyPaperPlaceholders(appHtml, activeSystem);
+		expect(resolvedHtml).toContain(activeSystem.light.paper);
+		expect(resolvedHtml).toContain(activeSystem.dark.paper);
+		expect(manifest).toContain(`"theme_color": "${activeSystem.light.paper}"`);
 		const darkPath = new URL('../../static/manifest-dark.webmanifest', import.meta.url);
 		expect(existsSync(darkPath)).toBe(true);
 		const manifestDark = readFileSync(darkPath, 'utf8');
-		expect(manifestDark).toMatch(/"theme_color":\s*"#131316"/);
-		expect(manifestDark).toMatch(/"background_color":\s*"#131316"/);
+		expect(manifestDark).toContain(`"theme_color": "${activeSystem.dark.paper}"`);
+		expect(manifestDark).toContain(`"background_color": "${activeSystem.dark.paper}"`);
 	});
 });

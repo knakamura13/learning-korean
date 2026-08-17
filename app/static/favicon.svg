@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#a4342b"/>
+  <rect width="64" height="64" rx="6" fill="#5C3D2E"/>
   <text x="32" y="45" font-family="Apple SD Gothic Neo, Malgun Gothic, Noto Sans KR, sans-serif"
-        font-size="38" font-weight="600" fill="#fffef9" text-anchor="middle">한</text>
+        font-size="38" font-weight="600" fill="#FAF6EE" text-anchor="middle">한</text>
 </svg>

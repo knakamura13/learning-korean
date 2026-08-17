@@ -116,7 +116,7 @@
 		gap: var(--s2);
 		text-decoration: none;
 		color: var(--ink);
-		font-weight: 600;
+		font-weight: 400;
 	}
 
 	.mark {
@@ -126,7 +126,13 @@
 		line-height: 1;
 	}
 
-	.name { font-size: 0.9rem; letter-spacing: 0.01em; }
+	.name {
+		font-family: var(--display);
+		font-size: 1.05rem;
+		font-style: italic;
+		font-weight: 400;
+		letter-spacing: 0.06em;
+	}
 
 	nav {
 		display: flex;
@@ -143,7 +149,10 @@
 		min-height: 44px;
 		padding: 0.35rem 0.7rem;
 		border-radius: var(--r-sm);
-		font-size: 0.84rem;
+		font-family: var(--display);
+		font-size: 0.92rem;
+		font-style: italic;
+		letter-spacing: 0.04em;
 		text-decoration: none;
 		color: var(--ink-soft);
 		white-space: nowrap;
