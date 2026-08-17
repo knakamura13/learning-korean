@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
+	import { resolve } from '$app/paths';
 	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
@@ -173,7 +174,7 @@
 				Cards unlock as you finish labs, so the deck never quizzes you on something you have
 				not met. Finish Lab 01 and {LABS[0].steps.length > 0 ? 19 : 0} consonants drop in.
 			</p>
-			<a class="btn" href="/lab/0001">Start Lab 01</a>
+			<a class="btn" href={resolve('/lab/[id]', { id: '0001' })}>Start Lab 01</a>
 		</div>
 	{:else if finishedSession}
 		<div class="card empty" in:fade>
@@ -326,10 +327,16 @@
 		margin-bottom: var(--s4);
 	}
 	.backup-card summary {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
 		cursor: pointer;
 		font-size: 0.86rem;
 		font-weight: 600;
 		padding: var(--s1) 0;
+	}
+	.backup-card summary:active {
+		color: var(--ink);
 	}
 	.backup-card summary:focus-visible {
 		outline: 2px solid var(--paper);
@@ -499,13 +506,13 @@
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
 		border-radius: var(--r-md);
-		border-left: 3px solid var(--rule-strong);
+		border-inline-start: 3px solid var(--rule-strong);
 		background: var(--paper-sunk);
 		font-size: 0.87rem;
 		line-height: 1.6;
 	}
-	.fb[data-tone='right'] { border-left-color: var(--good); background: var(--good-soft); }
-	.fb[data-tone='wrong'] { border-left-color: var(--bad); background: var(--bad-soft); }
+	.fb[data-tone='right'] { border-inline-start-color: var(--good); background: var(--good-soft); }
+	.fb[data-tone='wrong'] { border-inline-start-color: var(--bad); background: var(--bad-soft); }
 
 	.v {
 		display: block;
@@ -533,7 +540,7 @@
 		font-size: 0.7rem;
 		color: var(--ink-faint);
 		align-self: center;
-		margin-left: auto;
+		margin-inline-start: auto;
 	}
 
 	@media (pointer: coarse) {

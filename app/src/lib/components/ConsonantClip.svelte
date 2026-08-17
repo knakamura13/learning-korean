@@ -88,6 +88,10 @@
 		background: var(--paper-raised);
 		color: var(--ink);
 	}
+	.play:active {
+		background: color-mix(in srgb, var(--ink) 6%, var(--paper-sunk));
+		transform: translateY(1px);
+	}
 	.play:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;

@@ -1,0 +1,36 @@
+{
+	"name": "Korean — labs and review",
+	"short_name": "Korean",
+	"description": "Interactive labs and spaced repetition for reading Korean.",
+	"start_url": "./",
+	"scope": "./",
+	"display": "standalone",
+	"background_color": "#131316",
+	"theme_color": "#131316",
+	"icons": [
+		{
+			"src": "favicon.svg",
+			"type": "image/svg+xml",
+			"sizes": "any",
+			"purpose": "any"
+		},
+		{
+			"src": "icon-192.png",
+			"type": "image/png",
+			"sizes": "192x192",
+			"purpose": "any"
+		},
+		{
+			"src": "apple-touch-icon.png",
+			"type": "image/png",
+			"sizes": "180x180",
+			"purpose": "any"
+		},
+		{
+			"src": "icon-maskable.png",
+			"type": "image/png",
+			"sizes": "512x512",
+			"purpose": "maskable"
+		}
+	]
+}

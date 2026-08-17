@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	const status = $derived(page.status);
@@ -16,7 +17,7 @@
 	<div class="card empty">
 		<span class="big" lang="ko">{isMissing ? '한' : '잠깐'}</span>
 		<p class="eyebrow">HTTP {status}</p>
-		<h2>{isMissing ? 'This page is not in the course' : 'Something went wrong'}</h2>
+		<h1>{isMissing ? 'This page is not in the course' : 'Something went wrong'}</h1>
 		<p>
 			{#if isMissing}
 				That address is not a lab, a review, or the reference. The course lives on the
@@ -27,7 +28,7 @@
 				The page could not be shown. Head back to the labs and try that step again.
 			{/if}
 		</p>
-		<a class="btn" href="/">Back to labs</a>
+		<a class="btn" href={resolve('/')}>Back to labs</a>
 	</div>
 </div>
 
@@ -39,7 +40,10 @@
 		display: block;
 		margin-bottom: var(--s3);
 	}
-	.empty h2 { margin-bottom: var(--s2); }
+	.empty h1 {
+		margin-bottom: var(--s2);
+		font-size: clamp(1.35rem, 3vw, 1.6rem);
+	}
 	.empty p:not(.eyebrow) {
 		color: var(--ink-soft);
 		font-size: 0.92rem;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { assets } from '$app/paths';
+	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
@@ -9,13 +9,13 @@
 	let { children } = $props();
 
 	const canonical = $derived(pageCanonical(page.url.pathname));
-	const ogImage = $derived(siteAsset('/og.png') ?? `${assets}/og.png`);
+	const ogImage = $derived(siteAsset('/og.png'));
 
 	const nav = [
 		{ href: '/', label: 'Labs' },
 		{ href: '/review', label: 'Review' },
 		{ href: '/reference', label: 'Reference' }
-	];
+	] as const;
 
 	const queue = $derived(progress.stats.queue);
 </script>
@@ -32,18 +32,24 @@
 		<link rel="canonical" href={canonical} />
 		<meta property="og:url" content={canonical} />
 	{/if}
+	<meta property="og:type" content="website" />
 	<meta property="og:title" content="Korean — labs and review" />
 	<meta property="og:description" content="Interactive labs and spaced repetition for reading Korean." />
-	<meta property="og:image" content={ogImage} />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:image" content={ogImage} />
+	<meta name="twitter:title" content="Korean — labs and review" />
+	{#if ogImage}
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta name="twitter:image" content={ogImage} />
+	{/if}
 </svelte:head>
 
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="bar">
 	<div class="inner">
-		<a class="brand" href="/">
+		<a class="brand" href={resolve('/')}>
 			<span class="mark" lang="ko">한</span>
 			<span class="name">Korean</span>
 		</a>
@@ -53,7 +59,7 @@
 					? page.url.pathname === '/'
 					: page.url.pathname.startsWith(item.href)}
 				<a
-					href={item.href}
+					href={resolve(item.href)}
 					class:active={isActive}
 					aria-current={isActive ? 'page' : undefined}
 				>
@@ -75,14 +81,14 @@
 <style>
 	.skip {
 		position: absolute;
-		left: -9999px;
-		top: 0;
+		inset-inline-start: -9999px;
+		inset-block-start: 0;
 		background: var(--accent);
 		color: var(--accent-ink);
 		padding: var(--s2) var(--s4);
 		z-index: 10;
 	}
-	.skip:focus { left: var(--s3); top: var(--s3); }
+	.skip:focus { inset-inline-start: var(--s3); inset-block-start: var(--s3); }
 
 	.bar {
 		position: sticky;
@@ -125,7 +131,7 @@
 	nav {
 		display: flex;
 		gap: var(--s2);
-		margin-left: auto;
+		margin-inline-start: auto;
 		min-width: 0;
 		flex-shrink: 1;
 	}
@@ -144,6 +150,7 @@
 		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
 	}
 	nav a:hover { background: var(--paper-sunk); color: var(--ink); }
+	nav a:active { background: var(--rule); color: var(--ink); }
 	nav a.active { color: var(--accent); background: var(--accent-soft); }
 
 	.badge {

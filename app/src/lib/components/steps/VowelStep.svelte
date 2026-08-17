@@ -617,6 +617,7 @@
 			transform var(--fast) var(--ease);
 	}
 	.stamp:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+	.stamp:active:not(:disabled) { transform: translateY(0); }
 	.stamp.on {
 		border-color: var(--accent);
 		background: var(--accent-soft);
