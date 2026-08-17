@@ -55,5 +55,11 @@
 	state={won ? 'win' : impossible ? 'dead' : result ? 'partial' : 'empty'}
 />
 
-<Tray label="first vowel" items={step.first} selected={a} onSelect={(v) => (a = v)} />
-<Tray label="second vowel" items={step.second} selected={b} onSelect={(v) => (b = v)} />
+<Tray dock="first" label="first vowel" items={step.first} selected={a} onSelect={(v) => (a = v)} />
+<Tray
+	dock="second"
+	label="second vowel"
+	items={step.second}
+	selected={b}
+	onSelect={(v) => (b = v)}
+/>

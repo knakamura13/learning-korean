@@ -53,14 +53,22 @@
 <Slots {slots} {result} state={won ? 'win' : result ? 'partial' : 'empty'} />
 
 <Tray
+	dock="consonant"
 	label={hasFinal ? 'first consonant' : 'consonant'}
 	items={step.consonants}
 	selected={lead}
 	onSelect={(v) => (lead = v)}
 />
-<Tray label="vowel" items={step.vowels} selected={vowel} onSelect={(v) => (vowel = v)} />
+<Tray
+	dock="vowel"
+	label="vowel"
+	items={step.vowels}
+	selected={vowel}
+	onSelect={(v) => (vowel = v)}
+/>
 {#if hasFinal}
 	<Tray
+		dock="batchim"
 		label="batchim — the bottom slot"
 		items={step.finals!}
 		selected={final}

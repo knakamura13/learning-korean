@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { hasHangul } from '$lib/a11y/lang';
+	import { movedEnough, snapSlot, type SlotBox } from '$lib/domain/composerSnap';
+	import { trayLift } from './trayLift.svelte';
 
 	/** A labeled row of selectable chips — one independent composer slot. */
 	let {
@@ -9,6 +12,8 @@
 		text = false,
 		disabled = false,
 		tone = 'accent',
+		/** Matching `data-slot` on the composer readout. Omit for click-only trays. */
+		dock = undefined,
 		onSelect
 	}: {
 		label: string;
@@ -18,6 +23,7 @@
 		text?: boolean;
 		disabled?: boolean;
 		tone?: 'accent' | 'blue';
+		dock?: string;
 		onSelect: (value: string) => void;
 	} = $props();
 
@@ -46,6 +52,10 @@
 	});
 
 	let groupEl = $state<HTMLDivElement>();
+	let pending = $state<{ item: string; x: number; y: number } | null>(null);
+	let drag = $state<{ item: string; x: number; y: number } | null>(null);
+	/** Swallow the click that follows a pointer drag so a missed drop does not auto-fill. */
+	let skipClick = false;
 
 	/** Roving tabindex lives on the radiogroup element itself, per the ARIA pattern. */
 	function onGroupKeydown(e: KeyboardEvent) {
@@ -62,7 +72,68 @@
 		next.focus();
 		onSelect(items[chips.indexOf(next)]);
 	}
+
+	function startLift(item: string, e: PointerEvent) {
+		if (disabled || !dock || e.button !== 0) return;
+		skipClick = false;
+		pending = { item, x: e.clientX, y: e.clientY };
+	}
+
+	function beginDrag(e: PointerEvent) {
+		if (!pending || drag || !dock) return;
+		if (!movedEnough(pending.x, pending.y, e.clientX, e.clientY)) return;
+		const item = pending.item;
+		pending = null;
+		drag = { item, x: e.clientX, y: e.clientY };
+		trayLift.current = { dock, item, x: e.clientX, y: e.clientY };
+	}
+
+	function onPointerMove(e: PointerEvent) {
+		if (pending && !drag) beginDrag(e);
+		if (!drag || !dock) return;
+		drag = { ...drag, x: e.clientX, y: e.clientY };
+		trayLift.current = { dock, item: drag.item, x: e.clientX, y: e.clientY };
+	}
+
+	function slotBoxes(): SlotBox[] {
+		return [...document.querySelectorAll<HTMLElement>('[data-slot]')].map((el) => {
+			const r = el.getBoundingClientRect();
+			return {
+				id: el.dataset.slot ?? '',
+				left: r.left,
+				top: r.top,
+				right: r.right,
+				bottom: r.bottom
+			};
+		});
+	}
+
+	function endLift(e: PointerEvent) {
+		pending = null;
+		if (!drag) return;
+		skipClick = true;
+		const item = drag.item;
+		drag = null;
+		trayLift.current = null;
+		if (!dock) return;
+		const hit = snapSlot(slotBoxes(), e.clientX, e.clientY, dock);
+		if (hit) onSelect(item);
+	}
+
+	function onChipClick(item: string) {
+		if (skipClick) {
+			skipClick = false;
+			return;
+		}
+		onSelect(item);
+	}
+
+	onDestroy(() => {
+		if (dock && trayLift.current?.dock === dock) trayLift.current = null;
+	});
 </script>
+
+<svelte:window onpointermove={onPointerMove} onpointerup={endLift} onpointercancel={endLift} />
 
 <div
 	class={['tray', disabled && 'off', picked && 'picked']}
@@ -79,14 +150,22 @@
 			{@const on = selected === item}
 			<button
 				type="button"
-				class={['chip', text && 'text', on && 'on', tone === 'blue' && 'blue']}
+				class={[
+					'chip',
+					text && 'text',
+					on && 'on',
+					tone === 'blue' && 'blue',
+					dock && 'draggable',
+					drag?.item === item && 'lifted'
+				]}
 				role="radio"
 				aria-checked={on}
 				aria-label="{label}: {item}"
 				tabindex={i === activeIndex ? 0 : -1}
 				{disabled}
 				lang={hasHangul(item) ? 'ko' : undefined}
-				onclick={() => onSelect(item)}
+				onpointerdown={(e) => startLift(item, e)}
+				onclick={() => onChipClick(item)}
 			>
 				<span class="glyph">{item}</span>
 				{#if on}
@@ -96,6 +175,12 @@
 		{/each}
 	</div>
 </div>
+
+{#if drag}
+	<div class="ghost" style:left="{drag.x}px" style:top="{drag.y}px" aria-hidden="true">
+		<span class={['glyph', text && 'text']}>{drag.item}</span>
+	</div>
+{/if}
 
 <style>
 	.tray { margin-bottom: var(--s3); }
@@ -165,6 +250,9 @@
 	}
 	.chip.on.blue { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
 
+	.chip.draggable { touch-action: none; user-select: none; }
+	.chip.lifted { opacity: 0.4; }
+
 	.mark {
 		font-family: var(--sans);
 		font-size: 0.52rem;
@@ -174,6 +262,22 @@
 		line-height: 1;
 		padding-inline: 0.2rem;
 		text-align: center;
+	}
+
+	.ghost {
+		position: fixed;
+		z-index: 20;
+		pointer-events: none;
+		transform: translate(-50%, -50%);
+		font-family: var(--hangul);
+		font-size: 2rem;
+		color: var(--accent);
+		filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--ink) 18%, transparent));
+	}
+	.ghost .text {
+		font-family: var(--sans);
+		font-size: 0.84rem;
+		font-weight: 600;
 	}
 
 	@media (forced-colors: active) {
