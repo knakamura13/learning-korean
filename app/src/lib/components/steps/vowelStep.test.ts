@@ -224,9 +224,31 @@ describe('VowelStep dock board', () => {
 		flushSync();
 		expect(document.querySelector('[data-shape-picker]')).toBeNull();
 	});
+
+	it('still places on the next click after a drag that missed the board', async () => {
+		const onSettle = vi.fn();
+		render(VowelStep, { step: step('ㅣ', 'i'), onSettle, onNudge: () => {} });
+		const chip = stamp('ㅣ');
+		chip.setPointerCapture = () => {};
+		firePointer(chip, 'pointerdown', 8, 8);
+		firePointer(window, 'pointermove', 80, 80);
+		flushSync();
+		firePointer(window, 'pointerup', 80, 80);
+		flushSync();
+		await Promise.resolve();
+		dock('base').click();
+		flushSync();
+		expect(onSettle).toHaveBeenCalled();
+	});
 });
 
 function press(el: HTMLElement, key: string) {
 	el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
 	flushSync();
+}
+
+function firePointer(target: EventTarget, type: string, x: number, y: number) {
+	const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y });
+	Object.defineProperty(event, 'pointerId', { value: 1, configurable: true });
+	target.dispatchEvent(event);
 }

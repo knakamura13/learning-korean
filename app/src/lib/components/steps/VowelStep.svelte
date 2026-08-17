@@ -303,7 +303,7 @@
 	function onPointerUp(e: PointerEvent) {
 		pending = null;
 		if (!drag) return;
-		skipClick = true;
+		armClickSkip();
 		const active = drag;
 		drag = null;
 		const rect = boardEl?.getBoundingClientRect();
