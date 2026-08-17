@@ -31,26 +31,34 @@ export const PALETTE: readonly Stamp[] = ['ㅣ', 'ㅡ', 'tick'];
 export const SNAP_RADIUS_RATIO = 0.2;
 export const SNAP_RADIUS_MIN_PX = 44;
 
-export function dockPosition(id: DockId): { x: number; y: number } {
+function pairShown(shown: readonly DockId[], a: DockId, b: DockId): boolean {
+	return shown.includes(a) && shown.includes(b);
+}
+
+/**
+ * Unit-square centers. A lone tick stays on the letter's midline; a pair
+ * matches Hangul: ㅛ/ㅠ sit side by side, ㅑ/ㅕ stack.
+ */
+export function dockPosition(id: DockId, shown: readonly DockId[] = []): { x: number; y: number } {
 	switch (id) {
 		case 'base':
 			return { x: 0.5, y: 0.5 };
 		case 'left':
-			return { x: 0.22, y: 0.5 };
+			return pairShown(shown, 'left', 'left2') ? { x: 0.22, y: 0.35 } : { x: 0.22, y: 0.5 };
 		case 'left2':
-			return { x: 0.08, y: 0.5 };
+			return pairShown(shown, 'left', 'left2') ? { x: 0.22, y: 0.65 } : { x: 0.08, y: 0.5 };
 		case 'right':
-			return { x: 0.78, y: 0.5 };
+			return pairShown(shown, 'right', 'right2') ? { x: 0.78, y: 0.35 } : { x: 0.78, y: 0.5 };
 		case 'right2':
-			return { x: 0.92, y: 0.5 };
+			return pairShown(shown, 'right', 'right2') ? { x: 0.78, y: 0.65 } : { x: 0.92, y: 0.5 };
 		case 'above':
-			return { x: 0.5, y: 0.22 };
+			return pairShown(shown, 'above', 'above2') ? { x: 0.35, y: 0.22 } : { x: 0.5, y: 0.22 };
 		case 'above2':
-			return { x: 0.5, y: 0.08 };
+			return pairShown(shown, 'above', 'above2') ? { x: 0.65, y: 0.22 } : { x: 0.5, y: 0.08 };
 		case 'below':
-			return { x: 0.5, y: 0.78 };
+			return pairShown(shown, 'below', 'below2') ? { x: 0.35, y: 0.78 } : { x: 0.5, y: 0.78 };
 		case 'below2':
-			return { x: 0.5, y: 0.92 };
+			return pairShown(shown, 'below', 'below2') ? { x: 0.65, y: 0.78 } : { x: 0.5, y: 0.92 };
 		default: {
 			const _exhaustive: never = id;
 			return _exhaustive;
@@ -104,12 +112,12 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 			}
 		case 'left':
 			switch (direction) {
-				case 'left':
-					return 'left2';
 				case 'right':
 					return 'base';
-				case 'up':
 				case 'down':
+					return 'left2';
+				case 'left':
+				case 'up':
 					return null;
 				default: {
 					const _exhaustive: never = direction;
@@ -119,9 +127,10 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 		case 'left2':
 			switch (direction) {
 				case 'right':
+					return 'base';
+				case 'up':
 					return 'left';
 				case 'left':
-				case 'up':
 				case 'down':
 					return null;
 				default: {
@@ -133,10 +142,10 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 			switch (direction) {
 				case 'left':
 					return 'base';
-				case 'right':
-					return 'right2';
-				case 'up':
 				case 'down':
+					return 'right2';
+				case 'right':
+				case 'up':
 					return null;
 				default: {
 					const _exhaustive: never = direction;
@@ -146,9 +155,10 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 		case 'right2':
 			switch (direction) {
 				case 'left':
+					return 'base';
+				case 'up':
 					return 'right';
 				case 'right':
-				case 'up':
 				case 'down':
 					return null;
 				default: {
@@ -158,12 +168,12 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 			}
 		case 'above':
 			switch (direction) {
-				case 'up':
-					return 'above2';
 				case 'down':
 					return 'base';
-				case 'left':
 				case 'right':
+					return 'above2';
+				case 'up':
+				case 'left':
 					return null;
 				default: {
 					const _exhaustive: never = direction;
@@ -173,9 +183,10 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 		case 'above2':
 			switch (direction) {
 				case 'down':
+					return 'base';
+				case 'left':
 					return 'above';
 				case 'up':
-				case 'left':
 				case 'right':
 					return null;
 				default: {
@@ -187,10 +198,10 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 			switch (direction) {
 				case 'up':
 					return 'base';
-				case 'down':
-					return 'below2';
-				case 'left':
 				case 'right':
+					return 'below2';
+				case 'down':
+				case 'left':
 					return null;
 				default: {
 					const _exhaustive: never = direction;
@@ -200,9 +211,10 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 		case 'below2':
 			switch (direction) {
 				case 'up':
+					return 'base';
+				case 'left':
 					return 'below';
 				case 'down':
-				case 'left':
 				case 'right':
 					return null;
 				default: {
@@ -314,8 +326,13 @@ export function applyLift(state: BoardState, dock: DockId, lift: Lift): BoardSta
 			if (!state.base || dock === 'base') return null;
 			const side = sideOfDock(dock);
 			if (!side || !sidesFor(state.base).includes(side)) return null;
+			if (isSecondaryDock(dock)) {
+				// Empty ㅛ/ㅑ boards show both holes. The outer one still seats
+				// the first tick; a second stamp on it adds the glide.
+				if (state.ticks === 0) return { ...state, side, ticks: 1 };
+				return { ...state, side, ticks: 2 };
+			}
 			if (!visibleDocks(state).includes(dock)) return null;
-			if (isSecondaryDock(dock)) return { ...state, side, ticks: 2 };
 			const ticks = Math.max(lift.count, state.ticks, 1) as 1 | 2;
 			return { ...state, side, ticks };
 		}
@@ -388,7 +405,7 @@ export function snapDock(
 	let bestDist = Infinity;
 	for (const id of docks) {
 		if (applyLift(state, id, lift) === null) continue;
-		const pos = dockPosition(id);
+		const pos = dockPosition(id, docks);
 		const dx = pos.x * boardSizePx - x;
 		const dy = pos.y * boardSizePx - y;
 		const dist = Math.hypot(dx, dy);

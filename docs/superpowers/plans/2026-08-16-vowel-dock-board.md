@@ -59,7 +59,7 @@ export const EMPTY_BOARD: BoardState;
 export const PALETTE: readonly Stamp[];
 export const SNAP_RADIUS_RATIO = 0.2;
 export const SNAP_RADIUS_MIN_PX = 44;
-export function dockPosition(id: DockId): { x: number; y: number };
+export function dockPosition(id: DockId, shown?: readonly DockId[]): { x: number; y: number };
 export function visibleDocks(state: BoardState): DockId[];
 export function occupant(state: BoardState, dock: DockId): Stamp | null;
 export function applyStamp(state: BoardState, dock: DockId, stamp: Stamp): BoardState | null;

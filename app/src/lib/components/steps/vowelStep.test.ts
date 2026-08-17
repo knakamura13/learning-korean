@@ -126,6 +126,29 @@ describe('VowelStep dock board', () => {
 		expect(String(last?.[0])).toContain('ㅡ');
 	});
 
+	it('lays out empty ㅛ like the letter, not a stacked column', () => {
+		render(VowelStep, { step: step('ㅛ', 'yo'), onSettle: () => {}, onNudge: () => {} });
+		expect(shownDocks()).toEqual(['base', 'above', 'above2']);
+		expect(dock('above').style.top).toBe(dock('above2').style.top);
+		expect(dock('above').style.left).not.toBe(dock('above2').style.left);
+		const aboveLeft = parseFloat(dock('above').style.left);
+		const above2Left = parseFloat(dock('above2').style.left);
+		expect(aboveLeft).toBeLessThan(above2Left);
+	});
+
+	it('starts earth-vowel cards on the earth stroke', () => {
+		render(VowelStep, { step: step('ㅛ', 'yo'), onSettle: () => {}, onNudge: () => {} });
+		expect(stamp('ㅡ').getAttribute('aria-checked')).toBe('true');
+		expect(stamp('ㅣ').getAttribute('aria-checked')).toBe('false');
+		expect(document.querySelector('.tick-mark')?.classList.contains('upright')).toBe(true);
+	});
+
+	it('keeps a lone ㅗ hole on the midline', () => {
+		render(VowelStep, { step: step('ㅗ', 'o'), onSettle: () => {}, onNudge: () => {} });
+		expect(shownDocks()).toEqual(['base', 'above']);
+		expect(dock('above').style.left).toBe('50%');
+	});
+
 	it('adds the y-glide with a second tick on the same side', () => {
 		const onSettle = vi.fn();
 		render(VowelStep, { step: step('ㅑ', 'ya'), onSettle, onNudge: () => {} });

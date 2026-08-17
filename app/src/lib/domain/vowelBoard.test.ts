@@ -106,6 +106,15 @@ describe('stamping', () => {
 		expect(applyStamp(withI, 'right', 'ㅣ')).toBeNull();
 	});
 
+	it('lets the first ㅛ tick land on either hole without jumping to the glide', () => {
+		const withEu = applyStamp(EMPTY_BOARD, 'base', 'ㅡ')!;
+		const fromOuter = applyStamp(withEu, 'above2', 'tick');
+		expect(fromOuter).not.toBeNull();
+		expect(fromOuter?.ticks).toBe(1);
+		expect(vowelOf(fromOuter!)).toBe('ㅗ');
+		expect(vowelOf(applyStamp(fromOuter!, 'above2', 'tick')!)).toBe('ㅛ');
+	});
+
 	it('moves existing ticks when the opposite primary is stamped', () => {
 		const a = applyStamp(applyStamp(EMPTY_BOARD, 'base', 'ㅣ')!, 'right', 'tick')!;
 		expect(vowelOf(a)).toBe('ㅏ');
@@ -217,6 +226,14 @@ describe('snap', () => {
 		const base = dockPosition('base');
 		expect(snapDock(withI, { stamp: 'tick', count: 1 }, base.x * 200, base.y * 200, 200)).toBeNull();
 	});
+
+	it('snaps a ㅛ tick to the paired hole it was dropped on', () => {
+		const withEu = applyStamp(EMPTY_BOARD, 'base', 'ㅡ')!;
+		const shown: DockId[] = ['base', 'above', 'above2'];
+		expect(
+			snapDock(withEu, { stamp: 'tick', count: 1 }, 0.65 * 200, 0.22 * 200, 200, shown)
+		).toBe('above2');
+	});
 });
 
 describe('vowelOf', () => {
@@ -243,8 +260,9 @@ describe('spatial dock arrows', () => {
 		expect(dockInDirection(withI, 'left', 'left')).toBe('left');
 		expect(dockInDirection(withI, 'right', 'right')).toBe('right');
 		const iotated = board({ base: 'ㅣ', ticks: 1, side: 'right' });
-		expect(dockInDirection(iotated, 'right', 'right')).toBe('right2');
-		expect(dockInDirection(iotated, 'right2', 'right')).toBe('right2');
+		expect(dockInDirection(iotated, 'right', 'right')).toBe('right');
+		expect(dockInDirection(iotated, 'right', 'down')).toBe('right2');
+		expect(dockInDirection(iotated, 'right2', 'down')).toBe('right2');
 	});
 
 	it('sends ArrowUp from the earth base to the above tick', () => {
@@ -253,6 +271,17 @@ describe('spatial dock arrows', () => {
 		expect(dockInDirection(withEu, 'base', 'down')).toBe('below');
 		expect(dockInDirection(withEu, 'base', 'left')).toBe('base');
 		expect(dockInDirection(withEu, 'above', 'down')).toBe('base');
+	});
+
+	it('moves sideways between ㅛ ticks and down between ㅑ ticks', () => {
+		const yo: DockId[] = ['base', 'above', 'above2'];
+		expect(dockInDirection(EMPTY_BOARD, 'above', 'right', yo)).toBe('above2');
+		expect(dockInDirection(EMPTY_BOARD, 'above2', 'left', yo)).toBe('above');
+		expect(dockInDirection(EMPTY_BOARD, 'above', 'up', yo)).toBe('above');
+		const ya: DockId[] = ['base', 'right', 'right2'];
+		expect(dockInDirection(EMPTY_BOARD, 'right', 'down', ya)).toBe('right2');
+		expect(dockInDirection(EMPTY_BOARD, 'right2', 'up', ya)).toBe('right');
+		expect(dockInDirection(EMPTY_BOARD, 'right', 'right', ya)).toBe('right');
 	});
 });
 
@@ -292,5 +321,45 @@ describe('palette and positions', () => {
 			expect(y).toBeGreaterThanOrEqual(0);
 			expect(y).toBeLessThanOrEqual(1);
 		}
+	});
+
+	it('keeps a lone ㅗ tick on the vertical midline', () => {
+		expect(dockPosition('above', ['base', 'above'])).toEqual({ x: 0.5, y: 0.22 });
+	});
+
+	it('sits ㅛ ticks side by side above the earth stroke', () => {
+		const shown: DockId[] = ['base', 'above', 'above2'];
+		const above = dockPosition('above', shown);
+		const above2 = dockPosition('above2', shown);
+		expect(above.y).toBe(above2.y);
+		expect(above.x).toBeLessThan(above2.x);
+		expect(above.y).toBeLessThan(dockPosition('base', shown).y);
+	});
+
+	it('stacks ㅑ ticks on the right of the standing stroke', () => {
+		const shown: DockId[] = ['base', 'right', 'right2'];
+		const right = dockPosition('right', shown);
+		const right2 = dockPosition('right2', shown);
+		expect(right.x).toBe(right2.x);
+		expect(right.y).toBeLessThan(right2.y);
+		expect(right.x).toBeGreaterThan(dockPosition('base', shown).x);
+	});
+
+	it('sits ㅠ ticks side by side below the earth stroke', () => {
+		const shown: DockId[] = ['base', 'below', 'below2'];
+		const below = dockPosition('below', shown);
+		const below2 = dockPosition('below2', shown);
+		expect(below.y).toBe(below2.y);
+		expect(below.x).toBeLessThan(below2.x);
+		expect(below.y).toBeGreaterThan(dockPosition('base', shown).y);
+	});
+
+	it('stacks ㅕ ticks on the left of the standing stroke', () => {
+		const shown: DockId[] = ['base', 'left', 'left2'];
+		const left = dockPosition('left', shown);
+		const left2 = dockPosition('left2', shown);
+		expect(left.x).toBe(left2.x);
+		expect(left.y).toBeLessThan(left2.y);
+		expect(left.x).toBeLessThan(dockPosition('base', shown).x);
 	});
 });

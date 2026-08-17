@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Target from '../Target.svelte';
 	import { hasHangul } from '$lib/a11y/lang';
 	import type { VowelStep } from '$lib/content/types';
@@ -14,6 +15,7 @@
 		dockPosition,
 		liftDock,
 		occupant,
+		recipeOf,
 		sideOfDock,
 		snapDock,
 		stampLabel,
@@ -31,7 +33,7 @@
 	} = $props();
 
 	let board = $state(EMPTY_BOARD);
-	let selected = $state<Stamp>('ㅣ');
+	let selected = $state<Stamp>(untrack(() => recipeOf(step.target)?.base ?? 'ㅣ'));
 	let solved = $state(false);
 	let boardEl = $state<HTMLDivElement>();
 	let paletteEl = $state<HTMLDivElement>();
@@ -61,6 +63,7 @@
 	const selectedIndex = $derived(Math.max(0, PALETTE.indexOf(selected)));
 	const pickerOptions = $derived(picker ? compatibleStamps(board, picker.dock) : []);
 	const tabDock = $derived((docks.includes(activeDock) ? activeDock : docks[0]) ?? 'base');
+	const tickUpright = $derived((board.base ?? selected) === 'ㅡ');
 
 	$effect(() => {
 		if (won && !solved) {
@@ -364,7 +367,7 @@
 		<span class="glyph" lang="ko">{result}</span>
 	{/if}
 	{#each docks as id (id)}
-		{@const pos = dockPosition(id)}
+		{@const pos = dockPosition(id, docks)}
 		<button
 			type="button"
 			class={['dock', occupant(board, id) ? 'held' : 'open', id === 'base' && 'base']}
@@ -385,7 +388,7 @@
 	{/each}
 	{#if picker}
 		{@const openDock = picker.dock}
-		{@const pos = dockPosition(openDock)}
+		{@const pos = dockPosition(openDock, docks)}
 		<div
 			id="vowel-shape-picker"
 			class="picker"
@@ -410,7 +413,7 @@
 					onclick={() => seat(openDock, stamp)}
 				>
 					{#if stamp === 'tick'}
-						<span class="tick-mark"></span>
+						<span class={['tick-mark', tickUpright && 'upright']}></span>
 					{:else}
 						{stamp}
 					{/if}
@@ -445,7 +448,7 @@
 				onclick={() => (selected = stamp)}
 			>
 				{#if stamp === 'tick'}
-					<span class="tick-mark" aria-hidden="true"></span>
+					<span class={['tick-mark', tickUpright && 'upright']} aria-hidden="true"></span>
 					<span class="mark">tick</span>
 				{:else}
 					<span class="glyph">{stamp}</span>
@@ -458,7 +461,7 @@
 {#if drag}
 	<div class="ghost" style:left="{drag.x}px" style:top="{drag.y}px" aria-hidden="true">
 		{#if drag.lift.stamp === 'tick'}
-			<span class="tick-mark"></span>
+			<span class={['tick-mark', tickUpright && 'upright']}></span>
 		{:else}
 			<span class="glyph" lang="ko">{drag.lift.stamp}</span>
 		{/if}
@@ -633,6 +636,10 @@
 		height: 0.2rem;
 		border-radius: 2px;
 		background: currentColor;
+	}
+	.tick-mark.upright {
+		width: 0.2rem;
+		height: 0.7rem;
 	}
 	.mark {
 		font-family: var(--sans);
