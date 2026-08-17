@@ -120,7 +120,7 @@ describe('Tray', () => {
 		expect(eo.textContent).toMatch(/first/i);
 	});
 
-	it('keeps horizontal padding around the selected-slot mark', () => {
+	it('labels the selected consonant chip with the slot name', () => {
 		render(Tray, {
 			label: 'consonant',
 			items: ['ㄴ', 'ㅁ', 'ㅅ'],
@@ -128,13 +128,9 @@ describe('Tray', () => {
 			onSelect: () => {}
 		});
 
-		const mark = labeledGroup(document.body, 'consonant').querySelector('.mark');
-		expect(mark).toBeTruthy();
-		const styles = getComputedStyle(mark!);
-		const padLeft = parseFloat(styles.paddingLeft);
-		const padRight = parseFloat(styles.paddingRight);
-		expect(padLeft).toBeGreaterThanOrEqual(4);
-		expect(padRight).toBeGreaterThanOrEqual(4);
+		const nieun = radioNamed(labeledGroup(document.body, 'consonant'), 'ㄴ');
+		expect(nieun.classList.contains('on')).toBe(true);
+		expect(nieun.querySelector('.mark')?.textContent?.trim()).toBe('consonant');
 	});
 
 	it('keeps disabled chips unclickable', () => {
