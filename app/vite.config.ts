@@ -1,9 +1,10 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import { designSystemPlugin } from './src/lib/theme/vitePlugin.ts';
 // vitest's defineConfig, not vite's — it is the one that knows about `test`.
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-	plugins: [sveltekit()],
+	plugins: [designSystemPlugin(), sveltekit()],
 	build: {
 		// Vite 8's documented Baseline Widely Available target makes the
 		// browser-support policy explicit for contributors and deploys.

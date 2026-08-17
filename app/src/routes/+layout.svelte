@@ -1,4 +1,5 @@
 <script lang="ts">
+	import 'virtual:design-system.css';
 	import '../app.css';
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
