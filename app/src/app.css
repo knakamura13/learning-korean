@@ -62,7 +62,8 @@ html[data-theme='dark'] { color-scheme: dark; }
 body {
 	margin: 0;
 	min-height: 100dvh;
-	background: var(--paper);
+	background-color: var(--paper);
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.04'/%3E%3C/svg%3E");
 	color: var(--ink);
 	font-family: var(--sans);
 	line-height: var(--leading);
@@ -175,10 +176,34 @@ button { font: inherit; color: inherit; }
 }
 
 .card {
+	position: relative;
 	background: var(--paper-raised);
 	border: 1px solid var(--rule);
 	border-radius: var(--r-lg);
 	box-shadow: var(--shadow-1);
+}
+.card::before,
+.card::after {
+	content: '';
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	pointer-events: none;
+	border-color: var(--rule-strong);
+	border-style: solid;
+	border-width: 0;
+}
+.card::before {
+	inset-block-start: var(--s2);
+	inset-inline-start: var(--s2);
+	border-block-start-width: 1px;
+	border-inline-start-width: 1px;
+}
+.card::after {
+	inset-block-end: var(--s2);
+	inset-inline-end: var(--s2);
+	border-block-end-width: 1px;
+	border-inline-end-width: 1px;
 }
 
 /* --- buttons --- */

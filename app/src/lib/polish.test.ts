@@ -158,6 +158,15 @@ describe('polish audit regressions', () => {
 		expect(finish).not.toMatch(/<h2>/);
 	});
 
+	it('mounts cards as herbarium specimens without grain on the face', () => {
+		const card = cssBlock(appCss, '.card {');
+		expect(card).toMatch(/position:\s*relative/);
+		expect(appCss).toMatch(/\.card::before/);
+		expect(appCss).toMatch(/\.card::after/);
+		expect(appCss).toMatch(/body\s*\{[\s\S]*background-image:/);
+		expect(appCss).not.toMatch(/body::before[\s\S]{0,200}z-index:\s*1000/);
+	});
+
 	it('emits absolute Open Graph images only, with dimensions and a dark manifest', () => {
 		expect(layout).not.toMatch(/siteAsset\('\/og\.png'\)\s*\?\?/);
 		expect(layout).toMatch(/property="og:type"/);
