@@ -15,7 +15,7 @@
 
 <div class="shell">
 	<div class="card empty">
-		<p class="flourish" aria-hidden="true">* * *</p>
+		<p class="flourish" aria-hidden="true">***</p>
 		<span class="big" lang="ko">{isMissing ? '한' : '잠깐'}</span>
 		<p class="eyebrow">HTTP {status}</p>
 		<h1>{isMissing ? 'This page is not in the course' : 'Something went wrong'}</h1>

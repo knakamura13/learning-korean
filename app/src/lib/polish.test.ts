@@ -99,7 +99,7 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(/var\(--card-sheen\)/);
 		expect(appCss).toMatch(/--texture-opacity/);
 		expect(layout).not.toMatch(/backdrop-filter/);
-		expect(home).toMatch(/\* \* \*/);
+		expect(home).toMatch(/\*{3}/);
 		expect(styleBlock(home)).toMatch(/\.num\s*\{[^}]*var\(--gold\)/s);
 		expect(styleBlock(layout)).toMatch(/border-bottom-color:\s*var\(--gold\)/);
 	});

@@ -49,7 +49,7 @@
 
 <div class="shell">
 	<header class="head">
-		<p class="flourish" aria-hidden="true">* * *</p>
+		<p class="flourish" aria-hidden="true">***</p>
 		<p class="eyebrow">Reference</p>
 		<h1>Every letter and rule</h1>
 		<p class="lede">

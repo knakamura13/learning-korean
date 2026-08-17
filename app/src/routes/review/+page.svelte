@@ -120,7 +120,7 @@
 
 <div class="shell narrow">
 	<header class="head">
-		<p class="flourish" aria-hidden="true">* * *</p>
+		<p class="flourish" aria-hidden="true">***</p>
 		<p class="eyebrow">Spaced repetition</p>
 		<h1>Daily Review</h1>
 		<p class="standfirst">

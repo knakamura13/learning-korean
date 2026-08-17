@@ -53,7 +53,7 @@
 
 <div class="shell">
 	<header class="hero">
-		<p class="flourish" aria-hidden="true">* * *</p>
+		<p class="flourish" aria-hidden="true">***</p>
 		<p class="eyebrow" lang="ko">한글</p>
 		<h1>Read Korean from first principles</h1>
 		<p class="lede">
