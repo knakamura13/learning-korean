@@ -128,9 +128,9 @@
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									<span class="chip-status wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
+									<a class="peek" href="/lab/{lab.id}" aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
 								</span>
 							</div>
-							<a class="peek" href="/lab/{lab.id}" aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
 						</div>
 					</article>
 				{:else}
@@ -354,7 +354,13 @@
 		flex-wrap: wrap;
 		align-items: center;
 	}
-	.flag { min-height: 1.4em; display: inline-flex; align-items: center; }
+	.flag {
+		min-height: 1.4em;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--s2);
+		flex-wrap: wrap;
+	}
 	.chip-status {
 		display: inline-flex;
 		align-items: center;
@@ -384,12 +390,12 @@
 	.lab.ahead { opacity: 0.78; }
 	.peek {
 		display: inline-block;
-		margin-top: var(--s2);
-		font-size: 0.78rem;
-		font-weight: 600;
-		color: var(--ink-soft);
+		font-size: 0.66rem;
+		font-weight: 500;
+		color: var(--ink-faint);
 		text-decoration: none;
 		border-bottom: 1px solid var(--rule-strong);
+		line-height: 1.2;
 	}
 	.peek:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
