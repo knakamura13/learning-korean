@@ -32,6 +32,8 @@ function paint(paper: string, ink: string): Palette {
 		badSoft: paper,
 		warn: ink,
 		warnSoft: paper,
+		rose: ink,
+		roseSoft: paper,
 		shadow1: 'none',
 		shadow2: 'none',
 		shadow3: 'none'
@@ -43,7 +45,9 @@ const contrastLight: ContrastOverrides = {
 	rule: '#222222',
 	ruleStrong: '#333333',
 	accent: '#444444',
-	accentSoft: '#555555'
+	accentSoft: '#555555',
+	rose: '#666666',
+	roseSoft: '#777777'
 };
 
 const contrastDark: ContrastOverrides = {
@@ -51,7 +55,9 @@ const contrastDark: ContrastOverrides = {
 	rule: '#bbbbbb',
 	ruleStrong: '#cccccc',
 	accent: '#dddddd',
-	accentSoft: '#eeeeee'
+	accentSoft: '#eeeeee',
+	rose: '#f0f0f0',
+	roseSoft: '#fafafa'
 };
 
 const fixture: DesignSystem = {
@@ -139,6 +145,11 @@ describe('designSystemCss', () => {
 		expect(more).not.toContain('--shadow-1:');
 		expect(more).not.toContain('--serif:');
 		expect(more).not.toContain('--paper:');
+	});
+
+	it('emits rose and rose-soft from the palette', () => {
+		expect(css).toContain('--rose: #010101');
+		expect(css).toContain('--rose-soft: #fefefe');
 	});
 
 	it('still emits dark contrast overrides when contrastMoreLight is absent', () => {

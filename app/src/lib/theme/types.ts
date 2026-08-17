@@ -25,6 +25,9 @@ export interface Palette {
 	badSoft: string;
 	warn: string;
 	warnSoft: string;
+	/** Due/resume chrome. Distinct from moss `--accent`. */
+	rose: string;
+	roseSoft: string;
 	shadow1: string;
 	shadow2: string;
 	shadow3: string;
@@ -46,13 +49,15 @@ export interface ShapeTokens {
 	rPill: string;
 }
 
-/** High-contrast ink/rule/accent overrides. Not a full palette. */
+/** High-contrast ink/rule/accent/rose overrides. Not a full palette. */
 export interface ContrastOverrides {
 	inkFaint: string;
 	rule: string;
 	ruleStrong: string;
 	accent: string;
 	accentSoft: string;
+	rose: string;
+	roseSoft: string;
 }
 
 export interface FontFaceSpec {
@@ -98,6 +103,8 @@ export const PALETTE_CSS_VARS = {
 	badSoft: '--bad-soft',
 	warn: '--warn',
 	warnSoft: '--warn-soft',
+	rose: '--rose',
+	roseSoft: '--rose-soft',
 	shadow1: '--shadow-1',
 	shadow2: '--shadow-2',
 	shadow3: '--shadow-3'
@@ -122,5 +129,7 @@ export const CONTRAST_CSS_VARS = {
 	rule: '--rule',
 	ruleStrong: '--rule-strong',
 	accent: '--accent',
-	accentSoft: '--accent-soft'
+	accentSoft: '--accent-soft',
+	rose: '--rose',
+	roseSoft: '--rose-soft'
 } as const satisfies Record<keyof ContrastOverrides, string>;

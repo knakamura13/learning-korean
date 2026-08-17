@@ -120,6 +120,9 @@ describe('polish audit regressions', () => {
 
 	it('self-hosts Noto Serif KR for headings with optional display', () => {
 		expect(existsSync(new URL('../../static/fonts/NotoSerifKR-subset.woff2', import.meta.url))).toBe(true);
+		expect(systemCss).toMatch(/font-family: 'Noto Serif KR'/);
+		expect(systemCss).toMatch(/NotoSerifKR-subset\.woff2/);
+		expect(systemCss).toMatch(/font-display:\s*optional/);
 		expect(layout).toMatch(/activeSystem\.fonts/);
 	});
 
@@ -134,34 +137,30 @@ describe('polish audit regressions', () => {
 
 	it('uses moss and rose under prefers-contrast, not 태극 red', () => {
 		expect(appCss).not.toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#/);
-		const mossContrastAccent = '#1e3d2c';
-		const roseContrast = '#5c2c33';
-		expect(mossContrastAccent).not.toBe('#8a2a22');
-		expect(contrastRatio(mossContrastAccent, '#faf5ee')).toBeGreaterThanOrEqual(4.5);
-		expect(contrastRatio(roseContrast, '#faf5ee')).toBeGreaterThanOrEqual(4.5);
+		expect(activeSystem.contrastMoreLight?.accent.toLowerCase()).toBe('#1e3d2c');
+		expect(activeSystem.contrastMoreLight?.rose.toLowerCase()).toBe('#5c2c33');
+		expect(systemCss).toContain('--accent: #1e3d2c');
+		expect(systemCss).toContain('--rose: #5c2c33');
+		expect(systemCss).not.toContain('--accent: #8a2a22');
+		expect(contrastRatio(activeSystem.contrastMoreLight!.accent, activeSystem.light.paper)).toBeGreaterThanOrEqual(
+			4.5
+		);
+		expect(contrastRatio(activeSystem.contrastMoreLight!.rose, activeSystem.light.paper)).toBeGreaterThanOrEqual(4.5);
 	});
 
 	it('locks Botanical Korea paper, moss, and rose with WCAG floors', () => {
-		const light = {
-			paper: '#faf5ee',
-			inkFaint: '#5c5047',
-			accent: '#315c45',
-			accentInk: '#fffdf8',
-			rose: '#7a3e46',
-			good: '#2f6b45',
-			blue: '#3d5a7a',
-			warn: '#7a5e18'
-		};
-		const dark = {
-			paper: '#1a2420',
-			inkFaint: '#b8c4b0',
-			accent: '#a6c1ae',
-			accentInk: '#1a2420',
-			rose: '#e8b4ba',
-			good: '#83c99e',
-			blue: '#8ab7e0',
-			warn: '#d8b055'
-		};
+		expect(activeSystem.id).toBe('botanicalKorea');
+		const { light, dark } = activeSystem;
+		expect(light.paper.toLowerCase()).toBe('#faf5ee');
+		expect(light.accent.toLowerCase()).toBe('#315c45');
+		expect(light.accentInk.toLowerCase()).toBe('#fffdf8');
+		expect(light.rose.toLowerCase()).toBe('#7a3e46');
+		expect(dark.paper.toLowerCase()).toBe('#1a2420');
+		expect(dark.accent.toLowerCase()).toBe('#a6c1ae');
+		expect(dark.rose.toLowerCase()).toBe('#e8b4ba');
+		expect(systemCss).toContain('--paper: #faf5ee');
+		expect(systemCss).toContain('--rose: #7a3e46');
+		expect(systemCss).toContain('--rose-soft: #f3e6e8');
 		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
 		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
 		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);

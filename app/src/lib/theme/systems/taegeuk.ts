@@ -25,6 +25,8 @@ const light: Palette = {
 	badSoft: '#faeae8',
 	warn: '#8a6316',
 	warnSoft: '#faf2e0',
+	rose: '#a4342b',
+	roseSoft: '#f9ece9',
 	shadow1: '0 1px 2px rgba(26, 26, 24, 0.05), 0 1px 3px rgba(26, 26, 24, 0.04)',
 	shadow2: '0 2px 6px rgba(26, 26, 24, 0.07), 0 8px 20px rgba(26, 26, 24, 0.05)',
 	shadow3: '0 8px 24px rgba(26, 26, 24, 0.1), 0 20px 48px rgba(26, 26, 24, 0.07)'
@@ -50,6 +52,8 @@ const dark: Palette = {
 	badSoft: '#2a1a18',
 	warn: '#d8b055',
 	warnSoft: '#2a2312',
+	rose: '#e28379',
+	roseSoft: '#2d1e1c',
 	shadow1: '0 1px 2px rgba(0, 0, 0, 0.4)',
 	shadow2: '0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3)',
 	shadow3: '0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35)'
@@ -89,13 +93,17 @@ export const taegeuk: DesignSystem = {
 		rule: '#b8b19f',
 		ruleStrong: '#9a937f',
 		accent: '#8a2a22',
-		accentSoft: '#edd0cb'
+		accentSoft: '#edd0cb',
+		rose: '#8a2a22',
+		roseSoft: '#edd0cb'
 	},
 	contrastMoreDark: {
 		inkFaint: '#b0aca2',
 		rule: '#5c5c68',
 		ruleStrong: '#767684',
 		accent: '#f09990',
-		accentSoft: '#4a2a26'
+		accentSoft: '#4a2a26',
+		rose: '#f09990',
+		roseSoft: '#4a2a26'
 	}
 };

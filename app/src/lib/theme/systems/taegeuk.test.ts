@@ -22,4 +22,13 @@ describe('taegeuk', () => {
 		});
 		expect(taegeuk.type.hangul).toContain('Noto Sans KR');
 	});
+
+	it('aliases rose to accent so --rose is never unset', () => {
+		expect(taegeuk.light.rose).toBe(taegeuk.light.accent);
+		expect(taegeuk.light.roseSoft).toBe(taegeuk.light.accentSoft);
+		expect(taegeuk.dark.rose).toBe(taegeuk.dark.accent);
+		expect(taegeuk.dark.roseSoft).toBe(taegeuk.dark.accentSoft);
+		expect(taegeuk.contrastMoreLight?.rose).toBe(taegeuk.contrastMoreLight?.accent);
+		expect(taegeuk.contrastMoreDark?.rose).toBe(taegeuk.contrastMoreDark?.accent);
+	});
 });
