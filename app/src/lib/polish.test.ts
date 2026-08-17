@@ -167,6 +167,14 @@ describe('polish audit regressions', () => {
 		expect(systemCss).not.toMatch(/fonts\.googleapis\.com|fonts\.gstatic\.com/);
 	});
 
+	it('opens reference as a plate catalog, not nine peer encyclopedia sections', () => {
+		expect(reference).toMatch(/Index of plates/);
+		expect(reference).toMatch(/Back to catalog/);
+		expect(reference).not.toMatch(/sec-consonants-heading/);
+		expect(tocFlyleaf).toMatch(/Open plate text/);
+		expect(tocFlyleaf).toMatch(/Not yet derived/);
+	});
+
 	it('makes the Baseline Widely Available browser target explicit', () => {
 		expect(viteConfig).toMatch(/build:\s*\{[\s\S]*?target:\s*'baseline-widely-available'/);
 	});
