@@ -227,7 +227,7 @@ export const lab03: Lab = {
 			options: ['company', 'country', 'concert', 'compass'],
 			answer: 0,
 			teach:
-				'<p><strong>hoe-sa</strong> — company. Said closer to <em>hwe-sa</em>, since <span class="jamo">ㅚ</span> merged into <span class="rom">we</span>.</p><p>Which is exactly why you read the letters and not the romanisation. <span class="rom">oe</span> is a historical spelling; the Hangul is what tells you the truth.</p>'
+				'<p><strong>hoe-sa</strong> — company. Said closer to <em>hwe-sa</em>, since <span class="jamo">ㅚ</span> merged into <span class="rom">we</span>.</p><p>Which is exactly why you read the letters and not the romanization. <span class="rom">oe</span> is a historical spelling; the Hangul is what tells you the truth.</p>'
 		}
 	]
 };

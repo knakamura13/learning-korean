@@ -251,7 +251,7 @@
 							autocapitalize="off"
 							autocorrect="off"
 							spellcheck="false"
-							placeholder={pronCard ? 'han-gu-geo or 한구거' : 'type the romanisation'}
+							placeholder={pronCard ? 'han-gu-geo or 한구거' : 'type the romanization'}
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
 							oninvalid={(e) => {
@@ -266,7 +266,7 @@
 							<p id="empty-hint" class="empty-hint" role="status">
 								{pronCard
 									? 'Type hyphenated cuts, or Hangul, then Check.'
-									: 'Type a romanisation, then Check.'}
+									: 'Type a romanization, then Check.'}
 							</p>
 						{/if}
 					</div>

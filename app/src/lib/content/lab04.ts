@@ -55,7 +55,7 @@ export const lab04: Lab = {
 			answer: 0,
 			miss: '<p>English releases a puff after the <em>p</em>. Korean does the opposite.</p>',
 			teach:
-				'<p>Korean final stops are <strong>unreleased</strong>: the air is cut off and held, never let go.</p><p>Releasing them is the single most recognisable foreign-accent marker in Korean. Costs nothing to fix now, costs years later.</p>'
+				'<p>Korean final stops are <strong>unreleased</strong>: the air is cut off and held, never let go.</p><p>Releasing them is the single most recognizable foreign-accent marker in Korean. Costs nothing to fix now, costs years later.</p>'
 		},
 		{
 			type: 'choice',
@@ -70,7 +70,7 @@ export const lab04: Lab = {
 			answer: 0,
 			miss: '<p>Fewer than the spelling suggests — same trick as ㅙ ㅚ ㅞ in Lab 03.</p>',
 			teach:
-				'<p>One. All three are said <span class="rom">nat</span>, with an unreleased <em>t</em>.</p><p>This is <strong>neutralisation</strong>: down in the bottom slot, <span class="jamo">ㅅ</span>, <span class="jamo">ㅈ</span> and <span class="jamo">ㅊ</span> all collapse into <span class="jamo">ㄷ</span>. It is why Korean has so many homophones — and why you can read a word correctly and still not catch it in speech.</p>'
+				'<p>One. All three are said <span class="rom">nat</span>, with an unreleased <em>t</em>.</p><p>This is <strong>neutralization</strong>: down in the bottom slot, <span class="jamo">ㅅ</span>, <span class="jamo">ㅈ</span> and <span class="jamo">ㅊ</span> all collapse into <span class="jamo">ㄷ</span>. It is why Korean has so many homophones — and why you can read a word correctly and still not catch it in speech.</p>'
 		},
 		{
 			type: 'choice',
@@ -129,14 +129,14 @@ export const lab04: Lab = {
 			type: 'assemble',
 			act: 'Act 3 · names',
 			do: 'The most common surname in Korea. Build <em>gim</em>.',
-			hint: 'You will see it romanised as "Kim".',
+			hint: 'You will see it romanized as "Kim".',
 			target: '김',
 			targetName: 'Kim · about 1 in 5 Koreans',
 			consonants: ['ㄱ', 'ㅂ', 'ㅈ'],
 			vowels: ['ㅣ', 'ㅏ'],
 			finals: ['ㅁ', 'ㄴ', 'ㅇ'],
 			teach:
-				'<p><span class="hg">김</span>. Roughly a fifth of all Koreans.</p><p>Note the mismatch: it is romanised <em>Kim</em>, but the letter is <span class="jamo">ㄱ</span> — closer to a <em>g</em>. Another reason to read the Hangul and distrust the romanisation.</p>'
+				'<p><span class="hg">김</span>. Roughly a fifth of all Koreans.</p><p>Note the mismatch: it is romanized <em>Kim</em>, but the letter is <span class="jamo">ㄱ</span> — closer to a <em>g</em>. Another reason to read the Hangul and distrust the romanization.</p>'
 		},
 		{
 			type: 'assemble',

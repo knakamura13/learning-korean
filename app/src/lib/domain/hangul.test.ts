@@ -189,7 +189,7 @@ describe('clusters', () => {
 		}
 	});
 
-	it('recognises clusters and single finals apart', () => {
+	it('recognizes clusters and single finals apart', () => {
 		expect(isCluster('ㅄ')).toBe(true);
 		expect(isCluster('ㅂ')).toBe(false);
 		expect(clusterParts('ㅂ')).toBeNull();
@@ -245,7 +245,7 @@ describe('liaison (Articles 13–14)', () => {
 		expect(applyLiaison('영어')).toBe('영어');
 	});
 
-	it('does not implement ㅎ-deletion or palatalisation', () => {
+	it('does not implement ㅎ-deletion or palatalization', () => {
 		expect(applyLiaison('좋아요')).toBe('좋아요');
 		expect(applyLiaison('많아')).toBe('많아');
 		expect(applyLiaison('밭이')).toBe('바티');
@@ -288,7 +288,7 @@ describe('liaison (Articles 13–14)', () => {
 	});
 });
 
-describe('romanise spoken syllables', () => {
+describe('romanize spoken syllables', () => {
 	it('uses lab conventions: onset g/d/b/r, batchim k/t/p/l/ng, silent ㅇ-onset', () => {
 		expect(romanizeSyllable('한')).toBe('han');
 		expect(romanizeSyllable('국')).toBe('guk');

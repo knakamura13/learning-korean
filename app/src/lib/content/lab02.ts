@@ -24,7 +24,7 @@ export const lab02: Lab = {
 				'One long stroke plus a tick',
 				'Two long strokes crossing each other',
 				'One curve joined to one line',
-				'Three ticks around a centre dot'
+				'Three ticks around a center dot'
 			],
 			stack: true,
 			answer: 0,
@@ -59,7 +59,7 @@ export const lab02: Lab = {
 			target: 'ㅓ',
 			targetName: 'eo',
 			teach:
-				'<p><span class="jamo">ㅓ</span>, romanised <span class="rom">eo</span>. It is <em>not</em> an "o" sound — closer to the vowel in <em>duh</em>, unrounded and further back.</p><p>Tick right vs tick left also encodes a real split: right and up are "bright" vowels, left and down are "dark". Korean still pairs particles and sound-words by that split.</p>'
+				'<p><span class="jamo">ㅓ</span>, romanized <span class="rom">eo</span>. It is <em>not</em> an "o" sound — closer to the vowel in <em>duh</em>, unrounded and further back.</p><p>Tick right vs tick left also encodes a real split: right and up are "bright" vowels, left and down are "dark". Korean still pairs particles and sound-words by that split.</p>'
 		},
 		{
 			type: 'vowel',
@@ -123,7 +123,7 @@ export const lab02: Lab = {
 			target: 'ㅛ',
 			targetName: 'yo',
 			teach:
-				'<p><span class="jamo">ㅛ</span> — earth stroke, two ticks, on top.</p><p>You derived that one instead of memorising it. The same move gives you <span class="jamo">ㅑ</span>, <span class="jamo">ㅕ</span> and <span class="jamo">ㅠ</span> whenever you need them.</p>'
+				'<p><span class="jamo">ㅛ</span> — earth stroke, two ticks, on top.</p><p>You derived that one instead of memorizing it. The same move gives you <span class="jamo">ㅑ</span>, <span class="jamo">ㅕ</span> and <span class="jamo">ㅠ</span> whenever you need them.</p>'
 		},
 		{
 			type: 'vowel',
@@ -133,7 +133,7 @@ export const lab02: Lab = {
 			target: 'ㅡ',
 			targetName: 'eu',
 			teach:
-				'<p><span class="jamo">ㅡ</span> is the one with no English equivalent. Spread your lips as if smiling, then make a vowel from the back of your mouth with <em>no rounding at all</em>.</p><p>Romanised <span class="rom">eu</span>, which misleads badly — it is not <em>you</em> and not <em>oo</em>. Distrust the romanisation, trust the letter.</p>'
+				'<p><span class="jamo">ㅡ</span> is the one with no English equivalent. Spread your lips as if smiling, then make a vowel from the back of your mouth with <em>no rounding at all</em>.</p><p>Romanized <span class="rom">eu</span>, which misleads badly — it is not <em>you</em> and not <em>oo</em>. Distrust the romanization, trust the letter.</p>'
 		},
 		{
 			type: 'choice',
@@ -148,7 +148,7 @@ export const lab02: Lab = {
 			answer: 0,
 			miss: '<p>Say both into your hand. Only one pushes your lips forward into a circle.</p>',
 			teach:
-				'<p><span class="jamo">ㅗ</span> is rounded. <span class="jamo">ㅓ</span> is not — despite both being romanised with an "o" in them.</p><p>This single confusion causes more misheard Korean than any other vowel problem. Worth over-practising.</p>'
+				'<p><span class="jamo">ㅗ</span> is rounded. <span class="jamo">ㅓ</span> is not — despite both being romanized with an "o" in them.</p><p>This single confusion causes more misheard Korean than any other vowel problem. Worth over-practicing.</p>'
 		},
 		{
 			type: 'assemble',
