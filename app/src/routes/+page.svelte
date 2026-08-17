@@ -333,6 +333,7 @@
 			border-color var(--fast) var(--ease);
 	}
 	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+	a.lab.resume:hover { border-color: var(--rose); }
 
 	.num {
 		font-family: var(--mono);
