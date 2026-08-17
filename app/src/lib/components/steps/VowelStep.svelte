@@ -137,29 +137,6 @@
 		picker = { dock, index: pickerIndexFor(options) };
 	}
 
-	function hintTowardCenter(id: DockId): 'above' | 'below' | 'left' | 'right' {
-		switch (id) {
-			case 'above':
-			case 'above2':
-				return 'below';
-			case 'below':
-			case 'below2':
-				return 'above';
-			case 'left':
-			case 'left2':
-				return 'right';
-			case 'right':
-			case 'right2':
-				return 'left';
-			case 'base':
-				return 'below';
-			default: {
-				const _exhaustive: never = id;
-				return _exhaustive;
-			}
-		}
-	}
-
 	function confirmPicker() {
 		if (!picker) return;
 		const stamp = pickerOptions[picker.index];
@@ -491,9 +468,8 @@
 	{/if}
 	{#if tip}
 		{@const pos = dockPosition(tip, docks)}
-		{@const toward = hintTowardCenter(tip)}
 		<div
-			class={['tick-hint', toward]}
+			class="tick-hint"
 			data-tick-hint
 			role="status"
 			style:left="{pos.x * 100}%"
@@ -641,9 +617,9 @@
 	.tick-hint {
 		position: absolute;
 		z-index: 5;
-		width: max-content;
-		max-width: 10.5rem;
-		padding: 0.4rem 0.5rem;
+		box-sizing: border-box;
+		width: min(24rem, calc(100vw - 3rem));
+		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--accent);
 		border-radius: var(--r-sm);
 		background: var(--paper-raised);
@@ -656,18 +632,7 @@
 		color: var(--ink);
 		text-align: left;
 		pointer-events: none;
-	}
-	.tick-hint.below {
-		transform: translate(-50%, 1.45rem);
-	}
-	.tick-hint.above {
-		transform: translate(-50%, calc(-100% - 1.45rem));
-	}
-	.tick-hint.left {
-		transform: translate(calc(-100% - 1.45rem), -50%);
-	}
-	.tick-hint.right {
-		transform: translate(1.45rem, -50%);
+		transform: translate(-50%, calc(-100% - 0.55rem));
 	}
 	.choice {
 		appearance: none;
