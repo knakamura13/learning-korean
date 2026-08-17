@@ -14,6 +14,7 @@ import {
 	snapDock,
 	snapRadiusPx,
 	stampLabel,
+	boardDocks,
 	placeholderDocks,
 	recipeDocks,
 	towardTarget,
@@ -75,6 +76,15 @@ describe('target placeholders', () => {
 		expect(towardTarget(board({ base: 'ㅡ' }), 'ㅏ')).toBe(false);
 		expect(towardTarget(EMPTY_BOARD, 'ㅏ')).toBe(false);
 		expect(towardTarget(board({ base: 'ㅣ', ticks: 2, side: 'right' }), 'ㅏ')).toBe(false);
+	});
+
+	it('keeps empty-board silhouettes, then drops tick holes that the seated base cannot take', () => {
+		expect(placeholderDocks(EMPTY_BOARD, 'ㅛ')).toEqual(['base', 'above', 'above2']);
+		expect(placeholderDocks(board({ base: 'ㅡ' }), 'ㅛ')).toEqual(['above', 'above2']);
+		expect(placeholderDocks(board({ base: 'ㅡ' }), 'ㅏ')).toEqual([]);
+		expect(boardDocks(board({ base: 'ㅡ' }), 'ㅏ')).toEqual(['base']);
+		expect(placeholderDocks(board({ base: 'ㅣ' }), 'ㅗ')).toEqual([]);
+		expect(boardDocks(board({ base: 'ㅣ' }), 'ㅗ')).toEqual(['base']);
 	});
 });
 

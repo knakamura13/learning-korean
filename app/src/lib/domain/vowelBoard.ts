@@ -281,7 +281,16 @@ export function recipeDocks(vowel: string): DockId[] {
  */
 export function placeholderDocks(state: BoardState, target: string): DockId[] {
 	if (vowelOf(state) === target) return [];
-	return recipeDocks(target).filter((id) => occupant(state, id) === null);
+	const recipe = recipeOf(target);
+	return recipeDocks(target).filter((id) => {
+		if (occupant(state, id) !== null) return false;
+		// Empty boards keep the target silhouette. A seated wrong base cannot
+		// take those tick holes, so leave only the magnet that can be replaced.
+		if (id !== 'base' && state.base && recipe?.base && state.base !== recipe.base) {
+			return false;
+		}
+		return true;
+	});
 }
 
 /** Interactive docks: remaining placeholders plus occupied magnets. None on a win. */

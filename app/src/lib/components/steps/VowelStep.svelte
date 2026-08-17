@@ -78,7 +78,7 @@
 		} else if (result && !won && !solved) {
 			hadNudge = true;
 			onNudge(
-				`<p>That builds <span class="jamo">${result}</span>. Keep going — which stroke, how many ticks, and which side make <span class="jamo">${step.target}</span>?</p>`,
+				`<p>That builds <span class="jamo">${result}</span>. Keep going — which stroke and ticks make <span class="jamo">${step.target}</span>?</p>`,
 				true
 			);
 		}
@@ -94,8 +94,14 @@
 	function place(dock: DockId) {
 		if (solved) return;
 		const next = applyStamp(board, dock, selected);
-		if (next) board = next;
-		focusNextOpen();
+		if (next) {
+			board = next;
+			focusNextOpen();
+			return;
+		}
+		// Click uses the palette when that stamp can seat; otherwise match
+		// keyboard: a tick hole seats immediately, the base opens the picker.
+		activateDock(dock);
 	}
 
 	function seat(dock: DockId, stamp: Stamp) {
@@ -107,6 +113,11 @@
 		focusNextOpen();
 	}
 
+	function pickerIndexFor(options: readonly Stamp[]): number {
+		const i = options.indexOf(selected);
+		return i >= 0 ? i : 0;
+	}
+
 	function activateDock(dock: DockId) {
 		if (solved) return;
 		const options = compatibleStamps(board, dock);
@@ -115,7 +126,7 @@
 			seat(dock, options[0]);
 			return;
 		}
-		picker = { dock, index: 0 };
+		picker = { dock, index: pickerIndexFor(options) };
 	}
 
 	function confirmPicker() {
@@ -324,11 +335,21 @@
 		);
 		if (next) {
 			const seated = applyLift(board, next, active.lift);
-			if (seated) board = seated;
-			else if (active.fromBoard) board = active.origin;
+			if (seated) {
+				board = seated;
+				focusNextOpen();
+			} else if (active.fromBoard) board = active.origin;
 		} else if (active.fromBoard) {
 			board = active.origin;
 		}
+	}
+
+	function onPointerCancel() {
+		pending = null;
+		if (!drag) return;
+		const active = drag;
+		drag = null;
+		if (active.fromBoard) board = active.origin;
 	}
 
 	function onDockClick(id: DockId, e: MouseEvent) {
@@ -350,6 +371,7 @@
 <svelte:window
 	onpointermove={onPointerMove}
 	onpointerup={onPointerUp}
+	onpointercancel={onPointerCancel}
 	onkeydown={onWindowKey}
 />
 
@@ -376,7 +398,7 @@
 			style:left="{pos.x * 100}%"
 			style:top="{pos.y * 100}%"
 			aria-label={dockAria(id)}
-			aria-haspopup="listbox"
+			aria-haspopup={compatibleStamps(board, id).length > 1 ? 'listbox' : undefined}
 			aria-expanded={picker?.dock === id}
 			aria-controls={picker?.dock === id ? 'vowel-shape-picker' : undefined}
 			disabled={solved}
@@ -530,16 +552,11 @@
 		border: none;
 		background: transparent;
 		cursor: grab;
-		opacity: 0;
 	}
 	.dock.open {
 		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
 	}
 	.zone.filled .dock.open { opacity: 1; }
-	.dock.held:focus-visible {
-		outline: none;
-		box-shadow: none;
-	}
 	.dock:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
@@ -667,9 +684,16 @@
 			color: ButtonText;
 			border-color: ButtonText;
 		}
-		.stamp.on, .dock.held {
+		.stamp.on {
 			background: Highlight;
 			color: HighlightText;
+			border-color: Highlight;
+		}
+		.dock.held {
+			background: transparent;
+			border-color: transparent;
+		}
+		.dock.held:focus-visible {
 			border-color: Highlight;
 		}
 	}
