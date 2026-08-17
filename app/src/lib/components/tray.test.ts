@@ -10,6 +10,20 @@ import Tray from './Tray.svelte';
 import FusionStep from './steps/FusionStep.svelte';
 import AssembleStep from './steps/AssembleStep.svelte';
 import type { AssembleStep as AssembleStepData, FusionStep as FusionStepData } from '$lib/content/types';
+import { DRAG_THRESHOLD_PX } from '$lib/domain/composerSnap';
+
+if (typeof PointerEvent === 'undefined') {
+	class PointerEventPolyfill extends MouseEvent {
+		pointerId: number;
+		pointerType: string;
+		constructor(type: string, init: MouseEventInit & { pointerId?: number; pointerType?: string } = {}) {
+			super(type, init);
+			this.pointerId = init.pointerId ?? 0;
+			this.pointerType = init.pointerType ?? '';
+		}
+	}
+	Object.defineProperty(globalThis, 'PointerEvent', { value: PointerEventPolyfill });
+}
 
 type Mounted = Record<string, never>;
 const mounted: Mounted[] = [];
@@ -83,6 +97,67 @@ const assembleStep: AssembleStepData = {
 	vowels: ['ㅏ', 'ㅜ'],
 	finals: ['ㅂ', 'ㄱ', 'ㅅ']
 };
+
+const cvAssemble: AssembleStepData = {
+	type: 'assemble',
+	do: 'Build',
+	teach: 'ok',
+	target: '누',
+	targetName: 'nu',
+	consonants: ['ㄴ', 'ㅁ', 'ㅅ'],
+	vowels: ['ㅏ', 'ㅜ', 'ㅡ']
+};
+
+function firePointer(target: EventTarget, type: string, x: number, y: number) {
+	target.dispatchEvent(
+		new PointerEvent(type, {
+			bubbles: true,
+			cancelable: true,
+			clientX: x,
+			clientY: y,
+			pointerId: 1,
+			pointerType: 'mouse'
+		})
+	);
+}
+
+function mockSlot(
+	root: ParentNode,
+	name: string,
+	box: { left: number; top: number; right: number; bottom: number }
+) {
+	const el = root.querySelector<HTMLElement>(`[data-slot="${name}"]`);
+	if (!el) throw new Error(`no slot ${name}`);
+	vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
+		...box,
+		width: box.right - box.left,
+		height: box.bottom - box.top,
+		x: box.left,
+		y: box.top,
+		toJSON() {}
+	} as DOMRect);
+	return el;
+}
+
+/** Pointer-down on a chip, drag past the click threshold, release. Optionally synthesize the trailing click. */
+function dragChip(
+	chip: HTMLElement,
+	to: { x: number; y: number },
+	opts: { click?: boolean } = {}
+) {
+	firePointer(chip, 'pointerdown', 10, 10);
+	flushSync();
+	firePointer(window, 'pointermove', 10 + DRAG_THRESHOLD_PX, 10);
+	flushSync();
+	firePointer(window, 'pointermove', to.x, to.y);
+	flushSync();
+	firePointer(window, 'pointerup', to.x, to.y);
+	flushSync();
+	if (opts.click) {
+		chip.click();
+		flushSync();
+	}
+}
 
 describe('Tray', () => {
 	it('exposes one labeled radiogroup whose chips name the slot', () => {
@@ -243,6 +318,26 @@ describe('FusionStep trays', () => {
 		expect(slotEls[1].querySelector('.slot-name')?.textContent).toBe('second');
 		expect(root.querySelector('.out')?.textContent).not.toContain('✕');
 	});
+
+	it('seats a dragged second-tray vowel onto the second slot', () => {
+		const root = render(FusionStep, {
+			step: fusionStep,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		mockSlot(root, 'first', { left: 0, top: 0, right: 80, bottom: 80 });
+		mockSlot(root, 'second', { left: 200, top: 0, right: 280, bottom: 80 });
+
+		radioNamed(labeledGroup(root, 'first vowel'), 'ㅜ').click();
+		flushSync();
+
+		dragChip(radioNamed(labeledGroup(root, 'second vowel'), 'ㅓ'), { x: 240, y: 40 });
+
+		const [slotA, slotB] = slotValues(root);
+		expect(slotA).toBe('ㅜ');
+		expect(slotB).toBe('ㅓ');
+	});
 });
 
 describe('AssembleStep trays', () => {
@@ -272,5 +367,154 @@ describe('AssembleStep trays', () => {
 		expect(slotLead).toBe('ㅁ');
 		expect(slotVowel).toBe('ㅏ');
 		expect(slotFinal).toBe('ㅂ');
+	});
+
+	it('seats a dragged vowel onto the vowel slot without a click', () => {
+		const root = render(AssembleStep, {
+			step: cvAssemble,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		mockSlot(root, 'consonant', { left: 0, top: 0, right: 80, bottom: 80 });
+		mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
+
+		const vowel = labeledGroup(root, 'vowel');
+		dragChip(radioNamed(vowel, 'ㅜ'), { x: 240, y: 40 });
+
+		const [slotLead, slotVowel] = slotValues(root);
+		expect(slotLead).toBe('');
+		expect(slotVowel).toBe('ㅜ');
+		expect(radioNamed(vowel, 'ㅜ').getAttribute('aria-checked')).toBe('true');
+	});
+
+	it('still auto-fills a slot from a click when the pointer never drags', () => {
+		const root = render(AssembleStep, {
+			step: cvAssemble,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		const lead = labeledGroup(root, 'consonant');
+		radioNamed(lead, 'ㄴ').click();
+		flushSync();
+
+		expect(slotValues(root)[0]).toBe('ㄴ');
+		expect(radioNamed(lead, 'ㄴ').getAttribute('aria-checked')).toBe('true');
+	});
+
+	it('treats a short pointer jitter as a click, not a missed drag', () => {
+		const root = render(AssembleStep, {
+			step: cvAssemble,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		const lead = labeledGroup(root, 'consonant');
+		const chip = radioNamed(lead, 'ㄴ');
+		firePointer(chip, 'pointerdown', 10, 10);
+		flushSync();
+		firePointer(window, 'pointermove', 10 + DRAG_THRESHOLD_PX - 1, 10);
+		flushSync();
+		firePointer(window, 'pointerup', 10 + DRAG_THRESHOLD_PX - 1, 10);
+		flushSync();
+		chip.click();
+		flushSync();
+
+		expect(slotValues(root)[0]).toBe('ㄴ');
+	});
+
+	it('highlights the matching slot while a chip is in flight', () => {
+		const root = render(AssembleStep, {
+			step: cvAssemble,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		const vowelSlot = mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
+		mockSlot(root, 'consonant', { left: 0, top: 0, right: 80, bottom: 80 });
+
+		const chip = radioNamed(labeledGroup(root, 'vowel'), 'ㅜ');
+		firePointer(chip, 'pointerdown', 10, 10);
+		flushSync();
+		firePointer(window, 'pointermove', 10 + DRAG_THRESHOLD_PX, 10);
+		flushSync();
+
+		expect(vowelSlot.classList.contains('hot')).toBe(true);
+		expect(root.querySelector('[data-slot="consonant"]')?.classList.contains('hot')).toBe(false);
+		expect(root.querySelector('.ghost')?.textContent).toContain('ㅜ');
+
+		firePointer(window, 'pointerup', 500, 500);
+		flushSync();
+		expect(vowelSlot.classList.contains('hot')).toBe(false);
+	});
+
+	it('does not auto-fill after a missed drag, even when a click follows the release', () => {
+		const root = render(AssembleStep, {
+			step: cvAssemble,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		mockSlot(root, 'consonant', { left: 0, top: 0, right: 80, bottom: 80 });
+		mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
+
+		const vowel = labeledGroup(root, 'vowel');
+		const chip = radioNamed(vowel, 'ㅜ');
+		dragChip(chip, { x: 500, y: 500 }, { click: true });
+
+		expect(slotValues(root)[1]).toBe('');
+		expect(chip.getAttribute('aria-checked')).toBe('false');
+
+		chip.click();
+		flushSync();
+		expect(slotValues(root)[1]).toBe('ㅜ');
+	});
+
+	it('bounces a vowel dropped on the consonant slot and still lets the next click fill the vowel', () => {
+		const root = render(AssembleStep, {
+			step: cvAssemble,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		mockSlot(root, 'consonant', { left: 0, top: 0, right: 80, bottom: 80 });
+		mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
+
+		const vowel = labeledGroup(root, 'vowel');
+		const chip = radioNamed(vowel, 'ㅜ');
+		dragChip(chip, { x: 40, y: 40 }, { click: true });
+
+		const [slotLead, slotVowel] = slotValues(root);
+		expect(slotLead).toBe('');
+		expect(slotVowel).toBe('');
+
+		chip.click();
+		flushSync();
+		expect(slotValues(root)[1]).toBe('ㅜ');
+	});
+
+	it('seats a dragged batchim onto the bottom slot without changing the lead', () => {
+		const root = render(AssembleStep, {
+			step: assembleStep,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		mockSlot(root, 'consonant', { left: 0, top: 0, right: 80, bottom: 80 });
+		mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
+		mockSlot(root, 'batchim', { left: 100, top: 120, right: 180, bottom: 200 });
+
+		const lead = labeledGroup(root, 'first consonant');
+		radioNamed(lead, 'ㅁ').click();
+		flushSync();
+
+		const batchim = labeledGroup(root, 'batchim — the bottom slot');
+		dragChip(radioNamed(batchim, 'ㅂ'), { x: 140, y: 160 });
+
+		const [slotLead, , slotFinal] = slotValues(root);
+		expect(slotLead).toBe('ㅁ');
+		expect(slotFinal).toBe('ㅂ');
+		expect(radioNamed(lead, 'ㅂ').getAttribute('aria-checked')).toBe('false');
 	});
 });

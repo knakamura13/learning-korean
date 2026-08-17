@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { hasHangul } from '$lib/a11y/lang';
+	import { trayLift } from './trayLift.svelte';
 
 	/**
 	 * The composer readout: filled slots on the left, result on the right.
@@ -27,7 +28,14 @@
 	{#each slots as slot, i (i)}
 		{#if i > 0}<span class="op">+</span>{/if}
 		<div
-			class={['slot', slot.value && 'filled', slot.value && 'on', slot.bottom && 'bottom']}
+			class={[
+				'slot',
+				slot.value && 'filled',
+				slot.value && 'on',
+				slot.bottom && 'bottom',
+				slot.name && trayLift.current?.dock === slot.name && 'hot'
+			]}
+			data-slot={slot.name}
 			lang={hasHangul(slot.value ?? '') ? 'ko' : undefined}
 			aria-label={slot.name ? `${slot.name}: ${slot.value ?? 'empty'}` : undefined}
 		>
@@ -93,6 +101,15 @@
 
 	.slot.on {
 		box-shadow: 0 0 0 2px var(--accent-soft);
+	}
+
+	.slot.hot {
+		border-color: var(--accent);
+		box-shadow: 0 0 0 2px var(--accent-soft);
+	}
+	.slot.bottom.hot {
+		border-color: var(--blue);
+		box-shadow: 0 0 0 2px var(--blue-soft);
 	}
 
 	.slot-name {
