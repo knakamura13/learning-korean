@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import hooksSrc from '../../hooks.server.ts?raw';
 import { activeSystem } from './active';
 import { designSystemCss } from './css';
 import { applyPaperPlaceholders, PAPER_PLACEHOLDER_DARK, PAPER_PLACEHOLDER_LIGHT } from './placeholders';
@@ -39,5 +40,12 @@ describe('applyPaperPlaceholders', () => {
 describe('activeSystem', () => {
 	it('is Academia until a prototype points it elsewhere', () => {
 		expect(activeSystem.id).toBe('academia');
+	});
+});
+
+describe('prerender paper stamp', () => {
+	it('is applied by the server handle so static HTML is not left with placeholders', () => {
+		expect(hooksSrc).toMatch(/transformPageChunk/);
+		expect(hooksSrc).toMatch(/applyPaperPlaceholders/);
 	});
 });

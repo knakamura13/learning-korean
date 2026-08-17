@@ -10,14 +10,19 @@ export function designSystemPlugin(): Plugin {
 	const resolved = '\0' + DESIGN_SYSTEM_CSS_ID;
 	return {
 		name: 'design-system',
+		enforce: 'pre',
 		resolveId(id) {
-			if (id === DESIGN_SYSTEM_CSS_ID) return resolved;
+			const bare = id.split('?')[0];
+			if (bare === DESIGN_SYSTEM_CSS_ID) return resolved;
 		},
 		load(id) {
 			if (id === resolved) return designSystemCss(activeSystem);
 		},
-		transformIndexHtml(html) {
-			return applyPaperPlaceholders(html, activeSystem);
+		transformIndexHtml: {
+			order: 'pre',
+			handler(html) {
+				return applyPaperPlaceholders(html, activeSystem);
+			}
 		},
 		handleHotUpdate({ file, server }) {
 			if (!file.includes('/theme/')) return;

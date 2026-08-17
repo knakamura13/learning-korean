@@ -1,10 +1,9 @@
 /* ============================================================
    app.css — base styles on top of the active design system.
    Tokens (--ink, --paper, --accent, type, space, shape) come from
-   virtual:design-system.css. Swap systems in src/lib/theme/active.ts.
+   virtual:design-system.css (imported in +layout.svelte). Swap systems
+   in src/lib/theme/active.ts.
    ============================================================ */
-
-@import 'virtual:design-system.css';
 
 *,
 *::before,

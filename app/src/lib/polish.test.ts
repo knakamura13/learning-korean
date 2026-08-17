@@ -87,8 +87,9 @@ describe('polish audit regressions', () => {
 	});
 
 	it('loads tokens from the active design system rather than hard-coding a palette', () => {
-		expect(appCss).toMatch(/@import\s+'virtual:design-system\.css'/);
+		expect(layout).toMatch(/import 'virtual:design-system\.css'/);
 		expect(appCss).not.toMatch(/--paper:\s*#/);
+		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
 	it('makes the Baseline Widely Available browser target explicit', () => {
