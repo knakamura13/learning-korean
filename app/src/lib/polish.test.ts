@@ -88,7 +88,7 @@ describe('polish audit regressions', () => {
 
 	it('loads tokens from the active design system rather than hard-coding a palette', () => {
 		expect(appHtml).toContain('%%DESIGN_SYSTEM_CSS%%');
-		expect(appHtml).toContain('%%DESIGN_FONT_PRELOADS%%');
+		expect(layout).toMatch(/activeSystem\.fonts/);
 		expect(layout).not.toMatch(/virtual:design-system/);
 		expect(appCss).not.toMatch(/--paper:\s*#/);
 		expect(appCss).toMatch(/--s1:/);

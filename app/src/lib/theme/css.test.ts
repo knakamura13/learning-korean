@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import hooksSrc from '../../hooks.server.ts?raw';
+import layoutSrc from '../../routes/+layout.svelte?raw';
 import pluginSrc from './vitePlugin.ts?raw';
 import { designSystemCss } from './css';
 import {
 	applyDesignSystem,
 	CSS_PLACEHOLDER,
-	FONT_PRELOAD_PLACEHOLDER,
 	PAPER_PLACEHOLDER_DARK,
 	PAPER_PLACEHOLDER_LIGHT
 } from './placeholders';
@@ -154,19 +154,16 @@ describe('designSystemCss', () => {
 });
 
 describe('applyDesignSystem', () => {
-	it('stamps paper colours, token CSS, and font preloads into one HTML pass', () => {
+	it('stamps paper colours and token CSS into one HTML pass', () => {
 		const html = [
 			`light:${PAPER_PLACEHOLDER_LIGHT}`,
 			`dark:${PAPER_PLACEHOLDER_DARK}`,
-			`<style>${CSS_PLACEHOLDER}</style>`,
-			FONT_PRELOAD_PLACEHOLDER
+			`<style>${CSS_PLACEHOLDER}</style>`
 		].join('\n');
 		const stamped = applyDesignSystem(html, fixture);
 		expect(stamped).toContain(`light:${fixture.light.paper}`);
 		expect(stamped).toContain(`dark:${fixture.dark.paper}`);
 		expect(stamped).toContain('--paper: #fefefe');
-		expect(stamped).toContain('test.woff2');
-		expect(stamped).toContain('rel="preload"');
 		expect(stamped).not.toContain(CSS_PLACEHOLDER);
 		expect(stamped).not.toContain(PAPER_PLACEHOLDER_LIGHT);
 	});
@@ -179,5 +176,11 @@ describe('delivery', () => {
 		expect(pluginSrc).toMatch(/writeManifests/);
 		expect(pluginSrc).not.toMatch(/transformIndexHtml/);
 		expect(pluginSrc).not.toMatch(/virtual:design-system/);
+	});
+
+	it('preloads system webfonts from the layout so asset URLs are already resolved', () => {
+		expect(layoutSrc).toMatch(/activeSystem\.fonts/);
+		expect(layoutSrc).toMatch(/rel="preload"/);
+		expect(layoutSrc).not.toMatch(/%sveltekit\.assets%/);
 	});
 });
