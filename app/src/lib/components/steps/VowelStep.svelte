@@ -7,6 +7,7 @@
 		PALETTE,
 		applyLift,
 		applyStamp,
+		boardDocks,
 		clearDock,
 		compatibleStamps,
 		dockInDirection,
@@ -16,7 +17,6 @@
 		sideOfDock,
 		snapDock,
 		stampLabel,
-		visibleDocks,
 		vowelOf,
 		type DockId,
 		type Lift,
@@ -55,7 +55,7 @@
 
 	const result = $derived(vowelOf(board));
 	const won = $derived(result === step.target);
-	const docks = $derived(visibleDocks(board));
+	const docks = $derived(boardDocks(board, step.target));
 	const selectedIndex = $derived(Math.max(0, PALETTE.indexOf(selected)));
 	const pickerOptions = $derived(picker ? compatibleStamps(board, picker.dock) : []);
 	const tabDock = $derived((docks.includes(activeDock) ? activeDock : docks[0]) ?? 'base');
@@ -73,10 +73,18 @@
 		}
 	});
 
+	function focusNextOpen() {
+		const open = docks.find((id) => occupant(board, id) === null);
+		if (!open) return;
+		activeDock = open;
+		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${open}"]`)?.focus();
+	}
+
 	function place(dock: DockId) {
 		if (solved) return;
 		const next = applyStamp(board, dock, selected);
 		if (next) board = next;
+		focusNextOpen();
 	}
 
 	function seat(dock: DockId, stamp: Stamp) {
@@ -85,6 +93,7 @@
 		if (next) board = next;
 		selected = stamp;
 		picker = null;
+		focusNextOpen();
 	}
 
 	function activateDock(dock: DockId) {
@@ -224,7 +233,7 @@
 		if (!dir) return;
 		e.preventDefault();
 		if (picker) closePicker();
-		const next = dockInDirection(board, focused, dir);
+		const next = dockInDirection(board, focused, dir, docks);
 		activeDock = next;
 		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${next}"]`)?.focus();
 	}
@@ -299,7 +308,8 @@
 			active.lift,
 			e.clientX - rect.left,
 			e.clientY - rect.top,
-			rect.width
+			rect.width,
+			docks
 		);
 		if (next) {
 			const seated = applyLift(board, next, active.lift);
@@ -349,7 +359,7 @@
 		{@const pos = dockPosition(id)}
 		<button
 			type="button"
-			class={['dock', occupant(board, id) && 'held', id === 'base' && 'base']}
+			class={['dock', occupant(board, id) ? 'held' : 'open', id === 'base' && 'base']}
 			data-dock={id}
 			tabindex={solved ? -1 : id === tabDock ? 0 : -1}
 			style:left="{pos.x * 100}%"
@@ -506,14 +516,18 @@
 		border-radius: var(--r-md);
 	}
 	.dock.held {
-		border-style: dotted;
-		border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+		border: none;
+		background: transparent;
+		cursor: grab;
+		opacity: 0;
 	}
-	.zone.filled .dock { opacity: 0.4; }
-	.zone.filled .dock:hover,
-	.zone.filled .dock:focus-visible { opacity: 1; }
-	.zone.win .dock {
-		border-color: color-mix(in srgb, var(--good) 40%, transparent);
+	.dock.open {
+		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
+	}
+	.zone.filled .dock.open { opacity: 1; }
+	.dock.held:focus-visible {
+		outline: none;
+		box-shadow: none;
 	}
 	.dock:focus-visible {
 		outline: 2px solid var(--paper);

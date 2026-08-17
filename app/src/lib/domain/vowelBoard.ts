@@ -218,10 +218,15 @@ function neighborDock(from: DockId, direction: DockDir): DockId | null {
 }
 
 /** Next visible dock in a compass direction. Does not wrap. */
-export function dockInDirection(state: BoardState, from: DockId, direction: DockDir): DockId {
+export function dockInDirection(
+	state: BoardState,
+	from: DockId,
+	direction: DockDir,
+	docks: readonly DockId[] = visibleDocks(state)
+): DockId {
 	const next = neighborDock(from, direction);
 	if (!next) return from;
-	return visibleDocks(state).includes(next) ? next : from;
+	return docks.includes(next) ? next : from;
 }
 
 export function visibleDocks(state: BoardState): DockId[] {
@@ -232,6 +237,56 @@ export function visibleDocks(state: BoardState): DockId[] {
 		docks.push(`${state.side}2`);
 	}
 	return docks;
+}
+
+/** Invert a simple vowel into the stamps that build it. */
+export function recipeOf(vowel: string): BoardState | null {
+	const bases: BaseStroke[] = ['ㅣ', 'ㅡ'];
+	for (const base of bases) {
+		if (vowel === base) return { base, ticks: 0, side: null };
+		for (const side of sidesFor(base)) {
+			if (buildVowel(base, side, 1) === vowel) return { base, ticks: 1, side };
+			if (buildVowel(base, side, 2) === vowel) return { base, ticks: 2, side };
+		}
+	}
+	return null;
+}
+
+/** Docks required to construct `target`, in seating order. */
+export function recipeDocks(vowel: string): DockId[] {
+	const recipe = recipeOf(vowel);
+	if (!recipe?.base) return ['base'];
+	const docks: DockId[] = ['base'];
+	if (recipe.ticks >= 1 && recipe.side) docks.push(recipe.side);
+	if (recipe.ticks === 2 && recipe.side) docks.push(`${recipe.side}2`);
+	return docks;
+}
+
+/**
+ * Empty recipe docks still needed for `target`. Complete letters have none:
+ * remaining placeholders are n − m, where n is recipe length and m is how
+ * many of those docks already hold their piece.
+ */
+export function placeholderDocks(state: BoardState, target: string): DockId[] {
+	if (vowelOf(state) === target) return [];
+	return recipeDocks(target).filter((id) => occupant(state, id) === null);
+}
+
+/** Interactive docks: remaining placeholders plus occupied magnets. None on a win. */
+export function boardDocks(state: BoardState, target: string): DockId[] {
+	if (vowelOf(state) === target) return [];
+	const shown = new Set<DockId>(placeholderDocks(state, target));
+	for (const id of visibleDocks(state)) {
+		if (occupant(state, id)) shown.add(id);
+	}
+	const ordered: DockId[] = [];
+	for (const id of recipeDocks(target)) {
+		if (shown.has(id)) ordered.push(id);
+	}
+	for (const id of visibleDocks(state)) {
+		if (shown.has(id) && !ordered.includes(id)) ordered.push(id);
+	}
+	return ordered;
 }
 
 export function occupant(state: BoardState, dock: DockId): Stamp | null {
@@ -314,12 +369,13 @@ export function snapDock(
 	lift: Lift,
 	x: number,
 	y: number,
-	boardSizePx: number
+	boardSizePx: number,
+	docks: readonly DockId[] = visibleDocks(state)
 ): DockId | null {
 	const radius = snapRadiusPx(boardSizePx);
 	let best: DockId | null = null;
 	let bestDist = Infinity;
-	for (const id of visibleDocks(state)) {
+	for (const id of docks) {
 		if (applyLift(state, id, lift) === null) continue;
 		const pos = dockPosition(id);
 		const dx = pos.x * boardSizePx - x;

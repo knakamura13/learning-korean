@@ -46,6 +46,16 @@ function dock(id: string): HTMLElement {
 	return el;
 }
 
+function shownDocks(): string[] {
+	return [...document.querySelectorAll<HTMLElement>('[data-dock]')].map((el) => el.dataset.dock!);
+}
+
+function openDocks(): string[] {
+	return [...document.querySelectorAll<HTMLElement>('[data-dock]')].flatMap((el) =>
+		el.classList.contains('held') ? [] : [el.dataset.dock!]
+	);
+}
+
 describe('VowelStep dock board', () => {
 	it('exposes a strokes palette and no ticks or side trays', () => {
 		render(VowelStep, { step: step('ㅣ'), onSettle: () => {}, onNudge: () => {} });
@@ -65,41 +75,43 @@ describe('VowelStep dock board', () => {
 		flushSync();
 		expect(onSettle).toHaveBeenCalled();
 		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅣ');
+		expect(document.querySelectorAll('[data-dock]')).toHaveLength(0);
 	});
 
 	it('builds ㅏ by seating ㅣ then a tick on the right', () => {
 		const onSettle = vi.fn();
 		render(VowelStep, { step: step('ㅏ', 'a'), onSettle, onNudge: () => {} });
+		expect(shownDocks()).toEqual(['base', 'right']);
 		stamp('ㅣ').click();
 		flushSync();
 		dock('base').click();
 		flushSync();
 		expect(onSettle).not.toHaveBeenCalled();
+		expect(shownDocks()).toEqual(['base', 'right']);
+		expect(openDocks()).toEqual(['right']);
+		expect(document.querySelector('[data-dock="left"]')).toBeNull();
 		stamp('tick').click();
 		flushSync();
 		dock('right').click();
 		flushSync();
 		expect(onSettle).toHaveBeenCalled();
 		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅏ');
+		expect(document.querySelectorAll('[data-dock]')).toHaveLength(0);
 	});
 
 	it('soft-nudges when a real but wrong vowel is built', () => {
 		const onSettle = vi.fn();
 		const onNudge = vi.fn();
 		render(VowelStep, { step: step('ㅏ', 'a'), onSettle, onNudge });
-		stamp('ㅣ').click();
+		stamp('ㅡ').click();
 		flushSync();
 		dock('base').click();
-		flushSync();
-		stamp('tick').click();
-		flushSync();
-		dock('left').click();
 		flushSync();
 		expect(onSettle).not.toHaveBeenCalled();
 		expect(onNudge).toHaveBeenCalled();
 		const last = onNudge.mock.calls.at(-1);
 		expect(last?.[1]).toBe(true);
-		expect(String(last?.[0])).toContain('ㅓ');
+		expect(String(last?.[0])).toContain('ㅡ');
 	});
 
 	it('adds the y-glide with a second tick on the same side', () => {

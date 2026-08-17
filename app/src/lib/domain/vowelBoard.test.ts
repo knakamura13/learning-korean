@@ -14,6 +14,8 @@ import {
 	snapDock,
 	snapRadiusPx,
 	stampLabel,
+	placeholderDocks,
+	recipeDocks,
 	visibleDocks,
 	vowelOf,
 	type BoardState,
@@ -43,6 +45,27 @@ describe('visible docks', () => {
 		]);
 		expect(visibleDocks(board({ base: 'ㅡ', ticks: 2, side: 'below' }))).toContain('below2');
 		expect(visibleDocks(board({ base: 'ㅡ', ticks: 2, side: 'below' }))).not.toContain('above2');
+	});
+});
+
+describe('target placeholders', () => {
+	it('lists every slot the target letter still needs, and none once it is complete', () => {
+		expect(recipeDocks('ㅏ')).toEqual(['base', 'right']);
+		expect(recipeDocks('ㅑ')).toEqual(['base', 'right', 'right2']);
+		expect(recipeDocks('ㅣ')).toEqual(['base']);
+		expect(placeholderDocks(EMPTY_BOARD, 'ㅏ')).toEqual(['base', 'right']);
+		expect(placeholderDocks(board({ base: 'ㅣ' }), 'ㅏ')).toEqual(['right']);
+		expect(placeholderDocks(board({ base: 'ㅣ', ticks: 1, side: 'right' }), 'ㅏ')).toEqual([]);
+		expect(placeholderDocks(board({ base: 'ㅣ', ticks: 1, side: 'right' }), 'ㅑ')).toEqual([
+			'right2'
+		]);
+		expect(placeholderDocks(board({ base: 'ㅣ' }), 'ㅣ')).toEqual([]);
+	});
+
+	it('does not leave an opposite-side or extra-tick hole on a finished letter', () => {
+		const a = board({ base: 'ㅣ', ticks: 1, side: 'right' });
+		expect(placeholderDocks(a, 'ㅏ')).not.toContain('left');
+		expect(placeholderDocks(a, 'ㅏ')).not.toContain('right2');
 	});
 });
 
