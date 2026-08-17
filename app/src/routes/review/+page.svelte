@@ -426,13 +426,13 @@
 	.answer-controls {
 		display: flex;
 		align-items: stretch;
-		flex-wrap: wrap;
 		gap: var(--s2);
 	}
 
 	.answer-controls .in {
 		flex: 1 1 auto;
 		min-width: 0;
+		width: auto;
 	}
 
 	.answer-controls .btn {
