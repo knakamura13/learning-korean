@@ -400,6 +400,12 @@
 
 <Target target={step.target} name={step.targetName} />
 
+{#if tip}
+	<div class="tick-hint" data-tick-hint role="status">
+		{tickBeforeBaseHint(step.target)}
+	</div>
+{/if}
+
 <div
 	class={['zone', won && 'win', result && 'filled']}
 	bind:this={boardEl}
@@ -464,18 +470,6 @@
 					{/if}
 				</button>
 			{/each}
-		</div>
-	{/if}
-	{#if tip}
-		{@const pos = dockPosition(tip, docks)}
-		<div
-			class="tick-hint"
-			data-tick-hint
-			role="status"
-			style:left="{pos.x * 100}%"
-			style:top="{pos.y * 100}%"
-		>
-			{tickBeforeBaseHint(step.target)}
 		</div>
 	{/if}
 </div>
@@ -615,10 +609,9 @@
 	}
 
 	.tick-hint {
-		position: absolute;
-		z-index: 5;
 		box-sizing: border-box;
-		width: min(24rem, calc(100vw - 3rem));
+		width: 100%;
+		margin: 0 0 var(--s3);
 		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--accent);
 		border-radius: var(--r-sm);
@@ -631,8 +624,6 @@
 		letter-spacing: 0.01em;
 		color: var(--ink);
 		text-align: left;
-		pointer-events: none;
-		transform: translate(-50%, calc(-100% - 0.55rem));
 	}
 	.choice {
 		appearance: none;
