@@ -167,6 +167,21 @@ describe('polish audit regressions', () => {
 		expect(appCss).not.toMatch(/body::before[\s\S]{0,200}z-index:\s*1000/);
 	});
 
+	it('paints due and resume rose, and keeps primary actions moss', () => {
+		const homeCss = styleBlock(home);
+		const layoutCss = styleBlock(layout);
+		const reviewCss = styleBlock(review);
+		expect(home).toMatch(/chip-status due/);
+		expect(homeCss).toMatch(/\.chip-status\.due\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/a\.stat\.hot:not\(\.quiet\)[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/\.lab\.resume\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*var\(--accent\)/s);
+		expect(homeCss).toMatch(/\.continue\s*\{[^}]*var\(--accent\)/s);
+		expect(layoutCss).toMatch(/\.badge\s*\{[^}]*var\(--rose\)/s);
+		expect(layoutCss).toMatch(/nav a\.active\s*\{[^}]*var\(--accent\)/s);
+		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
+	});
+
 	it('emits absolute Open Graph images only, with dimensions and a dark manifest', () => {
 		expect(layout).not.toMatch(/siteAsset\('\/og\.png'\)\s*\?\?/);
 		expect(layout).toMatch(/property="og:type"/);

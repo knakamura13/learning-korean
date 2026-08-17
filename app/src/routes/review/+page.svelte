@@ -368,8 +368,8 @@
 		padding: var(--s3) var(--s2);
 		text-align: center;
 	}
-	.stat.hot { border-color: var(--accent); background: var(--accent-soft); }
-	.stat.hot b { color: var(--accent); }
+	.stat.hot { border-color: var(--rose); background: var(--rose-soft); }
+	.stat.hot b { color: var(--rose); }
 	.stat b {
 		font-family: var(--mono);
 		font-size: 1.35rem;

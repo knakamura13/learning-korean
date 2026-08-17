@@ -152,7 +152,7 @@
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									{#if card.resumeAt !== null}
-										<span class="chip-status go">resume · card {card.resumeAt + 1} of {lab.steps.length}</span>
+										<span class="chip-status due">resume · card {card.resumeAt + 1} of {lab.steps.length}</span>
 									{:else if card.done}
 										<span class="chip-status ok">✓ completed</span>
 									{:else if card.startHere}
@@ -304,8 +304,8 @@
 		text-transform: uppercase;
 		color: var(--ink-faint);
 	}
-	a.stat.hot:not(.quiet) { border-color: var(--accent); background: var(--accent-soft); }
-	a.stat.hot:not(.quiet) b { color: var(--accent); }
+	a.stat.hot:not(.quiet) { border-color: var(--rose); background: var(--rose-soft); }
+	a.stat.hot:not(.quiet) b { color: var(--rose); }
 	a.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
 
 	.sec {
@@ -342,8 +342,8 @@
 		line-height: 1.2;
 	}
 	.lab.done .num { color: var(--good); }
-	.lab.resume { border-color: var(--accent); }
-	.lab.resume .num { color: var(--accent); }
+	.lab.resume { border-color: var(--rose); }
+	.lab.resume .num { color: var(--rose); }
 
 	.lab h3 { font-size: 1.15rem; margin-bottom: var(--s1); }
 	.lab p { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.55; }
@@ -387,6 +387,11 @@
 		color: var(--accent);
 		background: var(--accent-soft);
 		border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+	}
+	.chip-status.due {
+		color: var(--rose);
+		background: var(--rose-soft);
+		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
 	}
 
 	.lab.ahead { opacity: 0.78; }
