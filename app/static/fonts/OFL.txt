@@ -1,4 +1,13 @@
-Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'
+This directory bundles OFL fonts used by the app:
+
+- Noto Sans KR: Copyright 2014-2021 Google Inc.
+- Cormorant Garamond: Copyright 2010 The Cormorant Project Authors
+  (https://github.com/CatharsisFonts/Cormorant)
+- Libre Baskerville: Copyright 2012 Impallari Type (www.impallari.com)
+- Lora: Copyright 2011 The Lora Project Authors
+- EB Garamond: Copyright 2017 The EB Garamond Project Authors
+- Source Serif 4: Copyright 2014-2021 Adobe (http://www.adobe.com/),
+  with Reserved Font Name 'Source'
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

@@ -49,6 +49,7 @@
 
 <div class="shell">
 	<header class="head">
+		<p class="flourish" aria-hidden="true">***</p>
 		<p class="eyebrow">Reference</p>
 		<h1>Every letter and rule</h1>
 		<p class="lede">
@@ -281,16 +282,22 @@
 </div>
 
 <style>
-	.head { margin-bottom: var(--s6); max-width: var(--measure); }
+	.head { margin-bottom: var(--s6); text-align: center; max-width: 40rem; margin-inline: auto; }
 	h1 { margin: var(--s2) 0 var(--s3); }
-	.lede { color: var(--ink-soft); }
+	.lede {
+		color: var(--ink-soft);
+		font-family: var(--serif);
+		font-style: italic;
+		letter-spacing: 0.03em;
+	}
 
 	.quick-nav-label {
 		margin: var(--s4) 0 var(--s1);
-		color: var(--ink-faint);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
+		color: var(--gold);
+		font-family: var(--display);
+		font-size: 0.7rem;
+		font-style: italic;
+		letter-spacing: 0.18em;
 		text-transform: uppercase;
 	}
 	.quick-nav {
@@ -303,12 +310,15 @@
 		display: inline-flex;
 		align-items: center;
 		min-height: 2.75rem;
-		padding: 0.25rem 0.65rem;
-		border-radius: var(--r-pill);
-		background: var(--paper-sunk);
+		padding: 0.25rem 0.7rem;
+		border-radius: var(--r-sm);
+		background: var(--paper-raised);
 		border: 1px solid var(--rule);
-		font-size: 0.74rem;
-		font-weight: 500;
+		font-family: var(--display);
+		font-size: 0.8rem;
+		font-style: italic;
+		letter-spacing: 0.06em;
+		font-weight: 400;
 		text-decoration: none;
 		color: var(--ink-soft);
 		white-space: nowrap;
@@ -316,8 +326,8 @@
 			color var(--fast) var(--ease);
 	}
 	.quick-nav a:hover {
-		background: var(--paper-raised);
-		border-color: var(--accent);
+		background: var(--paper-sunk);
+		border-color: var(--gold);
 		color: var(--accent);
 	}
 	.quick-nav a:active {
@@ -353,16 +363,6 @@
 	section {
 		margin-bottom: var(--s7);
 		scroll-margin-top: calc(var(--s7) + 2rem);
-	}
-
-	.sec {
-		font-family: var(--sans);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--ink-faint);
-		margin: 0 0 var(--s3);
 	}
 
 	.grid {

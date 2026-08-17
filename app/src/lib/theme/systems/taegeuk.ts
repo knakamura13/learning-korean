@@ -17,6 +17,9 @@ const light: Palette = {
 	accent: '#a4342b',
 	accentInk: '#ffffff',
 	accentSoft: '#f9ece9',
+	gold: '#a4342b',
+	goldSoft: '#f9ece9',
+	cardSheen: '#a4342b',
 	blue: '#2b5c8a',
 	blueSoft: '#eaf1f7',
 	good: '#2f6b45',
@@ -28,10 +31,13 @@ const light: Palette = {
 	shadow1: '0 1px 2px rgba(26, 26, 24, 0.05), 0 1px 3px rgba(26, 26, 24, 0.04)',
 	shadow2: '0 2px 6px rgba(26, 26, 24, 0.07), 0 8px 20px rgba(26, 26, 24, 0.05)',
 	shadow3: '0 8px 24px rgba(26, 26, 24, 0.1), 0 20px 48px rgba(26, 26, 24, 0.07)',
+	display: SERIF,
 	serif: SERIF,
 	sans: SANS,
 	mono: MONO,
-	hangul: HANGUL
+	hangul: HANGUL,
+	atmosphere: 'none',
+	textureOpacity: '0'
 };
 
 const dark: Palette = {
@@ -46,6 +52,9 @@ const dark: Palette = {
 	accent: '#e28379',
 	accentInk: '#1a1a18',
 	accentSoft: '#2d1e1c',
+	gold: '#e28379',
+	goldSoft: '#2d1e1c',
+	cardSheen: '#e28379',
 	blue: '#8ab7e0',
 	blueSoft: '#182531',
 	good: '#83c99e',
@@ -57,13 +66,16 @@ const dark: Palette = {
 	shadow1: '0 1px 2px rgba(0, 0, 0, 0.4)',
 	shadow2: '0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3)',
 	shadow3: '0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35)',
+	display: SERIF,
 	serif: SERIF,
 	sans: SANS,
 	mono: MONO,
-	hangul: HANGUL
+	hangul: HANGUL,
+	atmosphere: 'none',
+	textureOpacity: '0'
 };
 
-/** Current ink-and-paper system (태극 red / blue). */
+/** Previous ink-and-paper system, kept so a prototype can switch back in one line. */
 export const taegeuk: DesignSystem = {
 	id: 'taegeuk',
 	name: 'Taegeuk',

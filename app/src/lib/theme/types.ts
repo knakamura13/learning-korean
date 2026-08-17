@@ -16,6 +16,11 @@ export interface Palette {
 	accent: string;
 	accentInk: string;
 	accentSoft: string;
+	/** Honey / antique-gold ornaments (numerals, underlines, flourishes). Not caption text. */
+	gold: string;
+	goldSoft: string;
+	/** Card hover sheen, as a CSS `background-image` value. */
+	cardSheen: string;
 	blue: string;
 	blueSoft: string;
 	good: string;
@@ -27,12 +32,17 @@ export interface Palette {
 	shadow1: string;
 	shadow2: string;
 	shadow3: string;
+	/** Display / italic face (eyebrows, primary buttons). */
+	display: string;
 	/** Headings. */
 	serif: string;
 	/** Body and UI chrome. Named `--sans` in CSS for historical reasons. */
 	sans: string;
 	mono: string;
 	hangul: string;
+	/** Fixed-layer wash / vignette, as a CSS `background-image` value. */
+	atmosphere: string;
+	textureOpacity: string;
 }
 
 export interface ShapeTokens {
@@ -75,6 +85,9 @@ export const PALETTE_CSS_VARS = {
 	accent: '--accent',
 	accentInk: '--accent-ink',
 	accentSoft: '--accent-soft',
+	gold: '--gold',
+	goldSoft: '--gold-soft',
+	cardSheen: '--card-sheen',
 	blue: '--blue',
 	blueSoft: '--blue-soft',
 	good: '--good',
@@ -86,8 +99,11 @@ export const PALETTE_CSS_VARS = {
 	shadow1: '--shadow-1',
 	shadow2: '--shadow-2',
 	shadow3: '--shadow-3',
+	display: '--display',
 	serif: '--serif',
 	sans: '--sans',
 	mono: '--mono',
-	hangul: '--hangul'
+	hangul: '--hangul',
+	atmosphere: '--atmosphere',
+	textureOpacity: '--texture-opacity'
 } as const satisfies Record<keyof Palette, string>;

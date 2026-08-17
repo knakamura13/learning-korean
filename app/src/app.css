@@ -1,6 +1,6 @@
 /* ============================================================
    app.css — base styles on top of the active design system.
-   Tokens (--ink, --paper, --accent, type, space, shape) come from
+   Tokens (--ink, --paper, --accent, --gold, type, space, shape) come from
    virtual:design-system.css (imported in +layout.svelte). Swap systems
    in src/lib/theme/active.ts.
    ============================================================ */
@@ -18,14 +18,14 @@ html {
 	scrollbar-width: thin;
 	scrollbar-color: var(--ink-faint) var(--paper-sunk);
 	scrollbar-gutter: stable;
-	-webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 25%, transparent);
+	-webkit-tap-highlight-color: color-mix(in srgb, var(--gold) 25%, transparent);
 }
 
 html[data-theme='light'] { color-scheme: light; }
 html[data-theme='dark'] { color-scheme: dark; }
 
 ::selection {
-	background: var(--accent-soft);
+	background: var(--gold-soft);
 	color: var(--ink);
 }
 
@@ -41,11 +41,31 @@ html[data-theme='dark'] { color-scheme: dark; }
 body {
 	margin: 0;
 	min-height: 100dvh;
-	background: var(--paper);
+	background-color: var(--paper);
 	color: var(--ink);
 	font-family: var(--sans);
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
+}
+
+/* Sunlight wash / candle vignette, then paper grain — matches the source
+   overlays. z-index 0 sits under sticky chrome and main (z-index ≥ 1). */
+body::before,
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+}
+
+body::before {
+	background-image: var(--atmosphere);
+}
+
+body::after {
+	opacity: var(--texture-opacity);
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3, h4 {
@@ -56,14 +76,19 @@ h1, h2, h3, h4 {
 	margin: 0;
 }
 
-h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); }
+h1 {
+	font-family: var(--display);
+	font-style: italic;
+	letter-spacing: 0.08em;
+	font-size: clamp(2.15rem, 5.5vw, 3.25rem);
+}
 h2 { font-size: clamp(1.35rem, 3vw, 1.6rem); }
 h3 { font-size: 1.1rem; }
 
 h1, h2 { text-wrap: balance; }
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
 
-/* Hangul / lang=ko uses the self-hosted face. English UI keeps serif/sans. */
+/* Hangul / lang=ko uses the self-hosted face. Latin UI keeps the system serifs. */
 :lang(ko) {
 	font-family: var(--hangul);
 }
@@ -74,12 +99,13 @@ p, h1, h2, h3, .lab .body {
 }
 
 a {
-	color: var(--blue);
+	color: var(--accent);
+	text-decoration-color: var(--gold);
 	text-decoration-thickness: 1px;
-	text-underline-offset: 0.16em;
+	text-underline-offset: 0.18em;
 	transition: color var(--fast) var(--ease), transform var(--fast) var(--ease);
 }
-a:hover { color: var(--accent); }
+a:hover { color: var(--ink); }
 
 a:active {
 	transform: translateY(0);
@@ -91,7 +117,7 @@ button { font: inherit; color: inherit; }
 	outline: 2px solid var(--paper);
 	outline-offset: 2px;
 	box-shadow: var(--focus-ring);
-	border-radius: 3px;
+	border-radius: var(--r-sm);
 }
 
 /* --- shared primitives --- */
@@ -113,13 +139,44 @@ button { font: inherit; color: inherit; }
 .rom::before { content: '['; }
 .rom::after { content: ']'; }
 
+.flourish {
+	font-family: var(--display);
+	font-size: 1.5rem;
+	font-weight: 400;
+	color: var(--gold);
+	letter-spacing: 0.5em;
+	margin: 0 0 var(--s4);
+}
+
 .eyebrow {
-	font-size: 0.66rem;
-	font-weight: 700;
+	font-family: var(--display);
+	font-size: 0.8rem;
+	font-weight: 400;
+	font-style: italic;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--accent);
+	color: var(--gold);
 	margin: 0;
+}
+
+.sec {
+	font-family: var(--display);
+	font-size: clamp(1.55rem, 3vw, 2rem);
+	font-weight: 400;
+	font-style: italic;
+	letter-spacing: 0.1em;
+	color: var(--accent);
+	text-align: center;
+	margin: 0 0 var(--s5);
+}
+
+.sec::after {
+	content: '';
+	display: block;
+	width: 7.5rem;
+	height: 1px;
+	margin: var(--s3) auto 0;
+	background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
 .muted { color: var(--ink-soft); }
@@ -153,10 +210,27 @@ button { font: inherit; color: inherit; }
 }
 
 .card {
+	position: relative;
 	background: var(--paper-raised);
 	border: 1px solid var(--rule);
 	border-radius: var(--r-lg);
 	box-shadow: var(--shadow-1);
+}
+
+.card::before {
+	content: '';
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline: 0;
+	height: 3px;
+	background: var(--card-sheen);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--med) var(--ease);
+}
+
+.card:hover::before {
+	opacity: 1;
 }
 
 /* --- buttons --- */
@@ -166,21 +240,25 @@ button { font: inherit; color: inherit; }
 	border: 1px solid var(--accent);
 	background: var(--accent);
 	color: var(--accent-ink);
-	border-radius: var(--r-md);
-	padding: 0.62rem 1.3rem;
+	border-radius: var(--r-sm);
+	padding: 0.62rem 1.5rem;
 	min-height: 44px;
-	font-size: 0.88rem;
-	font-weight: 600;
+	font-family: var(--display);
+	font-size: 0.9375rem;
+	font-weight: 400;
+	font-style: italic;
+	letter-spacing: 0.1em;
 	cursor: pointer;
 	text-decoration: none;
 	display: inline-flex;
 	align-items: center;
 	gap: var(--s2);
 	transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
-		filter var(--fast) var(--ease), background var(--fast) var(--ease);
+		filter var(--fast) var(--ease), background var(--fast) var(--ease),
+		border-color var(--fast) var(--ease), color var(--fast) var(--ease);
 }
 
-.btn:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn:hover { filter: none; transform: translateY(-1px); box-shadow: var(--shadow-2); background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
 .btn:active { transform: translateY(0); box-shadow: var(--shadow-1); }
 .btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; filter: none; }
 .btn:focus-visible,
@@ -193,7 +271,7 @@ button { font: inherit; color: inherit; }
 	color: var(--ink-soft);
 	border-color: var(--rule-strong);
 }
-.btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; }
+.btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; border-color: var(--gold); }
 
 @media (forced-colors: active) {
 	:focus-visible {
@@ -207,6 +285,10 @@ button { font: inherit; color: inherit; }
 		color: CanvasText;
 		border: 1px solid ButtonBorder;
 		box-shadow: none;
+	}
+
+	.card::before {
+		background: Highlight;
 	}
 
 	.btn,

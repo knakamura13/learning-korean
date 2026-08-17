@@ -22,6 +22,16 @@ describe('designSystemCss', () => {
 			expect(css).toContain(face.file);
 		}
 	});
+
+	it('exposes a display face token for buttons and eyebrows', () => {
+		expect(css).toMatch(/--display:/);
+	});
+
+	it('exposes gold ornament tokens and a gold focus ring', () => {
+		expect(css).toContain(`--gold: ${activeSystem.light.gold}`);
+		expect(css).toContain(`--card-sheen: ${activeSystem.light.cardSheen}`);
+		expect(css).toMatch(/--focus-ring:.*var\(--gold\)/);
+	});
 });
 
 describe('applyPaperPlaceholders', () => {
@@ -34,8 +44,8 @@ describe('applyPaperPlaceholders', () => {
 });
 
 describe('activeSystem', () => {
-	it('is Taegeuk until a prototype points it elsewhere', () => {
-		expect(activeSystem.id).toBe('taegeuk');
+	it('is Academia until a prototype points it elsewhere', () => {
+		expect(activeSystem.id).toBe('academia');
 	});
 });
 

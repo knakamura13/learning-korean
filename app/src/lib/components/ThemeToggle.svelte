@@ -92,7 +92,7 @@
 		border: 1px solid var(--rule);
 		border-radius: var(--r-sm);
 		background: var(--paper-sunk);
-		color: var(--accent);
+		color: var(--gold);
 		cursor: pointer;
 		flex-shrink: 0;
 		transition:
@@ -101,7 +101,7 @@
 	}
 	.theme:hover {
 		background: var(--paper-raised);
-		color: var(--ink);
+		color: var(--gold);
 	}
 	.theme:active { transform: translateY(1px); }
 	.theme:focus-visible {

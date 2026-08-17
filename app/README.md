@@ -45,14 +45,18 @@ src/lib/content/    lessons as typed data
   lab01..lab05.ts     the course
 src/lib/theme/      swappable design systems (tokens + CSS)
   active.ts           one-line switch for the current look
-  systems/taegeuk.ts  ink-and-paper palette (current)
+  systems/academia.ts Light Academia / Dark Academia palettes (current)
+  systems/taegeuk.ts  previous ink-and-paper palette
 src/lib/components/ the runner and one component per step type
 src/routes/         dashboard, /lab/[id], /review, /reference
 ```
 
 Visual tokens are a `DesignSystem` object. Components only use semantic CSS
-variables (`--ink`, `--paper`, `--accent`, `--serif`, …). To prototype a new
+variables (`--ink`, `--paper`, `--accent`, `--gold`, `--serif`, …). To prototype a new
 look, add `src/lib/theme/systems/<name>.ts` and point `activeSystem` at it.
+The previous Taegeuk palette is still in `systems/taegeuk.ts` as a one-line
+switch-back. In Academia, `--gold` is honey/antique-gold for ornaments;
+`--accent` is walnut (light) or burgundy (dark) for buttons and links.
 
 ## Two rules worth keeping
 
