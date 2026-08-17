@@ -11,6 +11,7 @@ import FusionStep from './steps/FusionStep.svelte';
 import AssembleStep from './steps/AssembleStep.svelte';
 import type { AssembleStep as AssembleStepData, FusionStep as FusionStepData } from '$lib/content/types';
 import { DRAG_THRESHOLD_PX } from '$lib/domain/composerSnap';
+import { flushLabDrag } from './labDrag';
 
 if (typeof PointerEvent === 'undefined') {
 	class PointerEventPolyfill extends MouseEvent {
@@ -113,12 +114,17 @@ function firePointer(target: EventTarget, type: string, x: number, y: number) {
 		new PointerEvent(type, {
 			bubbles: true,
 			cancelable: true,
+			button: 0,
 			clientX: x,
 			clientY: y,
 			pointerId: 1,
 			pointerType: 'mouse'
 		})
 	);
+}
+
+async function frame() {
+	await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
 function mockSlot(
@@ -140,18 +146,21 @@ function mockSlot(
 }
 
 /** Pointer-down on a chip, drag past the click threshold, release. Optionally synthesize the trailing click. */
-function dragChip(
+async function dragChip(
 	chip: HTMLElement,
 	to: { x: number; y: number },
 	opts: { click?: boolean } = {}
 ) {
+	await flushLabDrag();
 	firePointer(chip, 'pointerdown', 10, 10);
-	flushSync();
 	firePointer(window, 'pointermove', 10 + DRAG_THRESHOLD_PX, 10);
+	await frame();
 	flushSync();
 	firePointer(window, 'pointermove', to.x, to.y);
+	await frame();
 	flushSync();
 	firePointer(window, 'pointerup', to.x, to.y);
+	await frame();
 	flushSync();
 	if (opts.click) {
 		chip.click();
@@ -332,7 +341,7 @@ describe('FusionStep trays', () => {
 		expect(root.querySelector('.out')?.textContent).not.toContain('✕');
 	});
 
-	it('seats a dragged second-tray vowel onto the second slot', () => {
+	it('seats a dragged second-tray vowel onto the second slot', async () => {
 		const root = render(FusionStep, {
 			step: fusionStep,
 			onSettle: () => {},
@@ -345,7 +354,7 @@ describe('FusionStep trays', () => {
 		radioNamed(labeledGroup(root, 'first vowel'), 'ㅜ').click();
 		flushSync();
 
-		dragChip(radioNamed(labeledGroup(root, 'second vowel'), 'ㅓ'), { x: 240, y: 40 });
+		await dragChip(radioNamed(labeledGroup(root, 'second vowel'), 'ㅓ'), { x: 240, y: 40 });
 
 		const [slotA, slotB] = slotValues(root);
 		expect(slotA).toBe('ㅜ');
@@ -382,7 +391,7 @@ describe('AssembleStep trays', () => {
 		expect(slotFinal).toBe('ㅂ');
 	});
 
-	it('seats a dragged vowel onto the vowel slot without a click', () => {
+	it('seats a dragged vowel onto the vowel slot without a click', async () => {
 		const root = render(AssembleStep, {
 			step: cvAssemble,
 			onSettle: () => {},
@@ -393,7 +402,7 @@ describe('AssembleStep trays', () => {
 		mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
 
 		const vowel = labeledGroup(root, 'vowel');
-		dragChip(radioNamed(vowel, 'ㅜ'), { x: 240, y: 40 });
+		await dragChip(radioNamed(vowel, 'ㅜ'), { x: 240, y: 40 });
 
 		const [slotLead, slotVowel] = slotValues(root);
 		expect(slotLead).toBe('');
@@ -416,20 +425,22 @@ describe('AssembleStep trays', () => {
 		expect(radioNamed(lead, 'ㄴ').getAttribute('aria-checked')).toBe('true');
 	});
 
-	it('treats a short pointer jitter as a click, not a missed drag', () => {
+	it('treats a short pointer jitter as a click, not a missed drag', async () => {
 		const root = render(AssembleStep, {
 			step: cvAssemble,
 			onSettle: () => {},
 			onNudge: () => {}
 		});
+		await flushLabDrag();
 
 		const lead = labeledGroup(root, 'consonant');
 		const chip = radioNamed(lead, 'ㄴ');
 		firePointer(chip, 'pointerdown', 10, 10);
-		flushSync();
 		firePointer(window, 'pointermove', 10 + DRAG_THRESHOLD_PX - 1, 10);
+		await frame();
 		flushSync();
 		firePointer(window, 'pointerup', 10 + DRAG_THRESHOLD_PX - 1, 10);
+		await frame();
 		flushSync();
 		chip.click();
 		flushSync();
@@ -437,20 +448,21 @@ describe('AssembleStep trays', () => {
 		expect(slotValues(root)[0]).toBe('ㄴ');
 	});
 
-	it('highlights the matching slot while a chip is in flight', () => {
+	it('highlights the matching slot while a chip is in flight', async () => {
 		const root = render(AssembleStep, {
 			step: cvAssemble,
 			onSettle: () => {},
 			onNudge: () => {}
 		});
+		await flushLabDrag();
 
 		const vowelSlot = mockSlot(root, 'vowel', { left: 200, top: 0, right: 280, bottom: 80 });
 		mockSlot(root, 'consonant', { left: 0, top: 0, right: 80, bottom: 80 });
 
 		const chip = radioNamed(labeledGroup(root, 'vowel'), 'ㅜ');
 		firePointer(chip, 'pointerdown', 10, 10);
-		flushSync();
 		firePointer(window, 'pointermove', 10 + DRAG_THRESHOLD_PX, 10);
+		await frame();
 		flushSync();
 
 		expect(vowelSlot.classList.contains('hot')).toBe(true);
@@ -458,11 +470,12 @@ describe('AssembleStep trays', () => {
 		expect(root.querySelector('.ghost')?.textContent).toContain('ㅜ');
 
 		firePointer(window, 'pointerup', 500, 500);
+		await frame();
 		flushSync();
 		expect(vowelSlot.classList.contains('hot')).toBe(false);
 	});
 
-	it('does not auto-fill after a missed drag, even when a click follows the release', () => {
+	it('does not auto-fill after a missed drag, even when a click follows the release', async () => {
 		const root = render(AssembleStep, {
 			step: cvAssemble,
 			onSettle: () => {},
@@ -474,7 +487,7 @@ describe('AssembleStep trays', () => {
 
 		const vowel = labeledGroup(root, 'vowel');
 		const chip = radioNamed(vowel, 'ㅜ');
-		dragChip(chip, { x: 500, y: 500 }, { click: true });
+		await dragChip(chip, { x: 500, y: 500 }, { click: true });
 
 		expect(slotValues(root)[1]).toBe('');
 		expect(chip.getAttribute('aria-checked')).toBe('false');
@@ -484,7 +497,7 @@ describe('AssembleStep trays', () => {
 		expect(slotValues(root)[1]).toBe('ㅜ');
 	});
 
-	it('bounces a vowel dropped on the consonant slot and still lets the next click fill the vowel', () => {
+	it('bounces a vowel dropped on the consonant slot and still lets the next click fill the vowel', async () => {
 		const root = render(AssembleStep, {
 			step: cvAssemble,
 			onSettle: () => {},
@@ -496,7 +509,7 @@ describe('AssembleStep trays', () => {
 
 		const vowel = labeledGroup(root, 'vowel');
 		const chip = radioNamed(vowel, 'ㅜ');
-		dragChip(chip, { x: 40, y: 40 }, { click: true });
+		await dragChip(chip, { x: 40, y: 40 }, { click: true });
 
 		const [slotLead, slotVowel] = slotValues(root);
 		expect(slotLead).toBe('');
@@ -507,7 +520,7 @@ describe('AssembleStep trays', () => {
 		expect(slotValues(root)[1]).toBe('ㅜ');
 	});
 
-	it('seats a dragged batchim onto the bottom slot without changing the lead', () => {
+	it('seats a dragged batchim onto the bottom slot without changing the lead', async () => {
 		const root = render(AssembleStep, {
 			step: assembleStep,
 			onSettle: () => {},
@@ -523,7 +536,7 @@ describe('AssembleStep trays', () => {
 		flushSync();
 
 		const batchim = labeledGroup(root, 'batchim — the bottom slot');
-		dragChip(radioNamed(batchim, 'ㅂ'), { x: 140, y: 160 });
+		await dragChip(radioNamed(batchim, 'ㅂ'), { x: 140, y: 160 });
 
 		const [slotLead, , slotFinal] = slotValues(root);
 		expect(slotLead).toBe('ㅁ');
