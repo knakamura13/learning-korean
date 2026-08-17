@@ -3,7 +3,7 @@
 	import { fly, fade } from 'svelte/transition';
 	import type { Lab } from '$lib/content/types';
 	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
-	import { focusWhen, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
 	import { labSession } from '$lib/stores/labSession.svelte';
@@ -248,12 +248,12 @@
 			jumpTo(stepCardIndex(index, e.key === 'ArrowLeft' ? -1 : 1, furthest));
 			return;
 		}
-		if (shouldIgnoreShortcut(e.target)) return;
-		if (settled && (e.key === 'Enter' || e.key === ' ')) {
+		if (shouldAdvanceOnEnter(e, settled)) {
 			e.preventDefault();
 			next();
 			return;
 		}
+		if (shouldIgnoreShortcut(e.target)) return;
 		if (!settled && step.type === 'choice' && isChoiceShortcutKey(e.key, step.options)) {
 			e.preventDefault();
 			choiceRef?.key(e.key);

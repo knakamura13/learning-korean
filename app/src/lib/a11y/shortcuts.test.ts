@@ -4,6 +4,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
 	focusWhen,
+	shouldAdvanceOnEnter,
 	shouldIgnoreArrowNav,
 	shouldIgnoreShortcut
 } from './shortcuts';
@@ -84,5 +85,24 @@ describe('shortcuts guards', () => {
 		expect(shouldIgnoreArrowNav(dock)).toBe(false);
 
 		board.remove();
+	});
+
+	it('does not advance on an Enter the dock already handled', () => {
+		const dock = document.createElement('button');
+		dock.disabled = true;
+		document.body.appendChild(dock);
+
+		const handled = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+		Object.defineProperty(handled, 'target', { value: dock });
+		handled.preventDefault();
+		expect(shouldAdvanceOnEnter(handled, true)).toBe(false);
+
+		const leftover = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+		Object.defineProperty(leftover, 'target', { value: dock });
+		expect(shouldAdvanceOnEnter(leftover, true)).toBe(true);
+
+		expect(shouldAdvanceOnEnter(leftover, false)).toBe(false);
+
+		dock.remove();
 	});
 });
