@@ -4,7 +4,7 @@ Lab 02 vowel cards stop being a parameter mixer (base / ticks / side trays plus 
 
 ## Goal
 
-On `type: 'vowel'` cards, the learner stamps a long stroke onto the centre of a square, then stamps ticks onto docks around it. The board is the same state for pointer and keyboard. Valid-but-wrong placements still compose a real vowel and soft-nudge, matching today's exploration contract.
+On `type: 'vowel'` cards, the learner stamps a long stroke onto the center of a square, then stamps ticks onto docks around it. The board is the same state for pointer and keyboard. Valid-but-wrong placements still compose a real vowel and soft-nudge, matching today's exploration contract.
 
 Success is: the five Lab 02 vowel cards are solvable by placing strokes in space, still completable inside the lab's ~9 minute budget, and still solvable with no pointer.
 
@@ -53,7 +53,7 @@ Visible docks:
 
 A tick dock that is not visible is not a drop target.
 
-Normalised positions on a unit square, used for layout and snap:
+Normalized positions on a unit square, used for layout and snap:
 
 - `base` → (0.50, 0.50)
 - `left` → (0.22, 0.50), `left2` → (0.08, 0.50)
@@ -112,12 +112,12 @@ The equation row (`base + ticks = result` from `Slots.svelte`) goes away on vowe
 
 The building zone is one square. A seated base or tick always yields a real simple vowel (`buildVowel` of a base with 0–2 ticks), so the seated visual is always the Unicode jamo, never a DIY plus-sign sitting on top of the letter.
 
-- Empty: dashed square, centre dock only.
-- Occupied: the Unicode jamo from `vowelOf(state)` large in the centre. Visible docks are quiet magnets (not labelled boxes) and remain hit targets. They do not draw a second copy of the tick on top of the glyph.
+- Empty: dashed square, center dock only.
+- Occupied: the Unicode jamo from `vowelOf(state)` large in the center. Visible docks are quiet magnets (not labeled boxes) and remain hit targets. They do not draw a second copy of the tick on top of the glyph.
 - During a drag, a ghost of the stamp follows the pointer.
 - Win: the same green treatment the old result box used (`--good` border and fill).
 
-Palette chips show the two long strokes as Hangul `ㅣ` and `ㅡ`, and the tick as a short mark labelled "tick". Do not bring back "none / one / two" or "left / right".
+Palette chips show the two long strokes as Hangul `ㅣ` and `ㅡ`, and the tick as a short mark labeled "tick". Do not bring back "none / one / two" or "left / right".
 
 `Target` above the board is unchanged.
 
@@ -157,6 +157,6 @@ Existing `content.test.ts` reachability via `buildVowel` stays. Tray tests for F
 
 ## Risks
 
-- Docks that look like the old labelled slots. Keep chrome quiet: magnets, not "LEFT" boxes.
+- Docks that look like the old labeled slots. Keep chrome quiet: magnets, not "LEFT" boxes.
 - Snap too tight on touch. Floor the radius at 44px.
 - Two-tick vs one-tick confusion. The secondary dock only appears after the first tick, so iotation is "add another tick on that side," not a second precision target from an empty board.

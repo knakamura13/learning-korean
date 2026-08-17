@@ -26,7 +26,7 @@ describe('choiceKeyScheme', () => {
 
 describe('numeric options must not collide with digit shortcuts', () => {
 	/**
-	 * After shuffle, visible order is not authored order. A chip labelled `2`
+	 * After shuffle, visible order is not authored order. A chip labeled `2`
 	 * on the option `4` is what learners press — they mean the answer they see.
 	 */
 	it('cannot expose a digit shortcut equal to a different option’s value', () => {

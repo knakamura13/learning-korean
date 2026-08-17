@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DECK, CARDS_BY_ID, TIERS, cardsOfTier, checkAnswer, normalise } from './deck';
+import { DECK, CARDS_BY_ID, TIERS, cardsOfTier, checkAnswer, normalize } from './deck';
 import { applyLiaison, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
 
 describe('deck integrity', () => {
@@ -42,7 +42,7 @@ describe('deck integrity', () => {
 		const g = CARDS_BY_ID['c-g'];
 		expect(checkAnswer(g, ' G ')).toBe(true);
 		expect(checkAnswer(g, 'g.')).toBe(true);
-		expect(normalise(' A B ')).toBe('ab');
+		expect(normalize(' A B ')).toBe('ab');
 	});
 
 	it('keeps ㅡ and ㅜ answers from colliding', () => {
@@ -96,7 +96,7 @@ describe('answers derived from the phonology module', () => {
 		for (const c of cardsOfTier('lab03').filter((x) => x.kind === 'build')) {
 			const parts = fusionParts(c.front);
 			expect(parts, c.front).not.toBeNull();
-			// The jamo form is always accepted alongside the romanised one.
+			// The jamo form is always accepted alongside the romanized one.
 			expect(checkAnswer(c, `${parts![0]}+${parts![1]}`)).toBe(true);
 		}
 	});

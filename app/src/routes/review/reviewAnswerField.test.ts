@@ -9,6 +9,13 @@ describe('review answer field', () => {
 		expect(src).not.toMatch(/aria-label="your answer"/);
 	});
 
+	it('pairs the submit button with the input, not the label', () => {
+		expect(src).toMatch(/class="answer-controls"/);
+		expect(src).toMatch(/\.answer-controls\s*\{[^}]*align-items:\s*stretch/s);
+		expect(src).toMatch(/\.answer-controls \.btn\s*\{[^}]*align-self:\s*stretch/s);
+		expect(src).not.toMatch(/align-items:\s*flex-start/);
+	});
+
 	it('includes progressbar attributes for session orientation', () => {
 		expect(src).toMatch(/role="progressbar"/);
 		expect(src).toMatch(/aria-valuenow=\{index \+ 1\}/);

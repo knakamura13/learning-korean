@@ -11,7 +11,7 @@ export const lab01: Lab = {
 	finish: {
 		title: 'You just derived 19 letters from 5 shapes',
 		summary:
-			'You never memorised a consonant chart. You found five shapes in your own mouth, worked out what a stroke and a doubling mean, built letters from them, and read Korean words nobody taught you. Next lab: vowels — three strokes, one rule, twenty-one letters.'
+			'You never memorized a consonant chart. You found five shapes in your own mouth, worked out what a stroke and a doubling mean, built letters from them, and read Korean words nobody taught you. Next lab: vowels — three strokes, one rule, twenty-one letters.'
 	},
 	steps: [
 		/* ---- Act 1: find the five shapes ---- */
@@ -101,7 +101,7 @@ export const lab01: Lab = {
 			miss:
 				'<p>Look back at what you just did — every click was about a <em>place</em>. The shapes are diagrams of your vocal tract.</p>',
 			teach:
-				'<p>This makes Hangul a <strong>featural</strong> alphabet — the only major script whose letter shapes systematically encode how the sound is produced.</p><p>Five shapes down. Fourteen letters to go, and you will not memorise a single one.</p>'
+				'<p>This makes Hangul a <strong>featural</strong> alphabet — the only major script whose letter shapes systematically encode how the sound is produced.</p><p>Five shapes down. Fourteen letters to go, and you will not memorize a single one.</p>'
 		},
 		{
 			type: 'choice',
@@ -178,7 +178,7 @@ export const lab01: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p>Doubled. And doubling does <em>not</em> mean a longer or louder sound.</p><p><span class="jamo">ㅃ</span> is <strong>tense</strong>: throat tight, muscles locked, and <em>no</em> puff of air at all — the opposite extreme from aspirated.</p><p>English has no third setting here, so producing it takes months. Recognising it takes about five seconds, which is all today asks.</p>'
+				'<p>Doubled. And doubling does <em>not</em> mean a longer or louder sound.</p><p><span class="jamo">ㅃ</span> is <strong>tense</strong>: throat tight, muscles locked, and <em>no</em> puff of air at all — the opposite extreme from aspirated.</p><p>English has no third setting here, so producing it takes months. Recognizing it takes about five seconds, which is all today asks.</p>'
 		},
 		{
 			type: 'build',

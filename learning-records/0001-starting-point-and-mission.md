@@ -1,6 +1,6 @@
 # Starting point: a few Hangul letters, aiming at a long-term foundation
 
-Kyle self-reports knowing "a few characters" — some letters recognisable, but he
+Kyle self-reports knowing "a few characters" — some letters recognizable, but he
 cannot reliably decode an unfamiliar syllable block. This is the floor: lessons may
 assume Hangul is not visually alien, but must assume no letter is reliably known.
 

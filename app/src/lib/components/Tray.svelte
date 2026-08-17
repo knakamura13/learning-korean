@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { hasHangul } from '$lib/a11y/lang';
 
-	/** A labelled row of selectable chips — one independent composer slot. */
+	/** A labeled row of selectable chips — one independent composer slot. */
 	let {
 		label,
 		items,

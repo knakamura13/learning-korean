@@ -28,7 +28,7 @@ function board(partial: Partial<BoardState> = {}): BoardState {
 }
 
 describe('visible docks', () => {
-	it('shows only the centre until a base is seated', () => {
+	it('shows only the center until a base is seated', () => {
 		expect(visibleDocks(EMPTY_BOARD)).toEqual(['base']);
 	});
 
@@ -257,6 +257,13 @@ describe('spatial dock arrows', () => {
 });
 
 describe('palette and positions', () => {
+	it('exposes the three stamps', () => {
+		expect(PALETTE).toEqual(['ㅣ', 'ㅡ', 'tick']);
+		expect(stampLabel('ㅣ')).toBe('standing stroke');
+		expect(stampLabel('ㅡ')).toBe('earth stroke');
+		expect(stampLabel('tick')).toBe('tick');
+	});
+
 	it('lists stamps a dock will actually accept', () => {
 		expect(compatibleStamps(EMPTY_BOARD, 'base')).toEqual(['ㅣ', 'ㅡ']);
 		expect(compatibleStamps(EMPTY_BOARD, 'right')).toEqual([]);

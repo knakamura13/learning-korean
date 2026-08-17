@@ -12,7 +12,7 @@
 
 	let opened = $state<Set<number>>(new Set());
 	// Options stay locked until every block has been decoded — the point is to
-	// sound the word out, not to recognise it from the answer list.
+	// sound the word out, not to recognize it from the answer list.
 	const allOpen = $derived(opened.size === step.blocks.length);
 	const remaining = $derived(step.blocks.length - opened.size);
 

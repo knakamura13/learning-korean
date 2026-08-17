@@ -17,7 +17,7 @@ from pathlib import Path
 
 SR = 22050
 
-# Compatibility jamo → romanised stem used by the app mapping.
+# Compatibility jamo → romanized stem used by the app mapping.
 CLIPS: list[tuple[str, str]] = [
     ("ㄱ", "g"),
     ("ㄲ", "kk"),

@@ -226,7 +226,7 @@ describe('liaison steps agree with the phonology', () => {
 		}
 	});
 
-	it('never uses 좋아요 or 밭이 as a liaison widget (wrong rule / palatalisation)', () => {
+	it('never uses 좋아요 or 밭이 as a liaison widget (wrong rule / palatalization)', () => {
 		for (const { step } of ALL_STEPS) {
 			if (step.type !== 'liaison') continue;
 			expect(step.word).not.toBe('좋아요');

@@ -131,7 +131,7 @@ if (dockBoard) return !isDisabledControl(target);
 
 **Interfaces:**
 - Consumes: `vowelBoard.ts` exports, `Tray`, `Target`, `onSettle` / `onNudge`
-- Produces: a board with `data-dock-board`, docks as buttons named `data-dock={id}`, palette radiogroup labelled "strokes" with items `ㅣ`, `ㅡ`, `tick`
+- Produces: a board with `data-dock-board`, docks as buttons named `data-dock={id}`, palette radiogroup labeled "strokes" with items `ㅣ`, `ㅡ`, `tick`
 
 UI behavior:
 - Selected palette stamp + click/Enter on a dock calls `applyStamp`.
@@ -141,7 +141,7 @@ UI behavior:
 - Win class on the board when `won`.
 - Validate with Svelte MCP autofixer before finish.
 
-- [ ] **Step 1: Write failing component tests** in `vowelStep.test.ts`: no ticks/side trays; palette labelled "strokes"; click `ㅣ` then base dock settles a target-`ㅣ` card; click tick then right dock builds `ㅏ` and settles; click left dock after that on an `ㅏ` card soft-nudges (does not settle) when target is `ㅏ` and the left tick made `ㅓ` — use a target-`ㅏ` step for the nudge case; two ticks via right then right2 build `ㅑ`.
+- [ ] **Step 1: Write failing component tests** in `vowelStep.test.ts`: no ticks/side trays; palette labeled "strokes"; click `ㅣ` then base dock settles a target-`ㅣ` card; click tick then right dock builds `ㅏ` and settles; click left dock after that on an `ㅏ` card soft-nudges (does not settle) when target is `ㅏ` and the left tick made `ㅓ` — use a target-`ㅏ` step for the nudge case; two ticks via right then right2 build `ㅑ`.
 
 - [ ] **Step 2: Run** `cd app && pnpm test src/lib/components/steps/vowelStep.test.ts` — expect FAIL.
 

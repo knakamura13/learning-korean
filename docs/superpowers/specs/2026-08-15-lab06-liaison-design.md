@@ -50,7 +50,7 @@ Success for this sitting: given a written word whose next block starts with plac
 
 Critical non-goals of this function (lock these in with tests):
 
-- **Must not palatalise.** `applyLiaison('밭이')` is `바티`, not `바치`. Article 17 is a later lab. Lab 06 therefore uses **밭에** (official Article 13 example: [바테]), never 밭이.
+- **Must not palatalize.** `applyLiaison('밭이')` is `바티`, not `바치`. Article 17 is a later lab. Lab 06 therefore uses **밭에** (official Article 13 example: [바테]), never 밭이.
 - **Must not apply Article 15.** When two *content* morphemes meet (밭 아래 → [바다래]), the *representative* ㄷ moves, not written ㅌ. `applyLiaison` always moves the written letter, so it would produce the wrong 바타래. Lab 06 only uses 조사 / 어미 / 접미사. Compounds like 겉옷, 꽃 위, 맛없다 are forbidden in this lab and this deck tier.
 - **Must not do tensification in general.** 학교 → 학꾜 is Lab 07. The sole tensing this function does is Article 14’s moved-ㅅ → ㅆ.
 
@@ -80,7 +80,7 @@ Do **not** use this widget for 좋아요. Stay would “win” because `applyLia
 
 ## Review deck (`kind: 'pron'`, tier `lab06`)
 
-Letter cards cannot hold this skill: 한국어 romanised letter-by-letter is already `hangugeo`, same as the spoken cut without hyphens. The front is the **written word**; the answer is the **spoken syllable cuts**.
+Letter cards cannot hold this skill: 한국어 romanized letter-by-letter is already `hangugeo`, same as the spoken cut without hyphens. The front is the **written word**; the answer is the **spoken syllable cuts**.
 
 Accepted answers, derived, never hand-typed as the source of truth:
 
@@ -98,7 +98,7 @@ Ten cards (one daily new-card cap). Notes are teaching, not confirmation:
 | p-한국어 | 한국어 | 한구거 | han-gu-geo | ㄱ jumped into the placeholder |
 | p-음악 | 음악 | 으막 | eu-mak | ㅁ would rather be an onset |
 | p-옷이 | 옷이 | 오시 | o-si | ㅅ comes back; not [오디] |
-| p-밭에 | 밭에 | 바테 | ba-te | ㅌ comes back; 밭이 palatalises later |
+| p-밭에 | 밭에 | 바테 | ba-te | ㅌ comes back; 밭이 palatalizes later |
 | p-부엌에 | 부엌에 | 부어케 | bu-eo-ke | ㅋ comes back, not ㄱ |
 | p-강이 | 강이 | 강이 | gang-i | ng stays; moving it would silence it |
 | p-읽어요 | 읽어요 | 일거요 | il-geo-yo | cluster splits; Rule B was isolation |
@@ -106,7 +106,7 @@ Ten cards (one daily new-card cap). Notes are teaching, not confirmation:
 | p-없어 | 없어 | 업써 | eop-sseo | ㅅ jumps and tenses (Article 14) |
 | p-한글을 | 한글을 | 한그를 | han-geu-reul | particle 을, real-sentence form |
 
-좋아요 is not a deck card. Romanisation of spoken blocks uses the same conventions as the labs: onset ㄱ/ㄷ/ㅂ/ㄹ = g/d/b/r, batchim ㄱ/ㄷ/ㅂ/ㄹ/ㅇ = k/t/p/l/ng, ㅇ-onset empty.
+좋아요 is not a deck card. Romanization of spoken blocks uses the same conventions as the labs: onset ㄱ/ㄷ/ㅂ/ㄹ = g/d/b/r, batchim ㄱ/ㄷ/ㅂ/ㄹ/ㅇ = k/t/p/l/ng, ㅇ-onset empty.
 
 ## The sixteen cards
 
@@ -140,7 +140,7 @@ Option-length rule still applies (choice: within one **word**; read: character l
 
 **4. 옷이** (clothes + subject) — identity. Teach: [오시], not [오디]. Isolation flattened ㅅ to ㄷ; the spelling kept ㅅ so a vowel could bring it back. Lab 04 paid off.
 
-**5. 밭에** (in the field) — identity, official Article 13 example. Teach: [바테]. ㅌ returns as ㅌ. *Do not use 밭이* — that palatalises to [바치] (Article 17). 에 keeps the card honest. Say that out loud in the teach so the later lab is seeded, not spoiled.
+**5. 밭에** (in the field) — identity, official Article 13 example. Teach: [바테]. ㅌ returns as ㅌ. *Do not use 밭이* — that palatalizes to [바치] (Article 17). 에 keeps the card honest. Say that out loud in the teach so the later lab is seeded, not spoiled.
 
 **6. 부엌에** (in the kitchen) — identity for the k-family. Teach: [부어케]. ㅋ, not ㄱ. Three collapses reversed in one act: ㅅ, ㅌ, ㅋ.
 
@@ -165,7 +165,7 @@ Option-length rule still applies (choice: within one **word**; read: character l
 
 **10. 읽어요** (liaison) — to read, polite. Teach: [일거요]. Lab 05’s Rule B still holds before a consonant or pause.
 
-**11. 앉아** (liaison) — sit. Teach: [안자]. 앉다 threw ㅈ away and tensed 다. Same spelling, different neighbour.
+**11. 앉아** (liaison) — sit. Teach: [안자]. 앉다 threw ㅈ away and tensed 다. Same spelling, different neighbor.
 
 ### Act 5 · two inoculations (2 choice)
 
@@ -198,10 +198,10 @@ Same shape as previous labs: tap each block to check the *written* reading, then
 ## What this lab does not teach
 
 - Tensification (경음화) except Article 14’s moved-ㅅ. Lab 05 already teased 없다 → [업따]; Lab 07 is 학교 → [학꾜].
-- Nasalisation, aspiration, ㅎ-deletion (beyond the inoculation), palatalisation, ㄹ assimilation.
+- Nasalization, aspiration, ㅎ-deletion (beyond the inoculation), palatalization, ㄹ assimilation.
 - Article 15 (content-morpheme liaison with representative sounds).
-- Names part 2, handwriting, romanisation traps.
-- Producing tense consonants. Recognising [업써] is enough.
+- Names part 2, handwriting, romanization traps.
+- Producing tense consonants. Recognizing [업써] is enough.
 
 ## File-level shape (so the plan can be typed against it)
 
@@ -231,7 +231,7 @@ Extend:
 
 ## Self-review
 
-- No TBD. Article 15, palatalisation, ㅎ, and ㅅ-tensing each have an explicit in-or-out.
+- No TBD. Article 15, palatalization, ㅎ, and ㅅ-tensing each have an explicit in-or-out.
 - 16 cards, 10 minutes, 10 deck cards.
 - Widget answers are derived; 좋아요 is not a widget card.
 - 밭에 not 밭이; 앉아 not 앉다; 없어 uses ㅆ.

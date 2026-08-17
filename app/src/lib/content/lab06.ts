@@ -78,7 +78,7 @@ export const lab06: Lab = {
 			word: '밭에',
 			gloss: 'in the field',
 			teach:
-				'<p><span class="hg">[바테]</span>. The <span class="jamo">ㅌ</span> comes back as <span class="jamo">ㅌ</span> — aspiration is allowed again once the letter is on top.</p><p><span class="hg">밭이</span> would go further and palatalise to <span class="hg">[바치]</span>. That is a later rule. <span class="jamo">에</span> keeps this card honest.</p>'
+				'<p><span class="hg">[바테]</span>. The <span class="jamo">ㅌ</span> comes back as <span class="jamo">ㅌ</span> — aspiration is allowed again once the letter is on top.</p><p><span class="hg">밭이</span> would go further and palatalize to <span class="hg">[바치]</span>. That is a later rule. <span class="jamo">에</span> keeps this card honest.</p>'
 		},
 		{
 			type: 'liaison',
@@ -149,7 +149,7 @@ export const lab06: Lab = {
 			word: '앉아',
 			gloss: 'sit (informal)',
 			teach:
-				'<p><span class="hg">[안자]</span>. <span class="jamo">ㄴ</span> stays; <span class="jamo">ㅈ</span> jumps.</p><p>Compare <span class="hg">앉다</span>, where <span class="jamo">ㅈ</span> was thrown away and <span class="hg">다</span> tensed. Same spelling, different neighbour, different spoken form.</p>'
+				'<p><span class="hg">[안자]</span>. <span class="jamo">ㄴ</span> stays; <span class="jamo">ㅈ</span> jumps.</p><p>Compare <span class="hg">앉다</span>, where <span class="jamo">ㅈ</span> was thrown away and <span class="hg">다</span> tensed. Same spelling, different neighbor, different spoken form.</p>'
 		},
 		{
 			type: 'choice',

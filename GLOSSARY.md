@@ -66,7 +66,7 @@ In this workspace "doubled" describes the **writing**; "tense" describes the **s
 ## Sound rules
 
 **Representative sound** (대표음):
-The one sound a batchim is actually pronounced as, after neutralisation. All 27
+The one sound a batchim is actually pronounced as, after neutralization. All 27
 possible finals reduce to seven: ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅇ.
 _Avoid_: default sound, base sound
 
@@ -77,7 +77,7 @@ placeholder ㅇ. 한국어 → [한구거]. Taught in Lab 06; batchim ㅇ does n
 Article 14).
 _Avoid_: linking, carry-over, resyllabification (correct but heavier)
 
-**Neutralisation**:
+**Neutralization**:
 The collapse of distinct written finals onto a single representative sound, making
 words like 낫 / 낮 / 낯 homophones in isolation.
 _Avoid_: reduction, simplification — "simplification" is reserved for clusters

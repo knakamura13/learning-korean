@@ -7,7 +7,7 @@
  * drift out of agreement with the deck that tests it.
  *
  * Sources: National Institute of Korean Language, Standard Pronunciation Rules
- * (표준 발음법, 1988) — Articles 8–12 for finals, neutralisation and clusters.
+ * (표준 발음법, 1988) — Articles 8–12 for finals, neutralization and clusters.
  */
 
 /** Initial-consonant slot (초성), in Unicode order. */
@@ -192,7 +192,7 @@ export function mergedWith(v: string): string[] {
 }
 
 /* ------------------------------------------------------------------ *
- * Finals — neutralisation and clusters
+ * Finals — neutralization and clusters
  * ------------------------------------------------------------------ */
 
 /** The seven sounds every batchim collapses to (대표음). */
@@ -261,7 +261,7 @@ export function clusterRule(final: string): ClusterRule | null {
 /**
  * Move a batchim into the following placeholder ㅇ.
  *
- * Articles 13–14 only. Does not palatalise (밭이 → 바티, not 바치),
+ * Articles 13–14 only. Does not palatalize (밭이 → 바티, not 바치),
  * does not drop ㅎ, and does not apply Article 15 representative-sound
  * liaison across content morphemes. Cluster-final ㅅ tenses to ㅆ
  * when it jumps; other tensification is out of scope.
@@ -408,8 +408,8 @@ export const SOUND_CHANGES: SoundChange[] = [
 		]
 	},
 	{
-		id: 'nasalisation',
-		name: 'Nasalisation',
+		id: 'nasalization',
+		name: 'Nasalization',
 		korean: '비음화',
 		trigger: 'ㄱ/ㄷ/ㅂ before ㄴ/ㅁ become ㅇ/ㄴ/ㅁ',
 		examples: [
@@ -428,8 +428,8 @@ export const SOUND_CHANGES: SoundChange[] = [
 		]
 	},
 	{
-		id: 'lateralisation',
-		name: 'Lateralisation',
+		id: 'lateralization',
+		name: 'Lateralization',
 		korean: '유음화',
 		trigger: 'ㄴ+ㄹ or ㄹ+ㄴ become ㄹㄹ',
 		examples: [
@@ -458,8 +458,8 @@ export const SOUND_CHANGES: SoundChange[] = [
 		]
 	},
 	{
-		id: 'palatalisation',
-		name: 'Palatalisation',
+		id: 'palatalization',
+		name: 'Palatalization',
 		korean: '구개음화',
 		trigger: 'ㄷ/ㅌ followed by 이 become ㅈ/ㅊ',
 		examples: [

@@ -10,7 +10,7 @@ here rather than from parametric guessing.
 - [National Institute of Korean Language — 국립국어원](https://www.korean.go.kr/)
   The official language regulator of South Korea (est. 1991 by Presidential Decree
   13163). Publisher of the 1988 **Standard Pronunciation Rules (표준 발음법)**, which
-  are the source of record for final-consonant neutralisation, cluster
+  are the source of record for final-consonant neutralization, cluster
   simplification, and every sound-change rule. Use for: settling any dispute about
   "correct" pronunciation or orthography.
 
@@ -62,7 +62,7 @@ Not yet raised with Kyle — these are candidates, not commitments.
 - [r/Korean](https://www.reddit.com/r/Korean/)
   The main English-language Korean-learning community. Actively moderated, maintains
   curated beginner resource lists, and has a recurring Q&A thread. Use for:
-  pronunciation sanity checks, "is this romanisation right", and resource vetting.
+  pronunciation sanity checks, "is this romanization right", and resource vetting.
 - [r/hangul](https://www.reddit.com/r/hangul/) — narrower, script-specific.
   Use for: handwriting and stroke-order feedback, which is hard to self-assess.
 - **Highest-value option given the mission:** the Korean speakers already in Kyle's

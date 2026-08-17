@@ -3,7 +3,7 @@
  *
  * Cards are answered by typing Revised Romanization, so no Korean keyboard is
  * needed and grading is objective rather than self-reported. Several letters
- * have more than one defensible romanisation (ㄱ is g or k depending on
+ * have more than one defensible romanization (ㄱ is g or k depending on
  * position); every reasonable spelling is accepted, and only genuinely wrong
  * answers are marked wrong.
  *
@@ -115,20 +115,20 @@ const FINAL_ROMAN: Record<string, string> = {
 
 const FINAL_NOTES: Record<string, string> = {
 	'ㄱ': 'Unreleased k. ㄱ ㄲ ㅋ all land here.',
-	'ㄲ': 'Neutralises to [ㄱ].',
-	'ㅋ': 'Neutralises to [ㄱ] — aspiration is a top-of-block luxury.',
+	'ㄲ': 'Neutralizes to [ㄱ].',
+	'ㅋ': 'Neutralizes to [ㄱ] — aspiration is a top-of-block luxury.',
 	'ㄴ': 'Stays n.',
 	'ㄷ': 'Unreleased t — the largest group.',
-	'ㅅ': 'Neutralises to [ㄷ]. This is why 낫 and 낮 sound identical.',
-	'ㅆ': 'Neutralises to [ㄷ].',
-	'ㅈ': 'Neutralises to [ㄷ].',
-	'ㅊ': 'Neutralises to [ㄷ].',
-	'ㅌ': 'Neutralises to [ㄷ].',
-	'ㅎ': 'Neutralises to [ㄷ] — though it usually aspirates the next sound instead.',
+	'ㅅ': 'Neutralizes to [ㄷ]. This is why 낫 and 낮 sound identical.',
+	'ㅆ': 'Neutralizes to [ㄷ].',
+	'ㅈ': 'Neutralizes to [ㄷ].',
+	'ㅊ': 'Neutralizes to [ㄷ].',
+	'ㅌ': 'Neutralizes to [ㄷ].',
+	'ㅎ': 'Neutralizes to [ㄷ] — though it usually aspirates the next sound instead.',
 	'ㄹ': 'Becomes a clear l at the bottom of a block.',
 	'ㅁ': 'Stays m.',
 	'ㅂ': 'Unreleased p.',
-	'ㅍ': 'Neutralises to [ㅂ].',
+	'ㅍ': 'Neutralizes to [ㅂ].',
 	'ㅇ': 'Here the circle finally makes a sound: ng, as in sing.'
 };
 
@@ -170,7 +170,7 @@ const LIAISON_NOTES: Record<string, string> = {
 	'한국어': 'ㄱ jumps into the placeholder. han-guk-eo is the spelling; [한구거] is the sound.',
 	'음악': 'ㅁ would rather be an onset than an unreleased stop: [으막].',
 	'옷이': 'Isolation flattened ㅅ to ㄷ. A vowel brings ㅅ back: [오시], not [오디].',
-	'밭에': 'ㅌ comes back as ㅌ: [바테]. 밭이 palatalises later — that is not this card.',
+	'밭에': 'ㅌ comes back as ㅌ: [바테]. 밭이 palatalizes later — that is not this card.',
 	'부엌에': 'ㅋ comes back as ㅋ, not ㄱ: [부어케].',
 	'강이': 'ㅇ-batchim is already ng. Moving it would silence it. [강이], not [가이].',
 	'읽어요': 'Cluster splits: ㄹ stays, ㄱ jumps. [일거요]. Rule B was isolation only.',
@@ -223,20 +223,20 @@ export function cardsOfTier(tier: string): Card[] {
 	return DECK.filter((c) => c.tier === tier);
 }
 
-/** Normalise a typed answer for comparison: case, spacing and stray punctuation. */
-export function normalise(input: string): string {
+/** Normalize a typed answer for comparison: case, spacing and stray punctuation. */
+export function normalize(input: string): string {
 	return input.toLowerCase().replace(/\s+/g, '').replace(/[.,!?]/g, '');
 }
 
-export function normalisePron(input: string): string {
+export function normalizePron(input: string): string {
 	return input.normalize('NFC').toLowerCase().replace(/\s+/g, '').replace(/[\[\].,!?]/g, '');
 }
 
 export function checkAnswer(card: Card, typed: string): boolean {
 	if (card.kind === 'pron') {
-		const t = normalisePron(typed);
-		return t.length > 0 && card.answers.some((a) => normalisePron(a) === t);
+		const t = normalizePron(typed);
+		return t.length > 0 && card.answers.some((a) => normalizePron(a) === t);
 	}
-	const t = normalise(typed);
-	return t.length > 0 && card.answers.some((a) => normalise(a) === t);
+	const t = normalize(typed);
+	return t.length > 0 && card.answers.some((a) => normalize(a) === t);
 }

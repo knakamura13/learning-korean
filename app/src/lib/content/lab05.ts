@@ -5,7 +5,7 @@ export const lab05: Lab = {
 	number: 5,
 	title: 'Two Letters, One Slot',
 	standfirst:
-		'Eleven times, Korean crams two consonants into the bottom of a block and pronounces only one of them. This is the last structural piece of the writing system — and the only part you genuinely have to memorise.',
+		'Eleven times, Korean crams two consonants into the bottom of a block and pronounces only one of them. This is the last structural piece of the writing system — and the only part you genuinely have to memorize.',
 	minutes: 10,
 	unlocks: 'lab05',
 	requires: '0004',
@@ -34,7 +34,7 @@ export const lab05: Lab = {
 			pron: '[업따]',
 			gloss: 'to not exist',
 			teach:
-				'<p>The <strong>first</strong> letter survives; <span class="jamo">ㅅ</span> is simply dropped.</p><p>The <span class="hg">따</span> is a separate rule: after an unreleased stop, a plain consonant tenses. You will formalise that later.</p>'
+				'<p>The <strong>first</strong> letter survives; <span class="jamo">ㅅ</span> is simply dropped.</p><p>The <span class="hg">따</span> is a separate rule: after an unreleased stop, a plain consonant tenses. You will formalize that later.</p>'
 		},
 		{
 			type: 'cluster',
@@ -88,7 +88,7 @@ export const lab05: Lab = {
 			],
 			vs: 'vs',
 			options: [
-				'A short list you memorise',
+				'A short list you memorize',
 				'Whether the vowel is bright',
 				'Whether the word is a verb',
 				'Always the louder one wins'

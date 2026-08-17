@@ -17,12 +17,12 @@ This is a real hinge in the curriculum, and it changes what a lesson looks like.
   reason a word Kyle can read correctly still sounds unfamiliar. It also pays off the
   aside in Lab 04 about spelling preserving a word's identity — the "real" ㅌ in 밭
   reappears when a vowel follows.
-- **The composer pattern generalises.** Four labs now use build-it-yourself widgets
+- **The composer pattern generalizes.** Four labs now use build-it-yourself widgets
   (`vowel`, `fusion`, `assemble`+finals, `cluster`). A sound-change lab wants the same
   treatment — likely a widget that shows a written word and lets the learner apply a
   rule to produce the spoken form, rather than a multiple-choice card.
 - **Honest difficulty is landing.** Lab 05 states outright that Rule A vs Rule B is a
-  memorised list with no derivable pattern, and points at the SRS deck as the reason
+  memorized list with no derivable pattern, and points at the SRS deck as the reason
   that is fine. Keep that register — do not manufacture false structure to make
   material feel tidier than it is.
 
