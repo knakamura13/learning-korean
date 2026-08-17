@@ -106,6 +106,12 @@ describe('polish audit regressions', () => {
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
+	it('uses moss and rose under prefers-contrast, not 태극 red', () => {
+		expect(appCss).not.toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#8a2a22/);
+		expect(appCss).toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#1e3d2c/);
+		expect(appCss).toMatch(/--rose:\s*#5c2c33/);
+	});
+
 	it('locks Botanical Korea paper, moss, and rose with WCAG floors', () => {
 		const light = {
 			paper: '#faf5ee',
