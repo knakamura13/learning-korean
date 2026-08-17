@@ -10,6 +10,4 @@ declare global {
 	}
 }
 
-declare module 'virtual:design-system.css';
-
 export {};

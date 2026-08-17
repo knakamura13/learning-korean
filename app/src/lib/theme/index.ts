@@ -1,7 +1,7 @@
 export type ThemePref = 'light' | 'dark' | 'system';
 
 export { activeSystem } from './active';
-export type { DesignSystem, Palette } from './types';
+export type { ContrastOverrides, DesignSystem, Palette, TypeStacks } from './types';
 
 import { activeSystem } from './active';
 

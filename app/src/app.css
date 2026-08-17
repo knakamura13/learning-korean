@@ -1,9 +1,29 @@
 /* ============================================================
    app.css — base styles on top of the active design system.
-   Tokens (--ink, --paper, --accent, type, space, shape) come from
-   virtual:design-system.css (imported in +layout.svelte). Swap systems
-   in src/lib/theme/active.ts.
+   Look tokens (--ink, --paper, --serif, --html-size, --leading, …)
+   are stamped into app.html from src/lib/theme. Swap systems in
+   src/lib/theme/active.ts. Space, motion, measure, and focus-ring
+   are app chrome and stay here.
    ============================================================ */
+
+:root {
+	--s1: 0.25rem;
+	--s2: 0.5rem;
+	--s3: 0.75rem;
+	--s4: 1rem;
+	--s5: 1.5rem;
+	--s6: 2rem;
+	--s7: 3rem;
+	--s8: 4rem;
+	--focus-ring: 0 0 0 3px color-mix(in srgb, var(--blue) 35%, transparent), 0 0 0 1px var(--blue);
+	--ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+	--fast: 130ms;
+	--med: 240ms;
+	--slow: 420ms;
+	--measure: 36rem;
+	--shell: 62rem;
+}
 
 *,
 *::before,
@@ -12,6 +32,7 @@
 }
 
 html {
+	font-size: var(--html-size);
 	color-scheme: light dark;
 	accent-color: var(--accent);
 	scroll-behavior: smooth;
@@ -44,6 +65,7 @@ body {
 	background: var(--paper);
 	color: var(--ink);
 	font-family: var(--sans);
+	line-height: var(--leading);
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 }

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import 'virtual:design-system.css';
 	import '../app.css';
-	import { assets, resolve } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
@@ -22,13 +21,6 @@
 </script>
 
 <svelte:head>
-	<link
-		rel="preload"
-		href="{assets}/fonts/NotoSansKR-subset.woff2"
-		as="font"
-		type="font/woff2"
-		crossorigin="anonymous"
-	/>
 	{#if canonical}
 		<link rel="canonical" href={canonical} />
 		<meta property="og:url" content={canonical} />
