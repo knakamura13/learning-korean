@@ -51,15 +51,19 @@ Visible docks:
 - Base `ㅣ`: `base`, `left`, `right`. If `ticks >= 1` and `side` is `left` or `right`, also `${side}2`.
 - Base `ㅡ`: `base`, `above`, `below`. If `ticks >= 1` and `side` is `above` or `below`, also `${side}2`.
 
-A tick dock that is not visible is not a drop target.
+A tick dock that is not visible is not a drop target, except the outer iotation hole: empty ㅛ/ㅑ/ㅠ/ㅕ boards show both tick holes, and the outer one may seat the first tick (count 1). A second stamp on it adds the glide.
 
-Normalized positions on a unit square, used for layout and snap:
+Normalized positions on a unit square, used for layout and snap. `dockPosition(id, shown)` uses letter geometry when both pair members are in `shown`; a lone tick stays on the midline.
 
 - `base` → (0.50, 0.50)
-- `left` → (0.22, 0.50), `left2` → (0.08, 0.50)
-- `right` → (0.78, 0.50), `right2` → (0.92, 0.50)
-- `above` → (0.50, 0.22), `above2` → (0.50, 0.08)
-- `below` → (0.50, 0.78), `below2` → (0.50, 0.92)
+- Lone `left` → (0.22, 0.50), lone `right` → (0.78, 0.50)
+- Lone `above` → (0.50, 0.22), lone `below` → (0.50, 0.78)
+- Paired ㅛ: `above` → (0.35, 0.22), `above2` → (0.65, 0.22)
+- Paired ㅠ: `below` → (0.35, 0.78), `below2` → (0.65, 0.78)
+- Paired ㅑ: `right` → (0.78, 0.35), `right2` → (0.78, 0.65)
+- Paired ㅕ: `left` → (0.22, 0.35), `left2` → (0.22, 0.65)
+
+Spatial arrows follow those pixels: Right between ㅛ ticks, Down between ㅑ ticks. They do not wrap.
 
 Snap radius is 0.20 of the board's CSS width, and at least 44px. Nearest compatible visible dock inside the radius wins. Otherwise the drop bounces (state unchanged).
 
@@ -71,8 +75,7 @@ Snap radius is 0.20 of the board's CSS width, and at least 44px. Nearest compati
 - `ㅣ` or `ㅡ` on a tick dock: reject.
 - `tick` on `base`, or `tick` with no base: reject.
 - `tick` on a visible primary dock: set `side` to that dock's side and `ticks` to `max(1, current ticks)`. Stamping the opposite primary **moves** existing ticks to that side (count preserved). That is "move the tick and watch."
-- `tick` on a visible secondary dock: set `ticks` to 2 on that side.
-- `tick` on a secondary dock that is not visible: reject.
+- `tick` on a secondary dock whose side is legal for the base: if `ticks` is 0, seat one tick on that side; otherwise set `ticks` to 2. Empty iotated boards show both holes, so the outer hole must be able to take the first tick.
 
 `clearDock(state, dock)`:
 
@@ -159,4 +162,4 @@ Existing `content.test.ts` reachability via `buildVowel` stays. Tray tests for F
 
 - Docks that look like the old labeled slots. Keep chrome quiet: magnets, not "LEFT" boxes.
 - Snap too tight on touch. Floor the radius at 44px.
-- Two-tick vs one-tick confusion. The secondary dock only appears after the first tick, so iotation is "add another tick on that side," not a second precision target from an empty board.
+- Two-tick vs one-tick confusion. Empty iotated boards show both holes in letter geometry; the first tick on either hole is still one tick, and the second hole is the glide.

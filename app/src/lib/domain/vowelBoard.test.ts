@@ -6,12 +6,17 @@ import {
 	applyLift,
 	applyStamp,
 	clearDock,
+	compatibleStamps,
+	dockInDirection,
 	dockPosition,
 	liftDock,
 	occupant,
 	snapDock,
 	snapRadiusPx,
 	stampLabel,
+	placeholderDocks,
+	recipeDocks,
+	towardTarget,
 	visibleDocks,
 	vowelOf,
 	type BoardState,
@@ -44,6 +49,35 @@ describe('visible docks', () => {
 	});
 });
 
+describe('target placeholders', () => {
+	it('lists every slot the target letter still needs, and none once it is complete', () => {
+		expect(recipeDocks('ㅏ')).toEqual(['base', 'right']);
+		expect(recipeDocks('ㅑ')).toEqual(['base', 'right', 'right2']);
+		expect(recipeDocks('ㅣ')).toEqual(['base']);
+		expect(placeholderDocks(EMPTY_BOARD, 'ㅏ')).toEqual(['base', 'right']);
+		expect(placeholderDocks(board({ base: 'ㅣ' }), 'ㅏ')).toEqual(['right']);
+		expect(placeholderDocks(board({ base: 'ㅣ', ticks: 1, side: 'right' }), 'ㅏ')).toEqual([]);
+		expect(placeholderDocks(board({ base: 'ㅣ', ticks: 1, side: 'right' }), 'ㅑ')).toEqual([
+			'right2'
+		]);
+		expect(placeholderDocks(board({ base: 'ㅣ' }), 'ㅣ')).toEqual([]);
+	});
+
+	it('does not leave an opposite-side or extra-tick hole on a finished letter', () => {
+		const a = board({ base: 'ㅣ', ticks: 1, side: 'right' });
+		expect(placeholderDocks(a, 'ㅏ')).not.toContain('left');
+		expect(placeholderDocks(a, 'ㅏ')).not.toContain('right2');
+	});
+
+	it('treats a correct unfinished recipe as progress, not a miss', () => {
+		expect(towardTarget(board({ base: 'ㅣ' }), 'ㅏ')).toBe(true);
+		expect(towardTarget(board({ base: 'ㅣ', ticks: 1, side: 'right' }), 'ㅑ')).toBe(true);
+		expect(towardTarget(board({ base: 'ㅡ' }), 'ㅏ')).toBe(false);
+		expect(towardTarget(EMPTY_BOARD, 'ㅏ')).toBe(false);
+		expect(towardTarget(board({ base: 'ㅣ', ticks: 2, side: 'right' }), 'ㅏ')).toBe(false);
+	});
+});
+
 describe('stamping', () => {
 	it('builds every simple vowel from stamps', () => {
 		const built = new Set<string>();
@@ -70,6 +104,15 @@ describe('stamping', () => {
 		expect(applyStamp(EMPTY_BOARD, 'base', 'tick')).toBeNull();
 		const withI = applyStamp(EMPTY_BOARD, 'base', 'ㅣ')!;
 		expect(applyStamp(withI, 'right', 'ㅣ')).toBeNull();
+	});
+
+	it('lets the first ㅛ tick land on either hole without jumping to the glide', () => {
+		const withEu = applyStamp(EMPTY_BOARD, 'base', 'ㅡ')!;
+		const fromOuter = applyStamp(withEu, 'above2', 'tick');
+		expect(fromOuter).not.toBeNull();
+		expect(fromOuter?.ticks).toBe(1);
+		expect(vowelOf(fromOuter!)).toBe('ㅗ');
+		expect(vowelOf(applyStamp(fromOuter!, 'above2', 'tick')!)).toBe('ㅛ');
 	});
 
 	it('moves existing ticks when the opposite primary is stamped', () => {
@@ -183,6 +226,14 @@ describe('snap', () => {
 		const base = dockPosition('base');
 		expect(snapDock(withI, { stamp: 'tick', count: 1 }, base.x * 200, base.y * 200, 200)).toBeNull();
 	});
+
+	it('snaps a ㅛ tick to the paired hole it was dropped on', () => {
+		const withEu = applyStamp(EMPTY_BOARD, 'base', 'ㅡ')!;
+		const shown: DockId[] = ['base', 'above', 'above2'];
+		expect(
+			snapDock(withEu, { stamp: 'tick', count: 1 }, 0.65 * 200, 0.22 * 200, 200, shown)
+		).toBe('above2');
+	});
 });
 
 describe('vowelOf', () => {
@@ -194,12 +245,61 @@ describe('vowelOf', () => {
 	});
 });
 
+describe('spatial dock arrows', () => {
+	it('sends ArrowRight from the standing base to the right tick, not the left', () => {
+		const withI = board({ base: 'ㅣ' });
+		expect(dockInDirection(withI, 'base', 'right')).toBe('right');
+		expect(dockInDirection(withI, 'base', 'left')).toBe('left');
+		expect(dockInDirection(withI, 'right', 'left')).toBe('base');
+		expect(dockInDirection(withI, 'left', 'right')).toBe('base');
+	});
+
+	it('does not wrap around the board', () => {
+		const withI = board({ base: 'ㅣ' });
+		expect(dockInDirection(withI, 'base', 'up')).toBe('base');
+		expect(dockInDirection(withI, 'left', 'left')).toBe('left');
+		expect(dockInDirection(withI, 'right', 'right')).toBe('right');
+		const iotated = board({ base: 'ㅣ', ticks: 1, side: 'right' });
+		expect(dockInDirection(iotated, 'right', 'right')).toBe('right');
+		expect(dockInDirection(iotated, 'right', 'down')).toBe('right2');
+		expect(dockInDirection(iotated, 'right2', 'down')).toBe('right2');
+	});
+
+	it('sends ArrowUp from the earth base to the above tick', () => {
+		const withEu = board({ base: 'ㅡ' });
+		expect(dockInDirection(withEu, 'base', 'up')).toBe('above');
+		expect(dockInDirection(withEu, 'base', 'down')).toBe('below');
+		expect(dockInDirection(withEu, 'base', 'left')).toBe('base');
+		expect(dockInDirection(withEu, 'above', 'down')).toBe('base');
+	});
+
+	it('moves sideways between ㅛ ticks and down between ㅑ ticks', () => {
+		const yo: DockId[] = ['base', 'above', 'above2'];
+		expect(dockInDirection(EMPTY_BOARD, 'above', 'right', yo)).toBe('above2');
+		expect(dockInDirection(EMPTY_BOARD, 'above2', 'left', yo)).toBe('above');
+		expect(dockInDirection(EMPTY_BOARD, 'above', 'up', yo)).toBe('above');
+		const ya: DockId[] = ['base', 'right', 'right2'];
+		expect(dockInDirection(EMPTY_BOARD, 'right', 'down', ya)).toBe('right2');
+		expect(dockInDirection(EMPTY_BOARD, 'right2', 'up', ya)).toBe('right');
+		expect(dockInDirection(EMPTY_BOARD, 'right', 'right', ya)).toBe('right');
+	});
+});
+
 describe('palette and positions', () => {
 	it('exposes the three stamps', () => {
 		expect(PALETTE).toEqual(['ㅣ', 'ㅡ', 'tick']);
 		expect(stampLabel('ㅣ')).toBe('standing stroke');
 		expect(stampLabel('ㅡ')).toBe('earth stroke');
 		expect(stampLabel('tick')).toBe('tick');
+	});
+
+	it('lists stamps a dock will actually accept', () => {
+		expect(compatibleStamps(EMPTY_BOARD, 'base')).toEqual(['ㅣ', 'ㅡ']);
+		expect(compatibleStamps(EMPTY_BOARD, 'right')).toEqual([]);
+		const withI = applyStamp(EMPTY_BOARD, 'base', 'ㅣ')!;
+		expect(compatibleStamps(withI, 'right')).toEqual(['tick']);
+		expect(compatibleStamps(withI, 'base')).toEqual(['ㅣ', 'ㅡ']);
+		expect(compatibleStamps(withI, 'above')).toEqual([]);
 	});
 
 	it('places every dock on the unit square', () => {
@@ -221,5 +321,45 @@ describe('palette and positions', () => {
 			expect(y).toBeGreaterThanOrEqual(0);
 			expect(y).toBeLessThanOrEqual(1);
 		}
+	});
+
+	it('keeps a lone ㅗ tick on the vertical midline', () => {
+		expect(dockPosition('above', ['base', 'above'])).toEqual({ x: 0.5, y: 0.22 });
+	});
+
+	it('sits ㅛ ticks side by side above the earth stroke', () => {
+		const shown: DockId[] = ['base', 'above', 'above2'];
+		const above = dockPosition('above', shown);
+		const above2 = dockPosition('above2', shown);
+		expect(above.y).toBe(above2.y);
+		expect(above.x).toBeLessThan(above2.x);
+		expect(above.y).toBeLessThan(dockPosition('base', shown).y);
+	});
+
+	it('stacks ㅑ ticks on the right of the standing stroke', () => {
+		const shown: DockId[] = ['base', 'right', 'right2'];
+		const right = dockPosition('right', shown);
+		const right2 = dockPosition('right2', shown);
+		expect(right.x).toBe(right2.x);
+		expect(right.y).toBeLessThan(right2.y);
+		expect(right.x).toBeGreaterThan(dockPosition('base', shown).x);
+	});
+
+	it('sits ㅠ ticks side by side below the earth stroke', () => {
+		const shown: DockId[] = ['base', 'below', 'below2'];
+		const below = dockPosition('below', shown);
+		const below2 = dockPosition('below2', shown);
+		expect(below.y).toBe(below2.y);
+		expect(below.x).toBeLessThan(below2.x);
+		expect(below.y).toBeGreaterThan(dockPosition('base', shown).y);
+	});
+
+	it('stacks ㅕ ticks on the left of the standing stroke', () => {
+		const shown: DockId[] = ['base', 'left', 'left2'];
+		const left = dockPosition('left', shown);
+		const left2 = dockPosition('left2', shown);
+		expect(left.x).toBe(left2.x);
+		expect(left.y).toBeLessThan(left2.y);
+		expect(left.x).toBeLessThan(dockPosition('base', shown).x);
 	});
 });

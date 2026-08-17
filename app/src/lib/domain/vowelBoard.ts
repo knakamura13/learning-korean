@@ -10,6 +10,7 @@ import { buildVowel, sidesFor, type TickSide } from './hangul';
 export type Stamp = 'ㅣ' | 'ㅡ' | 'tick';
 export type BaseStroke = 'ㅣ' | 'ㅡ';
 export type DockId = 'base' | TickSide | `${TickSide}2`;
+export type DockDir = 'left' | 'right' | 'up' | 'down';
 
 export interface BoardState {
 	base: BaseStroke | null;
@@ -30,26 +31,34 @@ export const PALETTE: readonly Stamp[] = ['ㅣ', 'ㅡ', 'tick'];
 export const SNAP_RADIUS_RATIO = 0.2;
 export const SNAP_RADIUS_MIN_PX = 44;
 
-export function dockPosition(id: DockId): { x: number; y: number } {
+function pairShown(shown: readonly DockId[], a: DockId, b: DockId): boolean {
+	return shown.includes(a) && shown.includes(b);
+}
+
+/**
+ * Unit-square centers. A lone tick stays on the letter's midline; a pair
+ * matches Hangul: ㅛ/ㅠ sit side by side, ㅑ/ㅕ stack.
+ */
+export function dockPosition(id: DockId, shown: readonly DockId[] = []): { x: number; y: number } {
 	switch (id) {
 		case 'base':
 			return { x: 0.5, y: 0.5 };
 		case 'left':
-			return { x: 0.22, y: 0.5 };
+			return pairShown(shown, 'left', 'left2') ? { x: 0.22, y: 0.35 } : { x: 0.22, y: 0.5 };
 		case 'left2':
-			return { x: 0.08, y: 0.5 };
+			return pairShown(shown, 'left', 'left2') ? { x: 0.22, y: 0.65 } : { x: 0.08, y: 0.5 };
 		case 'right':
-			return { x: 0.78, y: 0.5 };
+			return pairShown(shown, 'right', 'right2') ? { x: 0.78, y: 0.35 } : { x: 0.78, y: 0.5 };
 		case 'right2':
-			return { x: 0.92, y: 0.5 };
+			return pairShown(shown, 'right', 'right2') ? { x: 0.78, y: 0.65 } : { x: 0.92, y: 0.5 };
 		case 'above':
-			return { x: 0.5, y: 0.22 };
+			return pairShown(shown, 'above', 'above2') ? { x: 0.35, y: 0.22 } : { x: 0.5, y: 0.22 };
 		case 'above2':
-			return { x: 0.5, y: 0.08 };
+			return pairShown(shown, 'above', 'above2') ? { x: 0.65, y: 0.22 } : { x: 0.5, y: 0.08 };
 		case 'below':
-			return { x: 0.5, y: 0.78 };
+			return pairShown(shown, 'below', 'below2') ? { x: 0.35, y: 0.78 } : { x: 0.5, y: 0.78 };
 		case 'below2':
-			return { x: 0.5, y: 0.92 };
+			return pairShown(shown, 'below', 'below2') ? { x: 0.65, y: 0.78 } : { x: 0.5, y: 0.92 };
 		default: {
 			const _exhaustive: never = id;
 			return _exhaustive;
@@ -84,6 +93,154 @@ export function isSecondaryDock(id: DockId): boolean {
 	return id !== 'base' && id.endsWith('2');
 }
 
+function neighborDock(from: DockId, direction: DockDir): DockId | null {
+	switch (from) {
+		case 'base':
+			switch (direction) {
+				case 'left':
+					return 'left';
+				case 'right':
+					return 'right';
+				case 'up':
+					return 'above';
+				case 'down':
+					return 'below';
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'left':
+			switch (direction) {
+				case 'right':
+					return 'base';
+				case 'down':
+					return 'left2';
+				case 'left':
+				case 'up':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'left2':
+			switch (direction) {
+				case 'right':
+					return 'base';
+				case 'up':
+					return 'left';
+				case 'left':
+				case 'down':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'right':
+			switch (direction) {
+				case 'left':
+					return 'base';
+				case 'down':
+					return 'right2';
+				case 'right':
+				case 'up':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'right2':
+			switch (direction) {
+				case 'left':
+					return 'base';
+				case 'up':
+					return 'right';
+				case 'right':
+				case 'down':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'above':
+			switch (direction) {
+				case 'down':
+					return 'base';
+				case 'right':
+					return 'above2';
+				case 'up':
+				case 'left':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'above2':
+			switch (direction) {
+				case 'down':
+					return 'base';
+				case 'left':
+					return 'above';
+				case 'up':
+				case 'right':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'below':
+			switch (direction) {
+				case 'up':
+					return 'base';
+				case 'right':
+					return 'below2';
+				case 'down':
+				case 'left':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'below2':
+			switch (direction) {
+				case 'up':
+					return 'base';
+				case 'left':
+					return 'below';
+				case 'down':
+				case 'right':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		default: {
+			const _exhaustive: never = from;
+			return _exhaustive;
+		}
+	}
+}
+
+/** Next visible dock in a compass direction. Does not wrap. */
+export function dockInDirection(
+	state: BoardState,
+	from: DockId,
+	direction: DockDir,
+	docks: readonly DockId[] = visibleDocks(state)
+): DockId {
+	const next = neighborDock(from, direction);
+	if (!next) return from;
+	return docks.includes(next) ? next : from;
+}
+
 export function visibleDocks(state: BoardState): DockId[] {
 	if (!state.base) return ['base'];
 	const primaries = sidesFor(state.base);
@@ -92,6 +249,67 @@ export function visibleDocks(state: BoardState): DockId[] {
 		docks.push(`${state.side}2`);
 	}
 	return docks;
+}
+
+/** Invert a simple vowel into the stamps that build it. */
+export function recipeOf(vowel: string): BoardState | null {
+	const bases: BaseStroke[] = ['ㅣ', 'ㅡ'];
+	for (const base of bases) {
+		if (vowel === base) return { base, ticks: 0, side: null };
+		for (const side of sidesFor(base)) {
+			if (buildVowel(base, side, 1) === vowel) return { base, ticks: 1, side };
+			if (buildVowel(base, side, 2) === vowel) return { base, ticks: 2, side };
+		}
+	}
+	return null;
+}
+
+/** Docks required to construct `target`, in seating order. */
+export function recipeDocks(vowel: string): DockId[] {
+	const recipe = recipeOf(vowel);
+	if (!recipe?.base) return ['base'];
+	const docks: DockId[] = ['base'];
+	if (recipe.ticks >= 1 && recipe.side) docks.push(recipe.side);
+	if (recipe.ticks === 2 && recipe.side) docks.push(`${recipe.side}2`);
+	return docks;
+}
+
+/**
+ * Empty recipe docks still needed for `target`. Complete letters have none:
+ * remaining placeholders are n − m, where n is recipe length and m is how
+ * many of those docks already hold their piece.
+ */
+export function placeholderDocks(state: BoardState, target: string): DockId[] {
+	if (vowelOf(state) === target) return [];
+	return recipeDocks(target).filter((id) => occupant(state, id) === null);
+}
+
+/** Interactive docks: remaining placeholders plus occupied magnets. None on a win. */
+export function boardDocks(state: BoardState, target: string): DockId[] {
+	if (vowelOf(state) === target) return [];
+	const shown = new Set<DockId>(placeholderDocks(state, target));
+	for (const id of visibleDocks(state)) {
+		if (occupant(state, id)) shown.add(id);
+	}
+	const ordered: DockId[] = [];
+	for (const id of recipeDocks(target)) {
+		if (shown.has(id)) ordered.push(id);
+	}
+	for (const id of visibleDocks(state)) {
+		if (shown.has(id) && !ordered.includes(id)) ordered.push(id);
+	}
+	return ordered;
+}
+
+/** True when the board is a correct prefix of `target` (incomplete, not wrong). */
+export function towardTarget(state: BoardState, target: string): boolean {
+	const recipe = recipeOf(target);
+	if (!recipe?.base || !state.base) return false;
+	if (state.base !== recipe.base) return false;
+	if (recipe.ticks === 0) return state.ticks === 0;
+	if (state.ticks === 0) return true;
+	if (state.side !== recipe.side) return false;
+	return state.ticks <= recipe.ticks;
 }
 
 export function occupant(state: BoardState, dock: DockId): Stamp | null {
@@ -108,8 +326,13 @@ export function applyLift(state: BoardState, dock: DockId, lift: Lift): BoardSta
 			if (!state.base || dock === 'base') return null;
 			const side = sideOfDock(dock);
 			if (!side || !sidesFor(state.base).includes(side)) return null;
+			if (isSecondaryDock(dock)) {
+				// Empty ㅛ/ㅑ boards show both holes. The outer one still seats
+				// the first tick; a second stamp on it adds the glide.
+				if (state.ticks === 0) return { ...state, side, ticks: 1 };
+				return { ...state, side, ticks: 2 };
+			}
 			if (!visibleDocks(state).includes(dock)) return null;
-			if (isSecondaryDock(dock)) return { ...state, side, ticks: 2 };
 			const ticks = Math.max(lift.count, state.ticks, 1) as 1 | 2;
 			return { ...state, side, ticks };
 		}
@@ -128,6 +351,11 @@ export function applyLift(state: BoardState, dock: DockId, lift: Lift): BoardSta
 
 export function applyStamp(state: BoardState, dock: DockId, stamp: Stamp): BoardState | null {
 	return applyLift(state, dock, { stamp, count: 1 });
+}
+
+/** Stamps that would seat on this dock, in palette order. */
+export function compatibleStamps(state: BoardState, dock: DockId): Stamp[] {
+	return PALETTE.filter((stamp) => applyStamp(state, dock, stamp) !== null);
 }
 
 export function clearDock(state: BoardState, dock: DockId): BoardState {
@@ -169,14 +397,15 @@ export function snapDock(
 	lift: Lift,
 	x: number,
 	y: number,
-	boardSizePx: number
+	boardSizePx: number,
+	docks: readonly DockId[] = visibleDocks(state)
 ): DockId | null {
 	const radius = snapRadiusPx(boardSizePx);
 	let best: DockId | null = null;
 	let bestDist = Infinity;
-	for (const id of visibleDocks(state)) {
+	for (const id of docks) {
 		if (applyLift(state, id, lift) === null) continue;
-		const pos = dockPosition(id);
+		const pos = dockPosition(id, docks);
 		const dx = pos.x * boardSizePx - x;
 		const dy = pos.y * boardSizePx - y;
 		const dist = Math.hypot(dx, dy);

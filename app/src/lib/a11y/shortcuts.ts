@@ -46,6 +46,15 @@ export function shouldIgnoreArrowNav(target: EventTarget | null): boolean {
 	return !field.disabled && !field.readOnly;
 }
 
+/** Enter/Space after a settle advances — unless this key already did the settle. */
+export function shouldAdvanceOnEnter(e: KeyboardEvent, settled: boolean): boolean {
+	if (!settled) return false;
+	if (e.defaultPrevented) return false;
+	if (e.metaKey || e.ctrlKey || e.altKey) return false;
+	if (e.key !== 'Enter' && e.key !== ' ') return false;
+	return !shouldIgnoreShortcut(e.target);
+}
+
 export type FocusWhenParam = boolean | { active: boolean; preventScroll?: boolean };
 
 /** Focus `node` when `active` is true, including on mount. */
