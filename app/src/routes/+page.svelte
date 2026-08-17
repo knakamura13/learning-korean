@@ -53,6 +53,7 @@
 
 <div class="shell">
 	<header class="hero">
+		<p class="flourish" aria-hidden="true">* * *</p>
 		<p class="eyebrow" lang="ko">한글</p>
 		<h1>Read Korean from first principles</h1>
 		<p class="lede">
@@ -203,9 +204,22 @@
 </div>
 
 <style>
-	.hero { margin-bottom: var(--s5); max-width: var(--measure); }
+	.hero {
+		text-align: center;
+		margin: 0 auto var(--s6);
+		max-width: 40rem;
+	}
+	.hero .flourish { margin-bottom: var(--s4); }
 	h1 { margin: var(--s2) 0 var(--s3); }
-	.lede { color: var(--ink-soft); font-size: 1rem; line-height: 1.65; }
+	.lede {
+		color: var(--ink-soft);
+		font-family: var(--serif);
+		font-style: italic;
+		font-size: 1.05rem;
+		letter-spacing: 0.03em;
+		line-height: 1.7;
+		margin: 0 auto;
+	}
 
 	.continue {
 		display: flex;
@@ -229,10 +243,11 @@
 	.continue .eyebrow { margin-bottom: var(--s1); }
 	.continue-title {
 		display: block;
-		font-family: var(--serif);
-		font-size: 1.25rem;
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 1.3rem;
 		font-weight: 400;
-		letter-spacing: -0.015em;
+		letter-spacing: 0.05em;
 		line-height: 1.25;
 		margin-bottom: var(--s1);
 	}
@@ -306,17 +321,7 @@
 	}
 	a.stat.hot:not(.quiet) { border-color: var(--accent); background: var(--accent-soft); }
 	a.stat.hot:not(.quiet) b { color: var(--accent); }
-	a.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
-
-	.sec {
-		font-family: var(--sans);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--ink-faint);
-		margin: 0 0 var(--s3);
-	}
+	a.stat:hover { transform: translateY(-2px); border-color: var(--gold); }
 
 	section { margin-bottom: var(--s7); }
 
@@ -332,12 +337,14 @@
 		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
 			border-color var(--fast) var(--ease);
 	}
-	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--gold); }
 
 	.num {
-		font-family: var(--mono);
-		font-size: 1.5rem;
-		color: var(--ink-faint);
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 1.85rem;
+		letter-spacing: 0.08em;
+		color: var(--gold);
 		flex: 0 0 auto;
 		line-height: 1.2;
 	}
@@ -345,7 +352,13 @@
 	.lab.resume { border-color: var(--accent); }
 	.lab.resume .num { color: var(--accent); }
 
-	.lab h3 { font-size: 1.15rem; margin-bottom: var(--s1); }
+	.lab h3 {
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 1.25rem;
+		letter-spacing: 0.05em;
+		margin-bottom: var(--s1);
+	}
 	.lab p { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.55; }
 
 	.meta {
@@ -366,10 +379,13 @@
 	.chip-status {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.12rem 0.5rem;
-		border-radius: var(--r-pill);
-		font-size: 0.66rem;
-		font-weight: 600;
+		padding: 0.2rem 0.65rem;
+		border-radius: var(--r-sm);
+		font-family: var(--display);
+		font-size: 0.75rem;
+		font-weight: 400;
+		font-style: italic;
+		letter-spacing: 0.08em;
 		line-height: 1.2;
 		border: 1px solid transparent;
 	}
@@ -401,7 +417,7 @@
 		border-bottom: 1px solid var(--rule-strong);
 		line-height: 1.2;
 	}
-	.peek:hover { color: var(--accent); border-bottom-color: var(--accent); }
+	.peek:hover { color: var(--gold); border-bottom-color: var(--gold); }
 
 	.tiers { padding: var(--s4); }
 

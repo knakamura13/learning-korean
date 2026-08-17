@@ -51,7 +51,7 @@ function sharedDeclarations(system: DesignSystem): string {
 		`	--s8: 4rem;`,
 		`	--s9: 6rem;`,
 		shapeDeclarations(system),
-		`	--focus-ring: 0 0 0 3px color-mix(in srgb, var(--blue) 35%, transparent), 0 0 0 1px var(--blue);`,
+		`	--focus-ring: 0 0 0 3px color-mix(in srgb, var(--gold) 35%, transparent), 0 0 0 1px var(--gold);`,
 		`	--ease: cubic-bezier(0.22, 1, 0.36, 1);`,
 		`	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);`,
 		`	--fast: 130ms;`,
@@ -124,7 +124,6 @@ html {
 body {
 	line-height: var(--leading);
 	background-color: var(--paper);
-	background-image: var(--atmosphere);
 }
 `;
 }

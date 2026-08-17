@@ -11,13 +11,16 @@ const light: Palette = {
 	paper: '#FAF6EE',
 	paperSunk: '#F5EFE3',
 	paperRaised: '#FFF9F0',
-	rule: '#E3D9C6',
-	ruleStrong: '#C4B394',
+	rule: '#EDE5D5',
+	ruleStrong: '#E3D9C6',
 	accent: '#5C3D2E',
 	accentInk: '#FAF6EE',
 	accentSoft: '#EDE5D5',
-	blue: '#425A34',
-	blueSoft: '#E4EBE3',
+	gold: '#D4A843',
+	goldSoft: 'rgba(212, 168, 67, 0.12)',
+	cardSheen: 'linear-gradient(90deg, #d4a843, #c2704e, #a88b3d)',
+	blue: '#5C3D2E',
+	blueSoft: '#EDE5D5',
 	good: '#425A34',
 	goodSoft: '#E4EBE3',
 	bad: '#8A3A38',
@@ -32,8 +35,9 @@ const light: Palette = {
 	sans: "'Lora', Georgia, 'Palatino Linotype', Palatino, serif",
 	mono: MONO,
 	hangul: HANGUL,
-	atmosphere: 'radial-gradient(ellipse at 30% 20%, rgba(255, 240, 200, 0.28) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(245, 230, 200, 0.16) 0%, transparent 50%)',
-	textureOpacity: '0.03'
+	atmosphere:
+		'radial-gradient(ellipse at 30% 20%, rgba(255, 240, 200, 0.25) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(245, 230, 200, 0.15) 0%, transparent 50%)',
+	textureOpacity: '0.025'
 };
 
 const dark: Palette = {
@@ -45,11 +49,14 @@ const dark: Palette = {
 	paperRaised: '#3D2914',
 	rule: '#5C4630',
 	ruleStrong: '#9A7B4F',
-	accent: '#DEAD40',
-	accentInk: '#1C1612',
-	accentSoft: '#3D2914',
-	blue: '#84B49E',
-	blueSoft: '#1A2F26',
+	accent: '#722F37',
+	accentInk: '#F4F1E8',
+	accentSoft: '#4A1C23',
+	gold: '#B8860B',
+	goldSoft: 'rgba(184, 134, 11, 0.15)',
+	cardSheen: 'linear-gradient(90deg, #4a1c23, #722f37, #b8860b)',
+	blue: '#F4F1E8',
+	blueSoft: '#3D2914',
 	good: '#84B49E',
 	goodSoft: '#1A2F26',
 	bad: '#F09080',
@@ -64,7 +71,7 @@ const dark: Palette = {
 	sans: "'Source Serif 4', Georgia, 'Palatino Linotype', Palatino, serif",
 	mono: MONO,
 	hangul: HANGUL,
-	atmosphere: 'radial-gradient(ellipse at center, transparent 0%, rgba(26, 16, 10, 0.45) 100%)',
+	atmosphere: 'radial-gradient(ellipse at center, transparent 0%, rgba(26, 16, 10, 0.4) 100%)',
 	textureOpacity: '0.04'
 };
 
@@ -72,7 +79,8 @@ const dark: Palette = {
  * Light Academia (light) + Dark Academia (dark).
  * Palettes follow https://ggprompts.com/styles/light-academia.html
  * and https://ggprompts.com/styles/dark-academia.html, with caption-size
- * inks lifted to 7:1 against paper.
+ * inks lifted to 7:1 against paper. Honey/gold is ornamental; walnut and
+ * burgundy carry buttons and body links so small type stays readable.
  */
 export const academia: DesignSystem = {
 	id: 'academia',
@@ -80,10 +88,10 @@ export const academia: DesignSystem = {
 	htmlSize: '106.25%',
 	leading: '1.75',
 	shape: {
-		rSm: '2px',
-		rMd: '3px',
-		rLg: '4px',
-		rPill: '999px'
+		rSm: '0px',
+		rMd: '0px',
+		rLg: '0px',
+		rPill: '0px'
 	},
 	fonts: [
 		{ family: 'Cormorant Garamond', file: 'CormorantGaramond-Regular.woff2', weight: '400' },
@@ -125,6 +133,6 @@ export const academia: DesignSystem = {
 		inkFaint: '#E8E4D9',
 		rule: '#9A7B4F',
 		ruleStrong: '#DEAD40',
-		accent: '#E8C56B'
+		accent: '#8A3A44'
 	}
 };

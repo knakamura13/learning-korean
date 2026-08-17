@@ -92,6 +92,18 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
+	it('applies Academia chrome: gold ornaments, square cards, no frosted header', () => {
+		expect(systemCss).toMatch(/--gold:/);
+		expect(systemCss).toMatch(/--card-sheen:/);
+		expect(appCss).toMatch(/\.card::before/);
+		expect(appCss).toMatch(/var\(--card-sheen\)/);
+		expect(appCss).toMatch(/--texture-opacity/);
+		expect(layout).not.toMatch(/backdrop-filter/);
+		expect(home).toMatch(/\* \* \*/);
+		expect(styleBlock(home)).toMatch(/\.num\s*\{[^}]*var\(--gold\)/s);
+		expect(styleBlock(layout)).toMatch(/border-bottom-color:\s*var\(--gold\)/);
+	});
+
 	it('makes the Baseline Widely Available browser target explicit', () => {
 		expect(viteConfig).toMatch(/build:\s*\{[\s\S]*?target:\s*'baseline-widely-available'/);
 	});

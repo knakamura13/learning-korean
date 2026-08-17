@@ -536,6 +536,7 @@
 		margin: 0;
 		font-size: 1.15rem;
 		line-height: 1.25;
+		letter-spacing: 0.04em;
 	}
 
 	.standfirst {

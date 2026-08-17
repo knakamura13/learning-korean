@@ -120,6 +120,7 @@
 
 <div class="shell narrow">
 	<header class="head">
+		<p class="flourish" aria-hidden="true">* * *</p>
 		<p class="eyebrow">Spaced repetition</p>
 		<h1>Daily Review</h1>
 		<p class="standfirst">
@@ -303,7 +304,7 @@
 
 <style>
 	.narrow { max-width: 40rem; }
-	.head { margin-bottom: var(--s5); }
+	.head { margin-bottom: var(--s5); text-align: center; }
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.standfirst {
 		font-family: var(--serif);
@@ -396,14 +397,15 @@
 
 	.tag {
 		text-align: center;
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.13em;
-		text-transform: uppercase;
-		color: var(--accent);
+		font-family: var(--display);
+		font-size: 0.8rem;
+		font-style: italic;
+		font-weight: 400;
+		letter-spacing: 0.12em;
+		color: var(--gold);
 		margin: 0;
 	}
-	.tag.isnew { color: var(--blue); }
+	.tag.isnew { color: var(--accent); }
 
 	.glyph-row {
 		display: flex;

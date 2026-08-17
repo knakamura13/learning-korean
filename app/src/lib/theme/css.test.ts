@@ -26,6 +26,12 @@ describe('designSystemCss', () => {
 	it('exposes a display face token for buttons and eyebrows', () => {
 		expect(css).toMatch(/--display:/);
 	});
+
+	it('exposes gold ornament tokens and a gold focus ring', () => {
+		expect(css).toContain(`--gold: ${activeSystem.light.gold}`);
+		expect(css).toContain(`--card-sheen: ${activeSystem.light.cardSheen}`);
+		expect(css).toMatch(/--focus-ring:.*var\(--gold\)/);
+	});
 });
 
 describe('applyPaperPlaceholders', () => {

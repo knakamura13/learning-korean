@@ -16,6 +16,11 @@ export interface Palette {
 	accent: string;
 	accentInk: string;
 	accentSoft: string;
+	/** Honey / antique-gold ornaments (numerals, underlines, flourishes). Not caption text. */
+	gold: string;
+	goldSoft: string;
+	/** Card hover sheen, as a CSS `background-image` value. */
+	cardSheen: string;
 	blue: string;
 	blueSoft: string;
 	good: string;
@@ -80,6 +85,9 @@ export const PALETTE_CSS_VARS = {
 	accent: '--accent',
 	accentInk: '--accent-ink',
 	accentSoft: '--accent-soft',
+	gold: '--gold',
+	goldSoft: '--gold-soft',
+	cardSheen: '--card-sheen',
 	blue: '--blue',
 	blueSoft: '--blue-soft',
 	good: '--good',

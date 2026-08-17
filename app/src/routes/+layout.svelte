@@ -96,8 +96,7 @@
 		top: 0;
 		z-index: 5;
 		padding-top: env(safe-area-inset-top);
-		background: color-mix(in srgb, var(--paper) 88%, transparent);
-		backdrop-filter: blur(10px);
+		background: var(--paper-raised);
 		border-bottom: 1px solid var(--rule);
 	}
 
@@ -123,7 +122,7 @@
 	.mark {
 		font-family: var(--hangul);
 		font-size: 1.4rem;
-		color: var(--accent);
+		color: var(--gold);
 		line-height: 1;
 	}
 
@@ -137,7 +136,7 @@
 
 	nav {
 		display: flex;
-		gap: var(--s2);
+		gap: var(--s4);
 		margin-inline-start: auto;
 		min-width: 0;
 		flex-shrink: 1;
@@ -148,35 +147,43 @@
 		align-items: center;
 		gap: var(--s1);
 		min-height: 44px;
-		padding: 0.35rem 0.7rem;
-		border-radius: var(--r-sm);
+		padding: 0.5rem 0.15rem;
+		border-radius: 0;
+		border-bottom: 1px solid transparent;
 		font-family: var(--display);
-		font-size: 0.92rem;
+		font-size: 0.875rem;
 		font-style: italic;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.08em;
 		text-decoration: none;
-		color: var(--ink-soft);
+		color: var(--ink-faint);
 		white-space: nowrap;
-		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+		transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
 	}
-	nav a:hover { background: var(--paper-sunk); color: var(--ink); }
-	nav a:active { background: var(--rule); color: var(--ink); }
-	nav a.active { color: var(--accent); background: var(--accent-soft); }
+	nav a:hover { color: var(--accent); border-bottom-color: var(--gold); }
+	nav a:active { color: var(--ink); }
+	nav a.active { color: var(--accent); border-bottom-color: var(--gold); }
 
 	.badge {
-		font-family: var(--mono);
-		font-size: 0.62rem;
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 0.7rem;
+		letter-spacing: 0.08em;
 		background: var(--accent);
 		color: var(--accent-ink);
-		border-radius: var(--r-pill);
-		padding: 0.05rem 0.36rem;
+		border-radius: var(--r-sm);
+		padding: 0.05rem 0.4rem;
 		font-variant-numeric: tabular-nums;
+	}
+
+	main {
+		position: relative;
+		z-index: 1;
 	}
 
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
 		nav { gap: var(--s1); }
-		nav a { padding: 0.35rem 0.5rem; }
+		nav a { padding: 0.5rem 0.1rem; }
 	}
 
 	@media (max-width: 30rem) {
@@ -192,15 +199,14 @@
 			background: Canvas;
 			color: CanvasText;
 			border-bottom: 1px solid ButtonBorder;
-			backdrop-filter: none;
 		}
 		.badge {
 			background: Highlight;
 			color: HighlightText;
 		}
 		nav a.active {
-			background: Highlight;
-			color: HighlightText;
+			color: Highlight;
+			border-bottom-color: Highlight;
 		}
 	}
 </style>

@@ -16,6 +16,17 @@ describe('academia', () => {
 		expect(academia.dark.paper.toLowerCase()).toBe('#2a1a0a');
 	});
 
+	it('uses honey gold for ornaments and walnut / burgundy for actions', () => {
+		expect(academia.light.gold.toLowerCase()).toBe('#d4a843');
+		expect(academia.dark.gold.toLowerCase()).toBe('#b8860b');
+		expect(academia.light.accent.toLowerCase()).toBe('#5c3d2e');
+		expect(academia.dark.accent.toLowerCase()).toBe('#722f37');
+		expect(academia.shape.rSm).toBe('0px');
+		expect(academia.shape.rMd).toBe('0px');
+		expect(academia.shape.rLg).toBe('0px');
+		expect(academia.shape.rPill).toBe('0px');
+	});
+
 	it('pairs Light Academia faces with Dark Academia faces', () => {
 		expect(academia.light.display).toMatch(/Cormorant Garamond/);
 		expect(academia.light.serif).toMatch(/Libre Baskerville/);

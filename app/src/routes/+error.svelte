@@ -15,6 +15,7 @@
 
 <div class="shell">
 	<div class="card empty">
+		<p class="flourish" aria-hidden="true">* * *</p>
 		<span class="big" lang="ko">{isMissing ? '한' : '잠깐'}</span>
 		<p class="eyebrow">HTTP {status}</p>
 		<h1>{isMissing ? 'This page is not in the course' : 'Something went wrong'}</h1>
@@ -44,7 +45,7 @@
 		margin-bottom: var(--s2);
 		font-size: clamp(1.35rem, 3vw, 1.6rem);
 	}
-	.empty p:not(.eyebrow) {
+	.empty p:not(.eyebrow):not(.flourish) {
 		color: var(--ink-soft);
 		font-size: 0.92rem;
 		max-width: 28rem;

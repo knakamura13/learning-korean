@@ -8,7 +8,7 @@ import { academia } from './systems/academia.ts';
  * 2. Point `activeSystem` at it
  * 3. Reload — CSS tokens, theme-color, and manifests stay in lockstep
  *
- * Components keep using `var(--ink)` / `var(--paper)` / `var(--accent)`.
- * Swap `academia` for `taegeuk` to restore the previous palette.
+ * Components keep using `var(--ink)` / `var(--paper)` / `var(--accent)` /
+ * `var(--gold)`. Swap `academia` for `taegeuk` to restore the previous palette.
  */
 export const activeSystem = academia;

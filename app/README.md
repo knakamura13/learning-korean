@@ -51,10 +51,11 @@ src/routes/         dashboard, /lab/[id], /review, /reference
 ```
 
 Visual tokens are a `DesignSystem` object. Components only use semantic CSS
-variables (`--ink`, `--paper`, `--accent`, `--serif`, …). To prototype a new
+variables (`--ink`, `--paper`, `--accent`, `--gold`, `--serif`, …). To prototype a new
 look, add `src/lib/theme/systems/<name>.ts` and point `activeSystem` at it.
 The previous Taegeuk palette is still in `systems/taegeuk.ts` as a one-line
-switch-back.
+switch-back. In Academia, `--gold` is honey/antique-gold for ornaments;
+`--accent` is walnut (light) or burgundy (dark) for buttons and links.
 
 ## Two rules worth keeping
 
