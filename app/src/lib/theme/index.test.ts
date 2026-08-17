@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { isThemePref, nextThemePref, resolvedTheme } from './theme';
+import { isThemePref, nextThemePref, PAPER_DARK, PAPER_LIGHT, resolvedTheme } from './index';
+import { activeSystem } from './active';
 
 describe('isThemePref', () => {
 	it('accepts the three stored values', () => {
@@ -28,5 +29,12 @@ describe('nextThemePref', () => {
 		expect(nextThemePref('light')).toBe('dark');
 		expect(nextThemePref('dark')).toBe('system');
 		expect(nextThemePref('system')).toBe('light');
+	});
+});
+
+describe('paper colours', () => {
+	it('come from the active design system', () => {
+		expect(PAPER_LIGHT).toBe(activeSystem.light.paper);
+		expect(PAPER_DARK).toBe(activeSystem.dark.paper);
 	});
 });

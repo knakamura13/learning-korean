@@ -8,10 +8,13 @@
 		<link rel="manifest" href="%sveltekit.assets%/manifest-dark.webmanifest" media="(prefers-color-scheme: dark)" />
 		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<style>
+%%DESIGN_SYSTEM_CSS%%
+		</style>
 		<meta name="color-scheme" content="light dark" />
-		<meta name="theme-color" content="#fffef9" media="(prefers-color-scheme: light)" />
-		<meta name="theme-color" content="#131316" media="(prefers-color-scheme: dark)" />
-		<meta name="theme-color" content="#fffef9" data-resolved />
+		<meta name="theme-color" content="%%DESIGN_PAPER_LIGHT%%" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="%%DESIGN_PAPER_DARK%%" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="%%DESIGN_PAPER_LIGHT%%" data-resolved />
 		<script>
 			(function () {
 				try {
@@ -26,7 +29,7 @@
 						if (cs) cs.setAttribute('content', t);
 					}
 					var m = document.querySelector('meta[name="theme-color"][data-resolved]');
-					if (m) m.setAttribute('content', dark ? '#131316' : '#fffef9');
+					if (m) m.setAttribute('content', dark ? '%%DESIGN_PAPER_DARK%%' : '%%DESIGN_PAPER_LIGHT%%');
 				} catch (e) {}
 			})();
 		</script>

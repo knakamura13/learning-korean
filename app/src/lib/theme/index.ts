@@ -1,8 +1,13 @@
 export type ThemePref = 'light' | 'dark' | 'system';
 
+export { activeSystem } from './active';
+export type { ContrastOverrides, DesignSystem, Palette, TypeStacks } from './types';
+
+import { activeSystem } from './active';
+
 export const THEME_KEY = 'korean-theme';
-export const PAPER_LIGHT = '#fffef9';
-export const PAPER_DARK = '#131316';
+export const PAPER_LIGHT = activeSystem.light.paper;
+export const PAPER_DARK = activeSystem.dark.paper;
 
 export function isThemePref(value: string | null): value is ThemePref {
 	return value === 'light' || value === 'dark' || value === 'system';

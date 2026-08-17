@@ -1,52 +1,12 @@
 /* ============================================================
-   app.css — design tokens and base styles
-   One palette, one type scale, one motion vocabulary. Components
-   reference tokens only; no component invents a color.
+   app.css — base styles on top of the active design system.
+   Look tokens (--ink, --paper, --serif, --html-size, --leading, …)
+   are stamped into app.html from src/lib/theme. Swap systems in
+   src/lib/theme/active.ts. Space, motion, measure, and focus-ring
+   are app chrome and stay here.
    ============================================================ */
 
-/* Self-hosted Noto Sans KR (OFL). Subset = Hangul used in the app +
-   basic Latin, variable wght 400–600. Full VF is ~10MB; this file is ~35KB. */
-@font-face {
-	font-family: 'Noto Sans KR';
-	font-style: normal;
-	font-weight: 400 600;
-	font-display: optional;
-	src: url('/fonts/NotoSansKR-subset.woff2') format('woff2');
-}
-
 :root {
-	/* --- ink & paper --- */
-	--ink: #1a1a18;
-	--ink-soft: #55534e;
-	--ink-faint: #585650;
-	--paper: #fffef9;
-	--paper-sunk: #f4f2ea;
-	--paper-raised: #ffffff;
-	--rule: #e2ded1;
-	--rule-strong: #cdc7b5;
-
-	/* --- accents: 태극 red and blue --- */
-	--accent: #a4342b;
-	--accent-ink: #ffffff;
-	--accent-soft: #f9ece9;
-	--blue: #2b5c8a;
-	--blue-soft: #eaf1f7;
-
-	/* --- semantic --- */
-	--good: #2f6b45;
-	--good-soft: #e8f1eb;
-	--bad: #9c2f28;
-	--bad-soft: #faeae8;
-	--warn: #8a6316;
-	--warn-soft: #faf2e0;
-
-	/* --- type --- */
-	--serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-	--sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-	--mono: 'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
-	--hangul: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
-
-	/* --- space scale --- */
 	--s1: 0.25rem;
 	--s2: 0.5rem;
 	--s3: 0.75rem;
@@ -55,116 +15,14 @@
 	--s6: 2rem;
 	--s7: 3rem;
 	--s8: 4rem;
-
-	/* --- shape --- */
-	--r-sm: 6px;
-	--r-md: 10px;
-	--r-lg: 16px;
-	--r-pill: 999px;
-
-	/* --- focus ring token --- */
 	--focus-ring: 0 0 0 3px color-mix(in srgb, var(--blue) 35%, transparent), 0 0 0 1px var(--blue);
-
-	/* --- elevation --- */
-	--shadow-1: 0 1px 2px rgba(26, 26, 24, 0.05), 0 1px 3px rgba(26, 26, 24, 0.04);
-	--shadow-2: 0 2px 6px rgba(26, 26, 24, 0.07), 0 8px 20px rgba(26, 26, 24, 0.05);
-	--shadow-3: 0 8px 24px rgba(26, 26, 24, 0.1), 0 20px 48px rgba(26, 26, 24, 0.07);
-
-	/* --- motion --- */
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 	--fast: 130ms;
 	--med: 240ms;
 	--slow: 420ms;
-
 	--measure: 36rem;
 	--shell: 62rem;
-}
-
-:root[data-theme='dark'] {
-	--ink: #e9e7e0;
-	--ink-soft: #a8a49a;
-	--ink-faint: #a5a099;
-	--paper: #131316;
-	--paper-sunk: #1b1b20;
-	--paper-raised: #212127;
-	--rule: #32323a;
-	--rule-strong: #454550;
-
-	--accent: #e28379;
-	--accent-ink: #1a1a18;
-	--accent-soft: #2d1e1c;
-	--blue: #8ab7e0;
-	--blue-soft: #182531;
-
-	--good: #83c99e;
-	--good-soft: #17251d;
-	--bad: #e88b81;
-	--bad-soft: #2a1a18;
-	--warn: #d8b055;
-	--warn-soft: #2a2312;
-
-	--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-	--shadow-2: 0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3);
-	--shadow-3: 0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35);
-}
-
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme='light']) {
-		--ink: #e9e7e0;
-		--ink-soft: #a8a49a;
-		--ink-faint: #a5a099;
-		--paper: #131316;
-		--paper-sunk: #1b1b20;
-		--paper-raised: #212127;
-		--rule: #32323a;
-		--rule-strong: #454550;
-
-		--accent: #e28379;
-		--accent-ink: #1a1a18;
-		--accent-soft: #2d1e1c;
-		--blue: #8ab7e0;
-		--blue-soft: #182531;
-
-		--good: #83c99e;
-		--good-soft: #17251d;
-		--bad: #e88b81;
-		--bad-soft: #2a1a18;
-		--warn: #d8b055;
-		--warn-soft: #2a2312;
-
-		--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-		--shadow-2: 0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3);
-		--shadow-3: 0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35);
-	}
-}
-
-@media (prefers-contrast: more) {
-	:root {
-		--ink-faint: #4f4d48;
-		--rule: #b8b19f;
-		--rule-strong: #9a937f;
-		--accent: #8a2a22;
-		--accent-soft: #edd0cb;
-	}
-
-	:root[data-theme='dark'] {
-		--ink-faint: #b0aca2;
-		--rule: #5c5c68;
-		--rule-strong: #767684;
-		--accent: #f09990;
-		--accent-soft: #4a2a26;
-	}
-}
-
-@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
-	:root:not([data-theme='light']) {
-		--ink-faint: #b0aca2;
-		--rule: #5c5c68;
-		--rule-strong: #767684;
-		--accent: #f09990;
-		--accent-soft: #4a2a26;
-	}
 }
 
 *,
@@ -174,7 +32,7 @@
 }
 
 html {
-	font-size: 106.25%;
+	font-size: var(--html-size);
 	color-scheme: light dark;
 	accent-color: var(--accent);
 	scroll-behavior: smooth;
@@ -207,7 +65,7 @@ body {
 	background: var(--paper);
 	color: var(--ink);
 	font-family: var(--sans);
-	line-height: 1.6;
+	line-height: var(--leading);
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 }

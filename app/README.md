@@ -43,9 +43,21 @@ src/lib/domain/     pure logic, no framework, no I/O
 src/lib/content/    lessons as typed data
   types.ts            the step union every lab is built from
   lab01..lab05.ts     the course
+src/lib/theme/      swappable design systems (the look)
+  active.ts           one-line switch for the current look
+  systems/taegeuk.ts  ink-and-paper palette, type, shape, webfonts
+  css.ts              emits custom properties + @font-face only
+  manifest.ts         PWA theme/background colours from the system
 src/lib/components/ the runner and one component per step type
 src/routes/         dashboard, /lab/[id], /review, /reference
 ```
+
+The look is a `DesignSystem` object: palettes, type stacks, shape, webfonts,
+and contrast-more overrides. Components only use semantic CSS variables
+(`--ink`, `--paper`, `--accent`, `--serif`, …). Space, motion, and shell width
+stay in `app.css`. To prototype a new look, add `src/lib/theme/systems/<name>.ts`
+and point `activeSystem` at it — token CSS, `theme-color`, font preloads, and
+PWA manifests follow.
 
 ## Two rules worth keeping
 
