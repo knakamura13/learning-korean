@@ -67,8 +67,9 @@
 	.op { font-size: 1.2rem; color: var(--ink-faint); }
 
 	.slot {
-		width: 4.2rem;
-		height: 4.2rem;
+		width: 5.4rem;
+		min-height: 4.2rem;
+		padding: 0.3rem 0.45rem;
 		border: 2px dashed var(--rule-strong);
 		border-radius: var(--r-md);
 		display: flex;
@@ -99,10 +100,12 @@
 		font-family: var(--sans);
 		font-size: 0.5rem;
 		font-weight: 700;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		line-height: 1;
 		color: var(--ink-faint);
+		padding-inline: 0.2rem;
+		text-align: center;
 	}
 
 	.slot.filled .slot-name { color: var(--accent); }
@@ -162,7 +165,7 @@
 	.mark.bad { color: var(--bad); }
 
 	@media (max-width: 34rem) {
-		.slot { width: 3.4rem; height: 3.4rem; font-size: 1.8rem; }
+		.slot { width: 4.8rem; min-height: 3.6rem; font-size: 1.8rem; }
 		.out { width: 4.4rem; height: 4.4rem; font-size: 2.6rem; }
 		.asm { gap: var(--s2); }
 	}

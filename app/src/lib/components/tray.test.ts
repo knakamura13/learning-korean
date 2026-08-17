@@ -120,6 +120,23 @@ describe('Tray', () => {
 		expect(eo.textContent).toMatch(/first/i);
 	});
 
+	it('keeps horizontal padding around the selected-slot mark', () => {
+		render(Tray, {
+			label: 'consonant',
+			items: ['ㄴ', 'ㅁ', 'ㅅ'],
+			selected: 'ㄴ',
+			onSelect: () => {}
+		});
+
+		const mark = labeledGroup(document.body, 'consonant').querySelector('.mark');
+		expect(mark).toBeTruthy();
+		const styles = getComputedStyle(mark!);
+		const padLeft = parseFloat(styles.paddingLeft);
+		const padRight = parseFloat(styles.paddingRight);
+		expect(padLeft).toBeGreaterThanOrEqual(4);
+		expect(padRight).toBeGreaterThanOrEqual(4);
+	});
+
 	it('keeps disabled chips unclickable', () => {
 		const onSelect = vi.fn();
 		render(Tray, {

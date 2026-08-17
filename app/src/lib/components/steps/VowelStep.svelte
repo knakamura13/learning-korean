@@ -645,9 +645,11 @@
 		font-family: var(--sans);
 		font-size: 0.52rem;
 		font-weight: 700;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		line-height: 1;
+		padding-inline: 0.35rem;
+		text-align: center;
 	}
 
 	.ghost {
