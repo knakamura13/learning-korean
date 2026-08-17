@@ -440,3 +440,9 @@ export function stampLabel(stamp: Stamp): string {
 		}
 	}
 }
+
+/** Copy for a tick hole clicked before any long stroke is seated. */
+export function tickBeforeBaseHint(target: string): string {
+	const base = recipeOf(target)?.base ?? 'ㅣ';
+	return `Seat the ${stampLabel(base)} in the center first. Korean vowels are built from a long stroke, then ticks hang on it as modifiers — never the other way around.`;
+}

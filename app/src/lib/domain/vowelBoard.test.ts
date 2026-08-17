@@ -14,6 +14,7 @@ import {
 	snapDock,
 	snapRadiusPx,
 	stampLabel,
+	tickBeforeBaseHint,
 	boardDocks,
 	placeholderDocks,
 	recipeDocks,
@@ -301,6 +302,17 @@ describe('palette and positions', () => {
 		expect(stampLabel('ㅣ')).toBe('standing stroke');
 		expect(stampLabel('ㅡ')).toBe('earth stroke');
 		expect(stampLabel('tick')).toBe('tick');
+	});
+
+	it('teaches that ticks wait for the long stroke of the target letter', () => {
+		const earth = tickBeforeBaseHint('ㅗ');
+		expect(earth).toMatch(/earth stroke/i);
+		expect(earth).toMatch(/modifier/i);
+		expect(earth).not.toMatch(/standing stroke/i);
+		const standing = tickBeforeBaseHint('ㅏ');
+		expect(standing).toMatch(/standing stroke/i);
+		expect(standing).toMatch(/modifier/i);
+		expect(standing).not.toMatch(/earth stroke/i);
 	});
 
 	it('lists stamps a dock will actually accept', () => {

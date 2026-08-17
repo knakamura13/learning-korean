@@ -144,6 +144,8 @@ Palette chips show the two long strokes as Hangul `ㅣ` and `ㅡ`, and the tick 
 
 Wrong-orientation and empty-space drops are silent: the piece bounces. No miss tally.
 
+Clicking or Enter on a tick hole while no long stroke is seated is incomplete, not a miss: a local tooltip (`tickBeforeBaseHint`) names the target's foundation stroke and explains that ticks hang on it as modifiers. It dismisses once the stroke is seated, or on Escape.
+
 ## Content
 
 In Lab 02, the `ㅡ` card hint currently says "Set the ticks to none." Change it to "Just the earth stroke — no ticks." No other lab copy changes.

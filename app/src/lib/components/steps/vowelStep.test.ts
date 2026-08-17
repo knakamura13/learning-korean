@@ -288,6 +288,42 @@ describe('VowelStep dock board', () => {
 		flushSync();
 		expect(onSettle).toHaveBeenCalled();
 	});
+
+	it('teaches that the earth stroke must be seated before a tick on ㅗ', () => {
+		const onSettle = vi.fn();
+		const onNudge = vi.fn();
+		render(VowelStep, { step: step('ㅗ', 'o'), onSettle, onNudge });
+		dock('above').click();
+		flushSync();
+		const tip = document.querySelector('[data-tick-hint]');
+		expect(tip).toBeTruthy();
+		expect(tip?.textContent).toMatch(/earth stroke/i);
+		expect(tip?.textContent).toMatch(/modifier/i);
+		expect(onSettle).not.toHaveBeenCalled();
+		expect(onNudge).not.toHaveBeenCalled();
+		expect(document.querySelector('[data-dock-board]')?.textContent).not.toContain('ㅗ');
+	});
+
+	it('dismisses the tick-first hint once the long stroke is seated', () => {
+		render(VowelStep, { step: step('ㅗ', 'o'), onSettle: () => {}, onNudge: () => {} });
+		dock('above').click();
+		flushSync();
+		expect(document.querySelector('[data-tick-hint]')).toBeTruthy();
+		dock('base').click();
+		flushSync();
+		expect(document.querySelector('[data-tick-hint]')).toBeNull();
+		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅡ');
+	});
+
+	it('shows the standing-stroke hint from the keyboard on an empty ㅏ tick hole', () => {
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle: () => {}, onNudge: () => {} });
+		const right = dock('right');
+		right.focus();
+		press(right, 'Enter');
+		const tip = document.querySelector('[data-tick-hint]');
+		expect(tip).toBeTruthy();
+		expect(tip?.textContent).toMatch(/standing stroke/i);
+	});
 });
 
 function press(el: HTMLElement, key: string) {

@@ -19,6 +19,7 @@
 		sideOfDock,
 		snapDock,
 		stampLabel,
+		tickBeforeBaseHint,
 		towardTarget,
 		vowelOf,
 		type DockId,
@@ -54,6 +55,7 @@
 		y: number;
 	} | null>(null);
 	let picker = $state<{ dock: DockId; index: number } | null>(null);
+	let tip = $state<DockId | null>(null);
 	let activeDock = $state<DockId>('base');
 	let hadNudge = $state(false);
 
@@ -96,6 +98,7 @@
 		const next = applyStamp(board, dock, selected);
 		if (next) {
 			board = next;
+			tip = null;
 			focusNextOpen();
 			return;
 		}
@@ -110,6 +113,7 @@
 		if (next) board = next;
 		selected = stamp;
 		picker = null;
+		tip = null;
 		focusNextOpen();
 	}
 
@@ -121,12 +125,39 @@
 	function activateDock(dock: DockId) {
 		if (solved) return;
 		const options = compatibleStamps(board, dock);
-		if (options.length === 0) return;
+		if (options.length === 0) {
+			if (dock !== 'base' && board.base === null) tip = dock;
+			return;
+		}
+		tip = null;
 		if (options.length === 1) {
 			seat(dock, options[0]);
 			return;
 		}
 		picker = { dock, index: pickerIndexFor(options) };
+	}
+
+	function hintTowardCenter(id: DockId): 'above' | 'below' | 'left' | 'right' {
+		switch (id) {
+			case 'above':
+			case 'above2':
+				return 'below';
+			case 'below':
+			case 'below2':
+				return 'above';
+			case 'left':
+			case 'left2':
+				return 'right';
+			case 'right':
+			case 'right2':
+				return 'left';
+			case 'base':
+				return 'below';
+			default: {
+				const _exhaustive: never = id;
+				return _exhaustive;
+			}
+		}
 	}
 
 	function confirmPicker() {
@@ -185,12 +216,19 @@
 	}
 
 	function onWindowKey(e: KeyboardEvent) {
-		if (!picker || e.metaKey || e.ctrlKey || e.altKey) return;
+		if (e.metaKey || e.ctrlKey || e.altKey) return;
 		if (e.key !== 'Escape') return;
-		e.preventDefault();
-		const id = picker.dock;
-		closePicker();
-		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${id}"]`)?.focus();
+		if (picker) {
+			e.preventDefault();
+			const id = picker.dock;
+			closePicker();
+			boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${id}"]`)?.focus();
+			return;
+		}
+		if (tip) {
+			e.preventDefault();
+			tip = null;
+		}
 	}
 
 	function onPaletteKey(e: KeyboardEvent) {
@@ -235,10 +273,17 @@
 			picker = { ...picker, index: (picker.index + cycle + n) % n };
 			return;
 		}
-		if (e.key === 'Escape' && picker) {
-			e.preventDefault();
-			closePicker();
-			return;
+		if (e.key === 'Escape') {
+			if (picker) {
+				e.preventDefault();
+				closePicker();
+				return;
+			}
+			if (tip) {
+				e.preventDefault();
+				tip = null;
+				return;
+			}
 		}
 		if (e.key === 'Delete' || e.key === 'Backspace') {
 			e.preventDefault();
@@ -337,6 +382,7 @@
 			const seated = applyLift(board, next, active.lift);
 			if (seated) {
 				board = seated;
+				tip = null;
 				focusNextOpen();
 			} else if (active.fromBoard) board = active.origin;
 		} else if (active.fromBoard) {
@@ -441,6 +487,19 @@
 					{/if}
 				</button>
 			{/each}
+		</div>
+	{/if}
+	{#if tip}
+		{@const pos = dockPosition(tip, docks)}
+		{@const toward = hintTowardCenter(tip)}
+		<div
+			class={['tick-hint', toward]}
+			data-tick-hint
+			role="status"
+			style:left="{pos.x * 100}%"
+			style:top="{pos.y * 100}%"
+		>
+			{tickBeforeBaseHint(step.target)}
 		</div>
 	{/if}
 </div>
@@ -577,6 +636,38 @@
 		background: var(--paper-raised);
 		box-shadow: var(--shadow-2);
 		transform: translate(-50%, calc(-100% - 0.5rem));
+	}
+
+	.tick-hint {
+		position: absolute;
+		z-index: 5;
+		width: max-content;
+		max-width: 10.5rem;
+		padding: 0.4rem 0.5rem;
+		border: 1px solid var(--accent);
+		border-radius: var(--r-sm);
+		background: var(--paper-raised);
+		box-shadow: var(--shadow-2);
+		font-family: var(--sans);
+		font-size: 0.7rem;
+		font-weight: 500;
+		line-height: 1.35;
+		letter-spacing: 0.01em;
+		color: var(--ink);
+		text-align: left;
+		pointer-events: none;
+	}
+	.tick-hint.below {
+		transform: translate(-50%, 1.45rem);
+	}
+	.tick-hint.above {
+		transform: translate(-50%, calc(-100% - 1.45rem));
+	}
+	.tick-hint.left {
+		transform: translate(calc(-100% - 1.45rem), -50%);
+	}
+	.tick-hint.right {
+		transform: translate(1.45rem, -50%);
 	}
 	.choice {
 		appearance: none;
