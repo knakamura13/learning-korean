@@ -99,6 +99,18 @@ describe('VowelStep dock board', () => {
 		expect(document.querySelectorAll('[data-dock]')).toHaveLength(0);
 	});
 
+	it('does not treat the correct first stroke as a miss', () => {
+		const onSettle = vi.fn();
+		const onNudge = vi.fn();
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle, onNudge });
+		stamp('ㅣ').click();
+		flushSync();
+		dock('base').click();
+		flushSync();
+		expect(onSettle).not.toHaveBeenCalled();
+		expect(onNudge).not.toHaveBeenCalled();
+	});
+
 	it('soft-nudges when a real but wrong vowel is built', () => {
 		const onSettle = vi.fn();
 		const onNudge = vi.fn();

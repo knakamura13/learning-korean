@@ -175,8 +175,12 @@
 	/** A wrong answer that should not advance. `soft` means "exploration, not error". */
 	function onNudge(html: string, soft = false) {
 		if (settled) return;
+		if (!html) {
+			feedback = null;
+			return;
+		}
 		if (!soft) missedHere = true;
-		feedback = { tone: 'wrong', html, blocking: true };
+		feedback = { tone: 'wrong', html, blocking: !soft };
 	}
 
 	function next() {

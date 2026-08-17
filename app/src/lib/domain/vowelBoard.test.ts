@@ -16,6 +16,7 @@ import {
 	stampLabel,
 	placeholderDocks,
 	recipeDocks,
+	towardTarget,
 	visibleDocks,
 	vowelOf,
 	type BoardState,
@@ -66,6 +67,14 @@ describe('target placeholders', () => {
 		const a = board({ base: 'ㅣ', ticks: 1, side: 'right' });
 		expect(placeholderDocks(a, 'ㅏ')).not.toContain('left');
 		expect(placeholderDocks(a, 'ㅏ')).not.toContain('right2');
+	});
+
+	it('treats a correct unfinished recipe as progress, not a miss', () => {
+		expect(towardTarget(board({ base: 'ㅣ' }), 'ㅏ')).toBe(true);
+		expect(towardTarget(board({ base: 'ㅣ', ticks: 1, side: 'right' }), 'ㅑ')).toBe(true);
+		expect(towardTarget(board({ base: 'ㅡ' }), 'ㅏ')).toBe(false);
+		expect(towardTarget(EMPTY_BOARD, 'ㅏ')).toBe(false);
+		expect(towardTarget(board({ base: 'ㅣ', ticks: 2, side: 'right' }), 'ㅏ')).toBe(false);
 	});
 });
 

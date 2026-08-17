@@ -289,6 +289,17 @@ export function boardDocks(state: BoardState, target: string): DockId[] {
 	return ordered;
 }
 
+/** True when the board is a correct prefix of `target` (incomplete, not wrong). */
+export function towardTarget(state: BoardState, target: string): boolean {
+	const recipe = recipeOf(target);
+	if (!recipe?.base || !state.base) return false;
+	if (state.base !== recipe.base) return false;
+	if (recipe.ticks === 0) return state.ticks === 0;
+	if (state.ticks === 0) return true;
+	if (state.side !== recipe.side) return false;
+	return state.ticks <= recipe.ticks;
+}
+
 export function occupant(state: BoardState, dock: DockId): Stamp | null {
 	if (dock === 'base') return state.base;
 	const side = sideOfDock(dock);

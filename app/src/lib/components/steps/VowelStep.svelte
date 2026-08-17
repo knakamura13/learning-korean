@@ -17,6 +17,7 @@
 		sideOfDock,
 		snapDock,
 		stampLabel,
+		towardTarget,
 		vowelOf,
 		type DockId,
 		type Lift,
@@ -52,6 +53,7 @@
 	} | null>(null);
 	let picker = $state<{ dock: DockId; index: number } | null>(null);
 	let activeDock = $state<DockId>('base');
+	let hadNudge = $state(false);
 
 	const result = $derived(vowelOf(board));
 	const won = $derived(result === step.target);
@@ -65,7 +67,13 @@
 			solved = true;
 			picker = null;
 			onSettle();
+		} else if (!solved && (!result || towardTarget(board, step.target))) {
+			if (hadNudge) {
+				hadNudge = false;
+				onNudge('');
+			}
 		} else if (result && !won && !solved) {
+			hadNudge = true;
 			onNudge(
 				`<p>That builds <span class="jamo">${result}</span>. Keep going — which stroke, how many ticks, and which side make <span class="jamo">${step.target}</span>?</p>`,
 				true
