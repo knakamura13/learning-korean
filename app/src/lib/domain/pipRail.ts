@@ -29,7 +29,7 @@ export function pipRailEdgeFades(
 }
 
 /**
- * ScrollLeft that puts the pip's centre on the rail's centre, clamped.
+ * ScrollLeft that puts the pip's center on the rail's center, clamped.
  * Viewport boxes (getBoundingClientRect) plus the current scrollLeft.
  */
 export function pipRailCenteredScrollLeft(

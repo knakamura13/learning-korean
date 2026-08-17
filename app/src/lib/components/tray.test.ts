@@ -29,14 +29,14 @@ afterEach(() => {
 	document.body.innerHTML = '';
 });
 
-function labelledGroup(root: ParentNode, label: string): HTMLElement {
+function labeledGroup(root: ParentNode, label: string): HTMLElement {
 	const groups = [...root.querySelectorAll<HTMLElement>('[role="radiogroup"]')];
 	const match = groups.find((group) => {
 		const id = group.getAttribute('aria-labelledby');
 		if (!id) return false;
 		return document.getElementById(id)?.textContent?.trim() === label;
 	});
-	if (!match) throw new Error(`no radiogroup labelled "${label}"`);
+	if (!match) throw new Error(`no radiogroup labeled "${label}"`);
 	return match;
 }
 
@@ -85,7 +85,7 @@ const assembleStep: AssembleStepData = {
 };
 
 describe('Tray', () => {
-	it('exposes one labelled radiogroup whose chips name the slot', () => {
+	it('exposes one labeled radiogroup whose chips name the slot', () => {
 		render(Tray, {
 			label: 'second vowel',
 			items: ['ㅣ', 'ㅏ', 'ㅓ'],
@@ -93,7 +93,7 @@ describe('Tray', () => {
 			onSelect: () => {}
 		});
 
-		const group = labelledGroup(document.body, 'second vowel');
+		const group = labeledGroup(document.body, 'second vowel');
 		expect(radios(group)).toHaveLength(3);
 		const eo = radioNamed(group, 'ㅓ');
 		expect(eo.getAttribute('role')).toBe('radio');
@@ -109,7 +109,7 @@ describe('Tray', () => {
 			onSelect: () => {}
 		});
 
-		const group = labelledGroup(document.body, 'first vowel');
+		const group = labeledGroup(document.body, 'first vowel');
 		const eo = radioNamed(group, 'ㅓ');
 		const a = radioNamed(group, 'ㅏ');
 		expect(eo.getAttribute('aria-checked')).toBe('true');
@@ -131,7 +131,7 @@ describe('Tray', () => {
 			onSelect
 		});
 
-		const group = labelledGroup(document.body, 'tick side');
+		const group = labeledGroup(document.body, 'tick side');
 		expect(group.getAttribute('aria-disabled')).toBe('true');
 		radioNamed(group, 'left').click();
 		flushSync();
@@ -145,7 +145,7 @@ describe('Tray', () => {
 			selected: null,
 			onSelect: () => {}
 		});
-		const unpicked = labelledGroup(document.body, 'base stroke');
+		const unpicked = labeledGroup(document.body, 'base stroke');
 		expect(radioNamed(unpicked, 'ㅣ').getAttribute('tabindex')).toBe('0');
 		expect(radioNamed(unpicked, 'ㅡ').getAttribute('tabindex')).toBe('-1');
 
@@ -155,7 +155,7 @@ describe('Tray', () => {
 			selected: 'ㅓ',
 			onSelect: () => {}
 		});
-		const picked = labelledGroup(document.body, 'first vowel');
+		const picked = labeledGroup(document.body, 'first vowel');
 		expect(radioNamed(picked, 'ㅏ').getAttribute('tabindex')).toBe('-1');
 		expect(radioNamed(picked, 'ㅓ').getAttribute('tabindex')).toBe('0');
 	});
@@ -169,7 +169,7 @@ describe('Tray', () => {
 			text: true,
 			onSelect
 		});
-		const group = labelledGroup(document.body, 'ticks');
+		const group = labeledGroup(document.body, 'ticks');
 		const [none, one, two] = radios(group);
 
 		none.focus();
@@ -204,7 +204,7 @@ describe('Tray', () => {
 			disabled: true,
 			onSelect
 		});
-		const group = labelledGroup(document.body, 'tick side');
+		const group = labeledGroup(document.body, 'tick side');
 		const [left] = radios(group);
 		left.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
 		expect(onSelect).not.toHaveBeenCalled();
@@ -219,8 +219,8 @@ describe('FusionStep trays', () => {
 			onNudge: () => {}
 		});
 
-		const first = labelledGroup(root, 'first vowel');
-		const second = labelledGroup(root, 'second vowel');
+		const first = labeledGroup(root, 'first vowel');
+		const second = labeledGroup(root, 'second vowel');
 		expect(radioNamed(first, 'ㅓ')).toBeTruthy();
 		expect(radioNamed(second, 'ㅓ')).toBeTruthy();
 
@@ -253,9 +253,9 @@ describe('AssembleStep trays', () => {
 			onNudge: () => {}
 		});
 
-		const lead = labelledGroup(root, 'first consonant');
-		const vowel = labelledGroup(root, 'vowel');
-		const batchim = labelledGroup(root, 'batchim — the bottom slot');
+		const lead = labeledGroup(root, 'first consonant');
+		const vowel = labeledGroup(root, 'vowel');
+		const batchim = labeledGroup(root, 'batchim — the bottom slot');
 
 		radioNamed(lead, 'ㅁ').click();
 		flushSync();

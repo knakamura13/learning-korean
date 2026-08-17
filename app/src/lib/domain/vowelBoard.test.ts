@@ -23,7 +23,7 @@ function board(partial: Partial<BoardState> = {}): BoardState {
 }
 
 describe('visible docks', () => {
-	it('shows only the centre until a base is seated', () => {
+	it('shows only the center until a base is seated', () => {
 		expect(visibleDocks(EMPTY_BOARD)).toEqual(['base']);
 	});
 

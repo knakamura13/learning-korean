@@ -51,7 +51,7 @@ src/routes/         dashboard, /lab/[id], /review, /reference
 
 **Lessons never hard-code an answer they could derive.** A cluster card asks
 `hangul.ts` which letter survives; a batchim deck card asks for its own
-romanisation. A lesson therefore cannot drift out of agreement with the deck
+romanization. A lesson therefore cannot drift out of agreement with the deck
 that tests it, and `content.test.ts` asserts the whole course against the
 domain on every run — including that each authored pronunciation actually ends
 in the letter the rules predict.

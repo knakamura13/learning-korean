@@ -15,7 +15,7 @@ of mispronunciation and slow reading.
   letter.
 - Decoding is automatic rather than effortful: under ~2 seconds per unfamiliar
   syllable, so working memory is free for meaning instead of spelling.
-- Can predict what a written word will *sound* like, applying liaison, nasalisation,
+- Can predict what a written word will *sound* like, applying liaison, nasalization,
   tensification, and aspiration rather than being surprised by them.
 - Can read a Korean name or a short message from someone he knows and pronounce it
   close enough to be understood.
@@ -32,7 +32,7 @@ of mispronunciation and slow reading.
   style tutorials. Each lesson is a lab of action-cards where explanation arrives only
   as feedback on what he just did. Reference sheets may stay prose. See
   [learning record 0002](learning-records/0002-lessons-must-be-interactive.md).
-- Prefers to understand the *system* rather than memorise items, and to *derive* the
+- Prefers to understand the *system* rather than memorize items, and to *derive* the
   rule rather than be handed it.
 - Wants timed drills and real text, not passive review. Recognition-only exercises
   are a waste of his session.

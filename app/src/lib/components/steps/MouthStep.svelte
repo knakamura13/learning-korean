@@ -9,7 +9,7 @@
 		onNudge: (html: string, soft?: boolean) => void;
 	} = $props();
 
-	/** Zone centres and their label positions, in the SVG's 440×300 frame. */
+	/** Zone centers and their label positions, in the SVG's 440×300 frame. */
 	const ZONES: { id: ZoneId; cx: number; cy: number; tag: string; lx: number; ly: number; lead: string }[] = [
 		{ id: 'labial',   cx: 62,  cy: 148, tag: 'lips',        lx: 46,  ly: 210, lead: 'M62,169 L52,200' },
 		{ id: 'dental',   cx: 112, cy: 152, tag: 'teeth',       lx: 112, ly: 226, lead: 'M112,173 L112,216' },
@@ -161,8 +161,8 @@
 
 	.mouth { display: block; width: 100%; height: auto; }
 
-	/* The anatomy stays neutral — only the zones carry colour, or the drawing
-	   reads as an unidentifiable coloured blob. */
+	/* The anatomy stays neutral — only the zones carry color, or the drawing
+	   reads as an unidentifiable colored blob. */
 	.anat { fill: none; stroke: var(--ink-faint); stroke-width: 2; stroke-linecap: round; }
 	.tongue { fill: var(--paper-sunk); stroke: var(--ink-faint); stroke-width: 1.6; }
 	.cavity { fill: var(--ink); opacity: 0.05; }

@@ -24,7 +24,7 @@
   Hangul syllable drills in the same format he already uses, once the reading
   foundation is in. That format supports a `3 – Script` topic type explicitly.
 - Software engineer (HighPoint, monorepo work). Analogies from parsing, encoding,
-  and grammars will land. Unicode/normalisation angles on Hangul may genuinely
+  and grammars will land. Unicode/normalization angles on Hangul may genuinely
   interest him rather than distract.
 
 ## Teaching decisions made
@@ -35,11 +35,11 @@
   immediately. Vowels are a cleaner system but a smaller "aha".
 - **Loanwords as the first real text.** Only four borrowed vowels are needed to read
   피자 / 바나나 / 사우나 / 라디오 / 기타 / 소파. Instant payoff, zero vocabulary load,
-  and it demonstrates that decoding — not memorising — is the transferable skill.
+  and it demonstrates that decoding — not memorizing — is the transferable skill.
 - **Merged vowels framed as good news.** ㅐ=ㅔ and ㅙ=ㅚ=ㅞ will be presented as a
   reduction in workload, not an irregularity to fear. Pre-empts the common beginner
   panic about not hearing a distinction that native speakers no longer make either.
-- **Tense-consonant production explicitly deferred.** Recognising the series is a
+- **Tense-consonant production explicitly deferred.** Recognizing the series is a
   Lesson 01 goal; producing it is a months-long project. Said out loud in the lesson
   so a genuine difficulty does not read as personal failure.
 
@@ -74,10 +74,10 @@ Kyle asked for SRS to master every letter, sound, and compound. Built as:
 
 **Three design decisions worth preserving:**
 
-1. **Typed answers, not multiple choice.** Recognising a letter among four options is
+1. **Typed answers, not multiple choice.** Recognizing a letter among four options is
    far easier than producing its sound cold, and the easy version inflates the sense
    of mastery. Answers are typed as Revised Romanization — ASCII, so no Korean IME is
-   needed — and multiple spellings are accepted where romanisation is genuinely
+   needed — and multiple spellings are accepted where romanization is genuinely
    ambiguous (ㄱ → "g" or "k").
 2. **Grades come from the clock, not self-rating.** Self-assessment is unreliable
    early on. Grade is derived from correctness plus latency: correct under 3.5s is
@@ -197,7 +197,7 @@ options in future composer widgets; the impossible states are teaching surface.
 
 Lab 04 scope note: rather than a new step type, `assemble` gained an **optional
 `finals` tray** — a third slot that composes the full CVC block via the Unicode
-`T` index. Neutralisation is drilled with plain `choice` cards whose options are
+`T` index. Neutralization is drilled with plain `choice` cards whose options are
 single jamo (ㄱ/ㄴ/ㄷ/ㅂ), which keeps all four options exactly one character long.
 `Lab.batchim(jamo)` exposes the 27→7 map and is **cross-checked in testing against
 the `lab04` deck answers**, so the lab and the SRS deck cannot drift apart. Keep that
@@ -225,13 +225,13 @@ liaison so it does not get crammed into this rule. Keep that boundary in later l
 The page is now fully covered. Lab 06 (liaison) is built. What remains is how the
 page *sounds* when letters meet beyond that first rule. Suggested order:
 
-1. **Tensification + nasalisation** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
-   that most often make a known word unrecognisable by ear. **Next to implement.**
-2. **Aspiration, ㅎ-deletion, palatalisation, ㄹ assimilation** — the remaining four.
+1. **Tensification + nasalization** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
+   that most often make a known word unrecognizable by ear. **Next to implement.**
+2. **Aspiration, ㅎ-deletion, palatalization, ㄹ assimilation** — the remaining four.
 3. **Names, part 2** — full names, honorific suffixes, and how Korean addresses people.
    Ties off the "people in my life" half of the mission.
 4. **Handwriting** — stroke order, one session.
-5. **Romanisation traps** — why RR misleads, so he stops trusting it entirely.
+5. **Romanization traps** — why RR misleads, so he stops trusting it entirely.
 
 Sound-change deck tiers (`lab06`+) use rule-application cards: front is a written
 word, answer is its pronunciation. Lab 06 established the `pron` card kind in

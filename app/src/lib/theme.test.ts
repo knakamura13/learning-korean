@@ -12,7 +12,7 @@ describe('isThemePref', () => {
 });
 
 describe('resolvedTheme', () => {
-	it('honours an explicit choice', () => {
+	it('honors an explicit choice', () => {
 		expect(resolvedTheme('light', true)).toBe('light');
 		expect(resolvedTheme('dark', false)).toBe('dark');
 	});
