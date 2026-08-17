@@ -189,6 +189,12 @@ describe('polish audit regressions', () => {
 		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
 	});
 
+	it('paints the favicon 한 on moss, not 태극 red', () => {
+		const svg = readFileSync(new URL('../../static/favicon.svg', import.meta.url), 'utf8');
+		expect(svg).toMatch(/fill="#315c45"/);
+		expect(svg).not.toMatch(/#a4342b/);
+	});
+
 	it('emits absolute Open Graph images only, with dimensions and a dark manifest', () => {
 		expect(layout).not.toMatch(/siteAsset\('\/og\.png'\)\s*\?\?/);
 		expect(layout).toMatch(/property="og:type"/);
