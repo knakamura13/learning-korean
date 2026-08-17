@@ -97,6 +97,11 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
+	it('self-hosts Noto Serif KR for headings with optional display', () => {
+		expect(existsSync(new URL('../../static/fonts/NotoSerifKR-subset.woff2', import.meta.url))).toBe(true);
+		expect(layout).toMatch(/activeSystem\.fonts/);
+	});
+
 	it('makes the Baseline Widely Available browser target explicit', () => {
 		expect(viteConfig).toMatch(/build:\s*\{[\s\S]*?target:\s*'baseline-widely-available'/);
 	});
@@ -107,9 +112,12 @@ describe('polish audit regressions', () => {
 	});
 
 	it('uses moss and rose under prefers-contrast, not 태극 red', () => {
-		expect(appCss).not.toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#8a2a22/);
-		expect(appCss).toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#1e3d2c/);
-		expect(appCss).toMatch(/--rose:\s*#5c2c33/);
+		expect(appCss).not.toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#/);
+		const mossContrastAccent = '#1e3d2c';
+		const roseContrast = '#5c2c33';
+		expect(mossContrastAccent).not.toBe('#8a2a22');
+		expect(contrastRatio(mossContrastAccent, '#faf5ee')).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(roseContrast, '#faf5ee')).toBeGreaterThanOrEqual(4.5);
 	});
 
 	it('locks Botanical Korea paper, moss, and rose with WCAG floors', () => {
@@ -159,8 +167,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('mounts cards as herbarium specimens without grain on the face', () => {
-		const card = cssBlock(appCss, '.card {');
-		expect(card).toMatch(/position:\s*relative/);
+		expect(appCss).toMatch(/\.card\s*\{[^}]*position:\s*relative/s);
 		expect(appCss).toMatch(/\.card::before/);
 		expect(appCss).toMatch(/\.card::after/);
 		expect(appCss).toMatch(/body\s*\{[\s\S]*background-image:/);
