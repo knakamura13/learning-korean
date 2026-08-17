@@ -7,6 +7,7 @@ import {
 	applyStamp,
 	clearDock,
 	compatibleStamps,
+	dockInDirection,
 	dockPosition,
 	liftDock,
 	occupant,
@@ -192,6 +193,34 @@ describe('vowelOf', () => {
 		expect(vowelOf(board({ base: 'ㅣ', ticks: 1, side: 'right' }))).toBe(
 			buildVowel('ㅣ', 'right', 1)
 		);
+	});
+});
+
+describe('spatial dock arrows', () => {
+	it('sends ArrowRight from the standing base to the right tick, not the left', () => {
+		const withI = board({ base: 'ㅣ' });
+		expect(dockInDirection(withI, 'base', 'right')).toBe('right');
+		expect(dockInDirection(withI, 'base', 'left')).toBe('left');
+		expect(dockInDirection(withI, 'right', 'left')).toBe('base');
+		expect(dockInDirection(withI, 'left', 'right')).toBe('base');
+	});
+
+	it('does not wrap around the board', () => {
+		const withI = board({ base: 'ㅣ' });
+		expect(dockInDirection(withI, 'base', 'up')).toBe('base');
+		expect(dockInDirection(withI, 'left', 'left')).toBe('left');
+		expect(dockInDirection(withI, 'right', 'right')).toBe('right');
+		const iotated = board({ base: 'ㅣ', ticks: 1, side: 'right' });
+		expect(dockInDirection(iotated, 'right', 'right')).toBe('right2');
+		expect(dockInDirection(iotated, 'right2', 'right')).toBe('right2');
+	});
+
+	it('sends ArrowUp from the earth base to the above tick', () => {
+		const withEu = board({ base: 'ㅡ' });
+		expect(dockInDirection(withEu, 'base', 'up')).toBe('above');
+		expect(dockInDirection(withEu, 'base', 'down')).toBe('below');
+		expect(dockInDirection(withEu, 'base', 'left')).toBe('base');
+		expect(dockInDirection(withEu, 'above', 'down')).toBe('base');
 	});
 });
 

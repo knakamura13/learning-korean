@@ -9,6 +9,7 @@
 		applyStamp,
 		clearDock,
 		compatibleStamps,
+		dockInDirection,
 		dockPosition,
 		liftDock,
 		occupant,
@@ -50,12 +51,14 @@
 		y: number;
 	} | null>(null);
 	let picker = $state<{ dock: DockId; index: number } | null>(null);
+	let activeDock = $state<DockId>('base');
 
 	const result = $derived(vowelOf(board));
 	const won = $derived(result === step.target);
 	const docks = $derived(visibleDocks(board));
 	const selectedIndex = $derived(Math.max(0, PALETTE.indexOf(selected)));
 	const pickerOptions = $derived(picker ? compatibleStamps(board, picker.dock) : []);
+	const tabDock = $derived((docks.includes(activeDock) ? activeDock : docks[0]) ?? 'base');
 
 	$effect(() => {
 		if (won && !solved) {
@@ -114,6 +117,51 @@
 		return `${dockName(id)} dock, ${fill}`;
 	}
 
+	function arrowDir(key: string): 'left' | 'right' | 'up' | 'down' | null {
+		switch (key) {
+			case 'ArrowLeft':
+				return 'left';
+			case 'ArrowRight':
+				return 'right';
+			case 'ArrowUp':
+				return 'up';
+			case 'ArrowDown':
+				return 'down';
+			default:
+				return null;
+		}
+	}
+
+	function armClickSkip() {
+		skipClick = true;
+		queueMicrotask(() => {
+			skipClick = false;
+		});
+	}
+
+	function closePicker() {
+		picker = null;
+	}
+
+	function onBoardFocusOut(e: FocusEvent) {
+		if (!picker) return;
+		const next = e.relatedTarget;
+		if (next instanceof Node && boardEl?.contains(next)) {
+			if (next instanceof HTMLElement && next.dataset.dock === picker.dock) return;
+			if (next instanceof HTMLElement && next.closest('[data-shape-picker]')) return;
+		}
+		closePicker();
+	}
+
+	function onWindowKey(e: KeyboardEvent) {
+		if (!picker || e.metaKey || e.ctrlKey || e.altKey) return;
+		if (e.key !== 'Escape') return;
+		e.preventDefault();
+		const id = picker.dock;
+		closePicker();
+		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${id}"]`)?.focus();
+	}
+
 	function onPaletteKey(e: KeyboardEvent) {
 		if (solved || e.metaKey || e.ctrlKey || e.altKey) return;
 		let delta = 0;
@@ -134,43 +182,50 @@
 		const id = e.target instanceof HTMLElement ? e.target.dataset.dock : undefined;
 		const i = id ? docks.indexOf(id as DockId) : -1;
 		if (i < 0) return;
-		if (picker) {
+		const focused = docks[i];
+		if (picker && picker.dock === focused) {
 			if (e.key === 'Escape') {
 				e.preventDefault();
-				picker = null;
+				closePicker();
 				return;
 			}
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
+				armClickSkip();
 				confirmPicker();
 				return;
 			}
-			let cycle = 0;
-			if (e.key === 'ArrowRight' || e.key === 'ArrowDown') cycle = 1;
-			else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') cycle = -1;
-			else return;
+			const cycleDir = arrowDir(e.key);
+			if (!cycleDir) return;
 			e.preventDefault();
 			const n = pickerOptions.length;
 			if (n === 0) return;
+			const cycle = cycleDir === 'right' || cycleDir === 'down' ? 1 : -1;
 			picker = { ...picker, index: (picker.index + cycle + n) % n };
+			return;
+		}
+		if (e.key === 'Escape' && picker) {
+			e.preventDefault();
+			closePicker();
 			return;
 		}
 		if (e.key === 'Delete' || e.key === 'Backspace') {
 			e.preventDefault();
-			board = clearDock(board, docks[i]);
+			board = clearDock(board, focused);
 			return;
 		}
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
-			activateDock(docks[i]);
+			armClickSkip();
+			activateDock(focused);
 			return;
 		}
-		let delta = 0;
-		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') delta = 1;
-		else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') delta = -1;
-		else return;
+		const dir = arrowDir(e.key);
+		if (!dir) return;
 		e.preventDefault();
-		const next = docks[(i + delta + docks.length) % docks.length];
+		if (picker) closePicker();
+		const next = dockInDirection(board, focused, dir);
+		activeDock = next;
 		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${next}"]`)?.focus();
 	}
 
@@ -255,12 +310,15 @@
 		}
 	}
 
-	function onDockClick(id: DockId) {
+	function onDockClick(id: DockId, e: MouseEvent) {
 		if (skipClick) {
 			skipClick = false;
 			return;
 		}
 		if (picker) {
+			// Keyboard Enter on a <button> also synthesizes click (detail 0).
+			// Closing on that click makes the wheel vanish as it opens.
+			if (e.detail === 0) return;
 			picker = null;
 			return;
 		}
@@ -268,7 +326,11 @@
 	}
 </script>
 
-<svelte:window onpointermove={onPointerMove} onpointerup={onPointerUp} />
+<svelte:window
+	onpointermove={onPointerMove}
+	onpointerup={onPointerUp}
+	onkeydown={onWindowKey}
+/>
 
 <Target target={step.target} name={step.targetName} />
 
@@ -278,6 +340,7 @@
 	data-dock-board
 	role="group"
 	aria-label="vowel board"
+	onfocusout={onBoardFocusOut}
 >
 	{#if result}
 		<span class="glyph" lang="ko">{result}</span>
@@ -288,6 +351,7 @@
 			type="button"
 			class={['dock', occupant(board, id) && 'held', id === 'base' && 'base']}
 			data-dock={id}
+			tabindex={solved ? -1 : id === tabDock ? 0 : -1}
 			style:left="{pos.x * 100}%"
 			style:top="{pos.y * 100}%"
 			aria-label={dockAria(id)}
@@ -295,9 +359,10 @@
 			aria-expanded={picker?.dock === id}
 			aria-controls={picker?.dock === id ? 'vowel-shape-picker' : undefined}
 			disabled={solved}
+			onfocus={() => (activeDock = id)}
 			onkeydown={onBoardKey}
 			onpointerdown={(e) => startDockDrag(id, e)}
-			onclick={() => onDockClick(id)}
+			onclick={(e) => onDockClick(id, e)}
 		></button>
 	{/each}
 	{#if picker}

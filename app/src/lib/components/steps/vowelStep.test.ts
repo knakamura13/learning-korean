@@ -166,6 +166,40 @@ describe('VowelStep dock board', () => {
 		expect(document.querySelector('[data-shape-picker]')).toBeNull();
 		expect(onSettle).toHaveBeenCalled();
 	});
+
+	it('keeps the picker open when a native button click follows Enter', () => {
+		render(VowelStep, { step: step('ㅡ', 'eu'), onSettle: () => {}, onNudge: () => {} });
+		const base = dock('base');
+		base.focus();
+		press(base, 'Enter');
+		base.click();
+		flushSync();
+		expect(document.querySelector('[data-shape-picker]')).toBeTruthy();
+		expect(dock('base').getAttribute('aria-label')).toMatch(/empty/);
+	});
+
+	it('moves ArrowRight from the standing stroke to the right tick dock', () => {
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle: () => {}, onNudge: () => {} });
+		const base = dock('base');
+		base.focus();
+		press(base, 'Enter');
+		press(base, 'Enter');
+		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅣ');
+		press(base, 'ArrowRight');
+		expect(document.activeElement).toBe(dock('right'));
+	});
+
+	it('closes the picker when focus leaves the dock', () => {
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle: () => {}, onNudge: () => {} });
+		const base = dock('base');
+		base.focus();
+		press(base, 'Enter');
+		expect(document.querySelector('[data-shape-picker]')).toBeTruthy();
+		stamp('ㅡ').focus();
+		base.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: stamp('ㅡ') }));
+		flushSync();
+		expect(document.querySelector('[data-shape-picker]')).toBeNull();
+	});
 });
 
 function press(el: HTMLElement, key: string) {

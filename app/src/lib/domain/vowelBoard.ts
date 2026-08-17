@@ -10,6 +10,7 @@ import { buildVowel, sidesFor, type TickSide } from './hangul';
 export type Stamp = 'ㅣ' | 'ㅡ' | 'tick';
 export type BaseStroke = 'ㅣ' | 'ㅡ';
 export type DockId = 'base' | TickSide | `${TickSide}2`;
+export type DockDir = 'left' | 'right' | 'up' | 'down';
 
 export interface BoardState {
 	base: BaseStroke | null;
@@ -82,6 +83,145 @@ export function sideOfDock(id: DockId): TickSide | null {
 
 export function isSecondaryDock(id: DockId): boolean {
 	return id !== 'base' && id.endsWith('2');
+}
+
+function neighborDock(from: DockId, direction: DockDir): DockId | null {
+	switch (from) {
+		case 'base':
+			switch (direction) {
+				case 'left':
+					return 'left';
+				case 'right':
+					return 'right';
+				case 'up':
+					return 'above';
+				case 'down':
+					return 'below';
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'left':
+			switch (direction) {
+				case 'left':
+					return 'left2';
+				case 'right':
+					return 'base';
+				case 'up':
+				case 'down':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'left2':
+			switch (direction) {
+				case 'right':
+					return 'left';
+				case 'left':
+				case 'up':
+				case 'down':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'right':
+			switch (direction) {
+				case 'left':
+					return 'base';
+				case 'right':
+					return 'right2';
+				case 'up':
+				case 'down':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'right2':
+			switch (direction) {
+				case 'left':
+					return 'right';
+				case 'right':
+				case 'up':
+				case 'down':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'above':
+			switch (direction) {
+				case 'up':
+					return 'above2';
+				case 'down':
+					return 'base';
+				case 'left':
+				case 'right':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'above2':
+			switch (direction) {
+				case 'down':
+					return 'above';
+				case 'up':
+				case 'left':
+				case 'right':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'below':
+			switch (direction) {
+				case 'up':
+					return 'base';
+				case 'down':
+					return 'below2';
+				case 'left':
+				case 'right':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		case 'below2':
+			switch (direction) {
+				case 'up':
+					return 'below';
+				case 'down':
+				case 'left':
+				case 'right':
+					return null;
+				default: {
+					const _exhaustive: never = direction;
+					return _exhaustive;
+				}
+			}
+		default: {
+			const _exhaustive: never = from;
+			return _exhaustive;
+		}
+	}
+}
+
+/** Next visible dock in a compass direction. Does not wrap. */
+export function dockInDirection(state: BoardState, from: DockId, direction: DockDir): DockId {
+	const next = neighborDock(from, direction);
+	if (!next) return from;
+	return visibleDocks(state).includes(next) ? next : from;
 }
 
 export function visibleDocks(state: BoardState): DockId[] {
