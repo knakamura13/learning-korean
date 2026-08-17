@@ -1,4 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
@@ -34,6 +36,25 @@ function physicalBoxProps(src: string): string[] {
 
 function physicalLeftRight(src: string): string[] {
 	return src.match(/(?:^|[^\w-])(?:left|right)\s*:/gm) ?? [];
+}
+
+function samplePngRgb(filePath: string, x?: number, y?: number): { r: number; g: number; b: number } {
+	const script = `
+from PIL import Image
+import json, sys
+im = Image.open(sys.argv[1])
+w, h = im.size
+px = int(sys.argv[2]) if len(sys.argv) > 2 else w // 2
+py = int(sys.argv[3]) if len(sys.argv) > 3 else h // 2
+p = im.getpixel((px, py))
+print(json.dumps(list(p[:3])))
+`.trim();
+	const args = [filePath, String(x ?? ''), String(y ?? '')].filter((a, i) => i === 0 || a !== '');
+	const out = execSync(`python3 -c "${script.replace(/"/g, '\\"')}" ${args.map((a) => `"${a}"`).join(' ')}`, {
+		encoding: 'utf8'
+	}).trim();
+	const [r, g, b] = JSON.parse(out) as [number, number, number];
+	return { r, g, b };
 }
 
 describe('polish audit regressions', () => {
@@ -97,6 +118,14 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
+	it('self-hosts Noto Serif KR for headings with optional display', () => {
+		expect(existsSync(new URL('../../static/fonts/NotoSerifKR-subset.woff2', import.meta.url))).toBe(true);
+		expect(systemCss).toMatch(/font-family: 'Noto Serif KR'/);
+		expect(systemCss).toMatch(/NotoSerifKR-subset\.woff2/);
+		expect(systemCss).toMatch(/font-display:\s*optional/);
+		expect(layout).toMatch(/activeSystem\.fonts/);
+	});
+
 	it('makes the Baseline Widely Available browser target explicit', () => {
 		expect(viteConfig).toMatch(/build:\s*\{[\s\S]*?target:\s*'baseline-widely-available'/);
 	});
@@ -104,6 +133,42 @@ describe('polish audit regressions', () => {
 	it('keeps caption-size ink-faint at least 7:1 against paper', () => {
 		expect(contrastRatio(activeSystem.light.inkFaint, activeSystem.light.paper)).toBeGreaterThanOrEqual(7);
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
+	});
+
+	it('uses moss and rose under prefers-contrast, not 태극 red', () => {
+		expect(appCss).not.toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#/);
+		expect(activeSystem.contrastMoreLight?.accent.toLowerCase()).toBe('#1e3d2c');
+		expect(activeSystem.contrastMoreLight?.rose.toLowerCase()).toBe('#5c2c33');
+		expect(systemCss).toContain('--accent: #1e3d2c');
+		expect(systemCss).toContain('--rose: #5c2c33');
+		expect(systemCss).not.toContain('--accent: #8a2a22');
+		expect(contrastRatio(activeSystem.contrastMoreLight!.accent, activeSystem.light.paper)).toBeGreaterThanOrEqual(
+			4.5
+		);
+		expect(contrastRatio(activeSystem.contrastMoreLight!.rose, activeSystem.light.paper)).toBeGreaterThanOrEqual(4.5);
+	});
+
+	it('locks Botanical Korea paper, moss, and rose with WCAG floors', () => {
+		expect(activeSystem.id).toBe('botanicalKorea');
+		const { light, dark } = activeSystem;
+		expect(light.paper.toLowerCase()).toBe('#faf5ee');
+		expect(light.accent.toLowerCase()).toBe('#315c45');
+		expect(light.accentInk.toLowerCase()).toBe('#fffdf8');
+		expect(light.rose.toLowerCase()).toBe('#7a3e46');
+		expect(dark.paper.toLowerCase()).toBe('#1a2420');
+		expect(dark.accent.toLowerCase()).toBe('#a6c1ae');
+		expect(dark.rose.toLowerCase()).toBe('#e8b4ba');
+		expect(systemCss).toContain('--paper: #faf5ee');
+		expect(systemCss).toContain('--rose: #7a3e46');
+		expect(systemCss).toContain('--rose-soft: #f3e6e8');
+		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(4.5);
+		for (const name of ['rose', 'good', 'blue', 'warn'] as const) {
+			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(4.5);
+			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(4.5);
+		}
 	});
 
 	it('sizes peek, backup summary, and pip hits to at least 44px with pip buffers', () => {
@@ -119,6 +184,59 @@ describe('polish audit regressions', () => {
 		const finish = labRunner.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
 		expect(finish).toMatch(/<h1>/);
 		expect(finish).not.toMatch(/<h2>/);
+	});
+
+	it('mounts cards as herbarium specimens without grain on the face', () => {
+		expect(appCss).toMatch(/\.card\s*\{[^}]*position:\s*relative/s);
+		expect(appCss).toMatch(/\.card::before/);
+		expect(appCss).toMatch(/\.card::after/);
+		expect(appCss).toMatch(/body\s*\{[\s\S]*background-image:/);
+		expect(appCss).not.toMatch(/body::before[\s\S]{0,200}z-index:\s*1000/);
+		expect(appCss).toMatch(/width='400'\s+height='400'/);
+		expect(appCss).toMatch(/background-size:\s*400px\s+400px/);
+	});
+
+	it('paints due and resume rose, and keeps primary actions moss', () => {
+		const homeCss = styleBlock(home);
+		const layoutCss = styleBlock(layout);
+		const reviewCss = styleBlock(review);
+		expect(home).toMatch(/chip-status due/);
+		expect(homeCss).toMatch(/\.chip-status\.due\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/a\.stat\.hot:not\(\.quiet\)[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/\.lab\.resume\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/a\.lab\.resume:hover\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*var\(--accent\)/s);
+		expect(homeCss).toMatch(/\.continue\s*\{[^}]*var\(--accent\)/s);
+		expect(layoutCss).toMatch(/\.badge\s*\{[^}]*var\(--rose\)/s);
+		expect(layoutCss).toMatch(/nav a\.active\s*\{[^}]*var\(--accent\)/s);
+		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
+	});
+
+	it('ships moss raster icons and OG, not 태극 red marks', () => {
+		const rasters = ['icon-192.png', 'apple-touch-icon.png', 'icon-maskable.png', 'og.png'] as const;
+		const taguk = { r: 164, g: 52, b: 43 };
+		const isTaguk = (r: number, g: number, b: number) =>
+			Math.abs(r - taguk.r) < 8 && Math.abs(g - taguk.g) < 8 && Math.abs(b - taguk.b) < 8;
+
+		for (const name of rasters) {
+			const path = fileURLToPath(new URL(`../../static/${name}`, import.meta.url));
+			expect(existsSync(path)).toBe(true);
+			const bytes = readFileSync(path);
+			expect(bytes.length).toBeGreaterThan(1000);
+			expect(bytes[0]).toBe(0x89);
+			expect(bytes[1]).toBe(0x50);
+			const sample =
+				name === 'og.png'
+					? samplePngRgb(path, 200, 300)
+					: samplePngRgb(path);
+			expect(isTaguk(sample.r, sample.g, sample.b)).toBe(false);
+		}
+	});
+
+	it('paints the favicon 한 on moss, not 태극 red', () => {
+		const svg = readFileSync(new URL('../../static/favicon.svg', import.meta.url), 'utf8');
+		expect(svg).toMatch(/fill="#315c45"/);
+		expect(svg).not.toMatch(/#a4342b/);
 	});
 
 	it('emits absolute Open Graph images only, with dimensions and a dark manifest', () => {

@@ -159,7 +159,7 @@
 	.badge {
 		font-family: var(--mono);
 		font-size: 0.62rem;
-		background: var(--accent);
+		background: var(--rose);
 		color: var(--accent-ink);
 		border-radius: var(--r-pill);
 		padding: 0.05rem 0.36rem;
