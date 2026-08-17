@@ -124,6 +124,21 @@ describe('VowelStep dock board', () => {
 		const last = onNudge.mock.calls.at(-1);
 		expect(last?.[1]).toBe(true);
 		expect(String(last?.[0])).toContain('ㅡ');
+		expect(shownDocks()).toEqual(['base']);
+		expect(document.querySelector('[data-dock="right"]')).toBeNull();
+	});
+
+	it('seats a tick on click even when the base stamp is still selected', () => {
+		const onSettle = vi.fn();
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle, onNudge: () => {} });
+		stamp('ㅣ').click();
+		flushSync();
+		dock('base').click();
+		flushSync();
+		expect(stamp('ㅣ').getAttribute('aria-checked')).toBe('true');
+		dock('right').click();
+		flushSync();
+		expect(onSettle).toHaveBeenCalled();
 	});
 
 	it('lays out empty ㅛ like the letter, not a stacked column', () => {
@@ -187,16 +202,26 @@ describe('VowelStep dock board', () => {
 		press(base, 'Enter');
 		const picker = document.querySelector('[data-shape-picker]');
 		expect(picker).toBeTruthy();
-		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅣ');
-		press(base, 'ArrowRight');
 		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅡ');
 		press(base, 'ArrowRight');
 		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅣ');
 		press(base, 'ArrowRight');
+		expect(picker?.querySelector('[aria-selected="true"]')?.getAttribute('data-stamp')).toBe('ㅡ');
 		press(base, 'Enter');
 		expect(onSettle).toHaveBeenCalled();
 		expect(document.querySelector('[data-shape-picker]')).toBeNull();
 		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅡ');
+	});
+
+	it('opens the base picker on the selected palette stroke', () => {
+		render(VowelStep, { step: step('ㅗ', 'o'), onSettle: () => {}, onNudge: () => {} });
+		expect(stamp('ㅡ').getAttribute('aria-checked')).toBe('true');
+		const base = dock('base');
+		base.focus();
+		press(base, 'Enter');
+		expect(
+			document.querySelector('[data-shape-picker] [aria-selected="true"]')?.getAttribute('data-stamp')
+		).toBe('ㅡ');
 	});
 
 	it('places a tick immediately when the dock only accepts a tick', () => {
@@ -262,6 +287,42 @@ describe('VowelStep dock board', () => {
 		dock('base').click();
 		flushSync();
 		expect(onSettle).toHaveBeenCalled();
+	});
+
+	it('teaches that the earth stroke must be seated before a tick on ㅗ', () => {
+		const onSettle = vi.fn();
+		const onNudge = vi.fn();
+		render(VowelStep, { step: step('ㅗ', 'o'), onSettle, onNudge });
+		dock('above').click();
+		flushSync();
+		const tip = document.querySelector('[data-tick-hint]');
+		expect(tip).toBeTruthy();
+		expect(tip?.textContent).toMatch(/earth stroke/i);
+		expect(tip?.textContent).toMatch(/modifier/i);
+		expect(onSettle).not.toHaveBeenCalled();
+		expect(onNudge).not.toHaveBeenCalled();
+		expect(document.querySelector('[data-dock-board]')?.textContent).not.toContain('ㅗ');
+	});
+
+	it('dismisses the tick-first hint once the long stroke is seated', () => {
+		render(VowelStep, { step: step('ㅗ', 'o'), onSettle: () => {}, onNudge: () => {} });
+		dock('above').click();
+		flushSync();
+		expect(document.querySelector('[data-tick-hint]')).toBeTruthy();
+		dock('base').click();
+		flushSync();
+		expect(document.querySelector('[data-tick-hint]')).toBeNull();
+		expect(document.querySelector('[data-dock-board]')?.textContent).toContain('ㅡ');
+	});
+
+	it('shows the standing-stroke hint from the keyboard on an empty ㅏ tick hole', () => {
+		render(VowelStep, { step: step('ㅏ', 'a'), onSettle: () => {}, onNudge: () => {} });
+		const right = dock('right');
+		right.focus();
+		press(right, 'Enter');
+		const tip = document.querySelector('[data-tick-hint]');
+		expect(tip).toBeTruthy();
+		expect(tip?.textContent).toMatch(/standing stroke/i);
 	});
 });
 

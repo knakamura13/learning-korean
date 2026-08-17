@@ -19,6 +19,7 @@
 		sideOfDock,
 		snapDock,
 		stampLabel,
+		tickBeforeBaseHint,
 		towardTarget,
 		vowelOf,
 		type DockId,
@@ -54,6 +55,7 @@
 		y: number;
 	} | null>(null);
 	let picker = $state<{ dock: DockId; index: number } | null>(null);
+	let tip = $state<DockId | null>(null);
 	let activeDock = $state<DockId>('base');
 	let hadNudge = $state(false);
 
@@ -78,7 +80,7 @@
 		} else if (result && !won && !solved) {
 			hadNudge = true;
 			onNudge(
-				`<p>That builds <span class="jamo">${result}</span>. Keep going — which stroke, how many ticks, and which side make <span class="jamo">${step.target}</span>?</p>`,
+				`<p>That builds <span class="jamo">${result}</span>. Keep going — which stroke and ticks make <span class="jamo">${step.target}</span>?</p>`,
 				true
 			);
 		}
@@ -94,8 +96,15 @@
 	function place(dock: DockId) {
 		if (solved) return;
 		const next = applyStamp(board, dock, selected);
-		if (next) board = next;
-		focusNextOpen();
+		if (next) {
+			board = next;
+			tip = null;
+			focusNextOpen();
+			return;
+		}
+		// Click uses the palette when that stamp can seat; otherwise match
+		// keyboard: a tick hole seats immediately, the base opens the picker.
+		activateDock(dock);
 	}
 
 	function seat(dock: DockId, stamp: Stamp) {
@@ -104,18 +113,28 @@
 		if (next) board = next;
 		selected = stamp;
 		picker = null;
+		tip = null;
 		focusNextOpen();
+	}
+
+	function pickerIndexFor(options: readonly Stamp[]): number {
+		const i = options.indexOf(selected);
+		return i >= 0 ? i : 0;
 	}
 
 	function activateDock(dock: DockId) {
 		if (solved) return;
 		const options = compatibleStamps(board, dock);
-		if (options.length === 0) return;
+		if (options.length === 0) {
+			if (dock !== 'base' && board.base === null) tip = dock;
+			return;
+		}
+		tip = null;
 		if (options.length === 1) {
 			seat(dock, options[0]);
 			return;
 		}
-		picker = { dock, index: 0 };
+		picker = { dock, index: pickerIndexFor(options) };
 	}
 
 	function confirmPicker() {
@@ -174,12 +193,19 @@
 	}
 
 	function onWindowKey(e: KeyboardEvent) {
-		if (!picker || e.metaKey || e.ctrlKey || e.altKey) return;
+		if (e.metaKey || e.ctrlKey || e.altKey) return;
 		if (e.key !== 'Escape') return;
-		e.preventDefault();
-		const id = picker.dock;
-		closePicker();
-		boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${id}"]`)?.focus();
+		if (picker) {
+			e.preventDefault();
+			const id = picker.dock;
+			closePicker();
+			boardEl?.querySelector<HTMLButtonElement>(`[data-dock="${id}"]`)?.focus();
+			return;
+		}
+		if (tip) {
+			e.preventDefault();
+			tip = null;
+		}
 	}
 
 	function onPaletteKey(e: KeyboardEvent) {
@@ -224,10 +250,17 @@
 			picker = { ...picker, index: (picker.index + cycle + n) % n };
 			return;
 		}
-		if (e.key === 'Escape' && picker) {
-			e.preventDefault();
-			closePicker();
-			return;
+		if (e.key === 'Escape') {
+			if (picker) {
+				e.preventDefault();
+				closePicker();
+				return;
+			}
+			if (tip) {
+				e.preventDefault();
+				tip = null;
+				return;
+			}
 		}
 		if (e.key === 'Delete' || e.key === 'Backspace') {
 			e.preventDefault();
@@ -324,11 +357,22 @@
 		);
 		if (next) {
 			const seated = applyLift(board, next, active.lift);
-			if (seated) board = seated;
-			else if (active.fromBoard) board = active.origin;
+			if (seated) {
+				board = seated;
+				tip = null;
+				focusNextOpen();
+			} else if (active.fromBoard) board = active.origin;
 		} else if (active.fromBoard) {
 			board = active.origin;
 		}
+	}
+
+	function onPointerCancel() {
+		pending = null;
+		if (!drag) return;
+		const active = drag;
+		drag = null;
+		if (active.fromBoard) board = active.origin;
 	}
 
 	function onDockClick(id: DockId, e: MouseEvent) {
@@ -350,10 +394,17 @@
 <svelte:window
 	onpointermove={onPointerMove}
 	onpointerup={onPointerUp}
+	onpointercancel={onPointerCancel}
 	onkeydown={onWindowKey}
 />
 
 <Target target={step.target} name={step.targetName} />
+
+{#if tip}
+	<div class="tick-hint" data-tick-hint role="status">
+		{tickBeforeBaseHint(step.target)}
+	</div>
+{/if}
 
 <div
 	class={['zone', won && 'win', result && 'filled']}
@@ -376,7 +427,7 @@
 			style:left="{pos.x * 100}%"
 			style:top="{pos.y * 100}%"
 			aria-label={dockAria(id)}
-			aria-haspopup="listbox"
+			aria-haspopup={compatibleStamps(board, id).length > 1 ? 'listbox' : undefined}
 			aria-expanded={picker?.dock === id}
 			aria-controls={picker?.dock === id ? 'vowel-shape-picker' : undefined}
 			disabled={solved}
@@ -530,16 +581,11 @@
 		border: none;
 		background: transparent;
 		cursor: grab;
-		opacity: 0;
 	}
 	.dock.open {
 		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
 	}
 	.zone.filled .dock.open { opacity: 1; }
-	.dock.held:focus-visible {
-		outline: none;
-		box-shadow: none;
-	}
 	.dock:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
@@ -560,6 +606,24 @@
 		background: var(--paper-raised);
 		box-shadow: var(--shadow-2);
 		transform: translate(-50%, calc(-100% - 0.5rem));
+	}
+
+	.tick-hint {
+		box-sizing: border-box;
+		width: 100%;
+		margin: 0 0 var(--s3);
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--accent);
+		border-radius: var(--r-sm);
+		background: var(--paper-raised);
+		box-shadow: var(--shadow-2);
+		font-family: var(--sans);
+		font-size: 0.7rem;
+		font-weight: 500;
+		line-height: 1.35;
+		letter-spacing: 0.01em;
+		color: var(--ink);
+		text-align: left;
 	}
 	.choice {
 		appearance: none;
@@ -670,9 +734,16 @@
 			color: ButtonText;
 			border-color: ButtonText;
 		}
-		.stamp.on, .dock.held {
+		.stamp.on {
 			background: Highlight;
 			color: HighlightText;
+			border-color: Highlight;
+		}
+		.dock.held {
+			background: transparent;
+			border-color: transparent;
+		}
+		.dock.held:focus-visible {
 			border-color: Highlight;
 		}
 	}

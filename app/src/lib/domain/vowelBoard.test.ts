@@ -14,6 +14,8 @@ import {
 	snapDock,
 	snapRadiusPx,
 	stampLabel,
+	tickBeforeBaseHint,
+	boardDocks,
 	placeholderDocks,
 	recipeDocks,
 	towardTarget,
@@ -75,6 +77,15 @@ describe('target placeholders', () => {
 		expect(towardTarget(board({ base: 'ㅡ' }), 'ㅏ')).toBe(false);
 		expect(towardTarget(EMPTY_BOARD, 'ㅏ')).toBe(false);
 		expect(towardTarget(board({ base: 'ㅣ', ticks: 2, side: 'right' }), 'ㅏ')).toBe(false);
+	});
+
+	it('keeps empty-board silhouettes, then drops tick holes that the seated base cannot take', () => {
+		expect(placeholderDocks(EMPTY_BOARD, 'ㅛ')).toEqual(['base', 'above', 'above2']);
+		expect(placeholderDocks(board({ base: 'ㅡ' }), 'ㅛ')).toEqual(['above', 'above2']);
+		expect(placeholderDocks(board({ base: 'ㅡ' }), 'ㅏ')).toEqual([]);
+		expect(boardDocks(board({ base: 'ㅡ' }), 'ㅏ')).toEqual(['base']);
+		expect(placeholderDocks(board({ base: 'ㅣ' }), 'ㅗ')).toEqual([]);
+		expect(boardDocks(board({ base: 'ㅣ' }), 'ㅗ')).toEqual(['base']);
 	});
 });
 
@@ -291,6 +302,17 @@ describe('palette and positions', () => {
 		expect(stampLabel('ㅣ')).toBe('standing stroke');
 		expect(stampLabel('ㅡ')).toBe('earth stroke');
 		expect(stampLabel('tick')).toBe('tick');
+	});
+
+	it('teaches that ticks wait for the long stroke of the target letter', () => {
+		const earth = tickBeforeBaseHint('ㅗ');
+		expect(earth).toMatch(/earth stroke/i);
+		expect(earth).toMatch(/modifier/i);
+		expect(earth).not.toMatch(/standing stroke/i);
+		const standing = tickBeforeBaseHint('ㅏ');
+		expect(standing).toMatch(/standing stroke/i);
+		expect(standing).toMatch(/modifier/i);
+		expect(standing).not.toMatch(/earth stroke/i);
 	});
 
 	it('lists stamps a dock will actually accept', () => {

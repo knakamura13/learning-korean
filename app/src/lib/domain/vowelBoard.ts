@@ -281,7 +281,16 @@ export function recipeDocks(vowel: string): DockId[] {
  */
 export function placeholderDocks(state: BoardState, target: string): DockId[] {
 	if (vowelOf(state) === target) return [];
-	return recipeDocks(target).filter((id) => occupant(state, id) === null);
+	const recipe = recipeOf(target);
+	return recipeDocks(target).filter((id) => {
+		if (occupant(state, id) !== null) return false;
+		// Empty boards keep the target silhouette. A seated wrong base cannot
+		// take those tick holes, so leave only the magnet that can be replaced.
+		if (id !== 'base' && state.base && recipe?.base && state.base !== recipe.base) {
+			return false;
+		}
+		return true;
+	});
 }
 
 /** Interactive docks: remaining placeholders plus occupied magnets. None on a win. */
@@ -430,4 +439,10 @@ export function stampLabel(stamp: Stamp): string {
 			return _exhaustive;
 		}
 	}
+}
+
+/** Copy for a tick hole clicked before any long stroke is seated. */
+export function tickBeforeBaseHint(target: string): string {
+	const base = recipeOf(target)?.base ?? 'ㅣ';
+	return `Seat the ${stampLabel(base)} in the center first. Korean vowels are built from a long stroke, then ticks hang on it as modifiers — never the other way around.`;
 }
