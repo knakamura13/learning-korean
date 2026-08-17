@@ -120,6 +120,19 @@ describe('Tray', () => {
 		expect(eo.textContent).toMatch(/first/i);
 	});
 
+	it('labels the selected consonant chip with the slot name', () => {
+		render(Tray, {
+			label: 'consonant',
+			items: ['ㄴ', 'ㅁ', 'ㅅ'],
+			selected: 'ㄴ',
+			onSelect: () => {}
+		});
+
+		const nieun = radioNamed(labeledGroup(document.body, 'consonant'), 'ㄴ');
+		expect(nieun.classList.contains('on')).toBe(true);
+		expect(nieun.querySelector('.mark')?.textContent?.trim()).toBe('consonant');
+	});
+
 	it('keeps disabled chips unclickable', () => {
 		const onSelect = vi.fn();
 		render(Tray, {

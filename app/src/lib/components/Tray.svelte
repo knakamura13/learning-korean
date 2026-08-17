@@ -124,7 +124,7 @@
 		border-radius: var(--r-sm);
 		min-width: 3.2rem;
 		min-height: 44px;
-		padding: 0.45rem 0.55rem;
+		padding: 0.5rem 1.15rem;
 		font-family: var(--hangul);
 		font-size: 1.55rem;
 		font-weight: 500;
@@ -169,9 +169,11 @@
 		font-family: var(--sans);
 		font-size: 0.52rem;
 		font-weight: 700;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.02em;
 		text-transform: uppercase;
 		line-height: 1;
+		padding-inline: 0.2rem;
+		text-align: center;
 	}
 
 	@media (forced-colors: active) {
