@@ -27,11 +27,7 @@ const light: Palette = {
 	warnSoft: '#faf2e0',
 	shadow1: '0 1px 2px rgba(26, 26, 24, 0.05), 0 1px 3px rgba(26, 26, 24, 0.04)',
 	shadow2: '0 2px 6px rgba(26, 26, 24, 0.07), 0 8px 20px rgba(26, 26, 24, 0.05)',
-	shadow3: '0 8px 24px rgba(26, 26, 24, 0.1), 0 20px 48px rgba(26, 26, 24, 0.07)',
-	serif: SERIF,
-	sans: SANS,
-	mono: MONO,
-	hangul: HANGUL
+	shadow3: '0 8px 24px rgba(26, 26, 24, 0.1), 0 20px 48px rgba(26, 26, 24, 0.07)'
 };
 
 const dark: Palette = {
@@ -56,11 +52,7 @@ const dark: Palette = {
 	warnSoft: '#2a2312',
 	shadow1: '0 1px 2px rgba(0, 0, 0, 0.4)',
 	shadow2: '0 2px 8px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3)',
-	shadow3: '0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35)',
-	serif: SERIF,
-	sans: SANS,
-	mono: MONO,
-	hangul: HANGUL
+	shadow3: '0 10px 30px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.35)'
 };
 
 /** Current ink-and-paper system (태극 red / blue). */
@@ -75,7 +67,21 @@ export const taegeuk: DesignSystem = {
 		rLg: '16px',
 		rPill: '999px'
 	},
-	fonts: [],
+	type: {
+		serif: SERIF,
+		sans: SANS,
+		mono: MONO,
+		hangul: HANGUL
+	},
+	fonts: [
+		{
+			family: 'Noto Sans KR',
+			file: 'NotoSansKR-subset.woff2',
+			style: 'normal',
+			weight: '400 600',
+			display: 'optional'
+		}
+	],
 	light,
 	dark,
 	contrastMoreLight: {

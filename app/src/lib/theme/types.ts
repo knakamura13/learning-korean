@@ -1,8 +1,9 @@
 /**
- * Semantic colour tokens every design system must fill.
+ * Semantic tokens every design system must fill.
  *
  * Components speak only this vocabulary (`var(--ink)`, `var(--paper)`, …).
- * A new look is a new `DesignSystem` that maps its palette onto these names.
+ * A new look is a new `DesignSystem` that maps its palette, type, shape,
+ * and webfonts onto these names.
  */
 export interface Palette {
 	ink: string;
@@ -27,6 +28,9 @@ export interface Palette {
 	shadow1: string;
 	shadow2: string;
 	shadow3: string;
+}
+
+export interface TypeStacks {
 	/** Headings. */
 	serif: string;
 	/** Body and UI chrome. Named `--sans` in CSS for historical reasons. */
@@ -42,25 +46,36 @@ export interface ShapeTokens {
 	rPill: string;
 }
 
+/** High-contrast ink/rule/accent overrides. Not a full palette. */
+export interface ContrastOverrides {
+	inkFaint: string;
+	rule: string;
+	ruleStrong: string;
+	accent: string;
+	accentSoft: string;
+}
+
 export interface FontFaceSpec {
 	family: string;
 	file: string;
 	style?: 'normal' | 'italic';
 	weight?: string;
+	display?: 'auto' | 'block' | 'swap' | 'fallback' | 'optional';
 }
 
 export interface DesignSystem {
 	id: string;
 	name: string;
 	fonts: FontFaceSpec[];
+	type: TypeStacks;
 	shape: ShapeTokens;
-	/** Root `html` font-size. */
+	/** Root `html` font-size (`--html-size`). */
 	htmlSize: string;
 	leading: string;
 	light: Palette;
 	dark: Palette;
-	contrastMoreLight?: Partial<Palette>;
-	contrastMoreDark?: Partial<Palette>;
+	contrastMoreLight?: ContrastOverrides;
+	contrastMoreDark?: ContrastOverrides;
 }
 
 export const PALETTE_CSS_VARS = {
@@ -85,9 +100,27 @@ export const PALETTE_CSS_VARS = {
 	warnSoft: '--warn-soft',
 	shadow1: '--shadow-1',
 	shadow2: '--shadow-2',
-	shadow3: '--shadow-3',
+	shadow3: '--shadow-3'
+} as const satisfies Record<keyof Palette, string>;
+
+export const TYPE_CSS_VARS = {
 	serif: '--serif',
 	sans: '--sans',
 	mono: '--mono',
 	hangul: '--hangul'
-} as const satisfies Record<keyof Palette, string>;
+} as const satisfies Record<keyof TypeStacks, string>;
+
+export const SHAPE_CSS_VARS = {
+	rSm: '--r-sm',
+	rMd: '--r-md',
+	rLg: '--r-lg',
+	rPill: '--r-pill'
+} as const satisfies Record<keyof ShapeTokens, string>;
+
+export const CONTRAST_CSS_VARS = {
+	inkFaint: '--ink-faint',
+	rule: '--rule',
+	ruleStrong: '--rule-strong',
+	accent: '--accent',
+	accentSoft: '--accent-soft'
+} as const satisfies Record<keyof ContrastOverrides, string>;

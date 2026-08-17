@@ -17,7 +17,7 @@ import manifest from '../../static/manifest.webmanifest?raw';
 import { activeSystem } from './theme/active';
 import { contrastRatio } from './theme/contrast';
 import { designSystemCss } from './theme/css';
-import { applyPaperPlaceholders } from './theme/placeholders';
+import { applyDesignSystem } from './theme/placeholders';
 
 const appCss = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
 const systemCss = designSystemCss(activeSystem);
@@ -87,8 +87,13 @@ describe('polish audit regressions', () => {
 	});
 
 	it('loads tokens from the active design system rather than hard-coding a palette', () => {
-		expect(layout).toMatch(/import 'virtual:design-system\.css'/);
+		expect(appHtml).toContain('%%DESIGN_SYSTEM_CSS%%');
+		expect(layout).toMatch(/activeSystem\.fonts/);
+		expect(layout).not.toMatch(/virtual:design-system/);
 		expect(appCss).not.toMatch(/--paper:\s*#/);
+		expect(appCss).toMatch(/--s1:/);
+		expect(appCss).toMatch(/font-size:\s*var\(--html-size\)/);
+		expect(appCss).toMatch(/line-height:\s*var\(--leading\)/);
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
@@ -127,7 +132,7 @@ describe('polish audit regressions', () => {
 		expect(appHtml).toMatch(/manifest-dark\.webmanifest/);
 		expect(appHtml).toMatch(/prefers-color-scheme:\s*dark/);
 		expect(appHtml).toContain('%%DESIGN_PAPER_LIGHT%%');
-		const resolvedHtml = applyPaperPlaceholders(appHtml, activeSystem);
+		const resolvedHtml = applyDesignSystem(appHtml, activeSystem);
 		expect(resolvedHtml).toContain(activeSystem.light.paper);
 		expect(resolvedHtml).toContain(activeSystem.dark.paper);
 		expect(manifest).toContain(`"theme_color": "${activeSystem.light.paper}"`);

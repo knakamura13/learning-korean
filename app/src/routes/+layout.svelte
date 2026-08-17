@@ -1,11 +1,11 @@
 <script lang="ts">
-	import 'virtual:design-system.css';
 	import '../app.css';
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { activeSystem } from '$lib/theme/active';
 
 	let { children } = $props();
 
@@ -22,13 +22,15 @@
 </script>
 
 <svelte:head>
-	<link
-		rel="preload"
-		href="{assets}/fonts/NotoSansKR-subset.woff2"
-		as="font"
-		type="font/woff2"
-		crossorigin="anonymous"
-	/>
+	{#each activeSystem.fonts as face (face.file)}
+		<link
+			rel="preload"
+			href="{assets}/fonts/{face.file}"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+	{/each}
 	{#if canonical}
 		<link rel="canonical" href={canonical} />
 		<meta property="og:url" content={canonical} />
