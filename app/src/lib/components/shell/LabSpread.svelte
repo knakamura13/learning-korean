@@ -7,19 +7,26 @@
 		after
 	}: {
 		article: Snippet;
-		well: Snippet;
+		well?: Snippet;
 		after?: Snippet;
 	} = $props();
 </script>
 
-<div class="spread">
-	<div class="article">{@render article()}</div>
-	<div class="spread-col">
-		<div class="well">{@render well()}</div>
-		{#if after}
+<div class={['spread', { solo: !well }]}>
+	<div class="article">
+		{@render article()}
+		{#if !well && after}
 			<div class="after">{@render after()}</div>
 		{/if}
 	</div>
+	{#if well}
+		<div class="spread-col">
+			<div class="well">{@render well()}</div>
+			{#if after}
+				<div class="after">{@render after()}</div>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -29,6 +36,12 @@
 		grid-template-areas:
 			'article'
 			'spread-col';
+	}
+
+	.spread.solo {
+		max-width: var(--measure);
+		width: 100%;
+		margin-inline: auto;
 	}
 
 	.article { grid-area: article; min-width: 0; }
@@ -60,6 +73,12 @@
 			grid-template-areas: 'article spread-col';
 			align-items: start;
 			max-width: var(--sitting);
+		}
+
+		.spread.solo {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-areas: 'article';
+			max-width: var(--measure);
 		}
 
 		.spread-col {
