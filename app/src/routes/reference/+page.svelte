@@ -66,6 +66,16 @@
 		return () => observer.disconnect();
 	});
 
+	function jumpToSection(id: string, event: MouseEvent) {
+		activeSection = id;
+		const el = document.getElementById(id);
+		if (!el) return;
+		event.preventDefault();
+		history.replaceState(null, '', `#${id}`);
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+	}
+
 	const SOUND: Record<string, string> = {
 		'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
 		'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '—', 'ㅈ': 'j', 'ㅉ': 'jj',
@@ -97,9 +107,7 @@
 					href="#{section.id}"
 					class:active={activeSection === section.id}
 					aria-current={activeSection === section.id ? 'location' : undefined}
-					onclick={() => {
-						activeSection = section.id;
-					}}
+					onclick={(event) => jumpToSection(section.id, event)}
 				>
 					{section.nav}
 				</a>
@@ -380,7 +388,7 @@
 
 	section {
 		margin-bottom: var(--s7);
-		scroll-margin-block-start: calc(9.5rem + env(safe-area-inset-top));
+		scroll-margin-block-start: calc(44px + env(safe-area-inset-top) + 12.5rem);
 	}
 
 	.sec {

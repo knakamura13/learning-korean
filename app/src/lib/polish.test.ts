@@ -96,6 +96,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(reference)).not.toMatch(/flex-wrap:\s*nowrap/);
 		expect(styleBlock(reference)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(reference)).toMatch(/\.toc\s*\{[^}]*position:\s*sticky/s);
+		expect(reference).toMatch(/function jumpToSection/);
+		expect(reference).toMatch(/scrollIntoView/);
 		expect(home).toMatch(/Review still waits/);
 		expect(styleBlock(home)).toMatch(/grid-template-areas:/);
 	});
