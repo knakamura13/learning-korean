@@ -291,7 +291,7 @@ function chipCopy(
 			};
 		case 'done':
 			return {
-				chip: '✓ completed',
+				chip: '',
 				actionLabel: 'Open lab',
 				statusPhrase: 'completed'
 			};

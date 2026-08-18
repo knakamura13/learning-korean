@@ -157,11 +157,6 @@
 		background: var(--rose-soft);
 		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
 	}
-	.chip[data-kind='done'] {
-		color: var(--ink-faint);
-		background: transparent;
-		border-color: var(--rule-strong);
-	}
 	.chip[data-kind='start'] {
 		color: var(--accent-ink);
 		background: var(--accent);

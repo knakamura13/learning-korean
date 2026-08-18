@@ -505,9 +505,9 @@
 	}
 
 	.num.go {
-		color: var(--accent);
-		background: var(--accent-soft);
-		border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+		color: var(--accent-ink);
+		background: var(--accent);
+		border-color: var(--accent);
 	}
 	.num.open {
 		color: var(--accent);
@@ -532,8 +532,9 @@
 	}
 	.num.go:hover,
 	.num.go:focus-visible {
-		background: var(--accent-soft);
-		color: var(--accent);
+		background: var(--accent);
+		color: var(--accent-ink);
+		filter: brightness(1.07);
 	}
 
 	@media (forced-colors: active) {

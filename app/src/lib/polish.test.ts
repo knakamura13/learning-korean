@@ -499,33 +499,31 @@ describe('polish audit regressions', () => {
 		expect(review).not.toMatch(/type the romanization/);
 	});
 
-	it('archives completed labs and spotlights next-up without mint-on-mint chips', () => {
+	it('archives completed labs and inverts the next-up card like a button', () => {
 		const homeCss = styleBlock(home);
 		const railCss = styleBlock(labIndexRail);
 		const previewCss = styleBlock(labPreview);
 
 		expect(home).toMatch(/class:now=\{card\.startHere\}/);
-		expect(homeCss).toMatch(/\.lab\.now\s*\{[^}]*var\(--accent\)/s);
-		expect(homeCss).toMatch(/\.lab\.now\s*\{[^}]*border-inline-start-width:\s*3px/s);
-		expect(homeCss).toMatch(/\.lab\.now \.num\s*\{[^}]*var\(--accent\)/s);
+		expect(home).not.toMatch(/chip-status ok/);
+		expect(home).toMatch(/chip-status go/);
+		expect(homeCss).toMatch(/\.lab\.now\s*\{[^}]*background:\s*var\(--accent\)/s);
+		expect(homeCss).toMatch(/\.lab\.now\s*\{[^}]*color:\s*var\(--accent-ink\)/s);
+		expect(homeCss).toMatch(/\.lab\.now \.num\s*\{[^}]*var\(--accent-ink\)/s);
 		expect(homeCss).not.toMatch(/\.lab\.done \.num\s*\{[^}]*var\(--good\)/s);
 		expect(homeCss).toMatch(/\.lab\.done \.num\s*\{[^}]*var\(--ink-faint\)/s);
-		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*color:\s*var\(--accent-ink\)/s);
-		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*background:\s*var\(--accent\)/s);
-		expect(homeCss).toMatch(/\.chip-status\.ok\s*\{[^}]*background:\s*transparent/s);
-		expect(homeCss).not.toMatch(/\.chip-status\.ok\s*\{[^}]*var\(--good\)/s);
-		expect(homeCss).toMatch(/a\.lab\.done:hover\s*\{[^}]*border-color:\s*var\(--rule-strong\)/s);
-		expect(homeCss).toMatch(/a\.lab\.done:hover\s*\{[^}]*color:\s*inherit/s);
-		expect(homeCss).toMatch(/a\.lab\.now:hover\s*\{[^}]*var\(--accent\)/s);
-		expect(homeCss).toMatch(/a\.lab:hover \.chip-status\.go\s*\{[^}]*var\(--accent-ink\)/s);
+		expect(homeCss).toMatch(/a\.lab:hover\s*\{[^}]*translateY\(-2px\)/s);
+		expect(homeCss).not.toMatch(/a\.lab\.done:hover\s*\{[^}]*transform:\s*none/s);
+		expect(homeCss).toMatch(/a\.lab\.now:hover\s*\{[^}]*var\(--accent-ink\)/s);
+		expect(homeCss).toMatch(/\.lab\.now \.chip-status\.go\s*\{[^}]*background:\s*var\(--accent-ink\)/s);
 
-		expect(railCss).toMatch(/\.num\.go\s*\{[^}]*var\(--accent-soft\)/s);
+		expect(railCss).toMatch(/\.num\.go\s*\{[^}]*background:\s*var\(--accent\)/s);
+		expect(railCss).toMatch(/\.num\.go\s*\{[^}]*color:\s*var\(--accent-ink\)/s);
 		expect(railCss).not.toMatch(/\.num\.done\s*\{[^}]*var\(--good\)/s);
 		expect(railCss).toMatch(/\.num\.done\s*\{[^}]*var\(--ink-faint\)/s);
 
 		expect(previewCss).toMatch(/\.chip\[data-kind='start'\]\s*\{[^}]*var\(--accent-ink\)/s);
-		expect(previewCss).toMatch(/\.chip\[data-kind='done'\]\s*\{[^}]*background:\s*transparent/s);
-		expect(previewCss).not.toMatch(/\.chip\[data-kind='done'\]\s*\{[^}]*var\(--good\)/s);
+		expect(previewCss).not.toMatch(/\.chip\[data-kind='done'\]/);
 	});
 
 	it('paints due and resume rose, and keeps primary actions moss', () => {

@@ -106,8 +106,6 @@
 								<span class="flag">
 									{#if card.resumeAt !== null}
 										<span class="chip-status due">resume · card {card.resumeAt + 1} of {lab.steps.length}</span>
-									{:else if card.done}
-										<span class="chip-status ok">✓ completed</span>
 									{:else if card.startHere}
 										<span class="chip-status go">start here</span>
 									{/if}
@@ -214,23 +212,22 @@
 		text-decoration: none;
 		color: inherit;
 		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
-			border-color var(--fast) var(--ease);
+			border-color var(--fast) var(--ease), filter var(--fast) var(--ease),
+			background var(--fast) var(--ease), color var(--fast) var(--ease);
 	}
 	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
 	a.lab:active {
 		transform: translateY(0);
 		box-shadow: var(--shadow-1);
 	}
-	a.lab.now:hover { border-color: var(--accent); }
-	a.lab.resume:hover { border-color: var(--rose); }
-	a.lab.done:hover {
-		transform: none;
-		box-shadow: var(--shadow-1);
-		border-color: var(--rule-strong);
-		color: inherit;
-	}
-	a.lab:hover .chip-status.go {
+	a.lab.now:hover {
+		border-color: var(--accent);
 		color: var(--accent-ink);
+		filter: brightness(1.07);
+	}
+	a.lab.resume:hover { border-color: var(--rose); }
+	a.lab.now:hover .chip-status.go {
+		color: var(--accent);
 	}
 
 	.num {
@@ -241,10 +238,19 @@
 		line-height: 1.2;
 	}
 	.lab.now {
+		background: var(--accent);
+		color: var(--accent-ink);
 		border-color: var(--accent);
-		border-inline-start-width: 3px;
 	}
-	.lab.now .num { color: var(--accent); }
+	.lab.now .num { color: var(--accent-ink); }
+	.lab.now p,
+	.lab.now .meta {
+		color: color-mix(in srgb, var(--accent-ink) 82%, var(--accent));
+	}
+	a.lab.now::before,
+	a.lab.now::after {
+		border-color: color-mix(in srgb, var(--accent-ink) 40%, transparent);
+	}
 	.lab.done .num { color: var(--ink-faint); }
 	.lab.resume { border-color: var(--rose); }
 	.lab.resume .num { color: var(--rose); }
@@ -277,11 +283,6 @@
 		line-height: 1.2;
 		border: 1px solid transparent;
 	}
-	.chip-status.ok {
-		color: var(--ink-faint);
-		background: transparent;
-		border-color: var(--rule-strong);
-	}
 	.chip-status.wait {
 		color: var(--warn);
 		background: var(--warn-soft);
@@ -291,6 +292,11 @@
 		color: var(--accent-ink);
 		background: var(--accent);
 		border-color: var(--accent);
+	}
+	.lab.now .chip-status.go {
+		color: var(--accent);
+		background: var(--accent-ink);
+		border-color: var(--accent-ink);
 	}
 	.chip-status.due {
 		color: var(--rose);
@@ -378,7 +384,22 @@
 	.sw.n { background: var(--rule-strong); }
 
 	@media (forced-colors: active) {
-		.lab.now { border-color: Highlight; }
+		.lab.now {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+			filter: none;
+		}
+		.lab.now .num,
+		.lab.now p,
+		.lab.now .meta {
+			color: HighlightText;
+		}
+		.lab.now .chip-status.go {
+			color: Highlight;
+			background: HighlightText;
+			border-color: HighlightText;
+		}
 		.lab.resume { border-color: Highlight; }
 		.track { background: Canvas; }
 		.track .m { background: Highlight; }
