@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import src from './ReferenceIndexRail.svelte?raw';
 import preview from './ReferencePreview.svelte?raw';
+import hoverPreview from './hoverPreview.svelte.ts?raw';
 
 function styleBlock(markup: string): string {
 	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
@@ -35,12 +36,13 @@ describe('ReferenceIndexRail source contracts', () => {
 	});
 
 	it('keeps a hover bridge between the jump and the preview', () => {
-		expect(src).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
-		expect(src).toMatch(/decideHoverIntent/);
-		expect(src).toMatch(/<svelte:body onpointermove=\{onHoverIntentMove\}/);
-		expect(src).toMatch(/onPointerEnter=\{onPreviewPointerEnter\}/);
-		expect(src).toMatch(/isHoverPointerType/);
-		expect(src).toMatch(/expandHoverBox/);
+		expect(src).toMatch(/HoverPreview/);
+		expect(hoverPreview).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
+		expect(hoverPreview).toMatch(/decideHoverIntent/);
+		expect(src).toMatch(/<svelte:body onpointermove=\{hover\.onHoverIntentMove\}/);
+		expect(src).toMatch(/onPointerEnter=\{hover\.onPreviewPointerEnter\}/);
+		expect(hoverPreview).toMatch(/isHoverPointerType/);
+		expect(hoverPreview).toMatch(/expandHoverBox/);
 		expect(src).not.toMatch(/matchMedia\('\(hover: hover\)/);
 	});
 
@@ -50,11 +52,12 @@ describe('ReferenceIndexRail source contracts', () => {
 		expect(preview).not.toMatch(/role=["']dialog["']/);
 		expect(preview).not.toMatch(/role=\{dialog/);
 		expect(src).toMatch(/aria-expanded=\{expanded\}/);
-		expect(src).toMatch(/aria-controls=\{expanded \? panelId : undefined\}/);
+		expect(src).toMatch(/aria-controls=\{expanded \? hover\.panelId : undefined\}/);
 	});
 
 	it('jumps on click instead of arming a second tap', () => {
 		expect(src).toMatch(/onJump/);
+		expect(src).toMatch(/hover\.prepareActivate/);
 		expect(src).not.toMatch(/decideUnlockedPress/);
 		expect(src).not.toMatch(/armedForNavigate/);
 	});
