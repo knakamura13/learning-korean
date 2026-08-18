@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Options from '../Options.svelte';
 	import type { ReadStep } from '$lib/content/types';
-	import { settleAdvancePick } from '$lib/domain/advancePick';
+	import { resolveChoicePick } from '$lib/domain/advancePick';
 	import { fly } from 'svelte/transition';
 
-	let { step, onSettle }: {
+	let { step, onSettle, onNudge }: {
 		step: ReadStep;
 		onSettle: (teach?: string, correct?: boolean) => void;
 		onNudge: (html: string, soft?: boolean) => void;
@@ -22,8 +22,19 @@
 	}
 
 	function handle(correct: boolean) {
-		const result = settleAdvancePick(correct, step);
-		onSettle(result.overrideTeach, result.correct);
+		const result = resolveChoicePick(correct, step);
+		switch (result.action) {
+			case 'settle':
+				onSettle(undefined, result.correct);
+				return;
+			case 'nudge':
+				onNudge(result.html);
+				return;
+			default: {
+				const _exhaustive: never = result;
+				return _exhaustive;
+			}
+		}
 	}
 </script>
 
