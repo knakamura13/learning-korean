@@ -79,6 +79,14 @@ describe('polish audit regressions', () => {
 		expect(labRunner).toMatch(/showModal\s*\(/);
 	});
 
+	it('does not paint a focus ring on the lab instruction heading', () => {
+		const css = styleBlock(labRunner);
+		const doFocus = css.match(/\.do:focus(?:-visible)?(?:\s*,\s*\.do:focus(?:-visible)?)?\s*\{[^}]*\}/)?.[0] ?? '';
+		expect(doFocus).toMatch(/outline:\s*none/);
+		expect(doFocus).toMatch(/box-shadow:\s*none/);
+		expect(css).toMatch(/\.do:focus-visible/);
+	});
+
 	it('gives the theme control pressed-state feedback', () => {
 		expect(themeToggle).toMatch(/\.theme:active\s*\{/);
 	});
