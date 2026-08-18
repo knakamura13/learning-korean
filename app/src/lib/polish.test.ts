@@ -99,6 +99,11 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:hover\s*\{/);
 	});
 
+	it('keeps filled button labels visible when a .btn link is hovered', () => {
+		expect(appCss).toMatch(/a:hover:not\(\.btn\)\s*\{[^}]*color:\s*var\(--accent\)/s);
+		expect(appCss).toMatch(/\.btn:hover\s*\{[^}]*color:\s*var\(--accent-ink\)/s);
+	});
+
 	it('reserves the lab well with a mouth-sized skeleton until widgets can mount', () => {
 		const well = labRunner.match(/\{#snippet well\(\)\}([\s\S]*?)\{\/snippet\}/)?.[1] ?? '';
 		expect(well).toMatch(/\{#if ready\}/);
