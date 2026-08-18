@@ -149,13 +149,10 @@
 			aria-label="Review pile by letter family"
 		>
 			{#if pile.body === 'loading'}
-				{#each tiers as tier (tier.id)}
-					<div class="tier" aria-hidden="true">
-						<span class="nm">{tier.label}</span>
-						<span class="track"><span class="skel fill"></span></span>
-						<span class="ct"><span class="skel count"></span></span>
-					</div>
-				{/each}
+				<p class="pile-empty loading-copy" aria-hidden="true">
+					<span class="skel line-ph"></span>
+					<span class="skel line-ph short"></span>
+				</p>
 			{:else if pile.body === 'empty'}
 				<p class="pile-empty">
 					Letters land here after you finish a lab. Lab 01 unlocks
@@ -407,17 +404,21 @@
 		color: var(--ink-soft);
 		max-width: 32rem;
 	}
-
-	.track .skel.fill {
-		display: block;
-		width: 100%;
-		height: 100%;
-		border-radius: 4px;
+	.pile-empty.loading-copy {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s2);
+		min-height: 2.6rem;
+		justify-content: center;
 	}
-	.ct .skel.count {
-		display: inline-block;
-		width: 5.5ch;
-		height: 0.7rem;
+	.pile-empty .line-ph {
+		width: 22rem;
+		max-width: 90%;
+		height: 0.85rem;
+	}
+	.pile-empty .line-ph.short {
+		width: 14rem;
+		max-width: 70%;
 	}
 
 	.tier {

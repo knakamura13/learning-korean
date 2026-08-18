@@ -492,6 +492,8 @@ describe('polish audit regressions', () => {
 		expect(home).toMatch(/reviewPileView/);
 		expect(home).toMatch(/<a\s[^>]*class="chip-status wait"/);
 		expect(home).toMatch(/Letters land here after you finish a lab/);
+		expect(home).toMatch(/pile-empty loading-copy/);
+		expect(styleBlock(home)).toMatch(/\.pile-empty\.loading-copy/);
 	});
 
 	it('does not ship fascicle journal words in UI chrome', () => {
