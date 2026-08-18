@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount, tick, type Snippet } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import type { Lab } from '$lib/content/types';
@@ -38,7 +38,7 @@
 	import ReadStep from './steps/ReadStep.svelte';
 	import LabSpread from './shell/LabSpread.svelte';
 
-	let { lab, letterAsk }: { lab: Lab; letterAsk?: Snippet } = $props();
+	let { lab }: { lab: Lab } = $props();
 
 	let index = $state(0);
 	let settled = $state(false);
@@ -543,7 +543,6 @@
 					{/if}
 				{/key}
 			{/if}
-			{@render letterAsk?.()}
 		{/snippet}
 	</LabSpread>
 {/if}
