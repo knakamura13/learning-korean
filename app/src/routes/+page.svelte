@@ -134,7 +134,12 @@
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									<span class="chip-status wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
-									<a class="peek" href={resolve('/lab/[id]', { id: lab.id })} aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
+									<a
+										class="peek"
+										href={resolve('/lab/[id]', { id: lab.id })}
+										title="You can look at the cards. Review still waits until you finish Lab {prior ? pad(prior.number) : ''}."
+										aria-label="Preview Lab {pad(lab.number)} without finishing Lab {prior ? pad(prior.number) : ''}. Review still waits."
+									>Open anyway</a>
 								</span>
 							</div>
 						</div>
@@ -510,11 +515,12 @@
 	.track .n { background: var(--rule-strong); }
 	.ct {
 		flex: 0 0 auto;
-		min-width: 14ch;
+		min-width: 8ch;
 		text-align: end;
 		font-family: var(--mono);
 		font-size: 0.72rem;
 		color: var(--ink-faint);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.legend {
@@ -559,8 +565,27 @@
 		.sw.n { background: GrayText; }
 	}
 
+	@media (max-width: 40rem) {
+		.tier {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-areas:
+				'nm ct'
+				'track track';
+			column-gap: var(--s2);
+			row-gap: var(--s1);
+			align-items: baseline;
+		}
+		.nm {
+			grid-area: nm;
+			flex: none;
+			min-width: 0;
+		}
+		.ct { grid-area: ct; min-width: 0; }
+		.track { grid-area: track; width: 100%; }
+	}
+
 	@media (max-width: 34rem) {
-		.nm { flex-basis: 6.5rem; }
 		.continue { gap: var(--s3); padding: var(--s3); }
 		.continue-title { font-size: 1.1rem; }
 	}

@@ -135,6 +135,18 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(reference)).not.toMatch(/to inline-end/);
 	});
 
+	it('keeps every Reference section on screen instead of a hiding carousel', () => {
+		expect(reference).toMatch(/REFERENCE_SECTIONS/);
+		expect(styleBlock(reference)).toMatch(/\.quick-nav\s*\{[^}]*flex-wrap:\s*wrap/s);
+		expect(styleBlock(reference)).not.toMatch(/flex-wrap:\s*nowrap/);
+		expect(styleBlock(reference)).not.toMatch(/overflow-x:\s*auto/);
+		expect(styleBlock(reference)).toMatch(/\.toc\s*\{[^}]*position:\s*sticky/s);
+		expect(reference).toMatch(/function jumpToSection/);
+		expect(reference).toMatch(/scrollIntoView/);
+		expect(home).toMatch(/Review still waits/);
+		expect(styleBlock(home)).toMatch(/grid-template-areas:/);
+	});
+
 	it('uses logical properties in shared directional layout', () => {
 		expect(appCss).not.toMatch(/\bmargin-left\s*:/);
 		expect(labRunner).not.toMatch(/\bleft\s*:\s*0/);
@@ -304,7 +316,9 @@ describe('polish audit regressions', () => {
 
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
 		const css = styleBlock(reference);
-		expect(css).toMatch(/section\s*\{[^}]*scroll-margin-top:\s*calc\(var\(--s7\) \+ 2rem\)/s);
+		expect(css).toMatch(
+			/section\s*\{[^}]*scroll-margin-block-start:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ 12\.5rem\)/s
+		);
 		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100dvh/s);
 	});
 
