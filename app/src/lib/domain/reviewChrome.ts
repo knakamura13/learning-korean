@@ -30,7 +30,7 @@ export function reviewChrome(input: {
 	};
 }
 
-/** Short enough to sit beside Check on a phone; examples beat the word "romanization". */
+/** Short enough to sit in a phone-width field; examples beat the word "romanization". */
 export function reviewAnswerPlaceholder(kind: string): string {
-	return kind === 'pron' ? 'han-gu-geo or 한구거' : 'e.g. g, eo, silent';
+	return kind === 'pron' ? 'han-gu-geo or 한구거' : 'g, eo, silent';
 }

@@ -64,7 +64,7 @@ describe('reviewAnswerPlaceholder', () => {
 	});
 
 	it('hints letter answers without the word romanization', () => {
-		expect(reviewAnswerPlaceholder('consonant')).toBe('e.g. g, eo, silent');
-		expect(reviewAnswerPlaceholder('vowel')).toBe('e.g. g, eo, silent');
+		expect(reviewAnswerPlaceholder('consonant')).toBe('g, eo, silent');
+		expect(reviewAnswerPlaceholder('vowel')).toBe('g, eo, silent');
 	});
 });

@@ -40,8 +40,8 @@ describe('review answer field', () => {
 		expect(src).toMatch(/input\?\.focus\(\{\s*preventScroll:\s*true\s*\}\)/);
 	});
 
-	it('stacks the answer field above Check on the narrowest phones', () => {
-		expect(src).toMatch(/@media \(max-width: 22rem\)/);
-		expect(src).toMatch(/\.answer-controls \.in \{ flex: 1 1 100%; \}/);
+	it('stacks the answer field above Check on phones', () => {
+		expect(src).toMatch(/@media \(max-width: 36rem\)/);
+		expect(src).toMatch(/\.answer-controls \.in,\s*\.answer-controls \.btn \{ flex: 1 1 100%; \}/);
 	});
 });

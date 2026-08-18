@@ -499,9 +499,11 @@
 		height: auto;
 	}
 
-	@media (max-width: 22rem) {
+	@media (max-width: 36rem) {
 		.answer-controls { flex-wrap: wrap; }
-		.answer-controls .in { flex: 1 1 100%; }
+		.answer-controls .in,
+		.answer-controls .btn { flex: 1 1 100%; }
+		.answer-controls .btn { justify-content: center; }
 	}
 
 	.answer-label {
