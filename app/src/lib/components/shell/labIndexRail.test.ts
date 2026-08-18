@@ -49,6 +49,13 @@ describe('LabIndexRail source contracts', () => {
 		expect(src).toMatch(/onpointerdown=\{onWindowPointerDown\}/);
 	});
 
+	it('keeps a hover bridge between the number and the preview', () => {
+		expect(src).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
+		expect(src).toMatch(/decideHoverIntent/);
+		expect(src).toMatch(/<svelte:body onpointermove=\{onHoverIntentMove\}/);
+		expect(src).toMatch(/onPointerEnter=\{onPreviewPointerEnter\}/);
+	});
+
 	it('treats the preview as a disclosure, not a fake modal', () => {
 		expect(preview).not.toMatch(/aria-modal="true"/);
 		expect(preview).not.toMatch(/aria-modal/);

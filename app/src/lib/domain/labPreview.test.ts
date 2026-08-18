@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { labCardState, type CourseLab, type CourseNavView } from './courseNav';
 import {
 	anchorPopover,
+	decideHoverIntent,
 	decideItemFocusOpen,
 	decideUnlockedPress,
 	decideWindowEscape,
+	hoverBridgePolygon,
+	isPointInHoverBridge,
 	labPreviewModel,
 	previewChipKind,
+	svgPolygonPoints,
 	type PreviewOpenMode
 } from './labPreview';
 
@@ -62,6 +66,47 @@ describe('anchorPopover', () => {
 		const placed = anchorPopover(rect, { w: 320, h: 220 }, { w: 1200, h: 800 });
 		expect(placed.left).toBe(76);
 		expect(placed.top).toBe(52);
+	});
+});
+
+describe('hoverBridgePolygon', () => {
+	const apex = { x: 42, y: 222 };
+	const panel = { left: 76, top: 212, right: 396, bottom: 480 };
+
+	it('covers the 12px gap and the diagonal path toward Open anyway', () => {
+		const poly = hoverBridgePolygon(apex, panel);
+		expect(poly).toHaveLength(3);
+		expect(isPointInHoverBridge({ x: 70, y: 220 }, apex, panel)).toBe(true);
+		expect(isPointInHoverBridge({ x: 70, y: 360 }, apex, panel)).toBe(true);
+		expect(isPointInHoverBridge({ x: 42, y: 296 }, apex, panel)).toBe(false);
+		expect(isPointInHoverBridge({ x: 10, y: 100 }, apex, panel)).toBe(false);
+		expect(isPointInHoverBridge({ x: 500, y: 300 }, apex, panel)).toBe(false);
+	});
+
+	it('connects the left edge when the panel flips past the number', () => {
+		const flipped = { left: 8, top: 40, right: 328, bottom: 260 };
+		const apexRight = { x: 1122, y: 100 };
+		expect(isPointInHoverBridge({ x: 340, y: 100 }, apexRight, flipped)).toBe(true);
+		expect(isPointInHoverBridge({ x: 800, y: 400 }, apexRight, flipped)).toBe(false);
+	});
+
+	it('serializes SVG polygon points', () => {
+		expect(svgPolygonPoints(hoverBridgePolygon(apex, panel))).toMatch(/^\d/);
+	});
+});
+
+describe('decideHoverIntent', () => {
+	it('does not freeze cursor-follow while the pointer is still on the number', () => {
+		expect(decideHoverIntent(true, false, true)).toEqual({ action: 'stay', freezeFollow: false });
+	});
+
+	it('stays open and freezes follow on the card or the bridge', () => {
+		expect(decideHoverIntent(false, true, false)).toEqual({ action: 'stay', freezeFollow: true });
+		expect(decideHoverIntent(false, false, true)).toEqual({ action: 'stay', freezeFollow: true });
+	});
+
+	it('closes once the pointer leaves the number, card, and bridge', () => {
+		expect(decideHoverIntent(false, false, false)).toEqual({ action: 'close' });
 	});
 });
 
