@@ -128,11 +128,11 @@ describe('polish audit regressions', () => {
 		expect(css).toMatch(/text-align:\s*start/);
 	});
 
-	it('uses logical gradient directions in pip and reference masks', () => {
-		expect(styleBlock(labRunner)).not.toMatch(/to right/);
-		expect(styleBlock(labRunner)).toMatch(/to inline-end/);
-		expect(styleBlock(reference)).not.toMatch(/to right/);
-		expect(styleBlock(reference)).toMatch(/to inline-end/);
+	it('keeps physical gradient sides because logical gradient keywords are not Baseline', () => {
+		expect(styleBlock(labRunner)).toMatch(/to right/);
+		expect(styleBlock(labRunner)).not.toMatch(/to inline-end/);
+		expect(styleBlock(reference)).toMatch(/to right/);
+		expect(styleBlock(reference)).not.toMatch(/to inline-end/);
 	});
 
 	it('uses logical properties in shared directional layout', () => {

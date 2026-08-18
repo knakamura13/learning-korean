@@ -592,14 +592,14 @@
 		-webkit-mask-size: 100% 100%;
 		mask-size: 100% 100%;
 		-webkit-mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 0.75rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 0.75rem),
@@ -608,14 +608,14 @@
 	}
 	.rail-clip.fade-right {
 		-webkit-mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 1.15rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 1.15rem),
@@ -624,14 +624,14 @@
 	}
 	.rail-clip.fade-left {
 		-webkit-mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 0.75rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 0.75rem),
@@ -640,14 +640,14 @@
 	}
 	.rail-clip.fade-left.fade-right {
 		-webkit-mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 1.15rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to inline-end,
+			to right,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 1.15rem),

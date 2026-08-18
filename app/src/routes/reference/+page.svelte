@@ -334,7 +334,7 @@
 			scrollbar-color: var(--rule) transparent;
 			scrollbar-width: thin;
 			-webkit-overflow-scrolling: touch;
-			mask-image: linear-gradient(to inline-end, #000 0, #000 calc(100% - 2rem), transparent);
+			mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2rem), transparent);
 			padding-inline-end: 2rem;
 		}
 		.quick-nav a {
