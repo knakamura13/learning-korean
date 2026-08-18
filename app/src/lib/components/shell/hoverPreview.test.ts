@@ -139,7 +139,7 @@ describe('HoverPreview', () => {
 		expect(hover.openId).toBe('batchim');
 	});
 
-	it('opens on keyboard focus, skips the restore-focus reopen, and ignores hover Escape', () => {
+	it('opens on keyboard focus, skips the restore-focus reopen, and claims Escape', () => {
 		const hover = createHover();
 		const item = makeItem('clusters');
 		const nav = document.createElement('nav');
@@ -152,11 +152,6 @@ describe('HoverPreview', () => {
 		expect(hover.openId).toBe('clusters');
 		expect(hover.mode).toBe('keyboard');
 
-		hover.mode = 'pointer';
-		hover.onWindowKey(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-		expect(hover.openId).toBe('clusters');
-
-		hover.mode = 'keyboard';
 		const dismiss = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
 		hover.onWindowKey(dismiss);
 		expect(dismiss.defaultPrevented).toBe(true);
@@ -164,6 +159,28 @@ describe('HoverPreview', () => {
 
 		hover.onItemFocus('clusters', { currentTarget: item } as unknown as FocusEvent);
 		expect(hover.openId).toBe('clusters');
+	});
+
+	it('closes a hover preview on Escape without claiming the key or restoring focus', () => {
+		const hover = createHover();
+		const item = makeItem('batchim');
+		const nav = document.createElement('nav');
+		nav.appendChild(item);
+		document.body.appendChild(nav);
+		hover.bindNav(nav);
+		item.addEventListener('focus', (event) => hover.onItemFocus('batchim', event));
+
+		hover.onPointerEnter('batchim', pointer(item, 'pointerenter'));
+		expect(hover.mode).toBe('pointer');
+
+		const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+		hover.onWindowKey(event);
+		expect(event.defaultPrevented).toBe(false);
+		expect(hover.openId).toBeNull();
+		expect(document.activeElement).not.toBe(item);
+
+		hover.onItemPointerMove('batchim', pointer(item, 'pointermove', { clientY: 80 }));
+		expect(hover.openId).toBeNull();
 	});
 
 	it('lets an activate close without reopening from the trailing focus', () => {

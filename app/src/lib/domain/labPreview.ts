@@ -70,6 +70,7 @@ export type UnlockedPressDecision =
 
 export type WindowEscapeDecision =
 	| { action: 'ignore' }
+	| { action: 'close' }
 	| { action: 'dismiss'; restoreId: string };
 
 export type ItemFocusOpenDecision = { action: 'skip' } | { action: 'open' };
@@ -85,8 +86,9 @@ export function isHoverPointerType(pointerType: string): boolean {
 }
 
 /**
- * Hover-only previews must not steal Escape from the page. Keyboard and press
- * claim it so a panel that stole focus can close and return to the number.
+ * Hover Escape hides the overlay without claiming the key, so a lab picker
+ * can still handle it. Keyboard and press claim it so a panel that stole
+ * focus can close and return to the number.
  */
 export function decideWindowEscape(
 	openId: string | null,
@@ -95,7 +97,7 @@ export function decideWindowEscape(
 	if (openId === null) return { action: 'ignore' };
 	switch (mode) {
 		case 'pointer':
-			return { action: 'ignore' };
+			return { action: 'close' };
 		case 'keyboard':
 		case 'press':
 			return { action: 'dismiss', restoreId: openId };

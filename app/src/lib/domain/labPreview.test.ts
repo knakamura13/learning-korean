@@ -203,6 +203,8 @@ function previewAfterEscapeRestoreFocus(
 	switch (escape.action) {
 		case 'ignore':
 			return openId;
+		case 'close':
+			return null;
 		case 'dismiss': {
 			const focus = decideItemFocusOpen(true);
 			switch (focus.action) {
@@ -237,9 +239,9 @@ describe('Escape restore-focus must not reopen the preview', () => {
 		expect(previewAfterEscapeRestoreFocus('0001', 'press')).toBeNull();
 	});
 
-	it('does not claim window Escape for a hover-only preview', () => {
-		expect(decideWindowEscape('0001', 'pointer')).toEqual({ action: 'ignore' });
-		expect(previewAfterEscapeRestoreFocus('0001', 'pointer')).toBe('0001');
+	it('closes a hover-only preview on Escape without restoring focus', () => {
+		expect(decideWindowEscape('0001', 'pointer')).toEqual({ action: 'close' });
+		expect(previewAfterEscapeRestoreFocus('0001', 'pointer')).toBeNull();
 	});
 
 	it('ignores Escape when nothing is open', () => {

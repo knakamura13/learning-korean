@@ -167,6 +167,8 @@ function closeThenSyntheticNumberFocus(mode: PreviewOpenMode): string | null {
 	switch (escape.action) {
 		case 'ignore':
 			return '0001';
+		case 'close':
+			return null;
 		case 'dismiss': {
 			let openId: string | null = null;
 			const focus = decideItemFocusOpen(true);
@@ -197,14 +199,15 @@ describe('Escape from the panel (would fail today’s reopen loop)', () => {
 		expect(closeThenSyntheticNumberFocus('press')).toBeNull();
 	});
 
-	it('does not window-claim Escape for hover-only', () => {
-		expect(decideWindowEscape('0001', 'pointer')).toEqual({ action: 'ignore' });
-		expect(closeThenSyntheticNumberFocus('pointer')).toBe('0001');
+	it('closes hover-only on Escape without restoring focus', () => {
+		expect(decideWindowEscape('0001', 'pointer')).toEqual({ action: 'close' });
+		expect(closeThenSyntheticNumberFocus('pointer')).toBeNull();
 	});
 
 	it('wires dismiss and focus-open through the extracted decisions', () => {
 		expect(src).toMatch(/onkeydown=\{hover\.onWindowKey\}/);
 		expect(hoverPreview).toMatch(/decideWindowEscape\(this\.openId,\s*this\.mode\)/);
+		expect(hoverPreview).toMatch(/case 'close':/);
 		expect(hoverPreview).toMatch(/decideItemFocusOpen\(this\.#suppressFocusOpen\)/);
 		expect(hoverPreview).toMatch(/#suppressFocusOpen = true/);
 	});

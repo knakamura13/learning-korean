@@ -3,7 +3,8 @@
  *
  * Placement, hover-bridge geometry, and pointer-type gating stay in
  * `labPreview.ts`. This class owns the open/close timer, cursor follow,
- * Escape restore-focus, and the DOM selectors each rail passes in.
+ * Escape restore-focus (keyboard/press), hover Escape without claiming the key,
+ * and the DOM selectors each rail passes in.
  * Click semantics and preview cards stay on the rails.
  */
 
@@ -236,6 +237,9 @@ export class HoverPreview {
 		const decision = decideWindowEscape(this.openId, this.mode);
 		switch (decision.action) {
 			case 'ignore':
+				return;
+			case 'close':
+				this.closePreview();
 				return;
 			case 'dismiss': {
 				e.preventDefault();
