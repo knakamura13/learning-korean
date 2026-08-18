@@ -52,25 +52,26 @@ export const lab03: Lab = {
 		{
 			type: 'fusion',
 			act: 'Act 1 · fuse it',
-			do: 'Same rule on the dark twin. Fuse <em>e</em>.',
+			do: 'Same rule. Fuse the two pieces that make <em>e</em>.',
+			hint: 'This time start from ㅓ. Pick its two parts.',
 			target: 'ㅔ',
 			targetName: 'e',
 			first: ['ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ'],
 			second: ['ㅣ', 'ㅏ', 'ㅓ'],
 			teach:
-				'<p><span class="jamo">ㅓ</span> + <span class="jamo">ㅣ</span> = <span class="jamo">ㅔ</span>.</p><p>You have now built two different vowels. Here is the thing nobody warns you about.</p>'
+				'<p><span class="jamo">ㅓ</span> + <span class="jamo">ㅣ</span> = <span class="jamo">ㅔ</span>.</p><p>You have now built two different vowels, <em>ae</em> (<span class="jamo">ㅐ</span>) and <em>e</em> (<span class="jamo">ㅔ</span>). Are they two different sounds?</p>'
 		},
 		{
 			type: 'choice',
 			act: 'Act 1 · the good news',
-			do: 'You just built <span class="jamo">ㅐ</span> and <span class="jamo">ㅔ</span> from different parts. In modern Seoul speech they are…',
+			do: 'You just built <span class="jamo">ㅐ</span> and <span class="jamo">ㅔ</span> from different parts. Now, what is the good news?',
 			stage: [{ glyph: 'ㅐ' }, { glyph: 'ㅔ' }],
 			vs: 'vs',
 			options: [
-				'Identical in modern Seoul speech',
-				'Different only in formal speech',
-				'Different by vowel length only',
-				'Identical only in very fast speech'
+				'They sound the same in modern Korean',
+				'They differ only in their vowel length',
+				'They sound the same only when spoken slowly',
+				'They differ only in formal Korean speech'
 			],
 			stack: true,
 			answer: 0,
