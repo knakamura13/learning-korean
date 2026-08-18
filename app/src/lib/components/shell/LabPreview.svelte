@@ -62,9 +62,6 @@
 	{#if model.chip}
 		<p class="chip" data-kind={model.chipKind}>{model.chip}</p>
 	{/if}
-	{#if model.prerequisite}
-		<p class="prereq">{model.prerequisite}</p>
-	{/if}
 	<div class="actions">
 		<a class={actionClass(model.actionLabel)} href={resolve('/lab/[id]', { id: model.id })}>
 			{model.actionLabel}
@@ -149,13 +146,6 @@
 		color: var(--accent);
 		background: var(--accent-soft);
 		border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-	}
-
-	.prereq {
-		margin: 0 0 var(--s3);
-		font-size: 0.82rem;
-		color: var(--ink-soft);
-		line-height: 1.45;
 	}
 
 	.actions {

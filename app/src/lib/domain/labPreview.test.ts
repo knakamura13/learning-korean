@@ -96,7 +96,7 @@ describe('labPreviewModel', () => {
 		expect(model.locked).toBe(true);
 		expect(model.actionLabel).toBe('Open anyway');
 		expect(model.chip).toMatch(/Finish Lab 01 first/);
-		expect(model.prerequisite).toBeNull();
+		expect(model).not.toHaveProperty('prerequisite');
 	});
 
 	it('covers every labCardState branch without a leftover kind', () => {

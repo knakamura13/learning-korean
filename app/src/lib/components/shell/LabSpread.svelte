@@ -14,7 +14,7 @@
 
 <div class="spread">
 	<div class="article">{@render article()}</div>
-	<div class="stage">
+	<div class="spread-col">
 		<div class="well">{@render well()}</div>
 		{#if after}
 			<div class="after">{@render after()}</div>
@@ -28,12 +28,12 @@
 		gap: var(--s6);
 		grid-template-areas:
 			'article'
-			'stage';
+			'spread-col';
 	}
 
 	.article { grid-area: article; min-width: 0; }
-	.stage {
-		grid-area: stage;
+	.spread-col {
+		grid-area: spread-col;
 		display: flex;
 		flex-direction: column;
 		gap: var(--s6);
@@ -56,14 +56,18 @@
 	@media (min-width: 72rem) {
 		.spread {
 			grid-template-columns: minmax(0, var(--measure)) minmax(280px, 1fr);
-			grid-template-areas: 'article stage';
+			grid-template-areas: 'article spread-col';
 			align-items: start;
 			max-width: var(--sitting);
 		}
 
-		.stage {
+		.spread-col {
 			position: sticky;
 			inset-block-start: calc(44px + env(safe-area-inset-top) + var(--s3));
+			max-height: calc(100dvh - 44px - env(safe-area-inset-top) - var(--s3) - var(--s4));
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			scrollbar-width: thin;
 		}
 
 		.well {

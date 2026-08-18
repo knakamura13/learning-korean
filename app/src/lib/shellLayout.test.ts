@@ -14,8 +14,11 @@ describe('shell layout source contracts', () => {
 		expect(layout).toMatch(/<main[^>]*id="main"/);
 		expect(layout).toMatch(/<main[^>]*tabindex="-1"/);
 		expect(layout).toMatch(/class="skip"[^>]*href="#main"/);
-		expect(layout).toMatch(/onclick=\{[^}]*focus\(\)/);
+		expect(layout).toMatch(/onclick=\{skipToMain\}/);
+		expect(layout).toMatch(/function skipToMain/);
+		expect(layout).toMatch(/preventDefault\(\)/);
 		expect(layout).toMatch(/getElementById\(['"]main['"]\)/);
+		expect(layout).toMatch(/main:focus-visible/);
 	});
 
 	it('home and lab pages put .shell before LabIndexRail in DOM order', () => {

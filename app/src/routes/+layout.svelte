@@ -20,6 +20,13 @@
 
 	const queue = $derived(progress.stats.queue);
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+
+	function skipToMain(event: MouseEvent) {
+		event.preventDefault();
+		const main = document.getElementById('main');
+		if (!(main instanceof HTMLElement)) return;
+		main.focus();
+	}
 </script>
 
 <svelte:head>
@@ -49,11 +56,7 @@
 	{/if}
 </svelte:head>
 
-<a
-	class="skip"
-	href="#main"
-	onclick={() => document.getElementById('main')?.focus()}
->Skip to content</a>
+<a class="skip" href="#main" onclick={skipToMain}>Skip to content</a>
 
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
@@ -97,6 +100,12 @@
 		z-index: 10;
 	}
 	.skip:focus { inset-inline-start: var(--s3); inset-block-start: var(--s3); }
+
+	main:focus,
+	main:focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
 
 	.bar {
 		position: sticky;
