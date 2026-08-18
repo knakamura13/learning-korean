@@ -25,6 +25,7 @@ describe('shell layout source contracts', () => {
 
 	it('home wide layout aligns with header shell, not 90rem', () => {
 		expect(home).toMatch(/max-width:\s*var\(--shell\)/);
+		expect(home).toMatch(/padding-inline:\s*0/);
 		expect(home).toMatch(/grid-template-areas:\s*'rail main'/);
 		expect(home).toMatch(/\.with-rail \.shell\s*\{[^}]*grid-area:\s*main/);
 		expect(home).toMatch(/\.with-rail :global\(\.lab-index\)\s*\{[^}]*grid-area:\s*rail/);

@@ -194,7 +194,9 @@ describe('LabSpread source contracts', () => {
 	});
 
 	it('keeps settle UI under the well on wide screens', () => {
-		expect(spread).toMatch(/'article after'/);
+		expect(spread).toMatch(/class="stage"/);
+		expect(spread).toMatch(/'article stage'/);
 		expect(spread).not.toMatch(/'after well'/);
+		expect(spread).toMatch(/\.stage\s*\{[^}]*position:\s*sticky/s);
 	});
 });

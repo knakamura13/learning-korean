@@ -250,6 +250,7 @@ export function labPreviewModel(
 		actionLabel: copy.actionLabel,
 		accessibleName: `${eyebrow}, ${lab.title}, ${copy.statusPhrase}`,
 		locked: kind === 'locked',
+		// Lock copy lives on `chip` only; keep the field so LabPreview can grow a distinct sentence later.
 		prerequisite: null
 	};
 }

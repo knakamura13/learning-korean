@@ -14,10 +14,12 @@
 
 <div class="spread">
 	<div class="article">{@render article()}</div>
-	<div class="well">{@render well()}</div>
-	{#if after}
-		<div class="after">{@render after()}</div>
-	{/if}
+	<div class="stage">
+		<div class="well">{@render well()}</div>
+		{#if after}
+			<div class="after">{@render after()}</div>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -26,15 +28,20 @@
 		gap: var(--s6);
 		grid-template-areas:
 			'article'
-			'well'
-			'after';
+			'stage';
 	}
 
 	.article { grid-area: article; min-width: 0; }
-	.after { grid-area: after; min-width: 0; }
+	.stage {
+		grid-area: stage;
+		display: flex;
+		flex-direction: column;
+		gap: var(--s6);
+		min-width: 0;
+	}
+	.after { min-width: 0; }
 
 	.well {
-		grid-area: well;
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
@@ -49,16 +56,17 @@
 	@media (min-width: 72rem) {
 		.spread {
 			grid-template-columns: minmax(0, var(--measure)) minmax(280px, 1fr);
-			grid-template-areas:
-				'article well'
-				'article after';
+			grid-template-areas: 'article stage';
 			align-items: start;
 			max-width: var(--sitting);
 		}
 
-		.well {
+		.stage {
 			position: sticky;
 			inset-block-start: calc(44px + env(safe-area-inset-top) + var(--s3));
+		}
+
+		.well {
 			min-height: 320px;
 			min-width: 280px;
 		}

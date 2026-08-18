@@ -226,6 +226,7 @@
 			grid-area: main;
 			max-width: none;
 			width: 100%;
+			padding-inline: 0;
 		}
 		.with-rail :global(.lab-index) {
 			grid-area: rail;
