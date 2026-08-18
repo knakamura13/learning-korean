@@ -89,9 +89,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:active\s*\{/);
-		expect(styleBlock(home)).toMatch(/\.continue:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.lab:active\s*\{/);
-		expect(styleBlock(home)).toMatch(/a\.stat:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/\.peek:active\s*\{/);
 	});
 
@@ -260,9 +258,6 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(home)).toMatch(
 			/\.sec\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
 		);
-		expect(styleBlock(home)).toMatch(
-			/\.continue-title\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
-		);
 	});
 
 	it('makes the Baseline Widely Available browser target explicit', () => {
@@ -336,9 +331,7 @@ describe('polish audit regressions', () => {
 
 	it('paints stats labels in ink so they clear 7:1 on raised paper and rose-soft', () => {
 		const { light, dark } = activeSystem;
-		expect(styleBlock(home)).toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink\)/s);
 		expect(styleBlock(review)).toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink\)/s);
-		expect(styleBlock(home)).not.toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
 		expect(styleBlock(review)).not.toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
 		for (const palette of [light, dark]) {
 			expect(contrastRatio(palette.ink, palette.paperRaised)).toBeGreaterThanOrEqual(7);
@@ -440,9 +433,8 @@ describe('polish audit regressions', () => {
 		expect(layout).toMatch(/class="mark" lang="ko"/);
 		expect(layout).toMatch(/pathname === '\/' \|\| page\.url\.pathname\.startsWith\('\/lab\/'\)/);
 		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);
-		expect(home).toMatch(/Labs teach Hangul/);
-		expect(home).toMatch(/Review quizzes only what you have already met/);
-		expect(home).toMatch(/Reference is the letter list/);
+		expect(home).toMatch(/Interactive labs that make you derive the writing system/);
+		expect(home).not.toMatch(/Labs teach Hangul/);
 		expect(home).toMatch(/<h2 id="sec-review-heading" class="sec">Review pile<\/h2>/);
 		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
 		expect(home).not.toMatch(/sec-deck-heading/);
@@ -483,19 +475,9 @@ describe('polish audit regressions', () => {
 		const reviewCss = styleBlock(review);
 		expect(home).toMatch(/chip-status due/);
 		expect(homeCss).toMatch(/\.chip-status\.due\s*\{[^}]*var\(--rose\)/s);
-		expect(homeCss).toMatch(/a\.stat\.hot:not\(\.quiet\)[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/\.lab\.resume\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/a\.lab\.resume:hover\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*var\(--accent\)/s);
-		expect(homeCss).toMatch(/\.continue\[data-kind='start'\]\s*\{[^}]*var\(--accent\)/s);
-		expect(homeCss).toMatch(/\.continue\[data-kind='start'\]\s*\{[^}]*var\(--accent-soft\)/s);
-		expect(homeCss).toMatch(
-			/\.continue\[data-kind='resume'\],\s*\.continue\[data-kind='review'\]\s*\{[^}]*var\(--rose\)[^}]*var\(--rose-soft\)/s
-		);
-		expect(homeCss).toMatch(
-			/\.continue\[data-kind='resume'\] \.continue-go,\s*\.continue\[data-kind='review'\] \.continue-go\s*\{[^}]*var\(--rose\)/s
-		);
-		expect(homeCss).not.toMatch(/\.continue\s*\{[^}]*var\(--accent\)/s);
 		expect(layoutCss).toMatch(/\.badge\s*\{[^}]*var\(--rose\)/s);
 		expect(layoutCss).toMatch(/nav a\.active\s*\{[^}]*var\(--accent\)/s);
 		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
