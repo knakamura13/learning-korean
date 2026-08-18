@@ -10,6 +10,6 @@ import { botanicalKorea } from './systems/botanicalKorea.ts';
  *    all come from that object
  *
  * Components keep using `var(--ink)` / `var(--paper)` / `var(--accent)` /
- * `var(--rose)`.
+ * `var(--rose)`. Unused looks on disk: `taegeuk`, `watercolor`, `academia`.
  */
 export const activeSystem = botanicalKorea;

@@ -9,3 +9,7 @@ Newsreader
   Copyright 2020 The Newsreader Project Authors
   https://github.com/productiontype/Newsreader
   Files: Newsreader-latin.woff2, Newsreader-Italic-latin.woff2
+
+Libre Baskerville (unused Academia system)
+  Copyright 2012 Impallari Type (www.impallari.com)
+  Files: LibreBaskerville-Regular.woff2, LibreBaskerville-Italic.woff2
