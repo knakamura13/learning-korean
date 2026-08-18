@@ -14,6 +14,8 @@
 		decideItemFocusOpen,
 		decideUnlockedPress,
 		decideWindowEscape,
+		expandHoverBox,
+		isHoverPointerType,
 		isPointInHoverBridge,
 		isPressPointerType,
 		labPreviewModels,
@@ -81,18 +83,16 @@
 		anchor ? anchorPopover(anchor, panelSize, viewportSize) : { left: 8, top: 8 }
 	);
 
-	const panelBox = $derived({
-		left: placement.left,
-		top: placement.top,
-		right: placement.left + panelSize.w,
-		bottom: placement.top + panelSize.h
-	});
+	const panelBox = $derived(
+		expandHoverBox({
+			left: placement.left,
+			top: placement.top,
+			right: placement.left + panelSize.w,
+			bottom: placement.top + panelSize.h
+		})
+	);
 
 	const panelId = 'lab-index-preview';
-
-	function isFinePointer(): boolean {
-		return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-	}
 
 	function prefersReducedMotion(): boolean {
 		return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -189,26 +189,33 @@
 		lastPointer = { x: e.clientX, y: e.clientY };
 	}
 
+	function pointerAnchor(e: PointerEvent): PopoverAnchor | null {
+		const box = rectOf(e.currentTarget);
+		if (box && 'right' in box) return { x: box.right, y: e.clientY };
+		return { x: e.clientX, y: e.clientY };
+	}
+
 	function onPointerEnter(item: LabPreviewModel, e: PointerEvent) {
-		if (!isFinePointer()) return;
+		if (!isHoverPointerType(e.pointerType)) return;
 		rememberPointer(e);
 		openPreview(
 			item.id,
 			'pointer',
-			prefersReducedMotion() ? rectOf(e.currentTarget) : { x: e.clientX, y: e.clientY }
+			prefersReducedMotion() ? rectOf(e.currentTarget) : pointerAnchor(e)
 		);
 	}
 
 	function onItemPointerMove(item: LabPreviewModel, e: PointerEvent) {
-		if (!isFinePointer()) return;
+		if (!isHoverPointerType(e.pointerType)) return;
 		rememberPointer(e);
 		if (prefersReducedMotion()) return;
 		if (openId !== item.id || mode !== 'pointer' || followFrozen) return;
-		anchor = { x: e.clientX, y: e.clientY };
+		const next = pointerAnchor(e);
+		if (next) anchor = next;
 	}
 
-	function onItemPointerLeave() {
-		if (!isFinePointer()) return;
+	function onItemPointerLeave(e: PointerEvent) {
+		if (!isHoverPointerType(e.pointerType)) return;
 		followFrozen = true;
 		scheduleClose();
 	}
@@ -219,7 +226,7 @@
 	}
 
 	function onHoverIntentMove(e: PointerEvent) {
-		if (!openId || mode !== 'pointer' || !lastPointer || !isFinePointer()) return;
+		if (!openId || mode !== 'pointer' || !lastPointer || !isHoverPointerType(e.pointerType)) return;
 		const target = e.target;
 		const overItem = target instanceof Element && Boolean(target.closest('[data-lab-index-item]'));
 		const overPanel = target instanceof Element && Boolean(target.closest(`#${panelId}`));

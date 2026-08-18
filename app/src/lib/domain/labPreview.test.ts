@@ -6,7 +6,9 @@ import {
 	decideItemFocusOpen,
 	decideUnlockedPress,
 	decideWindowEscape,
+	expandHoverBox,
 	hoverBridgePolygon,
+	isHoverPointerType,
 	isPointInHoverBridge,
 	labPreviewModel,
 	previewChipKind,
@@ -45,12 +47,12 @@ function view(partial: { ready?: boolean; unlocked?: string[] } = {}): CourseNav
 }
 
 describe('anchorPopover', () => {
-	it('places the panel 12px from the cursor and flips near the right edge', () => {
+	it('places the panel 12px to the right and 0.5rem above the cursor', () => {
 		const viewport = { w: 1200, h: 800 };
 		const panel = { w: 320, h: 220 };
 		const open = anchorPopover({ x: 80, y: 120 }, panel, viewport);
 		expect(open.left).toBe(92);
-		expect(open.top).toBe(132);
+		expect(open.top).toBe(112);
 		const flipped = anchorPopover({ x: 1100, y: 120 }, panel, viewport);
 		expect(flipped.left).toBeLessThan(1100 - 320);
 	});
@@ -61,11 +63,30 @@ describe('anchorPopover', () => {
 		expect(placed.top + 220).toBeLessThanOrEqual(800);
 	});
 
-	it('anchors to a number box when the cursor is a DOMRect-like', () => {
+	it('anchors a number box to the right edge and 0.5rem above the vertical center', () => {
 		const rect = { x: 20, y: 40, width: 44, height: 44, top: 40, right: 64 };
 		const placed = anchorPopover(rect, { w: 320, h: 220 }, { w: 1200, h: 800 });
 		expect(placed.left).toBe(76);
-		expect(placed.top).toBe(52);
+		expect(placed.top).toBe(54);
+	});
+});
+
+describe('isHoverPointerType', () => {
+	it('treats mouse as hover and touch/pen as press, ignoring matchMedia', () => {
+		expect(isHoverPointerType('mouse')).toBe(true);
+		expect(isHoverPointerType('')).toBe(true);
+		expect(isHoverPointerType('touch')).toBe(false);
+		expect(isHoverPointerType('pen')).toBe(false);
+	});
+});
+
+describe('expandHoverBox', () => {
+	it('adds a 4px halo on every side so the pointer can leave the number without dropping the card', () => {
+		const box = { left: 76, top: 120, right: 396, bottom: 400 };
+		expect(expandHoverBox(box)).toEqual({ left: 72, top: 116, right: 400, bottom: 404 });
+		const apex = { x: 64, y: 142 };
+		const hit = expandHoverBox({ left: 76, top: 142, right: 396, bottom: 400 });
+		expect(isPointInHoverBridge({ x: 73, y: 200 }, apex, hit)).toBe(true);
 	});
 });
 

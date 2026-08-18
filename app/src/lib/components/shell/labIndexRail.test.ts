@@ -49,6 +49,12 @@ describe('LabIndexRail source contracts', () => {
 		expect(preview).toMatch(/btn ghost/);
 	});
 
+	it('opens the hover preview from this event pointerType, not matchMedia hover', () => {
+		expect(src).toMatch(/isHoverPointerType\(e\.pointerType\)/);
+		expect(src).not.toMatch(/function isFinePointer/);
+		expect(src).not.toMatch(/\(hover: hover\) and \(pointer: fine\)/);
+	});
+
 	it('freezes cursor-follow so the panel action can be clicked', () => {
 		expect(src).toMatch(/followFrozen/);
 		expect(src).not.toMatch(/<svelte:window[^>]*onpointermove/);
@@ -60,6 +66,9 @@ describe('LabIndexRail source contracts', () => {
 		expect(src).toMatch(/decideHoverIntent/);
 		expect(src).toMatch(/<svelte:body onpointermove=\{onHoverIntentMove\}/);
 		expect(src).toMatch(/onPointerEnter=\{onPreviewPointerEnter\}/);
+		expect(src).toMatch(/expandHoverBox/);
+		expect(src).toMatch(/pointerAnchor/);
+		expect(preview).toMatch(/PREVIEW_HOVER_BUFFER_PX|--preview-buffer|padding:\s*4px/);
 	});
 
 	it('treats the preview as a disclosure, not a fake modal', () => {
