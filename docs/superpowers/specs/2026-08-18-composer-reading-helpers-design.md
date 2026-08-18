@@ -530,14 +530,34 @@ Do not ship C’s hanging tickets. The herbarium story is already in paper, tick
 
 ### Open for review (pick one)
 
-1. **Assemble inheritance** — keep (recommended) or pass a silent `Slots` flag to limit captions to fusion. Inheritance is simpler; batchim `k`/`t`/`ng` is honest isolation RR.
-2. **Caption color** — `--ink-faint` (recommended, recedes) vs `--accent` like `.rom2` (louder, more reference-like).
+1. **Assemble inheritance** — keep (recommended) or pass a silent `Slots` flag to limit captions to fusion. Independent drafts split: infer-from-glyph inherits; an explicit `as?: JamoSlot` or `fusionReadings` flag opts in so unused `Slots` stay mute. Inheritance is simpler; batchim `k`/`t`/`ng` is honest isolation RR.
+2. **Caption color** — `--ink-faint` (recommended, recedes) vs `--accent` like `.rom2` (louder, more reference-like). Do not put `--ink-faint` on `--paper-sunk` (fails the 7:1 caption floor). Do not paint RR `--good` on win (the Hangul result already carries the grade).
+3. **Result-box reading** — omit (recommended: `Target` already names the assignment) vs label only when `fuse`/`compose` returns a real glyph (the assignment and the specimen produced are different sentences; a miss should read `ae` under ㅐ while the target still says `ye`). Never concatenate `yeo`+`i`. Never label `?` or `✕`.
+
+---
+
+## Independent drafts
+
+Four visual directions and four interface shapes were written in isolation, then scored above. They agree on the spine: Hangul-only trays, filled-only helpers, derived RR (never authored in `lab03.ts`), no hover-only exclusive channel.
+
+| Draft | One-line |
+|---|---|
+| Herbarium epithet | Always-on italic plate caption *inside* the filled mount |
+| Vitrine registration | Inspect overlay (`[yeo]`) on hover / focus / tap-toggle; idle Hangul only |
+| Determination hang-tickets | Always-on paper slip under a 1px stem; tickets never go green |
+| Graphite stave | Second equation register (`yeo + i = ye`); result RR withheld until Hangul exists |
+| Minimize | `romanizeJamo(jamo, slot)` + optional `Slot.as` |
+| Fusion common-case | `romanizeVowel` + `fusionReadings` flag; assemble stays unlabeled |
+| Maximize | Three-layer policy kit — honest that it is easy to teach the wrong sound |
+| Specimen | Branded `collect(identity, collection)`; deep only if `caption` dies |
+
+The recommendation (plate caption + one domain function) is the overlap of the always-on visuals with the small interfaces. Inspect, tickets, the stave, the policy kit, and the specimen type remain on the record as rejected for v1, not as unread.
 
 ---
 
 ## Spec self-review
 
-- No TBD/TODO left in the locked section. The two open questions are explicit.
+- No TBD/TODO left in the locked section. The three open questions are explicit.
 - Visual A does not contradict Interface 1: no `reading` prop, no hover API.
 - Scope is one sitting: one function, one component, fusion+assemble. Not trays, not dock, not reference migration.
 - “Hover vs labels” is resolved as “labels; hover is the wrong exclusive channel,” not as “maybe both.”
