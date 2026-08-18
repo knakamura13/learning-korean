@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import type { Pathname } from '$app/types';
 	import { LABS } from '$lib/content';
 	import {
-		continueAction,
 		labCardState,
 		requiredLab,
 		toCourseLab,
@@ -15,7 +13,7 @@
 	import { progress } from '$lib/stores/progress.svelte';
 	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
 
-	// Prerendered HTML has no stored progress. Gate stats, completion badges,
+	// Prerendered HTML has no stored progress. Gate completion badges
 	// and deck-tier counts until the client has ticked, so we never flash
 	// empty or stored values into static HTML.
 	let ready = $state(false);
@@ -38,8 +36,6 @@
 			queue: stats.queue
 		};
 	});
-
-	const next = $derived(continueAction(course, navView));
 
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
@@ -64,57 +60,6 @@
 			Labs teach Hangul. Review quizzes only what you have already met. Reference is the letter list.
 		</p>
 	</header>
-
-	{#if next}
-		<a class="continue card" href={resolve(next.href as Pathname)} data-kind={next.kind}>
-			<div class="continue-copy">
-				<p class="eyebrow">{next.kicker}</p>
-				<strong class="continue-title">{next.title}</strong>
-				<span class="continue-detail">{next.detail}</span>
-			</div>
-			<span class="continue-go" aria-hidden="true">→</span>
-		</a>
-	{/if}
-
-	<section class="strip" aria-busy={!ready} aria-label="Course and review statistics">
-		<a class="stat hot" href={resolve('/review')} class:quiet={!ready || stats.queue === 0}>
-			<b>
-				{#if ready}
-					{stats.queue}
-				{:else}
-					<span class="skel" aria-hidden="true"></span>
-				{/if}
-			</b><span>to review</span>
-		</a>
-		<div class="stat">
-			<b>
-				{#if ready}
-					{stats.mature}
-				{:else}
-					<span class="skel" aria-hidden="true"></span>
-				{/if}
-			</b><span>mastered</span>
-		</div>
-		<div class="stat">
-			<b>
-				{#if ready}
-					{stats.unlocked}<i>/{stats.total}</i>
-				{:else}
-					<span class="skel" aria-hidden="true"></span>
-				{/if}
-			</b><span>unlocked</span>
-		</div>
-		<div class="stat">
-			<b>
-				{#if ready}
-					{stats.streak}
-				{:else}
-					<span class="skel" aria-hidden="true"></span>
-				{/if}
-			</b><span>day streak</span>
-		</div>
-		<p class="streak-note">Day streak counts review days, not finished labs.</p>
-	</section>
 
 	<section aria-labelledby="sec-labs-heading">
 		<h2 id="sec-labs-heading" class="sec">Labs</h2>
@@ -251,125 +196,6 @@
 		font-size: 0.92rem;
 		line-height: 1.55;
 		margin: var(--s3) 0 0;
-	}
-
-	.continue {
-		display: flex;
-		align-items: center;
-		gap: var(--s4);
-		padding: var(--s4);
-		margin-bottom: var(--s5);
-		text-decoration: none;
-		color: inherit;
-		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
-			border-color var(--fast) var(--ease);
-	}
-	.continue:hover {
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-2);
-		color: inherit;
-	}
-	.continue:active {
-		transform: translateY(0);
-		box-shadow: var(--shadow-1);
-	}
-	.continue-copy { min-width: 0; flex: 1 1 auto; }
-	.continue .eyebrow { margin-bottom: var(--s1); }
-	.continue-title {
-		display: block;
-		font-family: var(--display);
-		font-style: italic;
-		font-size: 1.25rem;
-		font-weight: 400;
-		letter-spacing: -0.015em;
-		line-height: 1.25;
-		margin-bottom: var(--s1);
-	}
-	.continue-detail {
-		display: block;
-		font-size: 0.86rem;
-		color: var(--ink-soft);
-		line-height: 1.45;
-	}
-	.continue-go {
-		flex: 0 0 auto;
-		font-size: 1.4rem;
-		line-height: 1;
-	}
-	.continue[data-kind='start'] {
-		border-color: var(--accent);
-		background: var(--accent-soft);
-	}
-	.continue[data-kind='start'] .continue-go { color: var(--accent); }
-	.continue[data-kind='resume'],
-	.continue[data-kind='review'] {
-		border-color: var(--rose);
-		background: var(--rose-soft);
-	}
-	.continue[data-kind='resume'] .continue-go,
-	.continue[data-kind='review'] .continue-go { color: var(--rose); }
-	.continue[data-kind='caught-up'] {
-		border-color: var(--rule);
-		background: var(--paper-raised);
-	}
-	.continue[data-kind='caught-up'] .continue-go { color: var(--ink-faint); }
-
-	.strip {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: var(--s2);
-		margin-bottom: var(--s7);
-		min-height: 4.75rem;
-	}
-	.streak-note {
-		grid-column: 1 / -1;
-		margin: 0;
-		font-size: 0.72rem;
-		line-height: 1.4;
-		color: var(--ink-faint);
-	}
-
-	@media (min-width: 40rem) {
-		.strip { grid-template-columns: repeat(4, 1fr); }
-	}
-
-	.stat {
-		border: 1px solid var(--rule);
-		border-radius: var(--r-md);
-		background: var(--paper-raised);
-		padding: var(--s3);
-		text-align: center;
-		text-decoration: none;
-		color: inherit;
-		min-height: 4.5rem;
-		transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
-	}
-	.stat b {
-		font-family: var(--mono);
-		font-size: 1.5rem;
-		font-weight: 500;
-		display: block;
-		min-height: 1.5em;
-		font-variant-numeric: tabular-nums;
-	}
-	.stat b i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
-	.stat .skel {
-		width: 1.6em;
-		height: 0.65em;
-		margin: 0.42em auto 0.18em;
-	}
-	.stat span {
-		font-size: 0.72rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--ink);
-	}
-	a.stat.hot:not(.quiet) { border-color: var(--rose); background: var(--rose-soft); }
-	a.stat.hot:not(.quiet) b { color: var(--rose); }
-	a.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
-	a.stat:active {
-		transform: translateY(0);
-		box-shadow: var(--shadow-1);
 	}
 
 	.sec {
@@ -544,18 +370,7 @@
 	.sw.n { background: var(--rule-strong); }
 
 	@media (forced-colors: active) {
-		.stat {
-			background: Canvas;
-			color: CanvasText;
-			border-color: ButtonBorder;
-		}
-		a.stat.hot:not(.quiet) {
-			border-color: Highlight;
-			background: Canvas;
-		}
-		.continue,
 		.lab.resume { border-color: Highlight; }
-		.continue { background: Canvas; }
 		.track { background: Canvas; }
 		.track .m { background: Highlight; }
 		.track .y { background: ButtonText; }
@@ -585,8 +400,4 @@
 		.track { grid-area: track; width: 100%; }
 	}
 
-	@media (max-width: 34rem) {
-		.continue { gap: var(--s3); padding: var(--s3); }
-		.continue-title { font-size: 1.1rem; }
-	}
 </style>
