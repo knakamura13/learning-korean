@@ -1,11 +1,11 @@
 # Composer reading helpers
 
 **Date:** 2026-08-18
-**Status:** design exploration — not ready to implement until this spec is reviewed
+**Status:** implemented 2026-08-18 — Visual A (plate caption) + Interface 1 (`jamoReading`)
 **Request:** independent pronunciation labels on letter-building slots (`yeo` under ㅕ, `i` under ㅣ), or the same helpers as a hover/focus popover
 **Surfaces:** Lab 03 fusion composer first; Assemble uses the same `Slots` primitive
 
-This document is a UI design brainstorm plus an interface-shape comparison. No application code. Do not implement from this file until it is reviewed.
+This document is the UI design brainstorm plus an interface-shape comparison that shipped. Caption type in `Slots.svelte` is 0.72rem / 600 (0.62rem under 34rem): spec A’s 0.62/500 vanished at sitting size once Hangul was isolated onto `.slot-value`. Filled batchim keeps the blue border and drops the `--blue-soft` wash so `--ink-faint` stays on paper.
 
 ---
 
@@ -567,4 +567,4 @@ The recommendation (plate caption + one domain function) is the overlap of the a
 
 ## Next
 
-This is the written spec. Review it before any implementation plan. If the plate caption and `jamoReading` look right, the next step is a `docs/superpowers/plans/` tasking — not a drive-by CSS tweak.
+Shipped as Visual A + `jamoReading` on `Slots`. Open leftovers: `/reference` `SOUND` map as a later consumer; result-box RR still omitted.
