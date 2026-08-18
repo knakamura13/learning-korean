@@ -128,9 +128,9 @@
 		top: 0;
 		z-index: 5;
 		padding-top: env(safe-area-inset-top);
-		background: color-mix(in srgb, var(--paper) 88%, transparent);
-		backdrop-filter: blur(10px);
+		background: color-mix(in srgb, var(--paper-sunk) 82%, black);
 		border-bottom: 1px solid var(--rule);
+		overflow: visible;
 	}
 
 	.inner {
@@ -143,6 +143,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--s4);
+		overflow: visible;
 	}
 
 	.brand {
@@ -175,31 +176,78 @@
 	}
 
 	nav {
+		--tab-r: 12px;
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--s2);
+		align-self: stretch;
+		align-items: stretch;
+		gap: 0.35rem;
 		margin-inline-start: auto;
+		padding-block-start: 0.25rem;
+		padding-inline: var(--tab-r);
 		min-width: 0;
 		flex-shrink: 1;
 		justify-content: flex-end;
+		overflow: visible;
 	}
 
 	nav a {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--s1);
-		min-height: 44px;
-		padding: 0.35rem 0.7rem;
-		border-radius: var(--r-sm);
+		min-height: calc(44px - 0.25rem);
+		padding: 0 0.75rem;
+		border-radius: 0;
 		font-size: 0.84rem;
 		text-decoration: none;
 		color: var(--ink-soft);
 		white-space: nowrap;
-		transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+		z-index: 0;
+		transition: color var(--fast) var(--ease);
 	}
-	nav a:hover { background: var(--paper-sunk); color: var(--ink); }
-	nav a:active { background: var(--rule); color: var(--ink); }
-	nav a.active { color: var(--accent); background: var(--accent-soft); }
+	nav a:hover { color: var(--ink); }
+	nav a:active { color: var(--ink); }
+	nav a.active {
+		color: var(--accent);
+		background: var(--paper);
+		border: 1px solid var(--rule);
+		border-block-end: none;
+		border-start-start-radius: var(--tab-r);
+		border-start-end-radius: var(--tab-r);
+		margin-block-end: -1px;
+		padding-block-end: 1px;
+		z-index: 1;
+	}
+	nav a.active::before,
+	nav a.active::after {
+		content: '';
+		position: absolute;
+		inset-block-end: 0;
+		width: var(--tab-r);
+		height: var(--tab-r);
+		pointer-events: none;
+	}
+	nav a.active::before {
+		inset-inline-start: calc(-1 * var(--tab-r));
+		background: radial-gradient(
+			circle at 0 0,
+			transparent calc(var(--tab-r) - 1px),
+			var(--rule) calc(var(--tab-r) - 1px),
+			var(--rule) var(--tab-r),
+			var(--paper) calc(var(--tab-r) + 0.5px)
+		);
+	}
+	nav a.active::after {
+		inset-inline-end: calc(-1 * var(--tab-r));
+		background: radial-gradient(
+			circle at 100% 0,
+			transparent calc(var(--tab-r) - 1px),
+			var(--rule) calc(var(--tab-r) - 1px),
+			var(--rule) var(--tab-r),
+			var(--paper) calc(var(--tab-r) + 0.5px)
+		);
+	}
 
 	.badge {
 		font-family: var(--mono);
@@ -219,8 +267,7 @@
 
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
-		nav { gap: var(--s1); }
-		nav a { padding: 0.35rem 0.5rem; }
+		nav a { padding-inline: 0.55rem; }
 	}
 
 	@media (max-width: 30rem) {
@@ -229,7 +276,7 @@
 			gap: var(--s2);
 		}
 		.name { font-size: 0.8125rem; }
-		nav a { letter-spacing: -0.02em; padding: 0.35rem 0.4rem; }
+		nav a { letter-spacing: -0.02em; padding-inline: 0.45rem; }
 	}
 
 	@media (max-width: 20rem) {
@@ -254,7 +301,6 @@
 			background: Canvas;
 			color: CanvasText;
 			border-bottom: 1px solid ButtonBorder;
-			backdrop-filter: none;
 		}
 		.badge {
 			background: Highlight;
@@ -263,6 +309,25 @@
 		nav a.active {
 			background: Highlight;
 			color: HighlightText;
+			border-color: ButtonBorder;
+		}
+		nav a.active::before {
+			background: radial-gradient(
+				circle at 0 0,
+				transparent calc(var(--tab-r) - 1px),
+				ButtonBorder calc(var(--tab-r) - 1px),
+				ButtonBorder var(--tab-r),
+				Highlight calc(var(--tab-r) + 0.5px)
+			);
+		}
+		nav a.active::after {
+			background: radial-gradient(
+				circle at 100% 0,
+				transparent calc(var(--tab-r) - 1px),
+				ButtonBorder calc(var(--tab-r) - 1px),
+				ButtonBorder var(--tab-r),
+				Highlight calc(var(--tab-r) + 0.5px)
+			);
 		}
 	}
 </style>

@@ -11,6 +11,9 @@
 		type ThemePref
 	} from '$lib/theme';
 
+	// Theme toggle is intentionally binary (light ↔ dark), not trinary.
+	// With no stored choice we follow the system scheme; the first click
+	// persists light or dark until localStorage is cleared.
 	let pref = $state<ThemePref>('system');
 	const darkScheme = new MediaQuery('prefers-color-scheme: dark');
 
@@ -32,7 +35,7 @@
 	}
 
 	function cycle() {
-		setPref(nextThemePref(pref));
+		setPref(nextThemePref(pref, darkScheme.current));
 	}
 
 	const glyph = $derived(themeToggleGlyph(pref, darkScheme.current));
@@ -62,9 +65,6 @@
 			/>
 		</svg>
 	{/if}
-	{#if pref === 'system'}
-		<span class="auto" aria-hidden="true">Auto</span>
-	{/if}
 </button>
 
 <style>
@@ -78,47 +78,55 @@
 		min-width: 44px;
 		min-height: 44px;
 		padding: 0;
-		border: 1px solid var(--rule);
+		border: none;
 		border-radius: var(--r-sm);
-		background: var(--paper-sunk);
+		background: transparent;
 		color: var(--accent);
 		cursor: pointer;
 		flex-shrink: 0;
+		transition: color var(--fast) var(--ease);
+	}
+	.theme::before {
+		content: '';
+		position: absolute;
+		inset: 0.25rem;
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--r-sm);
+		background: var(--paper);
+		pointer-events: none;
 		transition:
 			background var(--fast) var(--ease),
-			color var(--fast) var(--ease);
+			border-color var(--fast) var(--ease);
 	}
 	.theme:hover {
-		background: var(--paper-raised);
 		color: var(--ink);
+	}
+	.theme:hover::before {
+		background: var(--paper-raised);
+		border-color: var(--accent);
 	}
 	.theme:active { transform: translateY(1px); }
 	.theme:focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
+	.theme:focus-visible::before {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 	}
 
 	.ico {
-		width: 1.15rem;
-		height: 1.15rem;
+		position: relative;
+		z-index: 1;
+		width: 1.05rem;
+		height: 1.05rem;
 		display: block;
 	}
 
-	.auto {
-		position: absolute;
-		inset-inline-end: 1px;
-		inset-block-end: 1px;
-		font-size: 0.625rem;
-		font-weight: 700;
-		line-height: 1;
-		letter-spacing: 0.02em;
-		text-transform: uppercase;
-		pointer-events: none;
-	}
-
 	@media (prefers-reduced-motion: reduce) {
-		.theme {
+		.theme,
+		.theme::before {
 			transition: none;
 		}
 		.theme:active {
@@ -128,11 +136,15 @@
 
 	@media (forced-colors: active) {
 		.theme {
-			background: Canvas;
-			border: 1px solid ButtonBorder;
+			background: transparent;
+			border: none;
 			color: ButtonText;
 		}
-		.theme:focus-visible {
+		.theme::before {
+			background: Canvas;
+			border: 1px solid ButtonBorder;
+		}
+		.theme:focus-visible::before {
 			outline: 2px solid Highlight;
 			box-shadow: none;
 		}

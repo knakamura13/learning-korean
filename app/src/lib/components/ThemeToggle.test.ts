@@ -25,11 +25,12 @@ describe('ThemeToggle glyphs', () => {
 	it('keeps a 44px hit target, reduced-motion, and forced-colors styles', () => {
 		expect(css).toMatch(/min-width:\s*44px/);
 		expect(css).toMatch(/min-height:\s*44px/);
+		expect(css).toMatch(/\.theme::before\s*\{[^}]*inset:\s*0\.25rem/s);
 		expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
 	});
 
-	it('announces the stored pref, system follow-through, and the next cycle step', () => {
+	it('announces the resolved scheme and the next binary step', () => {
 		expect(src).toMatch(/aria-label=\{label\}/);
 		expect(src).toMatch(/themeToggleLabel\(pref,\s*darkScheme\.current\)/);
 		expect(src).not.toMatch(/themePrefLabel\(pref\)/);
@@ -49,17 +50,14 @@ describe('ThemeToggle glyphs', () => {
 		expect(moon).toMatch(/A7 7 0 0 1 10\.2 4\.1/);
 	});
 
-	it('still cycles through nextThemePref', () => {
-		expect(src).toMatch(/setPref\(nextThemePref\(pref\)\)/);
+	it('still flips through nextThemePref', () => {
+		expect(src).toMatch(/setPref\(nextThemePref\(pref,\s*darkScheme\.current\)\)/);
 	});
 
-	it('exposes data-pref on the button and a visible Auto mark for system', () => {
+	it('exposes data-pref and keeps the toggle binary, not Auto/system', () => {
 		expect(src).toMatch(/data-pref=\{pref\}/);
-		const glyphEnd = src.indexOf('{/if}', src.indexOf(`glyph === 'sun'`));
-		const systemIf = src.indexOf(`{#if pref === 'system'}`);
-		expect(systemIf).toBeGreaterThan(glyphEnd);
-		expect(src).toMatch(
-			/\{#if pref === 'system'\}[\s\S]*?aria-hidden="true"[\s\S]*?Auto/
-		);
+		expect(src).toMatch(/intentionally binary \(light ↔ dark\), not trinary/);
+		expect(src).not.toMatch(/\{#if pref === 'system'\}/);
+		expect(src).not.toMatch(/>Auto</);
 	});
 });
