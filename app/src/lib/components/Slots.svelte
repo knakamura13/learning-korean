@@ -103,8 +103,6 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.1rem;
-		font-family: var(--hangul);
-		font-size: 2.3rem;
 		font-weight: 500;
 		color: var(--ink-faint);
 		position: relative;
@@ -153,23 +151,23 @@
 		box-shadow: var(--focus-ring);
 	}
 
-	.slot-value { line-height: 1; }
+	.slot-value {
+		line-height: 1;
+		font-family: var(--hangul);
+		font-size: 2.3rem;
+	}
 
 	.slot-reading {
 		font-family: var(--mono);
-		font-size: 0.62rem;
-		font-weight: 500;
-		letter-spacing: 0.04em;
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
 		line-height: 1;
 		min-height: 0.72rem;
 		color: var(--ink-faint);
 		text-transform: none;
 		text-align: center;
 		transition: opacity var(--fast) var(--ease);
-	}
-
-	.slot.filled .slot-reading {
-		color: var(--ink-faint);
 	}
 
 	.slot.bottom {
@@ -218,8 +216,9 @@
 	.mark.bad { color: var(--bad); }
 
 	@media (max-width: 34rem) {
-		.slot { min-width: 3.8rem; min-height: 4.32rem; font-size: 1.8rem; padding: 0.3rem 0.6rem; }
-		.slot-reading { font-size: 0.55rem; min-height: 0.64rem; }
+		.slot { min-width: 3.8rem; min-height: 4.32rem; padding: 0.3rem 0.6rem; }
+		.slot-value { font-size: 1.8rem; }
+		.slot-reading { font-size: 0.62rem; min-height: 0.64rem; }
 		.out { width: 4.4rem; height: 4.4rem; font-size: 2.6rem; }
 		.asm { gap: var(--s2); }
 	}
