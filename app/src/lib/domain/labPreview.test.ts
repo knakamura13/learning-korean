@@ -85,7 +85,7 @@ describe('labPreviewModel', () => {
 		expect(JSON.stringify(model)).not.toMatch(/Colophon|ToC|folio|plate/i);
 	});
 
-	it('uses Open anyway and the prerequisite sentence when the lab is locked', () => {
+	it('uses Open anyway and the lock chip without duplicating prerequisite copy', () => {
 		const firstVisit = view({ ready: false });
 		const model = labPreviewModel(
 			labs[1],
@@ -96,7 +96,7 @@ describe('labPreviewModel', () => {
 		expect(model.locked).toBe(true);
 		expect(model.actionLabel).toBe('Open anyway');
 		expect(model.chip).toMatch(/Finish Lab 01 first/);
-		expect(model.prerequisite).toMatch(/Finish Lab 01 first/);
+		expect(model.prerequisite).toBeNull();
 	});
 
 	it('covers every labCardState branch without a leftover kind', () => {

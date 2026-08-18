@@ -250,7 +250,7 @@ export function labPreviewModel(
 		actionLabel: copy.actionLabel,
 		accessibleName: `${eyebrow}, ${lab.title}, ${copy.statusPhrase}`,
 		locked: kind === 'locked',
-		prerequisite: kind === 'locked' ? copy.chip : null
+		prerequisite: null
 	};
 }
 

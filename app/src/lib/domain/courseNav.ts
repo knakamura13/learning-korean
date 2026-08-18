@@ -115,7 +115,7 @@ export function labCardState(lab: CourseLab, labs: CourseLab[], view: CourseNavV
 	const done = isDone(lab, view);
 	const blocked = isBlocked(lab, labs, view);
 	return {
-		locked: blocked && !resume,
+		locked: blocked && !resume && !done,
 		done: done && !resume,
 		resumeAt: resume ? resume.nextIndex : null,
 		startHere: nextLabId(labs, view) === lab.id
@@ -193,5 +193,5 @@ export function showPrerequisiteGate(
 	labs: CourseLab[],
 	view: Pick<CourseNavView, 'ready' | 'isUnlocked'>
 ): boolean {
-	return isBlocked(lab, labs, view);
+	return isBlocked(lab, labs, view) && !isDone(lab, view);
 }
