@@ -359,6 +359,10 @@ describe('polish audit regressions', () => {
 	it('keeps composer plate readings faint on paper, not the batchim wash', () => {
 		const css = styleBlock(slots);
 		expect(css).toMatch(/\.slot-reading\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*font-style:\s*italic/s);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*font-weight:\s*400/s);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*margin-block-start:\s*var\(--s2\)/s);
+		expect(css).not.toMatch(/\.slot-name\s*\{[^}]*font-style:\s*italic/s);
 		expect(css).not.toMatch(/\.slot\.bottom\.filled\s*\{[^}]*background:\s*var\(--blue-soft\)/s);
 		expect(css).toMatch(/\.slot\.bottom\.filled\s*\{[^}]*border-color:\s*var\(--blue\)/s);
 		const { light, dark } = activeSystem;
