@@ -63,9 +63,11 @@
 	.backup-fold[open] summary::after {
 		transform: rotate(225deg);
 	}
-	.backup-fold summary:hover,
 	.backup-fold[open] summary {
 		color: var(--ink-soft);
+	}
+	.backup-fold summary:hover {
+		color: var(--accent);
 	}
 	.backup-fold summary:active {
 		color: var(--ink);

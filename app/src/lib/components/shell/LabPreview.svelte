@@ -63,7 +63,13 @@
 		<p class="chip" data-kind={model.chipKind}>{model.chip}</p>
 	{/if}
 	<div class="actions">
-		<a class={actionClass(model.actionLabel)} href={resolve('/lab/[id]', { id: model.id })}>
+		<a
+			class={actionClass(model.actionLabel)}
+			href={resolve('/lab/[id]', { id: model.id })}
+			title={model.locked
+				? 'You can look at the cards. Review still waits until you finish the previous lab.'
+				: undefined}
+		>
 			{model.actionLabel}
 		</a>
 		{#if mode !== 'pointer'}

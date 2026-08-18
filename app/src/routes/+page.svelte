@@ -134,7 +134,12 @@
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									<span class="chip-status wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
-									<a class="peek" href={resolve('/lab/[id]', { id: lab.id })} aria-label="Open Lab {pad(lab.number)} anyway">Open anyway</a>
+									<a
+										class="peek"
+										href={resolve('/lab/[id]', { id: lab.id })}
+										title="You can look at the cards. Review still waits until you finish Lab {prior ? pad(prior.number) : ''}."
+										aria-label="Preview Lab {pad(lab.number)} without finishing Lab {prior ? pad(prior.number) : ''}. Review still waits."
+									>Open anyway</a>
 								</span>
 							</div>
 						</div>
@@ -264,6 +269,10 @@
 		box-shadow: var(--shadow-2);
 		color: inherit;
 	}
+	.continue:active {
+		transform: translateY(0);
+		box-shadow: var(--shadow-1);
+	}
 	.continue-copy { min-width: 0; flex: 1 1 auto; }
 	.continue .eyebrow { margin-bottom: var(--s1); }
 	.continue-title {
@@ -358,6 +367,10 @@
 	a.stat.hot:not(.quiet) { border-color: var(--rose); background: var(--rose-soft); }
 	a.stat.hot:not(.quiet) b { color: var(--rose); }
 	a.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
+	a.stat:active {
+		transform: translateY(0);
+		box-shadow: var(--shadow-1);
+	}
 
 	.sec {
 		font-family: var(--display);
@@ -385,6 +398,10 @@
 			border-color var(--fast) var(--ease);
 	}
 	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+	a.lab:active {
+		transform: translateY(0);
+		box-shadow: var(--shadow-1);
+	}
 	a.lab.resume:hover { border-color: var(--rose); }
 
 	.num {
@@ -447,7 +464,13 @@
 		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
 	}
 
-	.lab.ahead { opacity: 0.78; }
+	.lab.ahead {
+		background: var(--paper-sunk);
+	}
+	.lab.ahead h3,
+	.lab.ahead p {
+		color: var(--ink-soft);
+	}
 	.peek {
 		display: inline-flex;
 		align-items: center;
@@ -460,6 +483,10 @@
 		line-height: 1.2;
 	}
 	.peek:hover { color: var(--accent); border-bottom-color: var(--accent); }
+	.peek:active {
+		transform: translateY(0);
+		box-shadow: var(--shadow-1);
+	}
 
 	.tiers { padding: var(--s4); }
 
@@ -472,7 +499,7 @@
 		font-size: 0.82rem;
 	}
 	.tier:last-of-type { border-bottom: none; }
-	.tier.locked { opacity: 0.45; }
+	.tier.locked { color: var(--ink-faint); }
 
 	.nm { flex: 0 0 9rem; }
 	.track {
@@ -488,11 +515,12 @@
 	.track .n { background: var(--rule-strong); }
 	.ct {
 		flex: 0 0 auto;
-		min-width: 14ch;
+		min-width: 8ch;
 		text-align: end;
 		font-family: var(--mono);
 		font-size: 0.72rem;
 		color: var(--ink-faint);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.legend {
@@ -537,8 +565,27 @@
 		.sw.n { background: GrayText; }
 	}
 
+	@media (max-width: 40rem) {
+		.tier {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-areas:
+				'nm ct'
+				'track track';
+			column-gap: var(--s2);
+			row-gap: var(--s1);
+			align-items: baseline;
+		}
+		.nm {
+			grid-area: nm;
+			flex: none;
+			min-width: 0;
+		}
+		.ct { grid-area: ct; min-width: 0; }
+		.track { grid-area: track; width: 100%; }
+	}
+
 	@media (max-width: 34rem) {
-		.nm { flex-basis: 6.5rem; }
 		.continue { gap: var(--s3); padding: var(--s3); }
 		.continue-title { font-size: 1.1rem; }
 	}

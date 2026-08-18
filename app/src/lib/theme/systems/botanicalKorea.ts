@@ -99,20 +99,6 @@ export const botanicalKorea: DesignSystem = {
 			weight: '400 600',
 			display: 'optional'
 		},
-		{
-			family: 'Noto Serif KR',
-			file: 'NotoSerifKR-subset.woff2',
-			style: 'normal',
-			weight: '400 600',
-			display: 'optional'
-		},
-		latinFace({
-			family: 'Newsreader',
-			file: 'Newsreader-latin.woff2',
-			style: 'normal',
-			weight: '300 400',
-			display: 'optional'
-		}),
 		latinFace({
 			family: 'Newsreader',
 			file: 'Newsreader-Italic-latin.woff2',

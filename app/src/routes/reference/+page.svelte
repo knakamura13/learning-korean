@@ -7,6 +7,11 @@
 		batchimSound, clusterParts, clusterRule, fusionParts, mergedWith, harmony,
 		derive, baseShapeOf
 	} from '$lib/domain/hangul';
+	import {
+		pickActiveSection,
+		REFERENCE_SECTIONS,
+		type SectionHit
+	} from '$lib/domain/referenceNav';
 
 	/** The five families, rebuilt from the derivation map rather than listed. */
 	const FAMILIES = BASE_SHAPES.map((base) => ({
@@ -34,6 +39,43 @@
 		'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖', 'ㅎ': '히읗'
 	};
 
+	let activeSection = $state<string | null>(null);
+
+	$effect(() => {
+		const hits = new Map<string, SectionHit>();
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					hits.set(entry.target.id, {
+						id: entry.target.id,
+						ratio: entry.intersectionRatio,
+						top: entry.boundingClientRect.top
+					});
+				}
+				activeSection = pickActiveSection([...hits.values()], activeSection);
+			},
+			{
+				rootMargin: '-72px 0px -50% 0px',
+				threshold: [0, 0.15, 0.4, 0.75, 1]
+			}
+		);
+		for (const section of REFERENCE_SECTIONS) {
+			const el = document.getElementById(section.id);
+			if (el) observer.observe(el);
+		}
+		return () => observer.disconnect();
+	});
+
+	function jumpToSection(id: string, event: MouseEvent) {
+		activeSection = id;
+		const el = document.getElementById(id);
+		if (!el) return;
+		event.preventDefault();
+		history.replaceState(null, '', `#${id}`);
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+	}
+
 	const SOUND: Record<string, string> = {
 		'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
 		'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '—', 'ㅈ': 'j', 'ㅉ': 'jj',
@@ -55,19 +97,23 @@
 			Generated from the same module the labs run on, so it cannot drift from what the app
 			teaches.
 		</p>
-		<p class="quick-nav-label">Jump to section</p>
-		<nav class="quick-nav" aria-label="Reference sections">
-			<a href="#consonants">19 Consonants</a>
-			<a href="#simple-vowels">10 Simple Vowels</a>
-			<a href="#compound-vowels">11 Compounds</a>
-			<a href="#batchim">Batchim (7 Sounds)</a>
-			<a href="#clusters">11 Clusters</a>
-			<a href="#derivation">Derivation Map</a>
-			<a href="#block-layouts">Block Layouts</a>
-			<a href="#sound-changes">Sound Changes</a>
-			<a href="#dictionary-order">Dictionary Order</a>
-		</nav>
 	</header>
+
+	<div class="toc">
+		<p class="quick-nav-label" id="jump-label">Jump to section</p>
+		<nav class="quick-nav" aria-labelledby="jump-label">
+			{#each REFERENCE_SECTIONS as section (section.id)}
+				<a
+					href="#{section.id}"
+					class:active={activeSection === section.id}
+					aria-current={activeSection === section.id ? 'location' : undefined}
+					onclick={(event) => jumpToSection(section.id, event)}
+				>
+					{section.nav}
+				</a>
+			{/each}
+		</nav>
+	</div>
 
 	<section id="consonants" aria-labelledby="sec-consonants-heading">
 		<h2 id="sec-consonants-heading" class="sec">19 consonants</h2>
@@ -281,12 +327,23 @@
 </div>
 
 <style>
-	.head { margin-bottom: var(--s6); max-width: var(--measure); }
+	.head { margin-bottom: var(--s4); max-width: var(--measure); }
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.lede { color: var(--ink-soft); }
 
+	.toc {
+		position: sticky;
+		inset-block-start: calc(44px + env(safe-area-inset-top));
+		z-index: 3;
+		margin: 0 0 var(--s6);
+		padding: var(--s2) 0 var(--s3);
+		background: color-mix(in srgb, var(--paper) 92%, transparent);
+		backdrop-filter: blur(10px);
+		border-bottom: 1px solid var(--rule);
+	}
+
 	.quick-nav-label {
-		margin: var(--s4) 0 var(--s1);
+		margin: 0 0 var(--s2);
 		color: var(--ink-faint);
 		font-size: 0.66rem;
 		font-weight: 700;
@@ -297,7 +354,7 @@
 		display: flex;
 		gap: var(--s2);
 		flex-wrap: wrap;
-		padding: var(--s2) 0;
+		padding: 0;
 	}
 	.quick-nav a {
 		display: inline-flex;
@@ -323,36 +380,15 @@
 	.quick-nav a:active {
 		transform: translateY(1px);
 	}
-
-	@media (max-width: 40rem) {
-		.quick-nav {
-			flex-wrap: nowrap;
-			overflow-x: auto;
-			overscroll-behavior-inline: contain;
-			scroll-padding-inline: var(--s2);
-			scroll-snap-type: inline proximity;
-			scrollbar-color: var(--rule) transparent;
-			scrollbar-width: thin;
-			-webkit-overflow-scrolling: touch;
-			mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 2rem), transparent);
-			padding-inline-end: 2rem;
-		}
-		.quick-nav a {
-			flex: 0 0 auto;
-			scroll-snap-align: start;
-		}
-		.quick-nav::-webkit-scrollbar {
-			height: 0.35rem;
-		}
-		.quick-nav::-webkit-scrollbar-thumb {
-			border-radius: var(--r-pill);
-			background: var(--rule);
-		}
+	.quick-nav a.active {
+		border-color: var(--accent);
+		background: var(--accent-soft);
+		color: var(--accent);
 	}
 
 	section {
 		margin-bottom: var(--s7);
-		scroll-margin-top: calc(var(--s7) + 2rem);
+		scroll-margin-block-start: calc(44px + env(safe-area-inset-top) + 12.5rem);
 	}
 
 	/* Last block is short; without leftover viewport, #dictionary-order cannot
@@ -487,5 +523,18 @@
 		align-items: center;
 		min-width: 44px;
 		min-height: 44px;
+	}
+
+	@media (forced-colors: active) {
+		.toc {
+			background: Canvas;
+			border-bottom-color: ButtonBorder;
+			backdrop-filter: none;
+		}
+		.quick-nav a.active {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+		}
 	}
 </style>

@@ -495,6 +495,11 @@
 						{/if}
 					</div>
 				{/key}
+			{:else}
+				<div class="work work-skel" aria-hidden="true">
+					<div class="skel line-ph"></div>
+					<div class="skel mouth-ph"></div>
+				</div>
 			{/if}
 		{/snippet}
 		{#snippet after()}
@@ -880,6 +885,16 @@
 		width: 100%;
 		min-width: 0;
 		margin-top: 0;
+	}
+
+	.work-skel .line-ph {
+		width: 14rem;
+		max-width: 80%;
+		height: 0.85rem;
+	}
+	.work-skel .mouth-ph {
+		width: 100%;
+		aspect-ratio: 440 / 300;
 	}
 
 	.advance {

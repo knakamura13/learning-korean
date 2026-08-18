@@ -28,19 +28,14 @@ describe('botanicalKorea', () => {
 		}
 	});
 
-	it('self-hosts Hangul sans and heading serif as optional webfonts', () => {
+	it('self-hosts Hangul sans as an optional webfont and keeps a serif stack token', () => {
 		const hangul = botanicalKorea.fonts.find((face) => face.file === 'NotoSansKR-subset.woff2');
-		const serif = botanicalKorea.fonts.find((face) => face.file === 'NotoSerifKR-subset.woff2');
 		expect(hangul).toMatchObject({
 			family: 'Noto Sans KR',
 			weight: '400 600',
 			display: 'optional'
 		});
-		expect(serif).toMatchObject({
-			family: 'Noto Serif KR',
-			weight: '400 600',
-			display: 'optional'
-		});
+		expect(botanicalKorea.fonts.find((face) => face.file === 'NotoSerifKR-subset.woff2')).toBeUndefined();
 		expect(botanicalKorea.type.hangul).toContain('Noto Sans KR');
 		expect(botanicalKorea.type.hangul).not.toMatch(/Newsreader/);
 		expect(botanicalKorea.type.serif).toContain('Noto Serif KR');
@@ -49,25 +44,22 @@ describe('botanicalKorea', () => {
 
 	it('self-hosts Newsreader italic with a Latin unicode-range', () => {
 		const italic = botanicalKorea.fonts.find((face) => face.file === 'Newsreader-Italic-latin.woff2');
-		const roman = botanicalKorea.fonts.find((face) => face.file === 'Newsreader-latin.woff2');
 		expect(italic).toMatchObject({
 			family: 'Newsreader',
 			style: 'italic',
 			display: 'optional',
 			unicodeRange: botanicalKorea.fonts.find((face) => face.unicodeRange)?.unicodeRange
 		});
-		expect(roman).toMatchObject({
-			family: 'Newsreader',
-			style: 'normal',
-			display: 'optional'
-		});
+		expect(botanicalKorea.fonts.find((face) => face.file === 'Newsreader-latin.woff2')).toBeUndefined();
 		expect(italic?.unicodeRange).toBe(LATIN_UNICODE_RANGE);
-		expect(roman?.unicodeRange).toBe(LATIN_UNICODE_RANGE);
 		const css = designSystemCss(botanicalKorea);
 		expect(css).toContain('Newsreader-Italic-latin.woff2');
+		expect(css).not.toContain('Newsreader-latin.woff2');
+		expect(css).not.toContain('NotoSerifKR-subset.woff2');
 		expect(css).toContain('font-style: italic');
 		expect(css).toContain('unicode-range:');
 		expect(css).toContain('--display:');
+		expect(css).toContain('--serif:');
 		expect(css).toContain('Newsreader');
 	});
 

@@ -40,6 +40,7 @@ describe('SiteFooter — quiet progress backup', () => {
 		const css = styleBlock(src);
 		expect(css).toMatch(/\.backup-fold summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(css).toMatch(/\.backup-fold summary:active\s*\{/);
+		expect(css).toMatch(/\.backup-fold summary:hover\s*\{/);
 		expect(css).toMatch(/summary:focus-visible/);
 		expect(css).not.toMatch(/(?:margin|padding|border)-(?:left|right)\s*:/);
 		expect(css).not.toMatch(/(?:^|[^\w-])(?:left|right)\s*:/m);
