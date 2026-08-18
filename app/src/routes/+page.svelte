@@ -53,7 +53,6 @@
 <svelte:head><title>Korean — labs and review</title></svelte:head>
 
 <div class="with-rail">
-	<LabIndexRail />
 	<div class="shell">
 	<header class="hero">
 		<p class="eyebrow" lang="ko">한글</p>
@@ -206,6 +205,7 @@
 		</div>
 	</section>
 	</div>
+	<LabIndexRail />
 </div>
 
 <style>
@@ -215,15 +215,20 @@
 	@media (min-width: 72rem) {
 		.with-rail {
 			display: grid;
-			grid-template-columns: 56px minmax(0, var(--shell));
-			justify-content: center;
+			grid-template-areas: 'rail main';
+			grid-template-columns: 56px minmax(0, 1fr);
 			column-gap: var(--s4);
-			max-width: 90rem;
+			max-width: var(--shell);
 			margin-inline: auto;
+			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
 		}
-		.with-rail :global(.shell) {
+		.with-rail .shell {
+			grid-area: main;
 			max-width: none;
 			width: 100%;
+		}
+		.with-rail :global(.lab-index) {
+			grid-area: rail;
 		}
 	}
 

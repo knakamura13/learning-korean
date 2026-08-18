@@ -49,7 +49,11 @@
 	{/if}
 </svelte:head>
 
-<a class="skip" href="#main">Skip to content</a>
+<a
+	class="skip"
+	href="#main"
+	onclick={() => document.getElementById('main')?.focus()}
+>Skip to content</a>
 
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
@@ -78,7 +82,7 @@
 	</div>
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1">
 	{@render children()}
 </main>
 

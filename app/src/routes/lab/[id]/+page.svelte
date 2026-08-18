@@ -34,7 +34,6 @@
 </svelte:head>
 
 <div class="with-rail">
-	<LabIndexRail currentId={lab.id} />
 	<div class="shell sitting">
 	{#if gated && prior}
 		<aside class="gate card" role="status">
@@ -57,6 +56,7 @@
 		</LabRunner>
 	{/key}
 	</div>
+	<LabIndexRail currentId={lab.id} />
 </div>
 
 <style>
@@ -66,15 +66,19 @@
 	@media (min-width: 72rem) {
 		.with-rail {
 			display: grid;
+			grid-template-areas: 'rail main';
 			grid-template-columns: 56px minmax(0, 1fr);
-			justify-content: center;
 			column-gap: var(--s4);
 			max-width: var(--sitting);
 			margin-inline: auto;
 		}
-		.with-rail :global(.shell) {
+		.with-rail .shell {
+			grid-area: main;
 			max-width: none;
 			width: 100%;
+		}
+		.with-rail :global(.lab-index) {
+			grid-area: rail;
 		}
 	}
 
