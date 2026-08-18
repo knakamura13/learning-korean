@@ -82,12 +82,20 @@ describe('polish audit regressions', () => {
 		expect(labRunner).toMatch(/showModal\s*\(/);
 	});
 
-	it('does not paint a focus ring on the lab instruction heading', () => {
-		const css = styleBlock(labRunner);
-		const doFocus = css.match(/\.do:focus(?:-visible)?(?:\s*,\s*\.do:focus(?:-visible)?)?\s*\{[^}]*\}/)?.[0] ?? '';
-		expect(doFocus).toMatch(/outline:\s*none/);
-		expect(doFocus).toMatch(/box-shadow:\s*none/);
-		expect(css).toMatch(/\.do:focus-visible/);
+	it('moves card-change focus to the first well control, not the instruction heading', () => {
+		expect(labRunner).not.toMatch(/querySelector\('h2'\)\?\.focus/);
+		expect(labRunner).not.toMatch(/<h2 class="do" tabindex="-1"/);
+		expect(labRunner).toMatch(/from '\$lib\/a11y\/firstWellControl'/);
+		expect(labRunner).toMatch(/firstWellControl\(/);
+		expect(styleBlock(labRunner)).not.toMatch(/\.do:focus-visible/);
+		expect(styleBlock(labRunner)).not.toMatch(/\.do:focus\b/);
+	});
+
+	it('announces the new instruction from a persistent live region outside the card key', () => {
+		expect(labRunner).toMatch(/data-prompt-live/);
+		expect(labRunner).toMatch(/data-prompt-live[^>]*aria-live="polite"/);
+		const promptOpen = labRunner.match(/class="prompt"[\s\S]{0,400}<h2 class="do"/)?.[0] ?? '';
+		expect(promptOpen).not.toMatch(/data-prompt-live/);
 	});
 
 	it('gives the theme control pressed-state feedback', () => {

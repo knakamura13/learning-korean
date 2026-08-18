@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import type { Lab } from '$lib/content/types';
 	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
+	import { firstWellControl } from '$lib/a11y/firstWellControl';
 	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
@@ -65,10 +66,12 @@
 	const nextLab = $derived(followingLab(course, lab.id));
 	const finishCopy = $derived(labFinishCopy(released, progress.stats));
 	const dueNow = $derived(progress.stats.queue);
+	const promptLive = $derived(step.do.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
 	let choiceRef = $state<ChoiceStep | undefined>();
 	let fadeLeft = $state(false);
 	let fadeRight = $state(false);
 	let cardEl = $state<HTMLDivElement>();
+	let workEl = $state<HTMLDivElement>();
 	let confirmingRestart = $state(false);
 	let restartButton = $state<HTMLButtonElement>();
 
@@ -76,11 +79,11 @@
 	 * Scroll and focus are managed in exactly one place: here. Advancing or
 	 * pip-jumping remounts the card via {#key index}, which would otherwise
 	 * keep whatever scroll depth the previous card happened to leave (burying
-	 * the new instruction above the fold) and drop focus to <body>, so
-	 * keyboard users resume from a browser heuristic and screen-reader users
-	 * hear nothing. On every card change we focus the new instruction heading
-	 * (without scrolling) and park the card just under the sticky header.
-	 * Settle reveals are revealAdvance's job; settle focus is focusWhen's.
+	 * the new instruction above the fold) and drop focus to <body>. On every
+	 * card change we park the prompt under the sticky header, announce the
+	 * new instruction, and focus the first control in the well — a real widget,
+	 * not the heading. Settle reveals are revealAdvance's job; settle focus
+	 * is focusWhen's.
 	 */
 	let managedIndex: number | null = null;
 	$effect(() => {
@@ -95,11 +98,15 @@
 			return;
 		}
 		managedIndex = i;
-		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
 		const chrome = document.querySelector('header.bar')?.getBoundingClientRect().bottom ?? 0;
 		const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - chrome - 8);
-		el.querySelector('h2')?.focus({ preventScroll: true });
 		window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+		void tick().then(() => {
+			if (index !== i || finished) return;
+			const well = workEl?.isConnected ? workEl : document.querySelector('.work');
+			firstWellControl(well)?.focus({ preventScroll: true });
+		});
 	});
 
 	function segmentElapsed() {
@@ -462,10 +469,11 @@
 					</div>
 					<span class="where">Card {index + 1} of {lab.steps.length}</span>
 				</nav>
+				<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true">{promptLive}</p>
 				{#key index}
 					<div class="prompt" bind:this={cardEl} in:fly={{ y: 10, duration: 260 }}>
 						{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
-						<h2 class="do" tabindex="-1">{@html labHtml(step.do)}</h2>
+						<h2 class="do">{@html labHtml(step.do)}</h2>
 						{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
 					</div>
 				{/key}
@@ -474,7 +482,7 @@
 		{#snippet well()}
 			{#if ready}
 				{#key index}
-					<div class="work">
+					<div class="work" bind:this={workEl}>
 						{#if step.type === 'mouth'}
 							<MouthStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'choice'}
@@ -867,15 +875,6 @@
 	.do :global(em) {
 		font-style: italic;
 		font-weight: 600;
-	}
-
-	/* Programmatically focused on card change for SR/keyboard orientation;
-	   it is not an interactive control, so no ring. Global :focus-visible
-	   still paints outline + box-shadow unless both are cleared here. */
-	.do:focus,
-	.do:focus-visible {
-		outline: none;
-		box-shadow: none;
 	}
 
 	.hint {
