@@ -41,8 +41,13 @@
 		font-size: 0.78rem;
 		font-weight: 500;
 		color: var(--ink-faint);
-		padding: var(--s1) 0;
+		padding: var(--s1) var(--s2);
+		margin-inline: calc(-1 * var(--s2));
+		border-radius: var(--r-sm);
 		list-style: none;
+		transition:
+			color var(--fast) var(--ease),
+			background var(--fast) var(--ease);
 	}
 	.backup-fold summary::-webkit-details-marker,
 	.backup-fold summary::marker {
@@ -67,10 +72,13 @@
 		color: var(--ink-soft);
 	}
 	.backup-fold summary:hover {
-		color: var(--accent);
+		color: var(--ink);
+		background: var(--accent-soft);
 	}
 	.backup-fold summary:active {
 		color: var(--ink);
+		background: var(--paper-sunk);
+		transform: translateY(1px);
 	}
 	.backup-fold summary:focus-visible {
 		outline: 2px solid var(--paper);
@@ -88,8 +96,14 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		.backup-fold summary {
+			transition: none;
+		}
 		.backup-fold summary::after {
 			transition: none;
+		}
+		.backup-fold summary:active {
+			transform: none;
 		}
 	}
 
@@ -99,6 +113,14 @@
 		}
 		.backup-fold summary {
 			color: CanvasText;
+		}
+		.backup-fold summary:hover {
+			background: Highlight;
+			color: HighlightText;
+		}
+		.backup-fold summary:active {
+			background: ButtonFace;
+			color: ButtonText;
 		}
 	}
 </style>

@@ -96,7 +96,17 @@ describe('polish audit regressions', () => {
 	});
 
 	it('gives the backup summary a hover state', () => {
-		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:hover\s*\{/);
+		const css = styleBlock(siteFooter);
+		const hover = css.match(/\.backup-fold summary:hover\s*\{[^}]*\}/)?.[0] ?? '';
+		const active = css.match(/\.backup-fold summary:active\s*\{[^}]*\}/)?.[0] ?? '';
+		const focus = css.match(/\.backup-fold summary:focus-visible\s*\{[^}]*\}/)?.[0] ?? '';
+		expect(hover).toMatch(/background:\s*var\(--accent-soft\)/);
+		expect(hover).not.toMatch(/box-shadow:\s*var\(--focus-ring\)/);
+		expect(hover).not.toMatch(/outline:/);
+		expect(hover).not.toMatch(/transform:/);
+		expect(active).toMatch(/transform:\s*translateY\(1px\)/);
+		expect(active).toMatch(/background:\s*var\(--paper-sunk\)/);
+		expect(focus).toMatch(/box-shadow:\s*var\(--focus-ring\)/);
 	});
 
 	it('keeps filled button labels visible when a .btn link is hovered', () => {
