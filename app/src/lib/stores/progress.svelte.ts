@@ -8,7 +8,7 @@
 
 import { browser } from '$app/environment';
 import {
-	emptyState, reviveState, unlock as unlockTiers, isUnlocked,
+	emptyState, reviveState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
 	weakest as weakestCards, gradeFromAttempt, tierReviewProgress,
 	type SrsState, type Grade, type Stats
@@ -118,12 +118,10 @@ function createProgress() {
 		},
 
 		import(json: string): boolean {
-			try {
-				commit(reviveState(JSON.parse(json)));
-				return true;
-			} catch {
-				return false;
-			}
+			const next = parseImportedBackup(json);
+			if (!next) return false;
+			commit(next);
+			return true;
 		}
 	};
 }

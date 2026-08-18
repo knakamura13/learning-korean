@@ -97,6 +97,28 @@ export function reviveState(raw: unknown): SrsState {
 	};
 }
 
+/** Strict shape check for file restore — unlike reviveState, rejects unknown payloads. */
+export function isSrsBackup(raw: unknown): boolean {
+	if (!raw || typeof raw !== 'object') return false;
+	const s = raw as Partial<SrsState> & { v?: number };
+	const version = s.version ?? s.v;
+	if (version !== 1) return false;
+	if (!Array.isArray(s.unlocked)) return false;
+	if (!s.cards || typeof s.cards !== 'object' || Array.isArray(s.cards)) return false;
+	return true;
+}
+
+/** Parse and validate an imported backup; returns null on any failure. */
+export function parseImportedBackup(json: string): SrsState | null {
+	try {
+		const parsed = JSON.parse(json);
+		if (!isSrsBackup(parsed)) return null;
+		return reviveState(parsed);
+	} catch {
+		return null;
+	}
+}
+
 export function isoDay(now: number): string {
 	return new Date(now).toISOString().slice(0, 10);
 }
