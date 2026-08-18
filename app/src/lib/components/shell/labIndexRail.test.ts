@@ -192,4 +192,9 @@ describe('LabSpread source contracts', () => {
 		expect(spread).not.toMatch(/\.well::after/);
 		expect(spread).not.toMatch(/Colophon|ToC|folio/i);
 	});
+
+	it('keeps settle UI under the well on wide screens', () => {
+		expect(spread).toMatch(/'article after'/);
+		expect(spread).not.toMatch(/'after well'/);
+	});
 });

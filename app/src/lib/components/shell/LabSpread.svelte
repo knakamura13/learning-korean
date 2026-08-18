@@ -51,7 +51,7 @@
 			grid-template-columns: minmax(0, var(--measure)) minmax(280px, 1fr);
 			grid-template-areas:
 				'article well'
-				'after well';
+				'article after';
 			align-items: start;
 			max-width: var(--sitting);
 		}
