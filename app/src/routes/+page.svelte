@@ -350,10 +350,10 @@
 		margin: 0.42em auto 0.18em;
 	}
 	.stat span {
-		font-size: 0.6rem;
-		letter-spacing: 0.1em;
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: var(--ink-faint);
+		color: var(--ink);
 	}
 	a.stat.hot:not(.quiet) { border-color: var(--rose); background: var(--rose-soft); }
 	a.stat.hot:not(.quiet) b { color: var(--rose); }

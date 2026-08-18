@@ -355,6 +355,12 @@
 		scroll-margin-top: calc(var(--s7) + 2rem);
 	}
 
+	/* Last block is short; without leftover viewport, #dictionary-order cannot
+	   settle under the sticky bar (other jumps already land ~85px). */
+	#sources {
+		min-height: calc(100dvh - (var(--s7) + 2rem));
+	}
+
 	.sec {
 		font-family: var(--sans);
 		font-size: 0.66rem;
@@ -476,4 +482,10 @@
 
 	.src { margin: 0; padding-inline-start: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--ink-soft); }
 	.src li { margin-bottom: var(--s2); }
+	.src a {
+		display: inline-flex;
+		align-items: center;
+		min-width: 44px;
+		min-height: 44px;
+	}
 </style>
