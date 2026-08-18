@@ -11,6 +11,8 @@ import { labCardState, type CourseLab, type CourseNavView, type LabCardState } f
 export const POPOVER_OFFSET_PX = 12;
 export const POPOVER_PAD_PX = 8;
 export const PREVIEW_HOVER_BUFFER_PX = 4;
+/** 0.5rem at a 16px root — lift the card above the cursor / number midline. */
+export const PREVIEW_LIFT_PX = 8;
 export const HOVER_CLOSE_MS = 160;
 
 export interface ViewportBox {
@@ -75,6 +77,11 @@ export type ItemFocusOpenDecision = { action: 'skip' } | { action: 'open' };
 /** Finger/stylus on this event — not matchMedia hover capability. */
 export function isPressPointerType(pointerType: string): boolean {
 	return pointerType === 'touch' || pointerType === 'pen';
+}
+
+/** Mouse (and empty pointerType) can hover; touch/pen must tap. */
+export function isHoverPointerType(pointerType: string): boolean {
+	return !isPressPointerType(pointerType);
 }
 
 /**
@@ -152,7 +159,7 @@ function isRect(cursor: PopoverAnchor): cursor is AnchorRect {
 	return 'width' in cursor;
 }
 
-/** 12px to the right of the cursor (or the number), top edge on the cursor / number midline. */
+/** 12px to the right of the number; top edge 0.5rem above the cursor / number midline. */
 export function anchorPopover(
 	cursor: PopoverAnchor,
 	panel: PanelBox,
@@ -163,7 +170,7 @@ export function anchorPopover(
 		: { x: cursor.x, y: cursor.y };
 
 	let left = origin.x + POPOVER_OFFSET_PX;
-	let top = origin.y;
+	let top = origin.y - PREVIEW_LIFT_PX;
 
 	if (left + panel.w > viewport.w - POPOVER_PAD_PX) {
 		left = origin.x - POPOVER_OFFSET_PX - panel.w;

@@ -43,6 +43,12 @@ describe('LabIndexRail source contracts', () => {
 		expect(preview).toMatch(/btn ghost/);
 	});
 
+	it('opens the hover preview from this event pointerType, not matchMedia hover', () => {
+		expect(src).toMatch(/isHoverPointerType\(e\.pointerType\)/);
+		expect(src).not.toMatch(/function isFinePointer/);
+		expect(src).not.toMatch(/\(hover: hover\) and \(pointer: fine\)/);
+	});
+
 	it('freezes cursor-follow so the panel action can be clicked', () => {
 		expect(src).toMatch(/followFrozen/);
 		expect(src).not.toMatch(/<svelte:window[^>]*onpointermove/);

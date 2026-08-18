@@ -15,6 +15,7 @@
 		decideUnlockedPress,
 		decideWindowEscape,
 		expandHoverBox,
+		isHoverPointerType,
 		isPointInHoverBridge,
 		isPressPointerType,
 		labPreviewModels,
@@ -92,10 +93,6 @@
 	);
 
 	const panelId = 'lab-index-preview';
-
-	function isFinePointer(): boolean {
-		return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-	}
 
 	function prefersReducedMotion(): boolean {
 		return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -199,7 +196,7 @@
 	}
 
 	function onPointerEnter(item: LabPreviewModel, e: PointerEvent) {
-		if (!isFinePointer()) return;
+		if (!isHoverPointerType(e.pointerType)) return;
 		rememberPointer(e);
 		openPreview(
 			item.id,
@@ -209,7 +206,7 @@
 	}
 
 	function onItemPointerMove(item: LabPreviewModel, e: PointerEvent) {
-		if (!isFinePointer()) return;
+		if (!isHoverPointerType(e.pointerType)) return;
 		rememberPointer(e);
 		if (prefersReducedMotion()) return;
 		if (openId !== item.id || mode !== 'pointer' || followFrozen) return;
@@ -217,8 +214,8 @@
 		if (next) anchor = next;
 	}
 
-	function onItemPointerLeave() {
-		if (!isFinePointer()) return;
+	function onItemPointerLeave(e: PointerEvent) {
+		if (!isHoverPointerType(e.pointerType)) return;
 		followFrozen = true;
 		scheduleClose();
 	}
@@ -229,7 +226,7 @@
 	}
 
 	function onHoverIntentMove(e: PointerEvent) {
-		if (!openId || mode !== 'pointer' || !lastPointer || !isFinePointer()) return;
+		if (!openId || mode !== 'pointer' || !lastPointer || !isHoverPointerType(e.pointerType)) return;
 		const target = e.target;
 		const overItem = target instanceof Element && Boolean(target.closest('[data-lab-index-item]'));
 		const overPanel = target instanceof Element && Boolean(target.closest(`#${panelId}`));

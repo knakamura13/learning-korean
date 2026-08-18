@@ -24,7 +24,7 @@
 		onClose: () => void;
 		onMeasure?: (size: { w: number; h: number }) => void;
 		onPointerEnter?: () => void;
-		onPointerLeave?: () => void;
+		onPointerLeave?: (e: PointerEvent) => void;
 	} = $props();
 
 	function actionClass(label: LabPreviewModel['actionLabel']): string {
