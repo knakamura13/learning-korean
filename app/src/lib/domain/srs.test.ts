@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS, DEFAULT_NEW_PER_DAY,
-	emptyState, reviveState, unlock, isUnlocked, grade, gradeFromAttempt,
+	emptyState, reviveState, isSrsBackup, parseImportedBackup, unlock, isUnlocked, grade, gradeFromAttempt,
 	due, pinNewForDay, nextDueAt, stats, streak, weakest, isoDay,
 	tierCountLabel, tierReviewProgress,
 	type SrsState, type SchedulableCard
@@ -27,6 +27,7 @@ describe('state hygiene', () => {
 		expect(reviveState(null).version).toBe(1);
 		expect(reviveState('nonsense').unlocked).toEqual([]);
 		expect(reviveState({ version: 99 }).cards).toEqual({});
+		expect(reviveState({ nope: true })).toEqual(emptyState());
 		expect(reviveState({ version: 1, unlocked: ['lab01', 7] }).unlocked).toEqual(['lab01']);
 	});
 
@@ -79,6 +80,44 @@ describe('state hygiene', () => {
 		pinNewForDay(s, deck, T0);
 		stats(s, deck, T0);
 		expect(JSON.stringify(s)).toBe(snapshot);
+	});
+});
+
+describe('backup validation', () => {
+	it('rejects payloads that are not SRS backups', () => {
+		expect(isSrsBackup({ nope: true })).toBe(false);
+		expect(isSrsBackup({ version: 1 })).toBe(false);
+		expect(isSrsBackup({ version: 1, unlocked: [], cards: [] })).toBe(false);
+	});
+
+	it('accepts v1 backups with unlocked and cards', () => {
+		expect(isSrsBackup({ version: 1, unlocked: [], cards: {} })).toBe(true);
+		expect(isSrsBackup({ v: 1, unlocked: ['lab01'], cards: {} })).toBe(true);
+	});
+
+	it('parseImportedBackup fails closed on invalid input', () => {
+		expect(parseImportedBackup('{"nope":true}')).toBeNull();
+		expect(parseImportedBackup('not json')).toBeNull();
+	});
+
+	it('parseImportedBackup revives a valid v1 payload', () => {
+		const payload = {
+			version: 1,
+			unlocked: ['lab01'],
+			cards: { c0: { ease: 2.5, ivl: 3, reps: 2, lapses: 0, due: T0 } },
+			days: { '2026-03-01': 5 },
+			newDate: '2026-03-01',
+			newCount: 3,
+			newIds: ['c1']
+		};
+		const revived = parseImportedBackup(JSON.stringify(payload));
+		expect(revived).not.toBeNull();
+		expect(revived!.version).toBe(1);
+		expect(revived!.unlocked).toEqual(['lab01']);
+		expect(revived!.cards.c0.ivl).toBe(3);
+		expect(revived!.days['2026-03-01']).toBe(5);
+		expect(revived!.newCount).toBe(3);
+		expect(revived!.newIds).toEqual(['c1']);
 	});
 });
 

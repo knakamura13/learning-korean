@@ -192,4 +192,12 @@ describe('LabSpread source contracts', () => {
 		expect(spread).not.toMatch(/\.well::after/);
 		expect(spread).not.toMatch(/Colophon|ToC|folio/i);
 	});
+
+	it('keeps settle UI under the well on wide screens', () => {
+		expect(spread).toMatch(/class="spread-col"/);
+		expect(spread).toMatch(/'article spread-col'/);
+		expect(spread).not.toMatch(/'after well'/);
+		expect(spread).toMatch(/\.spread-col\s*\{[^}]*position:\s*sticky/s);
+		expect(spread).toMatch(/max-height:\s*calc\(100dvh/);
+	});
 });

@@ -39,7 +39,7 @@
 	const label = $derived(themeToggleLabel(pref, darkScheme.current));
 </script>
 
-<button type="button" class="theme" aria-label={label} title={label} onclick={cycle}>
+<button type="button" class="theme" data-pref={pref} aria-label={label} title={label} onclick={cycle}>
 	{#if glyph === 'sun'}
 		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
 			<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
@@ -62,10 +62,14 @@
 			/>
 		</svg>
 	{/if}
+	{#if pref === 'system'}
+		<span class="auto" aria-hidden="true">Auto</span>
+	{/if}
 </button>
 
 <style>
 	.theme {
+		position: relative;
 		display: inline-flex;
 		appearance: none;
 		align-items: center;
@@ -99,6 +103,18 @@
 		width: 1.15rem;
 		height: 1.15rem;
 		display: block;
+	}
+
+	.auto {
+		position: absolute;
+		inset-inline-end: 1px;
+		inset-block-end: 1px;
+		font-size: 0.625rem;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		pointer-events: none;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

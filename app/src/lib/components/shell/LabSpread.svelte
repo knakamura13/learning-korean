@@ -14,10 +14,12 @@
 
 <div class="spread">
 	<div class="article">{@render article()}</div>
-	<div class="well">{@render well()}</div>
-	{#if after}
-		<div class="after">{@render after()}</div>
-	{/if}
+	<div class="spread-col">
+		<div class="well">{@render well()}</div>
+		{#if after}
+			<div class="after">{@render after()}</div>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -26,15 +28,20 @@
 		gap: var(--s6);
 		grid-template-areas:
 			'article'
-			'well'
-			'after';
+			'spread-col';
 	}
 
 	.article { grid-area: article; min-width: 0; }
-	.after { grid-area: after; min-width: 0; }
+	.spread-col {
+		grid-area: spread-col;
+		display: flex;
+		flex-direction: column;
+		gap: var(--s6);
+		min-width: 0;
+	}
+	.after { min-width: 0; }
 
 	.well {
-		grid-area: well;
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
@@ -49,16 +56,21 @@
 	@media (min-width: 72rem) {
 		.spread {
 			grid-template-columns: minmax(0, var(--measure)) minmax(280px, 1fr);
-			grid-template-areas:
-				'article well'
-				'after well';
+			grid-template-areas: 'article spread-col';
 			align-items: start;
 			max-width: var(--sitting);
 		}
 
-		.well {
+		.spread-col {
 			position: sticky;
 			inset-block-start: calc(44px + env(safe-area-inset-top) + var(--s3));
+			max-height: calc(100dvh - 44px - env(safe-area-inset-top) - var(--s3) - var(--s4));
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			scrollbar-width: thin;
+		}
+
+		.well {
 			min-height: 320px;
 			min-width: 280px;
 		}

@@ -154,7 +154,7 @@
 		<div class="strip" role="region" aria-label="Review session statistics">
 			<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
 			<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
-			<div class="stat"><b>{stats.seen}</b><span>started</span></div>
+			<div class="stat"><b>{stats.seen}</b><span>reviewed</span></div>
 			<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
 		</div>
 	{/if}

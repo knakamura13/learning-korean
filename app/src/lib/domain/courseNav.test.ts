@@ -169,6 +169,15 @@ describe('labCardState', () => {
 			startHere: false
 		});
 	});
+
+	it('treats a finished peeked lab as done and unlocked, not locked', () => {
+		const peekedDone = view({ unlocked: ['lab02'] });
+		expect(labCardState(labs[1], labs, peekedDone)).toMatchObject({
+			locked: false,
+			done: true,
+			resumeAt: null
+		});
+	});
 });
 
 describe('followingLab', () => {
@@ -185,5 +194,19 @@ describe('showPrerequisiteGate', () => {
 		expect(showPrerequisiteGate(labs[1], labs, view({ ready: true }))).toBe(true);
 		expect(showPrerequisiteGate(labs[1], labs, view({ unlocked: ['lab01'] }))).toBe(false);
 		expect(showPrerequisiteGate(labs[0], labs, view({ ready: true }))).toBe(false);
+	});
+
+	it('hides after a peeked lab is finished even without the prerequisite tier', () => {
+		expect(showPrerequisiteGate(labs[1], labs, view({ unlocked: ['lab02'] }))).toBe(false);
+	});
+
+	it('still shows for a peeked lab that is in progress', () => {
+		expect(
+			showPrerequisiteGate(
+				labs[1],
+				labs,
+				view({ sessions: { '0002': mid(2, 16) } })
+			)
+		).toBe(true);
 	});
 });

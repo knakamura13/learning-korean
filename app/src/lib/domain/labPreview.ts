@@ -133,7 +133,6 @@ export interface LabPreviewModel {
 	actionLabel: 'Open lab' | 'Open anyway';
 	accessibleName: string;
 	locked: boolean;
-	prerequisite: string | null;
 }
 
 function padLab(n: number): string {
@@ -249,8 +248,7 @@ export function labPreviewModel(
 		chipKind: kind,
 		actionLabel: copy.actionLabel,
 		accessibleName: `${eyebrow}, ${lab.title}, ${copy.statusPhrase}`,
-		locked: kind === 'locked',
-		prerequisite: kind === 'locked' ? copy.chip : null
+		locked: kind === 'locked'
 	};
 }
 

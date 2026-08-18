@@ -656,12 +656,13 @@
 		flex-wrap: nowrap;
 		min-width: 0;
 		margin: 0;
-		padding: 0.45rem 0;
+		padding: 0.45rem 0 0.35rem;
 		list-style: none;
 		overflow-x: auto;
 		overflow-y: hidden;
 		overscroll-behavior-x: contain;
-		scrollbar-width: none;
+		scrollbar-width: thin;
+		scrollbar-color: var(--rule-strong) transparent;
 		background-color: var(--paper);
 	}
 	.rail::before,
@@ -672,26 +673,11 @@
 		pointer-events: none;
 	}
 	.rail::-webkit-scrollbar {
-		display: none;
-		height: 0;
+		height: 4px;
 	}
-
-	/* Narrow viewports: later pips are off-screen. Keep a thin scrollbar so
-	   remaining cards are discoverable; upcoming pips stay non-buttons. */
-	@media (max-width: 30rem) {
-		.rail {
-			scrollbar-width: thin;
-			scrollbar-color: var(--rule-strong) transparent;
-			padding-bottom: 0.35rem;
-		}
-		.rail::-webkit-scrollbar {
-			display: block;
-			height: 4px;
-		}
-		.rail::-webkit-scrollbar-thumb {
-			background: var(--rule-strong);
-			border-radius: 2px;
-		}
+	.rail::-webkit-scrollbar-thumb {
+		background: var(--rule-strong);
+		border-radius: 2px;
 	}
 
 	.rail li { display: flex; flex: 0 0 auto; padding-inline: 0.2rem; }
