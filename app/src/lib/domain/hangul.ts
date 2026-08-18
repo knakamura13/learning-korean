@@ -366,7 +366,8 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 			return FINAL_RR[jamo] ?? '';
 		default: {
 			const _exhaustive: never = slot;
-			return _exhaustive;
+			void _exhaustive;
+			return '';
 		}
 	}
 }
