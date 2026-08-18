@@ -94,7 +94,7 @@
 	.slot {
 		min-width: 4.2rem;
 		width: max-content;
-		min-height: 4.92rem;
+		min-height: 5.42rem;
 		padding: 0.4rem 0.9rem;
 		border: 2px dashed var(--rule-strong);
 		border-radius: var(--r-md);
@@ -157,14 +157,16 @@
 		font-size: 2.3rem;
 	}
 
-	/* Spec A said 0.62/500; inherited Noto Sans KR ate Latin, and 0.62 vanished at sitting size. Hangul face is isolated on `.slot-value`; size stays readable. */
+	/* Italic + regular weight distinguish the RR footnote from uppercase FIRST/SECOND; extra --s2 sits under the glyph; do not use opacity to quiet the caption. */
 	.slot-reading {
 		font-family: var(--mono);
 		font-size: 0.72rem;
-		font-weight: 600;
+		font-style: italic;
+		font-weight: 400;
 		letter-spacing: 0.06em;
 		line-height: 1;
 		min-height: 0.72rem;
+		margin-block-start: var(--s2);
 		color: var(--ink-faint);
 		text-transform: none;
 		text-align: center;
@@ -222,7 +224,7 @@
 	.mark.bad { color: var(--bad); }
 
 	@media (max-width: 34rem) {
-		.slot { min-width: 3.8rem; min-height: 4.32rem; padding: 0.3rem 0.6rem; }
+		.slot { min-width: 3.8rem; min-height: 4.82rem; padding: 0.3rem 0.6rem; }
 		.slot-value { font-size: 1.8rem; }
 		.slot-reading { font-size: 0.62rem; min-height: 0.64rem; }
 		.out { width: 4.4rem; height: 4.4rem; font-size: 2.6rem; }
