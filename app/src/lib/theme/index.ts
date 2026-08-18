@@ -98,7 +98,7 @@ export function themeToggleLabel(pref: ThemePref, prefersDark = systemPrefersDar
 			return `Theme: Dark. Next: ${next}`;
 		case 'system': {
 			const following = prefersDark ? 'Dark' : 'Light';
-			return `Theme: System, following ${following}. Next: ${next}`;
+			return `Theme: Auto, system following ${following}. Next: ${next}`;
 		}
 		default: {
 			const _exhaustive: never = pref;

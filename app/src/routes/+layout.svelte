@@ -60,7 +60,7 @@
 
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
-		<a class="brand" href={resolve('/')} aria-label="Korean">
+		<a class="brand" href={resolve('/')} aria-label="Korean 한">
 			<span class="name">Korean</span>
 			<span class="mark" lang="ko">한</span>
 		</a>
@@ -118,7 +118,8 @@
 	}
 
 	.inner {
-		height: 44px;
+		min-height: 44px;
+		height: auto;
 		max-width: var(--shell);
 		margin: 0 auto;
 		padding-block: 0;
@@ -152,7 +153,7 @@
 	.name {
 		font-family: var(--display);
 		font-style: italic;
-		font-size: 16px;
+		font-size: 1rem;
 		font-weight: 400;
 		letter-spacing: 0;
 	}

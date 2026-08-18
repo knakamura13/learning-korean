@@ -494,6 +494,11 @@
 						{/if}
 					</div>
 				{/key}
+			{:else}
+				<div class="work work-skel" aria-hidden="true">
+					<div class="skel line-ph"></div>
+					<div class="skel mouth-ph"></div>
+				</div>
 			{/if}
 		{/snippet}
 		{#snippet after()}
@@ -587,14 +592,14 @@
 		-webkit-mask-size: 100% 100%;
 		mask-size: 100% 100%;
 		-webkit-mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 0.75rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 0.75rem),
@@ -603,14 +608,14 @@
 	}
 	.rail-clip.fade-right {
 		-webkit-mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 1.15rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.75rem,
 			#000 calc(100% - 1.15rem),
@@ -619,14 +624,14 @@
 	}
 	.rail-clip.fade-left {
 		-webkit-mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 0.75rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 0.75rem),
@@ -635,14 +640,14 @@
 	}
 	.rail-clip.fade-left.fade-right {
 		-webkit-mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 1.15rem),
 			transparent
 		);
 		mask-image: linear-gradient(
-			to right,
+			to inline-end,
 			transparent,
 			#000 0.9rem,
 			#000 calc(100% - 1.15rem),
@@ -879,6 +884,16 @@
 		width: 100%;
 		min-width: 0;
 		margin-top: 0;
+	}
+
+	.work-skel .line-ph {
+		width: 14rem;
+		max-width: 80%;
+		height: 0.85rem;
+	}
+	.work-skel .mouth-ph {
+		width: 100%;
+		aspect-ratio: 440 / 300;
 	}
 
 	.advance {

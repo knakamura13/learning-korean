@@ -335,6 +335,9 @@
 		font-weight: 600;
 		padding: var(--s1) 0;
 	}
+	.backup-card summary:hover {
+		color: var(--accent);
+	}
 	.backup-card summary:active {
 		color: var(--ink);
 	}
