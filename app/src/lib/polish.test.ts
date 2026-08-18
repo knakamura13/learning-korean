@@ -13,6 +13,8 @@ import themeToggle from './components/ThemeToggle.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
+import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
+import referencePreview from './components/shell/ReferencePreview.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
@@ -157,13 +159,12 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps every Reference section on screen instead of a hiding carousel', () => {
-		expect(reference).toMatch(/REFERENCE_SECTIONS/);
-		expect(styleBlock(reference)).toMatch(/\.quick-nav\s*\{[^}]*flex-wrap:\s*wrap/s);
-		expect(styleBlock(reference)).not.toMatch(/flex-wrap:\s*nowrap/);
-		expect(styleBlock(reference)).not.toMatch(/overflow-x:\s*auto/);
-		expect(styleBlock(reference)).toMatch(/\.toc\s*\{[^}]*position:\s*sticky/s);
+		expect(reference).toMatch(/ReferenceIndexRail/);
 		expect(reference).toMatch(/function jumpToSection/);
 		expect(reference).toMatch(/scrollIntoView/);
+		expect(styleBlock(referenceIndexRail)).toMatch(/flex-wrap:\s*wrap/);
+		expect(styleBlock(referenceIndexRail)).not.toMatch(/overflow-x:\s*auto/);
+		expect(styleBlock(referenceIndexRail)).toMatch(/\.ref-index\s*\{[^}]*position:\s*sticky/s);
 		expect(home).toMatch(/Review still waits/);
 		expect(styleBlock(home)).toMatch(/grid-template-areas:/);
 	});
@@ -185,7 +186,9 @@ describe('polish audit regressions', () => {
 			labPage,
 			labIndexRail,
 			labPreview,
-			labSpread
+			labSpread,
+			referenceIndexRail,
+			referencePreview
 		];
 		for (const src of chrome) {
 			expect(physicalBoxProps(src)).toEqual([]);
@@ -203,6 +206,8 @@ describe('polish audit regressions', () => {
 		expect(physicalLeftRight(styleBlock(labIndexRail))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(labPreview))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(labSpread))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(referenceIndexRail))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(referencePreview))).toEqual([]);
 	});
 
 	it('prevents a late Hangul font swap from causing layout shift', () => {
@@ -329,6 +334,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(referenceIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(themeToggle)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
@@ -338,6 +344,9 @@ describe('polish audit regressions', () => {
 		const css = styleBlock(reference);
 		expect(css).toMatch(
 			/section\s*\{[^}]*scroll-margin-block-start:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ 12\.5rem\)/s
+		);
+		expect(css).toMatch(
+			/min-width:\s*72rem[^}]*scroll-margin-block-start:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/s
 		);
 		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100dvh/s);
 	});

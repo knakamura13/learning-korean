@@ -1,6 +1,7 @@
 <script lang="ts">
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import KoText from '$lib/components/KoText.svelte';
+	import ReferenceIndexRail from '$lib/components/shell/ReferenceIndexRail.svelte';
 	import {
 		LEADS, VOWELS, REPRESENTATIVE, CLUSTERS, SOUND_CHANGES, BLOCK_LAYOUTS,
 		GANADA_CONSONANTS, GANADA_VOWELS, CLUSTER_EXCEPTIONS, BASE_SHAPES,
@@ -89,7 +90,8 @@
 
 <svelte:head><title>Reference — every letter and rule</title></svelte:head>
 
-<div class="shell">
+<div class="with-rail">
+	<div class="shell">
 	<header class="head">
 		<p class="eyebrow">Reference</p>
 		<h1>Every letter and rule</h1>
@@ -99,22 +101,7 @@
 		</p>
 	</header>
 
-	<div class="toc">
-		<p class="quick-nav-label" id="jump-label">Jump to section</p>
-		<nav class="quick-nav" aria-labelledby="jump-label">
-			{#each REFERENCE_SECTIONS as section (section.id)}
-				<a
-					href="#{section.id}"
-					class:active={activeSection === section.id}
-					aria-current={activeSection === section.id ? 'location' : undefined}
-					onclick={(event) => jumpToSection(section.id, event)}
-				>
-					{section.nav}
-				</a>
-			{/each}
-		</nav>
-	</div>
-
+	<div class="page">
 	<section id="consonants" aria-labelledby="sec-consonants-heading">
 		<h2 id="sec-consonants-heading" class="sec">19 consonants</h2>
 		<div class="grid">
@@ -324,67 +311,63 @@
 			</li>
 		</ul>
 	</section>
+	</div>
+	</div>
+	<ReferenceIndexRail activeId={activeSection} onJump={jumpToSection} />
 </div>
 
 <style>
+	.with-rail {
+		display: grid;
+		grid-template-areas:
+			'head'
+			'rail'
+			'main';
+		max-width: var(--shell);
+		margin-inline: auto;
+		padding-top: var(--s6);
+		padding-bottom: max(var(--s8), env(safe-area-inset-bottom));
+		padding-inline: max(var(--s5), env(safe-area-inset-left)) max(var(--s5), env(safe-area-inset-right));
+	}
+	.with-rail .shell {
+		display: contents;
+	}
+	.with-rail .head {
+		grid-area: head;
+	}
+	.with-rail .page {
+		grid-area: main;
+		min-width: 0;
+	}
+	.with-rail :global(.ref-index) {
+		grid-area: rail;
+	}
+
+	@media (max-width: 40rem) {
+		.with-rail {
+			padding-top: var(--s5);
+			padding-bottom: max(var(--s7), env(safe-area-inset-bottom));
+			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
+		}
+	}
+
+	@media (min-width: 72rem) {
+		section {
+			scroll-margin-block-start: calc(44px + env(safe-area-inset-top) + var(--s3));
+		}
+		.with-rail {
+			grid-template-areas:
+				'rail head'
+				'rail main';
+			grid-template-columns: max-content minmax(0, 1fr);
+			column-gap: var(--s4);
+			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
+		}
+	}
+
 	.head { margin-bottom: var(--s4); max-width: var(--measure); }
 	h1 { margin: var(--s2) 0 var(--s3); }
 	.lede { color: var(--ink-soft); }
-
-	.toc {
-		position: sticky;
-		inset-block-start: calc(44px + env(safe-area-inset-top));
-		z-index: 3;
-		margin: 0 0 var(--s6);
-		padding: var(--s2) 0 var(--s3);
-		background: color-mix(in srgb, var(--paper) 92%, transparent);
-		backdrop-filter: blur(10px);
-		border-bottom: 1px solid var(--rule);
-	}
-
-	.quick-nav-label {
-		margin: 0 0 var(--s2);
-		color: var(--ink-faint);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-	.quick-nav {
-		display: flex;
-		gap: var(--s2);
-		flex-wrap: wrap;
-		padding: 0;
-	}
-	.quick-nav a {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.75rem;
-		padding: 0.25rem 0.65rem;
-		border-radius: var(--r-pill);
-		background: var(--paper-sunk);
-		border: 1px solid var(--rule);
-		font-size: 0.74rem;
-		font-weight: 500;
-		text-decoration: none;
-		color: var(--ink-soft);
-		white-space: nowrap;
-		transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease),
-			color var(--fast) var(--ease);
-	}
-	.quick-nav a:hover {
-		background: var(--paper-raised);
-		border-color: var(--accent);
-		color: var(--accent);
-	}
-	.quick-nav a:active {
-		transform: translateY(1px);
-	}
-	.quick-nav a.active {
-		border-color: var(--accent);
-		background: var(--accent-soft);
-		color: var(--accent);
-	}
 
 	section {
 		margin-bottom: var(--s7);
@@ -523,18 +506,5 @@
 		align-items: center;
 		min-width: 44px;
 		min-height: 44px;
-	}
-
-	@media (forced-colors: active) {
-		.toc {
-			background: Canvas;
-			border-bottom-color: ButtonBorder;
-			backdrop-filter: none;
-		}
-		.quick-nav a.active {
-			background: Highlight;
-			color: HighlightText;
-			border-color: Highlight;
-		}
 	}
 </style>

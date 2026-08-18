@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
+import reference from '../routes/reference/+page.svelte?raw';
 
 function styleBlock(markup: string): string {
 	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
@@ -9,9 +10,9 @@ function styleBlock(markup: string): string {
 	return match[1];
 }
 
-function shellBeforeRail(src: string): boolean {
+function shellBeforeRail(src: string, railTag: string): boolean {
 	const shellMatch = src.match(/class="shell[\s"]/);
-	const railIdx = src.indexOf('<LabIndexRail');
+	const railIdx = src.indexOf(railTag);
 	return shellMatch !== null && railIdx !== -1 && shellMatch.index! < railIdx;
 }
 
@@ -36,8 +37,12 @@ describe('shell layout source contracts', () => {
 	});
 
 	it('home and lab pages put .shell before LabIndexRail in DOM order', () => {
-		expect(shellBeforeRail(home)).toBe(true);
-		expect(shellBeforeRail(labPage)).toBe(true);
+		expect(shellBeforeRail(home, '<LabIndexRail')).toBe(true);
+		expect(shellBeforeRail(labPage, '<LabIndexRail')).toBe(true);
+	});
+
+	it('reference page puts .shell before ReferenceIndexRail in DOM order', () => {
+		expect(shellBeforeRail(reference, '<ReferenceIndexRail')).toBe(true);
 	});
 
 	it('home wide layout aligns with header shell, not 90rem', () => {
@@ -54,5 +59,14 @@ describe('shell layout source contracts', () => {
 		expect(labPage).toMatch(/grid-template-areas:\s*'rail main'/);
 		expect(labPage).toMatch(/\.with-rail \.shell\s*\{[^}]*grid-area:\s*main/);
 		expect(labPage).toMatch(/\.with-rail :global\(\.lab-index\)\s*\{[^}]*grid-area:\s*rail/);
+	});
+
+	it('reference wide layout puts the jump rail left of content like Labs', () => {
+		expect(reference).toMatch(/max-width:\s*var\(--shell\)/);
+		expect(reference).toMatch(/grid-template-areas:\s*'rail head'\s*'rail main'/);
+		expect(reference).toMatch(/\.with-rail \.head\s*\{[^}]*grid-area:\s*head/);
+		expect(reference).toMatch(/\.with-rail \.page\s*\{[^}]*grid-area:\s*main/);
+		expect(reference).toMatch(/\.with-rail :global\(\.ref-index\)\s*\{[^}]*grid-area:\s*rail/);
+		expect(styleBlock(reference)).toMatch(/grid-template-areas:\s*'head'\s*'rail'\s*'main'/);
 	});
 });
