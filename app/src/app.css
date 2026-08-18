@@ -106,7 +106,7 @@ a {
 	text-underline-offset: 0.16em;
 	transition: color var(--fast) var(--ease), transform var(--fast) var(--ease);
 }
-a:hover { color: var(--accent); }
+a:hover:not(.btn) { color: var(--accent); }
 
 a:active {
 	transform: translateY(0);
@@ -232,7 +232,12 @@ button { font: inherit; color: inherit; }
 		filter var(--fast) var(--ease), background var(--fast) var(--ease);
 }
 
-.btn:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn:hover {
+	filter: brightness(1.07);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-2);
+	color: var(--accent-ink);
+}
 .btn:active { transform: translateY(0); box-shadow: var(--shadow-1); }
 .btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; filter: none; }
 .btn:focus-visible,
