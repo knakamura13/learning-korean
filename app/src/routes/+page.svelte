@@ -56,9 +56,6 @@
 		<p class="lede">
 			Interactive labs that make you derive the writing system rather than memorize it.
 		</p>
-		<p class="wayfind">
-			Labs teach Hangul. Review quizzes only what you have already met. Reference is the letter list.
-		</p>
 	</header>
 
 	<section aria-labelledby="sec-labs-heading">
@@ -191,12 +188,6 @@
 		font-weight: 400;
 	}
 	.lede { color: var(--ink-soft); font-size: 1rem; line-height: 1.65; }
-	.wayfind {
-		color: var(--ink-soft);
-		font-size: 0.92rem;
-		line-height: 1.55;
-		margin: var(--s3) 0 0;
-	}
 
 	.sec {
 		font-family: var(--display);

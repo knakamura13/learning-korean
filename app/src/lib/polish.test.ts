@@ -433,9 +433,8 @@ describe('polish audit regressions', () => {
 		expect(layout).toMatch(/class="mark" lang="ko"/);
 		expect(layout).toMatch(/pathname === '\/' \|\| page\.url\.pathname\.startsWith\('\/lab\/'\)/);
 		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);
-		expect(home).toMatch(/Labs teach Hangul/);
-		expect(home).toMatch(/Review quizzes only what you have already met/);
-		expect(home).toMatch(/Reference is the letter list/);
+		expect(home).toMatch(/Interactive labs that make you derive the writing system/);
+		expect(home).not.toMatch(/Labs teach Hangul/);
 		expect(home).toMatch(/<h2 id="sec-review-heading" class="sec">Review pile<\/h2>/);
 		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
 		expect(home).not.toMatch(/sec-deck-heading/);
