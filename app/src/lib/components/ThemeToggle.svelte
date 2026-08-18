@@ -71,9 +71,11 @@
 	.theme {
 		position: relative;
 		display: inline-flex;
+		flex-direction: column;
 		appearance: none;
 		align-items: center;
 		justify-content: center;
+		gap: 0.1rem;
 		width: 44px;
 		min-width: 44px;
 		min-height: 44px;
@@ -89,12 +91,14 @@
 	.theme::before {
 		content: '';
 		position: absolute;
-		inset: 10px;
+		inset: 0.25rem;
 		border: 1px solid var(--rule-strong);
 		border-radius: var(--r-sm);
 		background: var(--paper);
 		pointer-events: none;
-		transition: background var(--fast) var(--ease);
+		transition:
+			background var(--fast) var(--ease),
+			border-color var(--fast) var(--ease);
 	}
 	.theme:hover {
 		color: var(--ink);
@@ -121,12 +125,14 @@
 		height: 1.05rem;
 		display: block;
 	}
+	.theme[data-pref='system'] .ico {
+		width: 0.9rem;
+		height: 0.9rem;
+	}
 
 	.auto {
-		position: absolute;
+		position: relative;
 		z-index: 1;
-		inset-inline-end: 11px;
-		inset-block-end: 11px;
 		font-size: 0.5rem;
 		font-weight: 700;
 		line-height: 1;

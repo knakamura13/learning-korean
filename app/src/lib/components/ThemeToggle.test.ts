@@ -25,7 +25,7 @@ describe('ThemeToggle glyphs', () => {
 	it('keeps a 44px hit target, reduced-motion, and forced-colors styles', () => {
 		expect(css).toMatch(/min-width:\s*44px/);
 		expect(css).toMatch(/min-height:\s*44px/);
-		expect(css).toMatch(/\.theme::before\s*\{[^}]*inset:\s*10px/s);
+		expect(css).toMatch(/\.theme::before\s*\{[^}]*inset:\s*0\.25rem/s);
 		expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
 	});
@@ -62,5 +62,7 @@ describe('ThemeToggle glyphs', () => {
 		expect(src).toMatch(
 			/\{#if pref === 'system'\}[\s\S]*?aria-hidden="true"[\s\S]*?Auto/
 		);
+		expect(css).toMatch(/flex-direction:\s*column/);
+		expect(css).not.toMatch(/\.auto\s*\{[^}]*position:\s*absolute/s);
 	});
 });
