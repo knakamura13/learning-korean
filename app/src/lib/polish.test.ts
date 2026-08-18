@@ -438,6 +438,13 @@ describe('polish audit regressions', () => {
 		expect(labIndexRail).toMatch(/aria-label="Labs"/);
 	});
 
+	it('paints vertical overscroll with the header chrome color', () => {
+		expect(appCss).toMatch(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) 82%, black\)/);
+		expect(appCss).toMatch(/html\s*\{[^}]*background-color:\s*var\(--chrome\)/s);
+		expect(appCss).toMatch(/body\s*\{[^}]*background-color:\s*var\(--paper\)/s);
+		expect(styleBlock(layout)).toMatch(/\.bar\s*\{[^}]*background:\s*var\(--chrome\)/s);
+	});
+
 	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
 		expect(layout).toMatch(/class="brand"[^>]*aria-label="Korean 한"/);
 		expect(layout).toMatch(/class="mark" lang="ko"/);

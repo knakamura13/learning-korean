@@ -24,6 +24,8 @@
 	--measure: 36rem;
 	--shell: 62rem;
 	--sitting: 90rem;
+	/* Opaque nav / rubber-band canvas; matches header.bar. */
+	--chrome: color-mix(in srgb, var(--paper-sunk) 82%, black);
 }
 
 *,
@@ -36,6 +38,7 @@ html {
 	font-size: var(--html-size);
 	color-scheme: light dark;
 	accent-color: var(--accent);
+	background-color: var(--chrome);
 	scroll-behavior: smooth;
 	scrollbar-width: thin;
 	scrollbar-color: var(--ink-faint) var(--paper-sunk);

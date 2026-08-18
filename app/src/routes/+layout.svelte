@@ -128,7 +128,7 @@
 		top: 0;
 		z-index: 5;
 		padding-top: env(safe-area-inset-top);
-		background: color-mix(in srgb, var(--paper-sunk) 82%, black);
+		background: var(--chrome);
 		border-bottom: 1px solid var(--rule);
 		overflow: visible;
 	}
