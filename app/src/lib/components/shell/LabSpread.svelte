@@ -39,12 +39,13 @@
 		gap: var(--s6);
 		min-width: 0;
 	}
-	.after { min-width: 0; }
+	.after { min-width: 0; flex-shrink: 0; }
 
 	.well {
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
+		flex-shrink: 0;
 		min-width: 0;
 		min-height: 12rem;
 		padding: var(--s5);

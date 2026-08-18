@@ -416,6 +416,10 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.name\s*\{[^}]*font-size:\s*1rem/s);
 		expect(styleBlock(labSpread)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
 		expect(styleBlock(labSpread)).toMatch(/max-height:\s*calc\(100dvh - 2\.75rem/);
+		// Sticky column is a flex container with a viewport max-height. If .well
+		// (or .after) shrinks, stacked choice buttons paint past the well border.
+		expect(styleBlock(labSpread)).toMatch(/\.well\s*\{[^}]*flex-shrink:\s*0/s);
+		expect(styleBlock(labSpread)).toMatch(/\.after\s*\{[^}]*flex-shrink:\s*0/s);
 		expect(styleBlock(labIndexRail)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
