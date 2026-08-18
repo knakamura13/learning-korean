@@ -102,7 +102,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.1rem;
+		gap: 0.12rem;
 		font-weight: 500;
 		color: var(--ink-faint);
 		position: relative;
@@ -157,6 +157,7 @@
 		font-size: 2.3rem;
 	}
 
+	/* Spec A said 0.62/500; inherited Noto Sans KR ate Latin, and 0.62 vanished at sitting size. Hangul face is isolated on `.slot-value`; size stays readable. */
 	.slot-reading {
 		font-family: var(--mono);
 		font-size: 0.72rem;
@@ -167,7 +168,12 @@
 		color: var(--ink-faint);
 		text-transform: none;
 		text-align: center;
+		opacity: 0;
 		transition: opacity var(--fast) var(--ease);
+	}
+
+	.slot.filled .slot-reading:not(:empty) {
+		opacity: 1;
 	}
 
 	.slot.bottom {
@@ -175,7 +181,7 @@
 		border-bottom-width: 3px;
 		border-color: var(--blue);
 	}
-	.slot.bottom.filled { background: var(--blue-soft); border-color: var(--blue); }
+	.slot.bottom.filled { border-color: var(--blue); }
 
 	.out {
 		width: 5.4rem;
