@@ -11,6 +11,9 @@
 		type ThemePref
 	} from '$lib/theme';
 
+	// Theme toggle is intentionally binary (light ↔ dark), not trinary.
+	// With no stored choice we follow the system scheme; the first click
+	// persists light or dark until localStorage is cleared.
 	let pref = $state<ThemePref>('system');
 	const darkScheme = new MediaQuery('prefers-color-scheme: dark');
 
@@ -32,7 +35,7 @@
 	}
 
 	function cycle() {
-		setPref(nextThemePref(pref));
+		setPref(nextThemePref(pref, darkScheme.current));
 	}
 
 	const glyph = $derived(themeToggleGlyph(pref, darkScheme.current));
@@ -62,20 +65,15 @@
 			/>
 		</svg>
 	{/if}
-	{#if pref === 'system'}
-		<span class="auto" aria-hidden="true">Auto</span>
-	{/if}
 </button>
 
 <style>
 	.theme {
 		position: relative;
 		display: inline-flex;
-		flex-direction: column;
 		appearance: none;
 		align-items: center;
 		justify-content: center;
-		gap: 0.1rem;
 		width: 44px;
 		min-width: 44px;
 		min-height: 44px;
@@ -124,21 +122,6 @@
 		width: 1.05rem;
 		height: 1.05rem;
 		display: block;
-	}
-	.theme[data-pref='system'] .ico {
-		width: 0.9rem;
-		height: 0.9rem;
-	}
-
-	.auto {
-		position: relative;
-		z-index: 1;
-		font-size: 0.5rem;
-		font-weight: 700;
-		line-height: 1;
-		letter-spacing: 0.02em;
-		text-transform: uppercase;
-		pointer-events: none;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

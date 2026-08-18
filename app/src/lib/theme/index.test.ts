@@ -11,7 +11,7 @@ import {
 import { activeSystem } from './active';
 
 describe('isThemePref', () => {
-	it('accepts the three stored values', () => {
+	it('accepts stored light and dark, and leftover system', () => {
 		expect(isThemePref('light')).toBe(true);
 		expect(isThemePref('dark')).toBe(true);
 		expect(isThemePref('system')).toBe(true);
@@ -33,10 +33,11 @@ describe('resolvedTheme', () => {
 });
 
 describe('nextThemePref', () => {
-	it('cycles light → dark → system → light', () => {
+	it('flips light ↔ dark, and leaves system for the opposite of the resolved scheme', () => {
 		expect(nextThemePref('light')).toBe('dark');
-		expect(nextThemePref('dark')).toBe('system');
-		expect(nextThemePref('system')).toBe('light');
+		expect(nextThemePref('dark')).toBe('light');
+		expect(nextThemePref('system', false)).toBe('dark');
+		expect(nextThemePref('system', true)).toBe('light');
 	});
 });
 
@@ -53,15 +54,11 @@ describe('themeToggleGlyph', () => {
 });
 
 describe('themeToggleLabel', () => {
-	it('names the stored pref, system follow-through, and the next cycle step', () => {
-		expect(themeToggleLabel('system', false)).toBe(
-			'Theme: Auto, system following Light. Next: Light'
-		);
-		expect(themeToggleLabel('system', true)).toBe(
-			'Theme: Auto, system following Dark. Next: Light'
-		);
+	it('names the resolved scheme and the other binary step', () => {
+		expect(themeToggleLabel('system', false)).toBe('Theme: Light. Next: Dark');
+		expect(themeToggleLabel('system', true)).toBe('Theme: Dark. Next: Light');
 		expect(themeToggleLabel('light', true)).toBe('Theme: Light. Next: Dark');
-		expect(themeToggleLabel('dark', false)).toBe('Theme: Dark. Next: System');
+		expect(themeToggleLabel('dark', false)).toBe('Theme: Dark. Next: Light');
 	});
 });
 
