@@ -55,6 +55,8 @@ describe('LabIndexRail source contracts', () => {
 		expect(src).toMatch(/e\.pointerType/);
 		expect(src).toMatch(/armedForNavigate/);
 		expect(preview).toMatch(/model\.actionLabel/);
+		expect(preview).toMatch(/model\.priorId/);
+		expect(preview).toMatch(/model\.priorActionLabel/);
 		expect(preview).toMatch(/Close/);
 		expect(preview).toMatch(/btn ghost/);
 	});

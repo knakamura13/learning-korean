@@ -5,6 +5,7 @@ import {
 	labCardState,
 	labTone,
 	nextLabId,
+	reviewPileView,
 	showPrerequisiteGate,
 	type CourseLab,
 	type CourseNavView
@@ -196,6 +197,22 @@ describe('labCardState', () => {
 			done: true,
 			resumeAt: null
 		});
+	});
+});
+
+describe('reviewPileView', () => {
+	it('stays loading until progress is read so prerender cannot flash locked rows', () => {
+		expect(reviewPileView(false, 0, 10)).toEqual({ body: 'loading', due: 0 });
+		expect(reviewPileView(false, 19, 10)).toEqual({ body: 'loading', due: 0 });
+	});
+
+	it('uses an empty state when no family has unlocked yet', () => {
+		expect(reviewPileView(true, 0, 0)).toEqual({ body: 'empty', due: 0 });
+	});
+
+	it('shows progress and due count once a family is in the pile', () => {
+		expect(reviewPileView(true, 19, 10)).toEqual({ body: 'progress', due: 10 });
+		expect(reviewPileView(true, 19, 0)).toEqual({ body: 'progress', due: 0 });
 	});
 });
 

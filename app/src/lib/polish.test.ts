@@ -331,6 +331,7 @@ describe('polish audit regressions', () => {
 
 	it('sizes peek, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
 		expect(styleBlock(home)).toMatch(/\.peek\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(home)).toMatch(/a\.chip-status\.wait\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
@@ -488,6 +489,9 @@ describe('polish audit regressions', () => {
 		expect(home).toMatch(/<h2 id="sec-review-heading" class="sec">Review pile<\/h2>/);
 		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
 		expect(home).not.toMatch(/sec-deck-heading/);
+		expect(home).toMatch(/reviewPileView/);
+		expect(home).toMatch(/<a\s[^>]*class="chip-status wait"/);
+		expect(home).toMatch(/Letters land here after you finish a lab/);
 	});
 
 	it('does not ship fascicle journal words in UI chrome', () => {

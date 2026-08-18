@@ -5,6 +5,7 @@
 	import {
 		labCardState,
 		requiredLab,
+		reviewPileView,
 		toCourseLab,
 		type CourseNavView
 	} from '$lib/domain/courseNav';
@@ -36,6 +37,10 @@
 			queue: stats.queue
 		};
 	});
+
+	const pile = $derived(
+		reviewPileView(navView.ready, tiers.filter((tier) => tier.unlocked).length, navView.queue)
+	);
 
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
@@ -75,7 +80,15 @@
 								<span>~{lab.minutes} min</span>
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
-									<span class="chip-status wait">Finish Lab {prior ? pad(prior.number) : ''} first</span>
+									{#if prior}
+										<a
+											class="chip-status wait"
+											href={resolve('/lab/[id]', { id: prior.id })}
+											aria-label="Open Lab {pad(prior.number)} first: {prior.title}"
+										>Finish Lab {pad(prior.number)} first</a>
+									{:else}
+										<span class="chip-status wait">Finish the previous lab first</span>
+									{/if}
 									<a
 										class="peek"
 										href={resolve('/lab/[id]', { id: lab.id })}
@@ -119,36 +132,63 @@
 	</section>
 
 	<section aria-labelledby="sec-review-heading">
-		<h2 id="sec-review-heading" class="sec">Review pile</h2>
-		<div class="tiers card" role="region" aria-label="Review pile by letter family">
-			{#each tiers as tier (tier.id)}
-				{@const pctMature = pct(tier.mature, tier.size)}
-				{@const pctYoung = pct(tier.young, tier.size)}
-				{@const pctUnseen = pct(tier.unseen, tier.size)}
-				<div
-					class="tier"
-					class:locked={!ready || !tier.unlocked}
-					role="group"
-					aria-label="{tier.label}: {ready && tier.unlocked ? `${tier.mature} mastered, ${tier.young} learning, ${tier.unseen} not started (${tier.size} total)` : 'locked'}"
-				>
-					<span class="nm">{tier.label}</span>
-					<span class="track" aria-hidden="true">
-						{#if ready && tier.unlocked}
-							<span class="m" style="width:{pctMature}%" title="{tier.mature} mastered ({pctMature}%)"></span>
-							<span class="y" style="width:{pctYoung}%" title="{tier.young} learning ({pctYoung}%)"></span>
-							<span class="n" style="width:{pctUnseen}%" title="{tier.unseen} not started ({pctUnseen}%)"></span>
-						{/if}
-					</span>
-					<span class="ct" aria-hidden="true">
-						{#if ready}{tierCountLabel(tier)}{:else}locked{/if}
-					</span>
-				</div>
-			{/each}
-			<p class="legend" aria-hidden="true">
-				<i class="sw m"></i> mastered (21+ day gap)
-				<i class="sw y"></i> learning
-				<i class="sw n"></i> not started
-			</p>
+		<div class="sec-row">
+			<h2 id="sec-review-heading" class="sec">Review pile</h2>
+			{#if pile.body === 'progress' && pile.due > 0}
+				<a
+					class="chip-status due"
+					href={resolve('/review')}
+					aria-label="{pile.due} cards due for review"
+				>{pile.due} due</a>
+			{/if}
+		</div>
+		<div
+			class="tiers card"
+			role="region"
+			aria-busy={pile.body === 'loading'}
+			aria-label="Review pile by letter family"
+		>
+			{#if pile.body === 'loading'}
+				{#each tiers as tier (tier.id)}
+					<div class="tier" aria-hidden="true">
+						<span class="nm">{tier.label}</span>
+						<span class="track"><span class="skel fill"></span></span>
+						<span class="ct"><span class="skel count"></span></span>
+					</div>
+				{/each}
+			{:else if pile.body === 'empty'}
+				<p class="pile-empty">
+					Letters land here after you finish a lab. Lab 01 unlocks
+					{tiers[0]?.size ?? 19} consonants.
+				</p>
+			{:else}
+				{#each tiers as tier (tier.id)}
+					{@const pctMature = pct(tier.mature, tier.size)}
+					{@const pctYoung = pct(tier.young, tier.size)}
+					{@const pctUnseen = pct(tier.unseen, tier.size)}
+					<div
+						class="tier"
+						class:locked={!tier.unlocked}
+						role="group"
+						aria-label="{tier.label}: {tier.unlocked ? `${tier.mature} mastered, ${tier.young} learning, ${tier.unseen} not started (${tier.size} total)` : 'locked'}"
+					>
+						<span class="nm">{tier.label}</span>
+						<span class="track" aria-hidden="true">
+							{#if tier.unlocked}
+								<span class="m" style="width:{pctMature}%" title="{tier.mature} mastered ({pctMature}%)"></span>
+								<span class="y" style="width:{pctYoung}%" title="{tier.young} learning ({pctYoung}%)"></span>
+								<span class="n" style="width:{pctUnseen}%" title="{tier.unseen} not started ({pctUnseen}%)"></span>
+							{/if}
+						</span>
+						<span class="ct" aria-hidden="true">{tierCountLabel(tier)}</span>
+					</div>
+				{/each}
+				<p class="legend" aria-hidden="true">
+					<i class="sw m"></i> mastered (21+ day gap)
+					<i class="sw y"></i> learning
+					<i class="sw n"></i> not started
+				</p>
+			{/if}
 		</div>
 	</section>
 	</div>
@@ -198,6 +238,19 @@
 		text-transform: none;
 		color: var(--ink);
 		margin: 0 0 var(--s3);
+	}
+
+	.sec-row {
+		display: flex;
+		align-items: center;
+		gap: var(--s3);
+		flex-wrap: wrap;
+		margin: 0 0 var(--s3);
+	}
+	.sec-row .sec { margin: 0; }
+	.sec-row .chip-status {
+		text-decoration: none;
+		min-height: 44px;
 	}
 
 	section { margin-bottom: var(--s7); }
@@ -288,6 +341,19 @@
 		background: var(--warn-soft);
 		border-color: color-mix(in srgb, var(--warn) 30%, transparent);
 	}
+	a.chip-status.wait {
+		text-decoration: none;
+		min-height: 44px;
+		cursor: pointer;
+	}
+	a.chip-status.wait:hover {
+		color: var(--warn);
+		border-color: var(--warn);
+		background: color-mix(in srgb, var(--warn-soft) 70%, var(--paper));
+	}
+	a.chip-status.wait:active {
+		transform: translateY(1px);
+	}
 	.chip-status.go {
 		color: var(--accent-ink);
 		background: var(--accent);
@@ -302,6 +368,10 @@
 		color: var(--rose);
 		background: var(--rose-soft);
 		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
+	}
+	a.chip-status.due:hover {
+		color: var(--rose);
+		border-color: var(--rose);
 	}
 
 	.lab.ahead {
@@ -329,6 +399,26 @@
 	}
 
 	.tiers { padding: var(--s4); }
+
+	.pile-empty {
+		margin: 0;
+		font-size: 0.88rem;
+		line-height: 1.55;
+		color: var(--ink-soft);
+		max-width: 32rem;
+	}
+
+	.track .skel.fill {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border-radius: 4px;
+	}
+	.ct .skel.count {
+		display: inline-block;
+		width: 5.5ch;
+		height: 0.7rem;
+	}
 
 	.tier {
 		display: flex;
@@ -383,6 +473,10 @@
 	.sw.y { background: var(--accent); }
 	.sw.n { background: var(--rule-strong); }
 
+	@media (prefers-reduced-motion: reduce) {
+		a.chip-status.wait:active { transform: none; }
+	}
+
 	@media (forced-colors: active) {
 		.lab.now {
 			background: Highlight;
@@ -408,6 +502,12 @@
 		.sw.m { background: Highlight; }
 		.sw.y { background: ButtonText; }
 		.sw.n { background: GrayText; }
+		a.chip-status.wait,
+		a.chip-status.due {
+			background: Canvas;
+			color: LinkText;
+			border-color: LinkText;
+		}
 	}
 
 	@media (max-width: 40rem) {

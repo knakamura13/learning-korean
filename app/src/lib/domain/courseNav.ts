@@ -186,6 +186,27 @@ export function continueAction(labs: CourseLab[], view: CourseNavView): Continue
 	};
 }
 
+export type ReviewPileBody = 'loading' | 'empty' | 'progress';
+
+export type ReviewPileView = {
+	body: ReviewPileBody;
+	due: number;
+};
+
+/**
+ * Home Review pile: do not paint six locked rows and a color legend before
+ * any family has unlocked. Due count is 0 until progress has been read.
+ */
+export function reviewPileView(
+	ready: boolean,
+	unlockedFamilies: number,
+	queue: number
+): ReviewPileView {
+	if (!ready) return { body: 'loading', due: 0 };
+	if (unlockedFamilies <= 0) return { body: 'empty', due: 0 };
+	return { body: 'progress', due: Math.max(0, queue) };
+}
+
 /** The next lab in course order after `currentId`, or null on the last lab. */
 export function followingLab(labs: CourseLab[], currentId: string): CourseLab | null {
 	const i = labs.findIndex((lab) => lab.id === currentId);

@@ -69,6 +69,11 @@
 			<p class="chip" data-kind={model.chipKind}>{model.chip}</p>
 		{/if}
 		<div class="actions">
+			{#if model.priorId && model.priorActionLabel}
+				<a class="btn" href={resolve('/lab/[id]', { id: model.priorId })}>
+					{model.priorActionLabel}
+				</a>
+			{/if}
 			<a
 				class={actionClass(model.actionLabel)}
 				href={resolve('/lab/[id]', { id: model.id })}
