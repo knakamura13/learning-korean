@@ -284,6 +284,14 @@ describe('polish audit regressions', () => {
 		);
 	});
 
+	it('keeps jamo clusters on one line when headings balance', () => {
+		// `h1, h2 { text-wrap: balance }` wraps at spaces inside
+		// `<span class="jamo">ㅐ ㅔ ㅖ</span>` even when the line has room.
+		expect(appCss).toMatch(/h1,\s*h2\s*\{[^}]*text-wrap:\s*balance/s);
+		expect(appCss).toMatch(/\.jamo\s*\{[^}]*white-space:\s*nowrap/s);
+		expect(appCss).toMatch(/h2\.do\s*\{[^}]*text-wrap:\s*pretty/s);
+	});
+
 	it('makes the Baseline Widely Available browser target explicit', () => {
 		expect(viteConfig).toMatch(/build:\s*\{[\s\S]*?target:\s*'baseline-widely-available'/);
 	});

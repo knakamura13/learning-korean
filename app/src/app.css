@@ -90,6 +90,8 @@ h2 { font-size: clamp(1.35rem, 3vw, 1.6rem); }
 h3 { font-size: 1.1rem; }
 
 h1, h2 { text-wrap: balance; }
+/* Lab prompts are sentences. Balance wraps at spaces inside jamo lists. */
+h2.do { text-wrap: pretty; }
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
 
 /* Hangul stays Noto Sans KR. These beat heading --display italic (0,1,0 > 0,0,1). */
@@ -134,6 +136,7 @@ button { font: inherit; color: inherit; }
 	font-size: 1.2em;
 	font-weight: 500;
 	line-height: 1;
+	white-space: nowrap;
 }
 
 .rom {
