@@ -9,7 +9,7 @@
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
-	import { reviewAnswerPlaceholder, reviewChrome } from '$lib/domain/reviewChrome';
+	import { reviewAnswerPlaceholder, reviewBody, reviewChrome } from '$lib/domain/reviewChrome';
 
 	let queue = $state<Card[]>([]);
 	let index = $state(0);
@@ -26,9 +26,17 @@
 
 	const card = $derived(queue[index]);
 	const pronCard = $derived(card?.kind === 'pron');
-	const finishedSession = $derived(ready && queue.length > 0 && index >= queue.length);
-	const inSession = $derived(ready && queue.length > 0 && index < queue.length);
 	const stats = $derived(progress.stats);
+	const body = $derived(
+		reviewBody({
+			ready,
+			unlocked: stats.unlocked,
+			sittingLength: queue.length,
+			index,
+			remainingDue: stats.queue
+		})
+	);
+	const inSession = $derived(body === 'sitting');
 	const chrome = $derived(
 		reviewChrome({
 			ready,
@@ -100,6 +108,7 @@
 			queue = [...queue, card];
 		}
 		index += 1;
+		if (index >= queue.length) progress.tick();
 		reset();
 	}
 
@@ -157,14 +166,14 @@
 		</div>
 	{/if}
 
-	{#if !ready}
+	{#if body === 'loading'}
 		<div class="card empty loading" aria-busy="true">
 			<div class="skel glyph-ph" aria-hidden="true"></div>
 			<div class="skel line-ph" aria-hidden="true"></div>
 			<div class="skel field-ph" aria-hidden="true"></div>
 			<p class="muted">Loading Review…</p>
 		</div>
-	{:else if stats.unlocked === 0}
+	{:else if body === 'locked'}
 		<div class="card empty" in:fade>
 			<span class="big" lang="ko">한</span>
 			<h2>Nothing in Review yet</h2>
@@ -174,7 +183,7 @@
 			</p>
 			<a class="btn" href={resolve('/lab/[id]', { id: '0001' })}>Start Lab 01</a>
 		</div>
-	{:else if finishedSession}
+	{:else if body === 'check-for-more'}
 		<div class="card empty" in:fade>
 			<span class="big" lang="ko">{right / Math.max(shown, 1) >= 0.8 ? '좋아' : '또'}</span>
 			<h2>{right} of {shown} first time</h2>
@@ -191,7 +200,7 @@
 			</p>
 			<button class="btn" onclick={start}>Check for more</button>
 		</div>
-	{:else if queue.length === 0}
+	{:else if body === 'clear'}
 		<div class="card empty" in:fade>
 			<span class="big" lang="ko">쉬어</span>
 			<h2>Review is clear</h2>
@@ -203,7 +212,7 @@
 				{/if}
 			</p>
 		</div>
-	{:else}
+	{:else if body === 'sitting'}
 		{#key index}
 			<div class="card review" in:fly={{ y: 10, duration: 220 }} aria-labelledby="review-card-tag">
 				<div
