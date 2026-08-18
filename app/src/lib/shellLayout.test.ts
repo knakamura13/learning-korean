@@ -10,6 +10,11 @@ function shellBeforeRail(src: string): boolean {
 }
 
 describe('shell layout source contracts', () => {
+	it('layout mounts a quiet backup footer off lab sittings', () => {
+		expect(layout).toMatch(/import SiteFooter from '\$lib\/components\/SiteFooter\.svelte'/);
+		expect(layout).toMatch(/\{#if !labRoute\}[\s\S]*<SiteFooter \/>/);
+	});
+
 	it('layout exposes focusable main and skip link that focuses it', () => {
 		expect(layout).toMatch(/<main[^>]*id="main"/);
 		expect(layout).toMatch(/<main[^>]*tabindex="-1"/);

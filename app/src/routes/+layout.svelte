@@ -3,6 +3,7 @@
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { activeSystem } from '$lib/theme/active';
@@ -88,6 +89,9 @@
 <main id="main" tabindex="-1">
 	{@render children()}
 </main>
+{#if !labRoute}
+	<SiteFooter />
+{/if}
 
 <style>
 	.skip {
