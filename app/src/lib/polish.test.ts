@@ -351,8 +351,7 @@ describe('polish audit regressions', () => {
 		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100dvh/s);
 	});
 
-	it('sizes Need a letter and reference source links to at least 44px', () => {
-		expect(styleBlock(labPage)).toMatch(/\.ask a\s*\{[^}]*min-height:\s*44px/s);
+	it('sizes reference source links to at least 44px', () => {
 		expect(styleBlock(reference)).toMatch(/\.src a\s*\{[^}]*min-height:\s*44px/s);
 	});
 
@@ -487,9 +486,8 @@ describe('polish audit regressions', () => {
 		expect(review).toMatch(/Review is clear/);
 		expect(review).not.toMatch(/Deck clear/);
 		expect(review).not.toMatch(/Nothing in the deck/);
-		expect(labPage).toMatch(/Need a letter\?/);
-		expect(labPage).toMatch(/Look up any letter in/);
-		expect(labPage).toMatch(/resolve\('\/reference'\)/);
+		expect(labPage).not.toMatch(/Need a letter\?/);
+		expect(labPage).not.toMatch(/Look up any letter in/);
 		expect(labPage).not.toMatch(/jamo/);
 		expect(labPage).not.toMatch(/same\s+module these cards use/);
 		expect(styleBlock(labRunner)).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);

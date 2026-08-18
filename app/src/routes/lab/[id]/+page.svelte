@@ -45,15 +45,7 @@
 	{/if}
 
 	{#key lab.id}
-		<LabRunner {lab}>
-			{#snippet letterAsk()}
-				<aside class="ask">
-					<span class="h">Need a letter?</span>
-					Look up any letter in <a href={resolve('/reference')}>Reference</a>. It lists the
-					same letters these cards use.
-				</aside>
-			{/snippet}
-		</LabRunner>
+		<LabRunner {lab} />
 	{/key}
 	</div>
 	<LabIndexRail currentId={lab.id} />
@@ -99,34 +91,6 @@
 		display: block;
 		margin-bottom: var(--s1);
 		color: var(--warn);
-	}
-
-	.ask {
-		margin-top: var(--s7);
-		padding: var(--s4);
-		border: 1px dashed var(--rule-strong);
-		border-radius: var(--r-md);
-		background: var(--paper-sunk);
-		font-size: 0.86rem;
-		line-height: 1.6;
-		color: var(--ink-soft);
-	}
-
-	.ask a {
-		display: inline-flex;
-		align-items: center;
-		min-width: 44px;
-		min-height: 44px;
-	}
-
-	.ask .h {
-		display: block;
-		font-weight: 700;
-		font-size: 0.64rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--accent);
-		margin-bottom: var(--s1);
 	}
 
 	@media (forced-colors: active) {
