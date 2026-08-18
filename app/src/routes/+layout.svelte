@@ -3,6 +3,7 @@
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import { pageCanonical, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { activeSystem } from '$lib/theme/active';
@@ -58,6 +59,7 @@
 
 <a class="skip" href="#main" onclick={skipToMain}>Skip to content</a>
 
+<div class="frame">
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
 		<a class="brand" href={resolve('/')} aria-label="Korean 한">
@@ -88,8 +90,18 @@
 <main id="main" tabindex="-1">
 	{@render children()}
 </main>
+{#if !labRoute}
+	<SiteFooter />
+{/if}
+</div>
 
 <style>
+	.frame {
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
+	}
+
 	.skip {
 		position: absolute;
 		inset-inline-start: -9999px;
@@ -100,6 +112,10 @@
 		z-index: 10;
 	}
 	.skip:focus { inset-inline-start: var(--s3); inset-block-start: var(--s3); }
+
+	main {
+		flex: 1 1 auto;
+	}
 
 	main:focus,
 	main:focus-visible {

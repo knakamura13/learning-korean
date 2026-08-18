@@ -9,7 +9,6 @@
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
-	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import { reviewAnswerPlaceholder, reviewChrome } from '$lib/domain/reviewChrome';
 
 	let queue = $state<Card[]>([]);
@@ -33,7 +32,6 @@
 	const chrome = $derived(
 		reviewChrome({
 			ready,
-			durable: progress.durable,
 			unlocked: stats.unlocked,
 			inSession
 		})
@@ -140,30 +138,14 @@
 		{/if}
 	</header>
 
-	{#snippet backupPanel()}
-		<details class="backup-card card" open={!progress.durable}>
-			<summary>Back up or restore your progress</summary>
-			<p class="backup-note">
-				Your progress lives only in this browser. Back it up before switching browsers or
-				devices, clearing site data, or resetting this one — {progress.durable
-					? 'as a precaution.'
-					: 'right now, since this browser will not keep it for you.'}
-			</p>
-			<ProgressBackup exportJson={() => progress.export()} importJson={(json) => progress.import(json)} />
-		</details>
-	{/snippet}
-
 	{#if ready && !progress.durable}
 		<div class="warn card">
 			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
-			origin, so your review history will vanish when you close the tab. Download a backup
-			below before you do anything else, and serve the built app over HTTP rather than
+			origin, so your review history will vanish when you close the tab.
+			<a href="#progress-backup">Download a backup</a>
+			before you do anything else, and serve the built app over HTTP rather than
 			opening the files directly.
 		</div>
-	{/if}
-
-	{#if chrome.backupFirst}
-		{@render backupPanel()}
 	{/if}
 
 	{#if chrome.showStats}
@@ -315,10 +297,6 @@
 			</div>
 		{/key}
 	{/if}
-
-	{#if chrome.showBackup && !chrome.backupFirst}
-		{@render backupPanel()}
-	{/if}
 </div>
 
 <style>
@@ -342,63 +320,6 @@
 		margin-bottom: var(--s4);
 		font-size: 0.86rem;
 		line-height: 1.55;
-	}
-
-	.backup-card {
-		padding: var(--s3) var(--s4);
-		margin-bottom: var(--s4);
-	}
-	.backup-card:last-child {
-		margin-bottom: 0;
-		margin-top: var(--s5);
-	}
-	.backup-card summary {
-		display: flex;
-		align-items: center;
-		gap: var(--s2);
-		min-height: 44px;
-		cursor: pointer;
-		font-size: 0.86rem;
-		font-weight: 600;
-		padding: var(--s1) 0;
-		list-style: none;
-	}
-	.backup-card summary::-webkit-details-marker,
-	.backup-card summary::marker {
-		display: none;
-		content: none;
-	}
-	.backup-card summary::after {
-		content: '';
-		flex: 0 0 auto;
-		width: 0.4rem;
-		height: 0.4rem;
-		margin-inline-start: auto;
-		border-inline-end: 2px solid currentColor;
-		border-block-end: 2px solid currentColor;
-		transform: rotate(45deg);
-		transition: transform var(--fast) var(--ease);
-	}
-	.backup-card[open] summary::after {
-		transform: rotate(225deg);
-	}
-	.backup-card summary:hover {
-		color: var(--accent);
-	}
-	.backup-card summary:active {
-		color: var(--ink);
-	}
-	.backup-card summary:focus-visible {
-		outline: 2px solid var(--paper);
-		outline-offset: 2px;
-		box-shadow: var(--focus-ring);
-		border-radius: 3px;
-	}
-	.backup-note {
-		font-size: 0.82rem;
-		color: var(--ink-soft);
-		line-height: 1.55;
-		margin: var(--s2) 0 0;
 	}
 
 	.strip {

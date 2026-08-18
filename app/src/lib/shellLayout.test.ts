@@ -3,6 +3,12 @@ import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
 
+function styleBlock(markup: string): string {
+	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
+	if (!match) throw new Error('no style block');
+	return match[1];
+}
+
 function shellBeforeRail(src: string): boolean {
 	const shellMatch = src.match(/class="shell[\s"]/);
 	const railIdx = src.indexOf('<LabIndexRail');
@@ -10,6 +16,14 @@ function shellBeforeRail(src: string): boolean {
 }
 
 describe('shell layout source contracts', () => {
+	it('layout mounts a quiet backup footer off lab sittings', () => {
+		expect(layout).toMatch(/import SiteFooter from '\$lib\/components\/SiteFooter\.svelte'/);
+		expect(layout).toMatch(/\{#if !labRoute\}[\s\S]*<SiteFooter \/>/);
+		expect(layout).toMatch(/class="frame"/);
+		expect(styleBlock(layout)).toMatch(/\.frame\s*\{[^}]*min-height:\s*100dvh/s);
+		expect(styleBlock(layout)).toMatch(/main\s*\{[^}]*flex:\s*1 1 auto/s);
+	});
+
 	it('layout exposes focusable main and skip link that focuses it', () => {
 		expect(layout).toMatch(/<main[^>]*id="main"/);
 		expect(layout).toMatch(/<main[^>]*tabindex="-1"/);

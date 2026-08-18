@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
+import siteFooter from './components/SiteFooter.svelte?raw';
 import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
@@ -87,7 +88,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(vowelStep)).toMatch(/\.stamp:active:not\(:disabled\)\s*\{/);
 		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
-		expect(styleBlock(review)).toMatch(/\.backup-card summary:active\s*\{/);
+		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/\.continue:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.lab:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.stat:active\s*\{/);
@@ -95,7 +96,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('gives the backup summary a hover state', () => {
-		expect(styleBlock(review)).toMatch(/\.backup-card summary:hover\s*\{/);
+		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:hover\s*\{/);
 	});
 
 	it('reserves the lab well with a mouth-sized skeleton until widgets can mount', () => {
@@ -131,7 +132,6 @@ describe('polish audit regressions', () => {
 	it('keeps physical gradient sides because logical gradient keywords are not Baseline', () => {
 		expect(styleBlock(labRunner)).toMatch(/to right/);
 		expect(styleBlock(labRunner)).not.toMatch(/to inline-end/);
-		expect(styleBlock(reference)).toMatch(/to right/);
 		expect(styleBlock(reference)).not.toMatch(/to inline-end/);
 	});
 
@@ -154,6 +154,7 @@ describe('polish audit regressions', () => {
 			appCss,
 			labRunner,
 			progressBackup,
+			siteFooter,
 			layout,
 			home,
 			review,
@@ -172,6 +173,7 @@ describe('polish audit regressions', () => {
 		expect(physicalLeftRight(styleBlock(layout))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(labRunner))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(progressBackup))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(siteFooter))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(home))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(review))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(reference))).toEqual([]);
@@ -305,7 +307,7 @@ describe('polish audit regressions', () => {
 
 	it('sizes peek, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
 		expect(styleBlock(home)).toMatch(/\.peek\s*\{[^}]*min-height:\s*44px/s);
-		expect(styleBlock(review)).toMatch(/\.backup-card summary\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
@@ -430,13 +432,13 @@ describe('polish audit regressions', () => {
 	});
 
 	it('does not ship fascicle journal words in UI chrome', () => {
-		const chrome = layout + home + labRunner + labPage + labIndexRail + labPreview + labSpread + review;
+		const chrome = layout + home + labRunner + labPage + labIndexRail + labPreview + labSpread + review + siteFooter;
 		expect(chrome).not.toMatch(/Colophon/);
 		expect(chrome).not.toMatch(/>ToC</);
 		expect(chrome).not.toMatch(/label: 'ToC'/);
 		expect(chrome).not.toMatch(/fascicle/i);
 		expect(chrome).not.toMatch(/folio/i);
-		expect(review).toMatch(/Back up or restore your progress/);
+		expect(siteFooter).toMatch(/Back up or restore your progress/);
 		expect(review).toMatch(/Loading Review/);
 		expect(review).toMatch(/Nothing in Review yet/);
 		expect(review).toMatch(/Review is clear/);
@@ -450,12 +452,10 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labRunner)).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);
 	});
 
-	it('puts the review card ahead of backup and stats during a sitting', () => {
+	it('puts the review card ahead of stats during a sitting and keeps backup off the page', () => {
 		expect(review).toMatch(/reviewChrome\(/);
-		expect(review).toMatch(/\{#snippet backupPanel/);
-		expect(review).toMatch(/chrome\.backupFirst/);
-		expect(review).toMatch(/chrome\.showBackup && !chrome\.backupFirst/);
-		expect(styleBlock(review)).toMatch(/summary::after/);
+		expect(review).not.toMatch(/backupPanel/);
+		expect(review).not.toMatch(/ProgressBackup/);
 		expect(labRunner).toMatch(/\{:else if alreadyDone\}/);
 		expect(review).not.toMatch(/type the romanization/);
 	});
