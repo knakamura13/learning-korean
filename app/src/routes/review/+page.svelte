@@ -10,6 +10,7 @@
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
+	import { reviewAnswerPlaceholder, reviewChrome } from '$lib/domain/reviewChrome';
 
 	let queue = $state<Card[]>([]);
 	let index = $state(0);
@@ -27,6 +28,16 @@
 	const card = $derived(queue[index]);
 	const pronCard = $derived(card?.kind === 'pron');
 	const finishedSession = $derived(ready && queue.length > 0 && index >= queue.length);
+	const inSession = $derived(ready && queue.length > 0 && index < queue.length);
+	const stats = $derived(progress.stats);
+	const chrome = $derived(
+		reviewChrome({
+			ready,
+			durable: progress.durable,
+			unlocked: stats.unlocked,
+			inSession
+		})
+	);
 
 	onMount(() => {
 		progress.tick();
@@ -52,7 +63,7 @@
 		const current = queue[index];
 		sittingNew = Boolean(current && !progress.state.cards[current.id]);
 		await tick();
-		input?.focus();
+		input?.focus({ preventScroll: true });
 	}
 
 	function submit() {
@@ -102,7 +113,6 @@
 		}
 	}
 
-	const stats = $derived(progress.stats);
 	const nextDue = $derived(progress.nextDue);
 
 	const whenNext = $derived.by(() => {
@@ -119,25 +129,18 @@
 <svelte:window onkeydown={onKey} />
 
 <div class="shell narrow">
-	<header class="head">
+	<header class="head" class:compact={inSession}>
 		<p class="eyebrow">Spaced repetition</p>
 		<h1>Daily Review</h1>
-		<p class="standfirst">
-			Type the sound. The clock grades you — a slow correct answer comes back sooner than a
-			fast one, because hesitation is the honest signal.
-		</p>
+		{#if chrome.showStandfirst}
+			<p class="standfirst">
+				Type the sound. The clock grades you — a slow correct answer comes back sooner than a
+				fast one, because hesitation is the honest signal.
+			</p>
+		{/if}
 	</header>
 
-	{#if ready && !progress.durable}
-		<div class="warn card">
-			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
-			origin, so your review history will vanish when you close the tab. Download a backup
-			below before you do anything else, and serve the built app over HTTP rather than
-			opening the files directly.
-		</div>
-	{/if}
-
-	{#if ready}
+	{#snippet backupPanel()}
 		<details class="backup-card card" open={!progress.durable}>
 			<summary>Back up or restore your progress</summary>
 			<p class="backup-note">
@@ -148,9 +151,22 @@
 			</p>
 			<ProgressBackup exportJson={() => progress.export()} importJson={(json) => progress.import(json)} />
 		</details>
+	{/snippet}
+
+	{#if ready && !progress.durable}
+		<div class="warn card">
+			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
+			origin, so your review history will vanish when you close the tab. Download a backup
+			below before you do anything else, and serve the built app over HTTP rather than
+			opening the files directly.
+		</div>
 	{/if}
 
-	{#if ready && stats.unlocked > 0}
+	{#if chrome.backupFirst}
+		{@render backupPanel()}
+	{/if}
+
+	{#if chrome.showStats}
 		<div class="strip" role="region" aria-label="Review session statistics">
 			<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
 			<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
@@ -252,7 +268,7 @@
 							autocapitalize="off"
 							autocorrect="off"
 							spellcheck="false"
-							placeholder={pronCard ? 'han-gu-geo or 한구거' : 'type the romanization'}
+							placeholder={reviewAnswerPlaceholder(card.kind)}
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
 							oninvalid={(e) => {
@@ -299,11 +315,17 @@
 			</div>
 		{/key}
 	{/if}
+
+	{#if chrome.showBackup && !chrome.backupFirst}
+		{@render backupPanel()}
+	{/if}
 </div>
 
 <style>
 	.narrow { max-width: 40rem; }
 	.head { margin-bottom: var(--s5); }
+	.head.compact { margin-bottom: var(--s4); }
+	.head.compact h1 { margin-bottom: 0; }
 	h1 { margin: var(--s2) 0 var(--s3); font-family: var(--display); font-style: italic; font-weight: 400; }
 	.standfirst {
 		font-family: var(--display);
@@ -326,14 +348,39 @@
 		padding: var(--s3) var(--s4);
 		margin-bottom: var(--s4);
 	}
+	.backup-card:last-child {
+		margin-bottom: 0;
+		margin-top: var(--s5);
+	}
 	.backup-card summary {
 		display: flex;
 		align-items: center;
+		gap: var(--s2);
 		min-height: 44px;
 		cursor: pointer;
 		font-size: 0.86rem;
 		font-weight: 600;
 		padding: var(--s1) 0;
+		list-style: none;
+	}
+	.backup-card summary::-webkit-details-marker,
+	.backup-card summary::marker {
+		display: none;
+		content: none;
+	}
+	.backup-card summary::after {
+		content: '';
+		flex: 0 0 auto;
+		width: 0.4rem;
+		height: 0.4rem;
+		margin-inline-start: auto;
+		border-inline-end: 2px solid currentColor;
+		border-block-end: 2px solid currentColor;
+		transform: rotate(45deg);
+		transition: transform var(--fast) var(--ease);
+	}
+	.backup-card[open] summary::after {
+		transform: rotate(225deg);
 	}
 	.backup-card summary:active {
 		color: var(--ink);
@@ -377,10 +424,10 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.stat span {
-		font-size: 0.58rem;
-		letter-spacing: 0.1em;
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: var(--ink-faint);
+		color: var(--ink);
 	}
 
 	.review { padding: var(--s5); }
@@ -421,6 +468,10 @@
 		text-align: center;
 	}
 
+	@media (max-height: 52rem) {
+		.glyph { font-size: clamp(2.6rem, 6vw + 1rem, 4rem); }
+	}
+
 	.ask { text-align: center; font-size: 0.84rem; color: var(--ink-soft); margin: 0 0 var(--s4); }
 
 	form {
@@ -448,6 +499,13 @@
 		height: auto;
 	}
 
+	@media (max-width: 36rem) {
+		.answer-controls { flex-wrap: wrap; }
+		.answer-controls .in,
+		.answer-controls .btn { flex: 1 1 100%; }
+		.answer-controls .btn { justify-content: center; }
+	}
+
 	.answer-label {
 		font-size: 0.62rem;
 		font-weight: 700;
@@ -471,6 +529,11 @@
 		font-family: var(--mono);
 		font-size: 1.15rem;
 		padding: 0.7rem 0.9rem;
+	}
+	.in::placeholder {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		color: var(--ink-faint);
 	}
 	.in:focus-visible {
 		outline: 2px solid var(--paper);
