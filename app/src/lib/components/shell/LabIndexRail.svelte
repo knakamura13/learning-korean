@@ -192,13 +192,19 @@
 		lastPointer = { x: e.clientX, y: e.clientY };
 	}
 
+	function pointerAnchor(e: PointerEvent): PopoverAnchor | null {
+		const box = rectOf(e.currentTarget);
+		if (box && 'right' in box) return { x: box.right, y: e.clientY };
+		return { x: e.clientX, y: e.clientY };
+	}
+
 	function onPointerEnter(item: LabPreviewModel, e: PointerEvent) {
 		if (!isFinePointer()) return;
 		rememberPointer(e);
 		openPreview(
 			item.id,
 			'pointer',
-			prefersReducedMotion() ? rectOf(e.currentTarget) : { x: e.clientX, y: e.clientY }
+			prefersReducedMotion() ? rectOf(e.currentTarget) : pointerAnchor(e)
 		);
 	}
 
@@ -207,7 +213,8 @@
 		rememberPointer(e);
 		if (prefersReducedMotion()) return;
 		if (openId !== item.id || mode !== 'pointer' || followFrozen) return;
-		anchor = { x: e.clientX, y: e.clientY };
+		const next = pointerAnchor(e);
+		if (next) anchor = next;
 	}
 
 	function onItemPointerLeave() {
