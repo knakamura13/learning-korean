@@ -351,55 +351,59 @@
 <svelte:window onkeydown={onKey} />
 
 {#if finished}
-	<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
-		<span class="seal" lang="ko">한글</span>
-		<h1>{lab.finish.title}</h1>
-		<p class="summary">{lab.finish.summary}</p>
+	<LabSpread>
+		{#snippet article()}
+			<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
+				<span class="seal" lang="ko">한글</span>
+				<h1>{lab.finish.title}</h1>
+				<p class="summary">{lab.finish.summary}</p>
 
-		<div class="tally" role="region" aria-label="Lab results summary">
-			<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
-			<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
-			{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
-		</div>
+				<div class="tally" role="region" aria-label="Lab results summary">
+					<div><b>{firstTry}/{lab.steps.length}</b><span>first try</span></div>
+					<div><b>~{elapsedMinutes}m</b><span>elapsed</span></div>
+					{#if released > 0}<div><b>+{released}</b><span>cards unlocked</span></div>{/if}
+				</div>
 
-		<p class="unlocked">
-			{finishCopy.lead}
-			{finishCopy.detail}
-		</p>
+				<p class="unlocked">
+					{finishCopy.lead}
+					{finishCopy.detail}
+				</p>
 
-		<div class="actions">
-			{#if dueNow > 0}
-				<a class="btn" href={resolve('/review')}>Review now →</a>
-			{/if}
-			{#if nextLab}
-				<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href={resolve('/lab/[id]', { id: nextLab.id })}>Next lab</a>
-			{/if}
-			{#if confirmingRestart}
-				<dialog
-					class="restart-confirm"
-					aria-labelledby="restart-confirmation"
-					{@attach openRestartDialog}
-				>
-					<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
-					<div class="restart-confirm-actions">
-						<button class="btn ghost" type="button" use:focusWhen={true} onclick={cancelRestart}>
-							Cancel
+				<div class="actions">
+					{#if dueNow > 0}
+						<a class="btn" href={resolve('/review')}>Review now →</a>
+					{/if}
+					{#if nextLab}
+						<a class={dueNow > 0 ? 'btn ghost' : 'btn'} href={resolve('/lab/[id]', { id: nextLab.id })}>Next lab</a>
+					{/if}
+					{#if confirmingRestart}
+						<dialog
+							class="restart-confirm"
+							aria-labelledby="restart-confirmation"
+							{@attach openRestartDialog}
+						>
+							<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
+							<div class="restart-confirm-actions">
+								<button class="btn ghost" type="button" use:focusWhen={true} onclick={cancelRestart}>
+									Cancel
+								</button>
+								<button class="btn" type="button" onclick={confirmRestart}>Start over</button>
+							</div>
+						</dialog>
+					{:else}
+						<button
+							bind:this={restartButton}
+							class="btn ghost"
+							type="button"
+							onclick={requestRestart}
+						>
+							Run the lab again
 						</button>
-						<button class="btn" type="button" onclick={confirmRestart}>Start over</button>
-					</div>
-				</dialog>
-			{:else}
-				<button
-					bind:this={restartButton}
-					class="btn ghost"
-					type="button"
-					onclick={requestRestart}
-				>
-					Run the lab again
-				</button>
-			{/if}
-		</div>
-	</div>
+					{/if}
+				</div>
+			</div>
+		{/snippet}
+	</LabSpread>
 {:else}
 	<LabSpread>
 		{#snippet article()}

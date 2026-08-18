@@ -10,6 +10,12 @@ import src from './LabIndexRail.svelte?raw';
 import preview from './LabPreview.svelte?raw';
 import spread from './LabSpread.svelte?raw';
 
+function styleBlock(markup: string): string {
+	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
+	if (!match) throw new Error('no style block');
+	return match[1];
+}
+
 function legacyUnlockedWouldPreventDefault(
 	openId: string | null,
 	itemId: string,
@@ -206,5 +212,14 @@ describe('LabSpread source contracts', () => {
 		expect(spread).not.toMatch(/'after well'/);
 		expect(spread).toMatch(/\.spread-col\s*\{[^}]*position:\s*sticky/s);
 		expect(spread).toMatch(/max-height:\s*calc\(100dvh/);
+	});
+
+	it('centers a sitting with no well instead of leaving a vacant column', () => {
+		expect(spread).toMatch(/well\?:\s*Snippet/);
+		expect(spread).toMatch(/\{#if well\}/);
+		expect(spread).toMatch(/solo:\s*!well/);
+		const css = styleBlock(spread);
+		expect(css).toMatch(/\.spread\.solo\s*\{[^}]*max-width:\s*var\(--measure\)/s);
+		expect(css).toMatch(/\.spread\.solo\s*\{[^}]*margin-inline:\s*auto/s);
 	});
 });

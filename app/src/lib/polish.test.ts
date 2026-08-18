@@ -459,6 +459,11 @@ describe('polish audit regressions', () => {
 		expect(labPage).not.toMatch(/jamo/);
 		expect(labPage).not.toMatch(/same\s+module these cards use/);
 		expect(styleBlock(labRunner)).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);
+		const finish = labRunner.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
+		expect(finish).toMatch(/<LabSpread>/);
+		expect(finish).toMatch(/\{#snippet article\(\)\}/);
+		expect(finish).toMatch(/class="finish card"/);
+		expect(finish).not.toMatch(/\{#snippet well\(\)\}/);
 	});
 
 	it('puts the review card ahead of stats during a sitting and keeps backup off the page', () => {
