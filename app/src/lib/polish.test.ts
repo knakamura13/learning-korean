@@ -361,6 +361,16 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labRunner)).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);
 	});
 
+	it('puts the review card ahead of backup and stats during a sitting', () => {
+		expect(review).toMatch(/reviewChrome\(/);
+		expect(review).toMatch(/\{#snippet backupPanel/);
+		expect(review).toMatch(/chrome\.backupFirst/);
+		expect(review).toMatch(/chrome\.showBackup && !chrome\.backupFirst/);
+		expect(styleBlock(review)).toMatch(/summary::after/);
+		expect(labRunner).toMatch(/\{:else if alreadyDone\}/);
+		expect(review).not.toMatch(/type the romanization/);
+	});
+
 	it('paints due and resume rose, and keeps primary actions moss', () => {
 		const homeCss = styleBlock(home);
 		const layoutCss = styleBlock(layout);

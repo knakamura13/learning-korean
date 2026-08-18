@@ -406,9 +406,10 @@
 			<header class="head" class:compact={compactHead}>
 				<p class="eyebrow">
 					Lab {String(lab.number).padStart(2, '0')} · ~{lab.minutes} minutes
-					{#if alreadyDone}· completed{/if}
 					{#if showResumeNote}
 						· picking up at card {index + 1}
+					{:else if alreadyDone}
+						· completed
 					{/if}
 				</p>
 				<h1>{lab.title}</h1>
