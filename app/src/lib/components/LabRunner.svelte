@@ -872,8 +872,13 @@
 	}
 
 	/* Programmatically focused on card change for SR/keyboard orientation;
-	   it is not an interactive control, so no ring. */
-	.do:focus { outline: none; }
+	   it is not an interactive control, so no ring. Global :focus-visible
+	   still paints outline + box-shadow unless both are cleared here. */
+	.do:focus,
+	.do:focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
 
 	.hint {
 		font-size: 0.86rem;
