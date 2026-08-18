@@ -8,10 +8,13 @@
 		type CourseNavView
 	} from '$lib/domain/courseNav';
 	import {
+		HOVER_CLOSE_MS,
 		anchorPopover,
+		decideHoverIntent,
 		decideItemFocusOpen,
 		decideUnlockedPress,
 		decideWindowEscape,
+		isPointInHoverBridge,
 		isPressPointerType,
 		labPreviewModels,
 		type LabPreviewModel,
@@ -34,6 +37,7 @@
 	let armedForNavigate = $state<string | null>(null);
 	let mode = $state<PreviewOpenMode>('pointer');
 	let followFrozen = $state(false);
+	let lastPointer = $state<{ x: number; y: number } | null>(null);
 	let anchor = $state<PopoverAnchor | null>(null);
 	let panelSize = $state({ w: 320, h: 220 });
 	let viewportSize = $state({ w: 1200, h: 800 });
@@ -77,6 +81,13 @@
 		anchor ? anchorPopover(anchor, panelSize, viewportSize) : { left: 8, top: 8 }
 	);
 
+	const panelBox = $derived({
+		left: placement.left,
+		top: placement.top,
+		right: placement.left + panelSize.w,
+		bottom: placement.top + panelSize.h
+	});
+
 	const panelId = 'lab-index-preview';
 
 	function isFinePointer(): boolean {
@@ -101,7 +112,7 @@
 		cancelClose();
 		closeTimer = window.setTimeout(() => {
 			closePreview();
-		}, 100);
+		}, HOVER_CLOSE_MS);
 	}
 
 	function closePreview() {
@@ -110,6 +121,7 @@
 		openedBy = null;
 		armedForNavigate = null;
 		followFrozen = false;
+		lastPointer = null;
 		anchor = null;
 	}
 
@@ -173,8 +185,13 @@
 		}
 	}
 
+	function rememberPointer(e: PointerEvent) {
+		lastPointer = { x: e.clientX, y: e.clientY };
+	}
+
 	function onPointerEnter(item: LabPreviewModel, e: PointerEvent) {
 		if (!isFinePointer()) return;
+		rememberPointer(e);
 		openPreview(
 			item.id,
 			'pointer',
@@ -183,7 +200,9 @@
 	}
 
 	function onItemPointerMove(item: LabPreviewModel, e: PointerEvent) {
-		if (!isFinePointer() || prefersReducedMotion()) return;
+		if (!isFinePointer()) return;
+		rememberPointer(e);
+		if (prefersReducedMotion()) return;
 		if (openId !== item.id || mode !== 'pointer' || followFrozen) return;
 		anchor = { x: e.clientX, y: e.clientY };
 	}
@@ -197,6 +216,33 @@
 	function onPreviewPointerEnter() {
 		cancelClose();
 		followFrozen = true;
+	}
+
+	function onHoverIntentMove(e: PointerEvent) {
+		if (!openId || mode !== 'pointer' || !lastPointer || !isFinePointer()) return;
+		const target = e.target;
+		const overItem = target instanceof Element && Boolean(target.closest('[data-lab-index-item]'));
+		const overPanel = target instanceof Element && Boolean(target.closest(`#${panelId}`));
+		const inBridge = isPointInHoverBridge(
+			{ x: e.clientX, y: e.clientY },
+			lastPointer,
+			panelBox
+		);
+		const decision = decideHoverIntent(overItem, overPanel, inBridge);
+		switch (decision.action) {
+			case 'stay':
+				cancelClose();
+				if (decision.freezeFollow) followFrozen = true;
+				return;
+			case 'close':
+				followFrozen = true;
+				if (closeTimer === undefined) scheduleClose();
+				return;
+			default: {
+				const _exhaustive: never = decision;
+				return _exhaustive;
+			}
+		}
 	}
 
 	async function onLockedClick(item: LabPreviewModel, e: MouseEvent) {
@@ -332,6 +378,7 @@
 	onkeydown={onWindowKey}
 	onresize={syncViewport}
 />
+<svelte:body onpointermove={onHoverIntentMove} />
 
 <nav class="lab-index" aria-label="Labs" {@attach bindNav}>
 	<ol>

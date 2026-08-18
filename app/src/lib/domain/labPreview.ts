@@ -1,15 +1,47 @@
 /**
  * labPreview.ts — placement and copy for the 01–06 lab rail preview.
  *
- * Pure functions so cursor-follow math and honest chips can be tested without
- * mounting the rail. Chip kinds follow `labCardState` so the preview never
- * invents a status the home cards would not show.
+ * Pure functions so cursor-follow math, hover-bridge geometry, and honest chips
+ * can be tested without mounting the rail. Chip kinds follow `labCardState` so
+ * the preview never invents a status the home cards would not show.
  */
 
 import { labCardState, type CourseLab, type CourseNavView, type LabCardState } from './courseNav';
 
 export const POPOVER_OFFSET_PX = 12;
 export const POPOVER_PAD_PX = 8;
+export const HOVER_CLOSE_MS = 160;
+
+export interface ViewportBox {
+	w: number;
+	h: number;
+}
+
+export interface PanelBox {
+	w: number;
+	h: number;
+}
+
+export interface CursorPoint {
+	x: number;
+	y: number;
+}
+
+export interface AnchorRect {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	top: number;
+	right: number;
+}
+
+export interface HoverBox {
+	left: number;
+	top: number;
+	right: number;
+	bottom: number;
+}
 
 export interface ViewportBox {
 	w: number;
@@ -172,6 +204,67 @@ export function anchorPopover(
 	if (top < POPOVER_PAD_PX) top = POPOVER_PAD_PX;
 
 	return { left, top };
+}
+
+export type HoverIntentDecision =
+	| { action: 'stay'; freezeFollow: boolean }
+	| { action: 'close' };
+
+/** Keep the preview while the pointer is on the number, the card, or the path between. */
+export function decideHoverIntent(
+	overItem: boolean,
+	overPanel: boolean,
+	inBridge: boolean
+): HoverIntentDecision {
+	if (overItem) return { action: 'stay', freezeFollow: false };
+	if (overPanel || inBridge) return { action: 'stay', freezeFollow: true };
+	return { action: 'close' };
+}
+
+export function hoverBridgePolygon(apex: CursorPoint, panel: HoverBox): [CursorPoint, CursorPoint, CursorPoint] {
+	const panelCx = (panel.left + panel.right) / 2;
+	const overlap = 4;
+	if (apex.x <= panelCx) {
+		return [
+			apex,
+			{ x: panel.left + overlap, y: panel.top },
+			{ x: panel.left + overlap, y: panel.bottom }
+		];
+	}
+	return [
+		apex,
+		{ x: panel.right - overlap, y: panel.top },
+		{ x: panel.right - overlap, y: panel.bottom }
+	];
+}
+
+export function svgPolygonPoints(points: CursorPoint[]): string {
+	return points.map((p) => `${p.x},${p.y}`).join(' ');
+}
+
+export function isPointInHoverBridge(point: CursorPoint, apex: CursorPoint, panel: HoverBox): boolean {
+	if (
+		point.x >= panel.left &&
+		point.x <= panel.right &&
+		point.y >= panel.top &&
+		point.y <= panel.bottom
+	) {
+		return true;
+	}
+	return pointInPolygon(point, hoverBridgePolygon(apex, panel));
+}
+
+function pointInPolygon(point: CursorPoint, polygon: CursorPoint[]): boolean {
+	let inside = false;
+	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+		const a = polygon[i];
+		const b = polygon[j];
+		const crosses = a.y > point.y !== b.y > point.y;
+		if (!crosses) continue;
+		const atX = ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
+		if (point.x < atX) inside = !inside;
+	}
+	return inside;
 }
 
 export function previewChipKind(state: LabCardState): PreviewChipKind {
