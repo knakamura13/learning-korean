@@ -59,6 +59,7 @@
 
 <a class="skip" href="#main" onclick={skipToMain}>Skip to content</a>
 
+<div class="frame">
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
 		<a class="brand" href={resolve('/')} aria-label="Korean">
@@ -92,8 +93,15 @@
 {#if !labRoute}
 	<SiteFooter />
 {/if}
+</div>
 
 <style>
+	.frame {
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
+	}
+
 	.skip {
 		position: absolute;
 		inset-inline-start: -9999px;
@@ -104,6 +112,10 @@
 		z-index: 10;
 	}
 	.skip:focus { inset-inline-start: var(--s3); inset-block-start: var(--s3); }
+
+	main {
+		flex: 1 1 auto;
+	}
 
 	main:focus,
 	main:focus-visible {
