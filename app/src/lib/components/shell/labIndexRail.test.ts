@@ -9,6 +9,7 @@ import {
 import src from './LabIndexRail.svelte?raw';
 import preview from './LabPreview.svelte?raw';
 import spread from './LabSpread.svelte?raw';
+import hoverPreview from './hoverPreview.svelte.ts?raw';
 
 function styleBlock(markup: string): string {
 	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
@@ -59,24 +60,26 @@ describe('LabIndexRail source contracts', () => {
 	});
 
 	it('opens the hover preview from this event pointerType, not matchMedia hover', () => {
-		expect(src).toMatch(/isHoverPointerType\(e\.pointerType\)/);
+		expect(src).toMatch(/hover\.onPointerEnter/);
+		expect(hoverPreview).toMatch(/isHoverPointerType\(e\.pointerType\)/);
 		expect(src).not.toMatch(/function isFinePointer/);
 		expect(src).not.toMatch(/\(hover: hover\) and \(pointer: fine\)/);
 	});
 
 	it('freezes cursor-follow so the panel action can be clicked', () => {
-		expect(src).toMatch(/followFrozen/);
+		expect(src).toMatch(/HoverPreview/);
+		expect(hoverPreview).toMatch(/followFrozen/);
 		expect(src).not.toMatch(/<svelte:window[^>]*onpointermove/);
-		expect(src).toMatch(/onpointerdown=\{onWindowPointerDown\}/);
+		expect(src).toMatch(/onpointerdown=\{hover\.onWindowPointerDown\}/);
 	});
 
 	it('keeps a hover bridge between the number and the preview', () => {
-		expect(src).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
-		expect(src).toMatch(/decideHoverIntent/);
-		expect(src).toMatch(/<svelte:body onpointermove=\{onHoverIntentMove\}/);
-		expect(src).toMatch(/onPointerEnter=\{onPreviewPointerEnter\}/);
-		expect(src).toMatch(/expandHoverBox/);
-		expect(src).toMatch(/pointerAnchor/);
+		expect(hoverPreview).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
+		expect(hoverPreview).toMatch(/decideHoverIntent/);
+		expect(src).toMatch(/<svelte:body onpointermove=\{hover\.onHoverIntentMove\}/);
+		expect(src).toMatch(/onPointerEnter=\{hover\.onPreviewPointerEnter\}/);
+		expect(hoverPreview).toMatch(/expandHoverBox/);
+		expect(hoverPreview).toMatch(/pointerAnchor/);
 		expect(preview).toMatch(/PREVIEW_HOVER_BUFFER_PX|--preview-buffer|padding:\s*4px/);
 	});
 
@@ -86,7 +89,7 @@ describe('LabIndexRail source contracts', () => {
 		expect(preview).not.toMatch(/role=["']dialog["']/);
 		expect(preview).not.toMatch(/role=\{dialog/);
 		expect(src).toMatch(/aria-expanded=\{expanded\}/);
-		expect(src).toMatch(/aria-controls=\{expanded \? panelId : undefined\}/);
+		expect(src).toMatch(/aria-controls=\{expanded \? hover\.panelId : undefined\}/);
 	});
 });
 
@@ -173,6 +176,8 @@ function closeThenSyntheticNumberFocus(mode: PreviewOpenMode): string | null {
 	switch (escape.action) {
 		case 'ignore':
 			return '0001';
+		case 'close':
+			return null;
 		case 'dismiss': {
 			let openId: string | null = null;
 			const focus = decideItemFocusOpen(true);
@@ -203,15 +208,17 @@ describe('Escape from the panel (would fail today’s reopen loop)', () => {
 		expect(closeThenSyntheticNumberFocus('press')).toBeNull();
 	});
 
-	it('does not window-claim Escape for hover-only', () => {
-		expect(decideWindowEscape('0001', 'pointer')).toEqual({ action: 'ignore' });
-		expect(closeThenSyntheticNumberFocus('pointer')).toBe('0001');
+	it('closes hover-only on Escape without restoring focus', () => {
+		expect(decideWindowEscape('0001', 'pointer')).toEqual({ action: 'close' });
+		expect(closeThenSyntheticNumberFocus('pointer')).toBeNull();
 	});
 
 	it('wires dismiss and focus-open through the extracted decisions', () => {
-		expect(src).toMatch(/decideWindowEscape\(openId,\s*mode\)/);
-		expect(src).toMatch(/decideItemFocusOpen\(suppressFocusOpen\)/);
-		expect(src).toMatch(/suppressFocusOpen = true/);
+		expect(src).toMatch(/onkeydown=\{hover\.onWindowKey\}/);
+		expect(hoverPreview).toMatch(/decideWindowEscape\(this\.openId,\s*this\.mode\)/);
+		expect(hoverPreview).toMatch(/case 'close':/);
+		expect(hoverPreview).toMatch(/decideItemFocusOpen\(this\.#suppressFocusOpen\)/);
+		expect(hoverPreview).toMatch(/#suppressFocusOpen = true/);
 	});
 });
 
