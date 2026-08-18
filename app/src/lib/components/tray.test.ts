@@ -371,8 +371,7 @@ describe('FusionStep trays', () => {
 		const tray = labeledGroup(root, 'first vowel');
 		expect(radioNamed(tray, 'ㅜ').getAttribute('aria-label')).toBe('first vowel: ㅜ');
 		expect(radioNamed(tray, 'ㅜ').querySelector('.slot-reading')).toBeNull();
-		expect(root.querySelector('.out')?.textContent).toMatch(/ㅝ/);
-		expect(root.querySelector('.out')?.textContent).not.toMatch(/wo|u|eo/);
+		expect(root.querySelector('.out')?.textContent?.replace(/\s+/g, '')).toBe('ㅝ');
 	});
 
 	it('seats a dragged second-tray vowel onto the second slot', async () => {
@@ -430,6 +429,34 @@ describe('AssembleStep trays', () => {
 		expect(batchimSlot.querySelector('.slot-reading')?.textContent).toBe('p');
 		expect(leadSlot.getAttribute('aria-label')).toBe('consonant: ㅁ, m');
 		expect(batchimSlot.getAttribute('aria-label')).toBe('batchim: ㅂ, p');
+	});
+
+	it('leaves a silent lead ㅇ unlabeled on the plate', () => {
+		const root = render(AssembleStep, {
+			step: {
+				type: 'assemble',
+				do: 'Build',
+				teach: 'ok',
+				target: '위',
+				targetName: 'wi',
+				consonants: ['ㅇ', 'ㄱ', 'ㅁ'],
+				vowels: ['ㅟ', 'ㅜ', 'ㅣ']
+			},
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		radioNamed(labeledGroup(root, 'consonant'), 'ㅇ').click();
+		flushSync();
+		radioNamed(labeledGroup(root, 'vowel'), 'ㅟ').click();
+		flushSync();
+
+		const [leadSlot, vowelSlot] = [...root.querySelectorAll<HTMLElement>('.slot')];
+		const reading = leadSlot.querySelector('.slot-reading');
+		expect(reading?.textContent).toBe('');
+		expect(reading?.matches(':empty')).toBe(true);
+		expect(leadSlot.getAttribute('aria-label')).toBe('consonant: ㅇ');
+		expect(vowelSlot.querySelector('.slot-reading')?.textContent).toBe('wi');
 	});
 
 	it('seats a dragged vowel onto the vowel slot without a click', async () => {
