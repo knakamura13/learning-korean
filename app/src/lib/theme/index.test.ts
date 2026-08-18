@@ -54,8 +54,12 @@ describe('themeToggleGlyph', () => {
 
 describe('themeToggleLabel', () => {
 	it('names the stored pref, system follow-through, and the next cycle step', () => {
-		expect(themeToggleLabel('system', false)).toBe('Theme: System, following Light. Next: Light');
-		expect(themeToggleLabel('system', true)).toBe('Theme: System, following Dark. Next: Light');
+		expect(themeToggleLabel('system', false)).toBe(
+			'Theme: Auto, system following Light. Next: Light'
+		);
+		expect(themeToggleLabel('system', true)).toBe(
+			'Theme: Auto, system following Dark. Next: Light'
+		);
 		expect(themeToggleLabel('light', true)).toBe('Theme: Light. Next: Dark');
 		expect(themeToggleLabel('dark', false)).toBe('Theme: Dark. Next: System');
 	});

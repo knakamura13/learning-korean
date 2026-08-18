@@ -88,6 +88,51 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
 		expect(styleBlock(review)).toMatch(/\.backup-card summary:active\s*\{/);
+		expect(styleBlock(home)).toMatch(/\.continue:active\s*\{/);
+		expect(styleBlock(home)).toMatch(/a\.lab:active\s*\{/);
+		expect(styleBlock(home)).toMatch(/a\.stat:active\s*\{/);
+		expect(styleBlock(home)).toMatch(/\.peek:active\s*\{/);
+	});
+
+	it('gives the backup summary a hover state', () => {
+		expect(styleBlock(review)).toMatch(/\.backup-card summary:hover\s*\{/);
+	});
+
+	it('reserves the lab well with a mouth-sized skeleton until widgets can mount', () => {
+		const well = labRunner.match(/\{#snippet well\(\)\}([\s\S]*?)\{\/snippet\}/)?.[1] ?? '';
+		expect(well).toMatch(/\{#if ready\}/);
+		expect(well).toMatch(/class="[^"]*(?:work-skel|mouth-ph)/);
+		expect(well).toMatch(/aria-hidden="true"/);
+		expect(well).toMatch(/<MouthStep/);
+		expect(styleBlock(labRunner)).toMatch(/aspect-ratio:\s*440\s*\/\s*300/);
+	});
+
+	it('dims locked home chrome without opacity on live text', () => {
+		const css = styleBlock(home);
+		expect(css).not.toMatch(/\.lab\.ahead\s*\{[^}]*opacity\s*:/s);
+		expect(css).not.toMatch(/\.tier\.locked\s*\{[^}]*opacity\s*:/s);
+		expect(css).toMatch(/\.lab\.ahead\s*\{[^}]*background:\s*var\(--paper-sunk\)/s);
+		expect(css).toMatch(/\.tier\.locked\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+		expect(css).toMatch(/\.chip-status\.wait\s*\{[^}]*color:\s*var\(--warn\)/s);
+	});
+
+	it('sizes vowel picker choices to 44px and gives picker controls hover and active', () => {
+		const css = styleBlock(vowelStep);
+		expect(css).toMatch(/\.choice\s*\{[^}]*min-width:\s*44px/s);
+		expect(css).toMatch(/\.choice\s*\{[^}]*min-height:\s*44px/s);
+		expect(css).toMatch(/\.choice:hover/);
+		expect(css).toMatch(/\.choice:active/);
+		expect(css).toMatch(/\.dock:hover/);
+		expect(css).toMatch(/\.dock:active/);
+		expect(css).not.toMatch(/text-align:\s*left/);
+		expect(css).toMatch(/text-align:\s*start/);
+	});
+
+	it('keeps physical gradient sides because logical gradient keywords are not Baseline', () => {
+		expect(styleBlock(labRunner)).toMatch(/to right/);
+		expect(styleBlock(labRunner)).not.toMatch(/to inline-end/);
+		expect(styleBlock(reference)).toMatch(/to right/);
+		expect(styleBlock(reference)).not.toMatch(/to inline-end/);
 	});
 
 	it('uses logical properties in shared directional layout', () => {
@@ -141,17 +186,19 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
-	it('self-hosts Noto Serif KR for headings with optional display', () => {
+	it('keeps unused Botanical Korea faces on disk without preloading them', () => {
 		expect(existsSync(new URL('../../static/fonts/NotoSerifKR-subset.woff2', import.meta.url))).toBe(true);
-		expect(systemCss).toMatch(/font-family: 'Noto Serif KR'/);
-		expect(systemCss).toMatch(/NotoSerifKR-subset\.woff2/);
+		expect(existsSync(new URL('../../static/fonts/Newsreader-latin.woff2', import.meta.url))).toBe(true);
+		expect(systemCss).toMatch(/--serif:/);
+		expect(systemCss).toMatch(/Noto Serif KR/);
+		expect(systemCss).not.toMatch(/NotoSerifKR-subset\.woff2/);
+		expect(systemCss).not.toMatch(/Newsreader-latin\.woff2/);
 		expect(systemCss).toMatch(/font-display:\s*optional/);
 		expect(layout).toMatch(/activeSystem\.fonts/);
 	});
 
 	it('self-hosts Newsreader italic for English display type', () => {
 		expect(existsSync(new URL('../../static/fonts/Newsreader-Italic-latin.woff2', import.meta.url))).toBe(true);
-		expect(existsSync(new URL('../../static/fonts/Newsreader-latin.woff2', import.meta.url))).toBe(true);
 		expect(systemCss).toMatch(/font-family: 'Newsreader'/);
 		expect(systemCss).toMatch(/Newsreader-Italic-latin\.woff2/);
 		expect(systemCss).toMatch(/font-style:\s*italic/);
@@ -343,7 +390,12 @@ describe('polish audit regressions', () => {
 		expect(layout).not.toMatch(/Colophon/);
 		expect(layout).not.toMatch(/folio/);
 		expect(layout).toMatch(/ThemeToggle/);
-		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*height:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(layout)).not.toMatch(/\.inner\s*\{[^}]*(?<!min-)height:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/\.name\s*\{[^}]*font-size:\s*1rem/s);
+		expect(styleBlock(labSpread)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
+		expect(styleBlock(labSpread)).toMatch(/max-height:\s*calc\(100dvh - 2\.75rem/);
+		expect(styleBlock(labIndexRail)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
@@ -351,7 +403,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
-		expect(layout).toMatch(/class="brand"[^>]*aria-label="Korean"/);
+		expect(layout).toMatch(/class="brand"[^>]*aria-label="Korean 한"/);
 		expect(layout).toMatch(/class="mark" lang="ko"/);
 		expect(layout).toMatch(/pathname === '\/' \|\| page\.url\.pathname\.startsWith\('\/lab\/'\)/);
 		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);

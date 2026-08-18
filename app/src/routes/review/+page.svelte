@@ -382,6 +382,9 @@
 	.backup-card[open] summary::after {
 		transform: rotate(225deg);
 	}
+	.backup-card summary:hover {
+		color: var(--accent);
+	}
 	.backup-card summary:active {
 		color: var(--ink);
 	}

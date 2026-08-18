@@ -562,6 +562,7 @@
 		background: transparent;
 		transform: translate(-50%, -50%);
 		cursor: pointer;
+		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
 	}
 	.dock.base {
 		width: 3.4rem;
@@ -579,6 +580,12 @@
 		border: 2px dashed color-mix(in srgb, var(--accent) 28%, transparent);
 	}
 	.zone.filled .dock.open { opacity: 1; }
+	.dock:hover:not(:disabled):not(.held) {
+		border-color: var(--accent);
+	}
+	.dock:active:not(:disabled) {
+		background: var(--accent-soft);
+	}
 	.dock:focus-visible {
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
@@ -616,12 +623,12 @@
 		line-height: 1.35;
 		letter-spacing: 0.01em;
 		color: var(--ink);
-		text-align: left;
+		text-align: start;
 	}
 	.choice {
 		appearance: none;
-		min-width: 2.4rem;
-		min-height: 2.4rem;
+		min-width: 44px;
+		min-height: 44px;
 		margin: 0;
 		padding: 0;
 		border: 1px solid var(--rule-strong);
@@ -633,6 +640,15 @@
 		font-family: var(--hangul);
 		font-size: 1.35rem;
 		cursor: pointer;
+		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
+			transform var(--fast) var(--ease);
+	}
+	.choice:hover {
+		border-color: var(--accent);
+		transform: translateY(-1px);
+	}
+	.choice:active {
+		transform: translateY(0);
 	}
 	.choice.on {
 		border-color: var(--accent);
