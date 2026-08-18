@@ -13,6 +13,7 @@
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { tierCountLabel } from '$lib/domain/srs';
 	import { progress } from '$lib/stores/progress.svelte';
+	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
 
 	// Prerendered HTML has no stored progress. Gate stats, completion badges,
 	// and deck-tier counts until the client has ticked, so we never flash
@@ -51,13 +52,17 @@
 
 <svelte:head><title>Korean — labs and review</title></svelte:head>
 
-<div class="shell">
+<div class="with-rail">
+	<LabIndexRail />
+	<div class="shell">
 	<header class="hero">
 		<p class="eyebrow" lang="ko">한글</p>
 		<h1>Read Korean from first principles</h1>
 		<p class="lede">
-			Interactive labs that make you derive the writing system rather than memorize it,
-			backed by a spaced-repetition deck that only ever asks about material you have met.
+			Interactive labs that make you derive the writing system rather than memorize it.
+		</p>
+		<p class="wayfind">
+			Labs teach Hangul. Review quizzes only what you have already met. Reference is the letter list.
 		</p>
 	</header>
 
@@ -167,9 +172,9 @@
 		</div>
 	</section>
 
-	<section aria-labelledby="sec-deck-heading">
-		<h2 id="sec-deck-heading" class="sec">Deck</h2>
-		<div class="tiers card" role="region" aria-label="Deck tier mastery breakdown">
+	<section aria-labelledby="sec-review-heading">
+		<h2 id="sec-review-heading" class="sec">Review pile</h2>
+		<div class="tiers card" role="region" aria-label="Review pile by letter family">
 			{#each tiers as tier (tier.id)}
 				{@const pctMature = pct(tier.mature, tier.size)}
 				{@const pctYoung = pct(tier.young, tier.size)}
@@ -200,12 +205,42 @@
 			</p>
 		</div>
 	</section>
+	</div>
 </div>
 
 <style>
+	.with-rail {
+		display: block;
+	}
+	@media (min-width: 72rem) {
+		.with-rail {
+			display: grid;
+			grid-template-columns: 56px minmax(0, var(--shell));
+			justify-content: center;
+			column-gap: var(--s4);
+			max-width: 90rem;
+			margin-inline: auto;
+		}
+		.with-rail :global(.shell) {
+			max-width: none;
+			width: 100%;
+		}
+	}
+
 	.hero { margin-bottom: var(--s5); max-width: var(--measure); }
-	h1 { margin: var(--s2) 0 var(--s3); }
+	h1 {
+		margin: var(--s2) 0 var(--s3);
+		font-family: var(--display);
+		font-style: italic;
+		font-weight: 400;
+	}
 	.lede { color: var(--ink-soft); font-size: 1rem; line-height: 1.65; }
+	.wayfind {
+		color: var(--ink-soft);
+		font-size: 0.92rem;
+		line-height: 1.55;
+		margin: var(--s3) 0 0;
+	}
 
 	.continue {
 		display: flex;
@@ -215,8 +250,6 @@
 		margin-bottom: var(--s5);
 		text-decoration: none;
 		color: inherit;
-		border-color: var(--accent);
-		background: var(--accent-soft);
 		transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
 			border-color var(--fast) var(--ease);
 	}
@@ -229,7 +262,8 @@
 	.continue .eyebrow { margin-bottom: var(--s1); }
 	.continue-title {
 		display: block;
-		font-family: var(--serif);
+		font-family: var(--display);
+		font-style: italic;
 		font-size: 1.25rem;
 		font-weight: 400;
 		letter-spacing: -0.015em;
@@ -245,9 +279,20 @@
 	.continue-go {
 		flex: 0 0 auto;
 		font-size: 1.4rem;
-		color: var(--accent);
 		line-height: 1;
 	}
+	.continue[data-kind='start'] {
+		border-color: var(--accent);
+		background: var(--accent-soft);
+	}
+	.continue[data-kind='start'] .continue-go { color: var(--accent); }
+	.continue[data-kind='resume'],
+	.continue[data-kind='review'] {
+		border-color: var(--rose);
+		background: var(--rose-soft);
+	}
+	.continue[data-kind='resume'] .continue-go,
+	.continue[data-kind='review'] .continue-go { color: var(--rose); }
 	.continue[data-kind='caught-up'] {
 		border-color: var(--rule);
 		background: var(--paper-raised);
@@ -309,12 +354,13 @@
 	a.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
 
 	.sec {
-		font-family: var(--sans);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--ink-faint);
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 1.15rem;
+		font-weight: 400;
+		letter-spacing: -0.015em;
+		text-transform: none;
+		color: var(--ink);
 		margin: 0 0 var(--s3);
 	}
 

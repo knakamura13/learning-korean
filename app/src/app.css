@@ -23,6 +23,7 @@
 	--slow: 420ms;
 	--measure: 36rem;
 	--shell: 62rem;
+	--sitting: 90rem;
 }
 
 *,
@@ -73,7 +74,8 @@ body {
 }
 
 h1, h2, h3, h4 {
-	font-family: var(--serif);
+	font-family: var(--display);
+	font-style: italic;
 	font-weight: 400;
 	letter-spacing: -0.015em;
 	line-height: 1.18;
@@ -87,9 +89,10 @@ h3 { font-size: 1.1rem; }
 h1, h2 { text-wrap: balance; }
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
 
-/* Hangul / lang=ko uses the self-hosted face. English UI keeps serif/sans. */
+/* Hangul stays Noto Sans KR. These beat heading --display italic (0,1,0 > 0,0,1). */
 :lang(ko) {
 	font-family: var(--hangul);
+	font-style: normal;
 }
 
 p, h1, h2, h3, .lab .body {
@@ -120,10 +123,11 @@ button { font: inherit; color: inherit; }
 
 /* --- shared primitives --- */
 
-.hg { font-family: var(--hangul); font-weight: 500; }
+.hg { font-family: var(--hangul); font-style: normal; font-weight: 500; }
 
 .jamo {
 	font-family: var(--hangul);
+	font-style: normal;
 	font-size: 1.2em;
 	font-weight: 500;
 	line-height: 1;
@@ -183,8 +187,8 @@ button { font: inherit; color: inherit; }
 	border-radius: var(--r-lg);
 	box-shadow: var(--shadow-1);
 }
-.card::before,
-.card::after {
+.lab.card::before,
+.lab.card::after {
 	content: '';
 	position: absolute;
 	width: 12px;
@@ -194,13 +198,13 @@ button { font: inherit; color: inherit; }
 	border-style: solid;
 	border-width: 0;
 }
-.card::before {
+.lab.card::before {
 	inset-block-start: var(--s2);
 	inset-inline-start: var(--s2);
 	border-block-start-width: 1px;
 	border-inline-start-width: 1px;
 }
-.card::after {
+.lab.card::after {
 	inset-block-end: var(--s2);
 	inset-inline-end: var(--s2);
 	border-block-end-width: 1px;

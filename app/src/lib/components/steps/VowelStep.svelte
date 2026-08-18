@@ -509,12 +509,16 @@
 <style>
 	.zone {
 		position: relative;
-		width: min(12rem, 70vw);
-		height: min(12rem, 70vw);
+		box-sizing: border-box;
+		width: min(100%, calc(100dvh - 14rem));
+		max-width: 100%;
+		aspect-ratio: 1;
 		margin: 0 auto var(--s5);
-		border: 2px dashed var(--rule-strong);
+		container-type: inline-size;
+		border: 1px solid var(--rule);
 		border-radius: var(--r-md);
-		background: var(--paper-sunk);
+		background: var(--paper-raised);
+		box-shadow: var(--shadow-1);
 		transition: border-color var(--med) var(--ease), background var(--med) var(--ease),
 			color var(--med) var(--ease), transform var(--med) var(--ease);
 	}
@@ -536,7 +540,7 @@
 		align-items: center;
 		justify-content: center;
 		font-family: var(--hangul);
-		font-size: 5rem;
+		font-size: clamp(5rem, 28cqi, 8.5rem);
 		font-weight: 500;
 		line-height: 1;
 		color: var(--ink);
@@ -708,7 +712,23 @@
 		text-align: center;
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		.zone { transition: none; }
+		.zone.win { transform: none; }
+	}
+
 	@media (forced-colors: active) {
+		.zone {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+			box-shadow: none;
+		}
+		.zone.win {
+			background: Canvas;
+			color: Highlight;
+			border-color: Highlight;
+		}
 		.stamp, .dock {
 			background: ButtonFace;
 			color: ButtonText;

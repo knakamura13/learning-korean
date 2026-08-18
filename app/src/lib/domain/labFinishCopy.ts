@@ -19,7 +19,7 @@ export function labFinishCopy(
 
 	if (released <= 0) {
 		return {
-			lead: 'These cards are already in your deck.',
+			lead: 'These cards are already in Review.',
 			detail: `You have ${waiting}.`
 		};
 	}

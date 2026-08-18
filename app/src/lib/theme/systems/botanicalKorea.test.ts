@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from '../contrast';
 import { designSystemCss } from '../css';
-import { botanicalKorea } from './botanicalKorea';
+import { botanicalKorea, LATIN_UNICODE_RANGE } from './botanicalKorea';
 
 describe('botanicalKorea', () => {
 	it('is the pressed-flowers paper with moss accent and mugunghwa rose', () => {
@@ -42,7 +42,33 @@ describe('botanicalKorea', () => {
 			display: 'optional'
 		});
 		expect(botanicalKorea.type.hangul).toContain('Noto Sans KR');
+		expect(botanicalKorea.type.hangul).not.toMatch(/Newsreader/);
 		expect(botanicalKorea.type.serif).toContain('Noto Serif KR');
+		expect(botanicalKorea.type.display).toContain('Newsreader');
+	});
+
+	it('self-hosts Newsreader italic with a Latin unicode-range', () => {
+		const italic = botanicalKorea.fonts.find((face) => face.file === 'Newsreader-Italic-latin.woff2');
+		const roman = botanicalKorea.fonts.find((face) => face.file === 'Newsreader-latin.woff2');
+		expect(italic).toMatchObject({
+			family: 'Newsreader',
+			style: 'italic',
+			display: 'optional',
+			unicodeRange: botanicalKorea.fonts.find((face) => face.unicodeRange)?.unicodeRange
+		});
+		expect(roman).toMatchObject({
+			family: 'Newsreader',
+			style: 'normal',
+			display: 'optional'
+		});
+		expect(italic?.unicodeRange).toBe(LATIN_UNICODE_RANGE);
+		expect(roman?.unicodeRange).toBe(LATIN_UNICODE_RANGE);
+		const css = designSystemCss(botanicalKorea);
+		expect(css).toContain('Newsreader-Italic-latin.woff2');
+		expect(css).toContain('font-style: italic');
+		expect(css).toContain('unicode-range:');
+		expect(css).toContain('--display:');
+		expect(css).toContain('Newsreader');
 	});
 
 	it('puts moss and rose contrast-more deltas on the system, not a full palette dump', () => {

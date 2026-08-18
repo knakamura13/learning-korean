@@ -67,6 +67,7 @@ const fixture: DesignSystem = {
 	leading: '1.5',
 	shape: { rSm: '1px', rMd: '2px', rLg: '3px', rPill: '4px' },
 	type: {
+		display: 'Fixture Display',
 		serif: 'Fixture Serif',
 		sans: 'Fixture Sans',
 		mono: 'Fixture Mono',
@@ -112,9 +113,19 @@ describe('designSystemCss', () => {
 	});
 
 	it('declares type stacks once from DesignSystem.type, not from each palette', () => {
+		expect(css).toContain('--display: Fixture Display');
 		expect(css).toContain('--serif: Fixture Serif');
 		expect(css).toContain('--sans: Fixture Sans');
 		expect(css.match(/--serif:/g)?.length).toBe(1);
+		expect(css.match(/--display:/g)?.length).toBe(1);
+	});
+
+	it('emits unicode-range when a face declares it', () => {
+		const ranged = designSystemCss({
+			...fixture,
+			fonts: [{ ...fixture.fonts[0], unicodeRange: 'U+0000-00FF' }]
+		});
+		expect(ranged).toContain('unicode-range: U+0000-00FF');
 	});
 
 	it('emits look tokens for size, leading, and shape', () => {

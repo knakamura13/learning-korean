@@ -19,6 +19,7 @@
 	] as const;
 
 	const queue = $derived(progress.stats.queue);
+	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
 </script>
 
 <svelte:head>
@@ -50,16 +51,16 @@
 
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="bar">
+<header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
-		<a class="brand" href={resolve('/')}>
-			<span class="mark" lang="ko">한</span>
+		<a class="brand" href={resolve('/')} aria-label="Korean">
 			<span class="name">Korean</span>
+			<span class="mark" lang="ko">한</span>
 		</a>
 		<nav aria-label="Main navigation">
 			{#each nav as item (item.href)}
 				{@const isActive = item.href === '/'
-					? page.url.pathname === '/'
+					? page.url.pathname === '/' || page.url.pathname.startsWith('/lab/')
 					: page.url.pathname.startsWith(item.href)}
 				<a
 					href={resolve(item.href)}
@@ -104,39 +105,53 @@
 	}
 
 	.inner {
+		height: 44px;
 		max-width: var(--shell);
 		margin: 0 auto;
-		padding-block: var(--s2);
-		padding-inline: max(var(--s5), env(safe-area-inset-left)) max(var(--s5), env(safe-area-inset-right));
+		padding-block: 0;
+		padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
 		display: flex;
 		align-items: center;
-		gap: var(--s5);
+		gap: var(--s4);
 	}
 
 	.brand {
 		display: flex;
 		align-items: center;
 		gap: var(--s2);
+		flex-shrink: 0;
+		min-width: 44px;
+		min-height: 44px;
+		padding-inline: 0.2rem;
+		white-space: nowrap;
 		text-decoration: none;
 		color: var(--ink);
-		font-weight: 600;
+		font-weight: 400;
 	}
 
 	.mark {
 		font-family: var(--hangul);
-		font-size: 1.4rem;
+		font-size: 1.15rem;
 		color: var(--accent);
 		line-height: 1;
 	}
 
-	.name { font-size: 0.9rem; letter-spacing: 0.01em; }
+	.name {
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 16px;
+		font-weight: 400;
+		letter-spacing: 0;
+	}
 
 	nav {
 		display: flex;
+		flex-wrap: wrap;
 		gap: var(--s2);
 		margin-inline-start: auto;
 		min-width: 0;
 		flex-shrink: 1;
+		justify-content: flex-end;
 	}
 
 	nav a {
@@ -166,6 +181,12 @@
 		font-variant-numeric: tabular-nums;
 	}
 
+	@media (min-width: 72rem) {
+		.bar.lab-route .inner {
+			max-width: var(--sitting);
+		}
+	}
+
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
 		nav { gap: var(--s1); }
@@ -177,7 +198,25 @@
 			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
 			gap: var(--s2);
 		}
-		.name { display: none; }
+		.name { font-size: 0.8125rem; }
+		nav a { letter-spacing: -0.02em; padding: 0.35rem 0.4rem; }
+	}
+
+	@media (max-width: 20rem) {
+		.inner {
+			height: auto;
+			min-height: 44px;
+			flex-wrap: wrap;
+			row-gap: 0;
+		}
+		.inner :global(.theme) { order: 2; }
+		nav {
+			order: 3;
+			flex: 1 0 100%;
+			justify-content: flex-start;
+			margin-inline-start: 0;
+			gap: var(--s1);
+		}
 	}
 
 	@media (forced-colors: active) {

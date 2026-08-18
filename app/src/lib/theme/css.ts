@@ -16,12 +16,13 @@ function fontFaceCss(face: FontFaceSpec): string {
 	const style = face.style ?? 'normal';
 	const weight = face.weight ?? '400';
 	const display = face.display ?? 'swap';
+	const range = face.unicodeRange ? `\n	unicode-range: ${face.unicodeRange};` : '';
 	return `@font-face {
 	font-family: '${face.family}';
 	font-style: ${style};
 	font-weight: ${weight};
 	font-display: ${display};
-	src: url('/fonts/${face.file}') format('woff2');
+	src: url('/fonts/${face.file}') format('woff2');${range}
 }`;
 }
 

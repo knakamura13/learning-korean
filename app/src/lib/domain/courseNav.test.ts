@@ -144,7 +144,7 @@ describe('continueAction', () => {
 		});
 	});
 
-	it('reports a clear deck when the course and queue are done', () => {
+	it('reports a clear review when the course and queue are done', () => {
 		const action = continueAction(
 			labs,
 			view({ unlocked: ['lab01', 'lab02', 'lab03'], queue: 0 })
@@ -152,7 +152,8 @@ describe('continueAction', () => {
 		expect(action).toMatchObject({
 			kind: 'caught-up',
 			href: '/review',
-			title: 'Deck is clear'
+			title: 'Review is clear',
+			detail: 'Nothing is due. Open Review if you want to check.'
 		});
 	});
 });
