@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import {
 		applyTheme,
 		nextThemePref,
 		readThemePref,
-		themePrefLabel,
+		themeToggleGlyph,
+		themeToggleLabel,
 		writeThemePref,
 		type ThemePref
 	} from '$lib/theme';
 
 	let pref = $state<ThemePref>('system');
+	const darkScheme = new MediaQuery('prefers-color-scheme: dark');
 
 	onMount(() => {
 		pref = readThemePref();
@@ -32,13 +35,12 @@
 		setPref(nextThemePref(pref));
 	}
 
-	const label = $derived(
-		`Theme: ${themePrefLabel(pref)}. Next: ${themePrefLabel(nextThemePref(pref))}`
-	);
+	const glyph = $derived(themeToggleGlyph(pref, darkScheme.current));
+	const label = $derived(themeToggleLabel(pref, darkScheme.current));
 </script>
 
 <button type="button" class="theme" aria-label={label} title={label} onclick={cycle}>
-	{#if pref === 'light'}
+	{#if glyph === 'sun'}
 		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
 			<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
 			<path
@@ -49,7 +51,7 @@
 				d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.2 6.2 7.6 7.6M16.4 16.4l1.4 1.4M6.2 17.8 7.6 16.4M16.4 7.6l1.4-1.4"
 			/>
 		</svg>
-	{:else if pref === 'dark'}
+	{:else}
 		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
 			<path
 				fill="none"
@@ -57,23 +59,6 @@
 				stroke-width="2"
 				stroke-linejoin="round"
 				d="M16.5 13.5A7 7 0 0 1 10.2 4.1 7 7 0 1 0 19.9 13.8a7 7 0 0 1-3.4-.3z"
-			/>
-		</svg>
-	{:else}
-		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-			<path
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				d="M12 3v2M5 12H3M6.2 6.2 7.6 7.6M6.2 17.8 7.6 16.4M12 19v2"
-			/>
-			<path
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linejoin="round"
-				d="M12 8a4 4 0 1 0 4 4 6 6 0 0 1-4-4z"
 			/>
 		</svg>
 	{/if}
@@ -114,6 +99,15 @@
 		width: 1.15rem;
 		height: 1.15rem;
 		display: block;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.theme {
+			transition: none;
+		}
+		.theme:active {
+			transform: none;
+		}
 	}
 
 	@media (forced-colors: active) {

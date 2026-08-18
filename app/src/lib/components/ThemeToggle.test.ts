@@ -10,40 +10,46 @@ function styleBlock(markup: string): string {
 function branch(markup: string, condition: string): string {
 	const start = markup.indexOf(condition);
 	if (start < 0) throw new Error(`missing ${condition}`);
-	const next = markup.search(/\{:else(?:\s+if)?|\{:else\}|\{\/if\}/);
 	const from = markup.indexOf('>', start) + 1;
-	return markup.slice(from, next < 0 ? undefined : markup.indexOf('{:', from));
+	const next = markup.indexOf('{:', from);
+	const end = markup.indexOf('{/if}', from);
+	const cut = next >= 0 && (end < 0 || next < end) ? next : end;
+	return markup.slice(from, cut < 0 ? undefined : cut);
 }
 
 describe('ThemeToggle glyphs', () => {
 	const css = styleBlock(src);
-	const light = branch(src, `pref === 'light'`);
-	const dark = branch(src, `pref === 'dark'`);
-	const systemStart = src.indexOf('{:else}');
-	const system = src.slice(systemStart, src.indexOf('{/if}'));
+	const sun = branch(src, `glyph === 'sun'`);
+	const moon = branch(src, '{:else}');
 
-	it('keeps a 44px hit target and forced-colors styles', () => {
+	it('keeps a 44px hit target, reduced-motion, and forced-colors styles', () => {
 		expect(css).toMatch(/min-width:\s*44px/);
 		expect(css).toMatch(/min-height:\s*44px/);
+		expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
 	});
 
-	it('announces the current theme and the next cycle step', () => {
+	it('announces the stored pref, system follow-through, and the next cycle step', () => {
 		expect(src).toMatch(/aria-label=\{label\}/);
-		expect(src).toMatch(/title=\{label\}/);
-		expect(src).toMatch(/Theme: \$\{themePrefLabel\(pref\)\}\. Next: \$\{themePrefLabel\(nextThemePref\(pref\)\)\}/);
+		expect(src).toMatch(/themeToggleLabel\(pref,\s*darkScheme\.current\)/);
+		expect(src).not.toMatch(/themePrefLabel\(pref\)/);
+	});
+
+	it('defaults to system and paints the resolved sun or moon, not a chimera', () => {
+		expect(src).toMatch(/let pref = \$state<ThemePref>\('system'\)/);
+		expect(src).toMatch(/themeToggleGlyph\(pref,\s*darkScheme\.current\)/);
+		expect(src).toMatch(/prefers-color-scheme:\s*dark/);
+		expect(src).not.toMatch(/a4 4 0 1 0 4 4 6 6 0 0 1-4-4z/);
+		expect(src).not.toMatch(/\{:else if pref === /);
 	});
 
 	it('uses a sun for light and a moon for dark', () => {
-		expect(light).toMatch(/<circle /);
-		expect(light).toMatch(/M12 3v2/);
-		expect(dark).toMatch(/A7 7 0 0 1 10\.2 4\.1/);
+		expect(sun).toMatch(/<circle /);
+		expect(sun).toMatch(/M12 3v2/);
+		expect(moon).toMatch(/A7 7 0 0 1 10\.2 4\.1/);
 	});
 
-	it('uses a sun-moon glyph for system, not a monitor', () => {
-		expect(system).not.toMatch(/<rect\b/);
-		expect(system).not.toMatch(/M8 21h8/);
-		expect(system).toMatch(/M12 3v2/);
-		expect(system).toMatch(/a4 4 0 1 0 4 4 6 6 0 0 1-4-4z/);
+	it('still cycles through nextThemePref', () => {
+		expect(src).toMatch(/setPref\(nextThemePref\(pref\)\)/);
 	});
 });

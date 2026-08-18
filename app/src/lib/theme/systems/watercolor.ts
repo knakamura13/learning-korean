@@ -78,6 +78,7 @@ export const watercolor: DesignSystem = {
 		rPill: '40% 60% 55% 45% / 55% 45% 55% 45%'
 	},
 	type: {
+		display: SERIF,
 		serif: SERIF,
 		sans: SANS,
 		mono: MONO,

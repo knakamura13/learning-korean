@@ -27,4 +27,14 @@ describe('mouth hit press geometry', () => {
 	it('does not let a global button:active transform clobber layout', () => {
 		expect(appCss).not.toMatch(/button:not\(:disabled\):active/);
 	});
+
+	it('sizes the mouth to the well and keeps hits on the SVG frame', () => {
+		expect(css).toMatch(/\.mouth-wrap\s*\{[^}]*width:\s*100%/s);
+		expect(css).not.toMatch(/\.mouth-wrap\s*\{[^}]*max-width:\s*30rem/s);
+		expect(css).toMatch(/\.mouth-stage\s*\{[^}]*position:\s*relative/s);
+		expect(css).toMatch(/\.mouth\s*\{[^}]*width:\s*100%/s);
+		expect(css).toMatch(/\.zones\s*\{[^}]*inset:\s*0/s);
+		expect(mouthSrc).toMatch(/class="mouth-stage"/);
+		expect(mouthSrc).toMatch(/viewBox="0 0 440 300"/);
+	});
 });

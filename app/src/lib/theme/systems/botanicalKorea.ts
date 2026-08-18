@@ -1,10 +1,22 @@
-import type { DesignSystem, Palette } from '../types.ts';
+import type { DesignSystem, FontFaceSpec, Palette } from '../types.ts';
 
+const DISPLAY =
+	"'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif";
 const SERIF =
 	"'Noto Serif KR', 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
 const SANS = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
 const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
+
+/** Latin + punctuation the UI uses. Hangul never matches this range. */
+export const LATIN_UNICODE_RANGE =
+	'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD';
+
+function latinFace(
+	partial: Pick<FontFaceSpec, 'family' | 'file' | 'style' | 'weight' | 'display'>
+): FontFaceSpec {
+	return { ...partial, unicodeRange: LATIN_UNICODE_RANGE };
+}
 
 const light: Palette = {
 	ink: '#3e352c',
@@ -73,6 +85,7 @@ export const botanicalKorea: DesignSystem = {
 		rPill: '999px'
 	},
 	type: {
+		display: DISPLAY,
 		serif: SERIF,
 		sans: SANS,
 		mono: MONO,
@@ -92,7 +105,21 @@ export const botanicalKorea: DesignSystem = {
 			style: 'normal',
 			weight: '400 600',
 			display: 'optional'
-		}
+		},
+		latinFace({
+			family: 'Newsreader',
+			file: 'Newsreader-latin.woff2',
+			style: 'normal',
+			weight: '300 400',
+			display: 'optional'
+		}),
+		latinFace({
+			family: 'Newsreader',
+			file: 'Newsreader-Italic-latin.woff2',
+			style: 'italic',
+			weight: '400',
+			display: 'optional'
+		})
 	],
 	light,
 	dark,

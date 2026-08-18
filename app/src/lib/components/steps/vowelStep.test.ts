@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount, type Component } from 'svelte';
 import VowelStep from './VowelStep.svelte';
+import vowelSrc from './VowelStep.svelte?raw';
 import type { VowelStep as VowelStepData } from '$lib/content/types';
 import { flushLabDrag } from '../labDrag';
 
@@ -372,6 +373,19 @@ describe('VowelStep dock board', () => {
 		const tip = document.querySelector('[data-tick-hint]');
 		expect(tip).toBeTruthy();
 		expect(tip?.textContent).toMatch(/standing stroke/i);
+	});
+});
+
+describe('VowelStep well occupancy', () => {
+	it('fills the well as a square raised board, not a 12rem sunk stamp', () => {
+		const css = vowelSrc.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '';
+		const zoneBoard = css.match(/\.zone\s*\{[^}]+\}/)?.[0] ?? '';
+		expect(zoneBoard).toMatch(/aspect-ratio:\s*1/);
+		expect(zoneBoard).toMatch(/width:\s*min\(100%/);
+		expect(zoneBoard).toMatch(/paper-raised/);
+		expect(zoneBoard).not.toMatch(/12rem/);
+		expect(zoneBoard).not.toMatch(/paper-sunk/);
+		expect(css).toMatch(/\.dock\s*\{[^}]*width:\s*2\.75rem/s);
 	});
 });
 

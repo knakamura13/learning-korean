@@ -58,12 +58,13 @@
 	<p class="instruction" id="mouth-instruction">
 		Choose one of the labeled places. The labels are interactive.
 	</p>
-	<svg
-		class="mouth"
-		viewBox="0 0 440 300"
-		aria-hidden="true"
-		focusable="false"
-	>
+	<div class="mouth-stage">
+		<svg
+			class="mouth"
+			viewBox="0 0 440 300"
+			aria-hidden="true"
+			focusable="false"
+		>
 		<!-- the air cavity sound travels through -->
 		<path
 			class="cavity"
@@ -107,35 +108,36 @@
 				<text class="jamo-label" lang="ko" x={z.cx} y={z.cy + 9}>{label}</text>
 			{/if}
 		{/each}
-	</svg>
+		</svg>
 
-	<div class="zones" role="group" aria-label="place of articulation" aria-describedby="mouth-instruction">
-		{#each ZONES as z (z.id)}
-			{@const label = labelFor(z.id)}
-			{@const isPrior = priorLabels.has(z.id) && !(solved && z.id === step.zone)}
-			{@const locked = solved || isPrior}
-			<button
-				type="button"
-				class="hit"
-				class:locked
-				class:wrong={wrong === z.id}
-				disabled={locked}
-				style="--cx: {z.cx / 440}; --cy: {z.cy / 300}; --lx: {z.lx / 440}; --ly: {z.ly / 300};"
-				aria-label={label ? `${z.tag}, ${label}` : z.tag}
-				onmouseenter={() => (hover = z.id)}
-				onmouseleave={() => {
-					if (hover === z.id) hover = null;
-				}}
-				onfocus={() => (hover = z.id)}
-				onblur={() => {
-					if (hover === z.id) hover = null;
-				}}
-				onclick={() => pick(z.id)}
-			>
-				<span class="callout">{z.tag}</span>
-				<span class="dot" aria-hidden="true"></span>
-			</button>
-		{/each}
+		<div class="zones" role="group" aria-label="place of articulation" aria-describedby="mouth-instruction">
+			{#each ZONES as z (z.id)}
+				{@const label = labelFor(z.id)}
+				{@const isPrior = priorLabels.has(z.id) && !(solved && z.id === step.zone)}
+				{@const locked = solved || isPrior}
+				<button
+					type="button"
+					class="hit"
+					class:locked
+					class:wrong={wrong === z.id}
+					disabled={locked}
+					style="--cx: {z.cx / 440}; --cy: {z.cy / 300}; --lx: {z.lx / 440}; --ly: {z.ly / 300};"
+					aria-label={label ? `${z.tag}, ${label}` : z.tag}
+					onmouseenter={() => (hover = z.id)}
+					onmouseleave={() => {
+						if (hover === z.id) hover = null;
+					}}
+					onfocus={() => (hover = z.id)}
+					onblur={() => {
+						if (hover === z.id) hover = null;
+					}}
+					onclick={() => pick(z.id)}
+				>
+					<span class="callout">{z.tag}</span>
+					<span class="dot" aria-hidden="true"></span>
+				</button>
+			{/each}
+		</div>
 	</div>
 </div>
 
@@ -155,8 +157,11 @@
 	.mouth-wrap {
 		position: relative;
 		width: 100%;
-		max-width: 30rem;
-		margin: 0 auto;
+	}
+
+	.mouth-stage {
+		position: relative;
+		width: 100%;
 	}
 
 	.mouth { display: block; width: 100%; height: auto; }
@@ -314,8 +319,8 @@
 
 	.miss-slot {
 		min-height: 1.4em;
-		margin: var(--s2) auto 0;
-		max-width: 30rem;
+		margin: var(--s2) 0 0;
+		width: 100%;
 		text-align: center;
 	}
 	.local-miss {

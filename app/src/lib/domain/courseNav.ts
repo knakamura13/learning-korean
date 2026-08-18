@@ -170,8 +170,8 @@ export function continueAction(labs: CourseLab[], view: CourseNavView): Continue
 		kind: 'caught-up',
 		href: '/review',
 		kicker: 'Caught up',
-		title: 'Deck is clear',
-		detail: 'Nothing is due. Open the deck if you want to check.'
+		title: 'Review is clear',
+		detail: 'Nothing is due. Open Review if you want to check.'
 	};
 }
 

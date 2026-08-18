@@ -1,0 +1,11 @@
+Self-hosted Latin subsets (OFL)
+================================
+
+These woff2 files were subset from official OFL sources (Google Fonts mirrors
+of upstream) by `app/scripts/vendor-latin-fonts.py`. Hangul remains
+`NotoSansKR-subset.woff2`. The SIL Open Font License text is in OFL.txt.
+
+Newsreader
+  Copyright 2020 The Newsreader Project Authors
+  https://github.com/productiontype/Newsreader
+  Files: Newsreader-latin.woff2, Newsreader-Italic-latin.woff2

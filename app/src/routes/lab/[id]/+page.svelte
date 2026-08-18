@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 	import LabRunner from '$lib/components/LabRunner.svelte';
+	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
 	import { LABS } from '$lib/content';
 	import { requiredLab, showPrerequisiteGate, toCourseLab } from '$lib/domain/courseNav';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -31,12 +33,14 @@
 	<title>Lab {lab.number} — {lab.title}</title>
 </svelte:head>
 
-<div class="shell narrow">
+<div class="with-rail">
+	<LabIndexRail currentId={lab.id} />
+	<div class="shell sitting">
 	{#if gated && prior}
 		<aside class="gate card" role="status">
 			<strong>Lab {String(prior.number).padStart(2, '0')} comes first.</strong>
 			This lab assumes you have finished
-			<a href="/lab/{prior.id}">{prior.title}</a>.
+			<a href={resolve('/lab/[id]', { id: prior.id })}>{prior.title}</a>.
 			You can still look around — the cards will make more sense in order.
 		</aside>
 	{/if}
@@ -46,16 +50,38 @@
 			{#snippet letterAsk()}
 				<aside class="ask">
 					<span class="h">Need a letter?</span>
-					The <a href="/reference">reference</a> lists every jamo and rule, generated from the same
-					module these cards use.
+					Look up any letter in <a href={resolve('/reference')}>Reference</a>. It lists the
+					same letters these cards use.
 				</aside>
 			{/snippet}
 		</LabRunner>
 	{/key}
+	</div>
 </div>
 
 <style>
-	.narrow { max-width: 44rem; }
+	.with-rail {
+		display: block;
+	}
+	@media (min-width: 72rem) {
+		.with-rail {
+			display: grid;
+			grid-template-columns: 56px minmax(0, 1fr);
+			justify-content: center;
+			column-gap: var(--s4);
+			max-width: var(--sitting);
+			margin-inline: auto;
+		}
+		.with-rail :global(.shell) {
+			max-width: none;
+			width: 100%;
+		}
+	}
+
+	.sitting { max-width: 44rem; }
+	@media (min-width: 72rem) {
+		.sitting { max-width: none; }
+	}
 
 	.gate {
 		border-color: var(--warn);

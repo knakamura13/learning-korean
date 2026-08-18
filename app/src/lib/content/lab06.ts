@@ -161,7 +161,7 @@ export const lab06: Lab = {
 			miss:
 				'<p>The <span class="jamo">ㅅ</span> that <span class="hg">없다</span> threw away comes back — and it comes back tense.</p>',
 			teach:
-				'<p><span class="hg">[업써]</span>. <span class="jamo">ㅂ</span> stays; <span class="jamo">ㅅ</span> jumps and tenses to <span class="jamo">ㅆ</span>.</p><p>There is no deeper reason — Article 14 just says so. The deck will hold this one.</p>'
+				'<p><span class="hg">[업써]</span>. <span class="jamo">ㅂ</span> stays; <span class="jamo">ㅅ</span> jumps and tenses to <span class="jamo">ㅆ</span>.</p><p>There is no deeper reason — Article 14 just says so. Review will hold this one.</p>'
 		},
 		{
 			type: 'choice',

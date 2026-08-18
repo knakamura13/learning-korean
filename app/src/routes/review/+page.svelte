@@ -141,7 +141,7 @@
 		<details class="backup-card card" open={!progress.durable}>
 			<summary>Back up or restore your progress</summary>
 			<p class="backup-note">
-				Your deck lives only in this browser. Back it up before switching browsers or
+				Your progress lives only in this browser. Back it up before switching browsers or
 				devices, clearing site data, or resetting this one — {progress.durable
 					? 'as a precaution.'
 					: 'right now, since this browser will not keep it for you.'}
@@ -164,14 +164,14 @@
 			<div class="skel glyph-ph" aria-hidden="true"></div>
 			<div class="skel line-ph" aria-hidden="true"></div>
 			<div class="skel field-ph" aria-hidden="true"></div>
-			<p class="muted">Loading your deck…</p>
+			<p class="muted">Loading Review…</p>
 		</div>
 	{:else if stats.unlocked === 0}
 		<div class="card empty" in:fade>
 			<span class="big" lang="ko">한</span>
-			<h2>Nothing in the deck yet</h2>
+			<h2>Nothing in Review yet</h2>
 			<p>
-				Cards unlock as you finish labs, so the deck never quizzes you on something you have
+				Cards unlock as you finish labs, so Review never quizzes you on something you have
 				not met. Finish Lab 01 and {LABS[0].steps.length > 0 ? 19 : 0} consonants drop in.
 			</p>
 			<a class="btn" href={resolve('/lab/[id]', { id: '0001' })}>Start Lab 01</a>
@@ -182,7 +182,7 @@
 			<h2>{right} of {shown} first time</h2>
 			<p>
 				{#if right / Math.max(shown, 1) >= 0.9}
-					That deck is in good shape. The gaps will stretch out on their own.
+					That review is in good shape. The gaps will stretch out on their own.
 				{:else if right / Math.max(shown, 1) >= 0.6}
 					The ones you missed are already re-queued for a shorter gap. That is the system
 					working, not you failing.
@@ -196,7 +196,7 @@
 	{:else if queue.length === 0}
 		<div class="card empty" in:fade>
 			<span class="big" lang="ko">쉬어</span>
-			<h2>Deck clear</h2>
+			<h2>Review is clear</h2>
 			<p>Nothing is due. The next card comes back <strong>{whenNext}</strong>.</p>
 			<p class="muted tiny">
 				Reviewing early would only weaken the spacing — the gap is doing the work.
@@ -304,9 +304,9 @@
 <style>
 	.narrow { max-width: 40rem; }
 	.head { margin-bottom: var(--s5); }
-	h1 { margin: var(--s2) 0 var(--s3); }
+	h1 { margin: var(--s2) 0 var(--s3); font-family: var(--display); font-style: italic; font-weight: 400; }
 	.standfirst {
-		font-family: var(--serif);
+		font-family: var(--display);
 		font-style: italic;
 		font-size: 1.05rem;
 		color: var(--ink-soft);

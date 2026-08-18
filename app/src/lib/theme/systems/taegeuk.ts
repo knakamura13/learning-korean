@@ -72,6 +72,7 @@ export const taegeuk: DesignSystem = {
 		rPill: '999px'
 	},
 	type: {
+		display: SERIF,
 		serif: SERIF,
 		sans: SANS,
 		mono: MONO,

@@ -36,6 +36,7 @@
 	import ClusterStep from './steps/ClusterStep.svelte';
 	import LiaisonStep from './steps/LiaisonStep.svelte';
 	import ReadStep from './steps/ReadStep.svelte';
+	import LabSpread from './shell/LabSpread.svelte';
 
 	let { lab, letterAsk }: { lab: Lab; letterAsk?: Snippet } = $props();
 
@@ -400,138 +401,152 @@
 		</div>
 	</div>
 {:else}
-	<header class="head" class:compact={compactHead}>
-		<p class="eyebrow">
-			Lab {String(lab.number).padStart(2, '0')} · ~{lab.minutes} minutes
-			{#if alreadyDone}· completed{/if}
-			{#if showResumeNote}
-				· picking up at card {index + 1}
-			{/if}
-		</p>
-		<h1>{lab.title}</h1>
-		{#if !compactHead}
-			<p class="standfirst">{lab.standfirst}</p>
-		{/if}
-	</header>
-	{#if !ready}
-		<div class="card step loading" aria-busy="true">
-			<div class="skel line-ph" aria-hidden="true"></div>
-			<div class="skel work-ph" aria-hidden="true"></div>
-			<p class="muted">Loading the lab…</p>
-		</div>
-	{:else}
-	{#if showResumeNote}
-		<p class="vh" role="status">
-			Picking up at card {index + 1} of {lab.steps.length}.
-		</p>
-	{/if}
-	<nav class="rail-wrap" aria-label="Lab card navigation">
-		<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
-			<ol class="rail" {@attach keepSelectedVisible}>
-				{#each lab.steps as _, i (i)}
-					{@const kind = pipKind(i, outcomes, furthest)}
-					{@const selected = i === index}
-					<li>
-						{#if pipIsJumpTarget(kind) || selected}
-							<button
-								type="button"
-								class="pip"
-								data-kind={kind}
-								data-selected={selected || undefined}
-								aria-current={selected ? 'step' : undefined}
-								aria-label={pipLabel(kind, i + 1, selected)}
-								onclick={() => jumpTo(i)}
-							>
-								<span class="pip-n">{i + 1}</span>
-							</button>
-						{:else}
-							<span class="pip" data-kind={kind}>
-								<span class="pip-n" aria-hidden="true">{i + 1}</span>
-								<span class="vh">{pipLabel(kind, i + 1)}</span>
-							</span>
-						{/if}
-					</li>
-				{/each}
-			</ol>
-		</div>
-		<span class="where">Card {index + 1} of {lab.steps.length}</span>
-	</nav>
-
-	{#key index}
-		<div class="card step" bind:this={cardEl} in:fly={{ y: 10, duration: 260 }}>
-			{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
-			<h2 class="do" tabindex="-1">{@html labHtml(step.do)}</h2>
-			{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
-
-			<div class="work">
-				{#if step.type === 'mouth'}
-					<MouthStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'choice'}
-					<ChoiceStep bind:this={choiceRef} {step} {onSettle} {onNudge} />
-				{:else if step.type === 'build'}
-					<BuildStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'assemble'}
-					<AssembleStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'vowel'}
-					<VowelStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'fusion'}
-					<FusionStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'cluster'}
-					<ClusterStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'liaison'}
-					<LiaisonStep {step} {onSettle} {onNudge} />
-				{:else if step.type === 'read'}
-					<ReadStep {step} {onSettle} {onNudge} />
-				{:else}
-					{@const _exhaustive: never = step}
+	<LabSpread>
+		{#snippet article()}
+			<header class="head" class:compact={compactHead}>
+				<p class="eyebrow">
+					Lab {String(lab.number).padStart(2, '0')} · ~{lab.minutes} minutes
+					{#if alreadyDone}· completed{/if}
+					{#if showResumeNote}
+						· picking up at card {index + 1}
+					{/if}
+				</p>
+				<h1>{lab.title}</h1>
+				{#if !compactHead}
+					<p class="standfirst">{lab.standfirst}</p>
 				{/if}
-			</div>
-
-			{#if feedback || settled}
-				<div
-					class="advance"
-					use:revealAdvance={shouldRevealAdvance(settled, feedback?.tone)}
-				>
-					{#if feedback}
-						<div
-							class="fb"
-							data-tone={feedback.tone}
-							in:fade={{ duration: 180 }}
-							aria-live="polite"
-							aria-atomic="true"
-						>
-							<span class="verdict">
-								{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
-							</span>
-							{@html labHtml(feedback.html)}
-						</div>
-					{/if}
-
-					{#if settled}
-						<div class="foot" in:fade={{ duration: 160 }}>
-							<button
-								class="btn"
-								use:focusWhen={{ active: true, preventScroll: true }}
-								onclick={next}
-							>{isLast ? 'Finish' : 'Next'}</button>
-							<span class="kb">or press Enter</span>
-						</div>
-					{/if}
+			</header>
+			{#if !ready}
+				<div class="loading" aria-busy="true">
+					<div class="skel line-ph" aria-hidden="true"></div>
+					<p class="muted">Loading the lab…</p>
 				</div>
+			{:else}
+				{#if showResumeNote}
+					<p class="vh" role="status">
+						Picking up at card {index + 1} of {lab.steps.length}.
+					</p>
+				{/if}
+				<nav class="rail-wrap" aria-label="Lab card navigation">
+					<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
+						<ol class="rail" {@attach keepSelectedVisible}>
+							{#each lab.steps as _, i (i)}
+								{@const kind = pipKind(i, outcomes, furthest)}
+								{@const selected = i === index}
+								<li>
+									{#if pipIsJumpTarget(kind) || selected}
+										<button
+											type="button"
+											class="pip"
+											data-kind={kind}
+											data-selected={selected || undefined}
+											aria-current={selected ? 'step' : undefined}
+											aria-label={pipLabel(kind, i + 1, selected)}
+											onclick={() => jumpTo(i)}
+										>
+											<span class="pip-n">{i + 1}</span>
+										</button>
+									{:else}
+										<span class="pip" data-kind={kind}>
+											<span class="pip-n" aria-hidden="true">{i + 1}</span>
+											<span class="vh">{pipLabel(kind, i + 1)}</span>
+										</span>
+									{/if}
+								</li>
+							{/each}
+						</ol>
+					</div>
+					<span class="where">Card {index + 1} of {lab.steps.length}</span>
+				</nav>
+				{#key index}
+					<div class="prompt" bind:this={cardEl} in:fly={{ y: 10, duration: 260 }}>
+						{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
+						<h2 class="do" tabindex="-1">{@html labHtml(step.do)}</h2>
+						{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
+					</div>
+				{/key}
 			{/if}
-		</div>
-	{/key}
-	{/if}
-{/if}
+		{/snippet}
+		{#snippet well()}
+			{#if ready}
+				{#key index}
+					<div class="work">
+						{#if step.type === 'mouth'}
+							<MouthStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'choice'}
+							<ChoiceStep bind:this={choiceRef} {step} {onSettle} {onNudge} />
+						{:else if step.type === 'build'}
+							<BuildStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'assemble'}
+							<AssembleStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'vowel'}
+							<VowelStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'fusion'}
+							<FusionStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'cluster'}
+							<ClusterStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'liaison'}
+							<LiaisonStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'read'}
+							<ReadStep {step} {onSettle} {onNudge} />
+						{:else}
+							{@const _exhaustive: never = step}
+						{/if}
+					</div>
+				{/key}
+			{/if}
+		{/snippet}
+		{#snippet after()}
+			{#if ready}
+				{#key index}
+					{#if feedback || settled}
+						<div
+							class="advance"
+							use:revealAdvance={shouldRevealAdvance(settled, feedback?.tone)}
+						>
+							{#if feedback}
+								<div
+									class="fb"
+									data-tone={feedback.tone}
+									in:fade={{ duration: 180 }}
+									aria-live="polite"
+									aria-atomic="true"
+								>
+									<span class="verdict">
+										{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
+									</span>
+									{@html labHtml(feedback.html)}
+								</div>
+							{/if}
 
-{#if !finished}
-	{@render letterAsk?.()}
+							{#if settled}
+								<div class="foot" in:fade={{ duration: 160 }}>
+									<button
+										class="btn"
+										use:focusWhen={{ active: true, preventScroll: true }}
+										onclick={next}
+									>{isLast ? 'Finish' : 'Next'}</button>
+									<span class="kb">or press Enter</span>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				{/key}
+			{/if}
+			{@render letterAsk?.()}
+		{/snippet}
+	</LabSpread>
 {/if}
 
 <style>
 	.head { margin-bottom: var(--s5); }
 	.head.compact { margin-bottom: var(--s3); }
-	.head h1 { margin: var(--s2) 0 var(--s3); }
+	.head h1 {
+		margin: var(--s2) 0 var(--s3);
+		font-family: var(--display);
+		font-style: italic;
+		font-weight: 400;
+	}
 	.head.compact h1 {
 		margin: 0;
 		font-size: 1.15rem;
@@ -539,7 +554,7 @@
 	}
 
 	.standfirst {
-		font-family: var(--serif);
+		font-family: var(--display);
 		font-size: 1.1rem;
 		font-style: italic;
 		color: var(--ink-soft);
@@ -842,20 +857,22 @@
 		max-width: 80%;
 		height: 0.85rem;
 	}
-	.loading .work-ph {
-		width: 100%;
-		max-width: 22rem;
-		height: 8rem;
-		border-radius: var(--r-md);
-	}
 	.loading .muted { margin: var(--s2) 0 0; }
 
-	.step { padding: var(--s6) var(--s5) var(--s5); }
+	.prompt { min-width: 0; }
 
 	.do {
+		font-family: var(--sans);
+		font-style: normal;
 		font-size: clamp(1.15rem, 2.8vw, 1.45rem);
 		line-height: 1.34;
 		margin: var(--s2) 0 var(--s1);
+	}
+
+	/* {@html} em is invisible to scoped CSS; :global is required. */
+	.do :global(em) {
+		font-style: italic;
+		font-weight: 600;
 	}
 
 	/* Programmatically focused on card change for SR/keyboard orientation;
@@ -868,7 +885,15 @@
 		margin: 0 0 var(--s4);
 	}
 
-	.work { margin-top: var(--s4); }
+	.work {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		flex: 1 1 auto;
+		width: 100%;
+		min-width: 0;
+		margin-top: 0;
+	}
 
 	.advance {
 		scroll-margin-bottom: max(var(--s4), env(safe-area-inset-bottom));
@@ -912,8 +937,16 @@
 	}
 
 	/* --- finish --- */
-	.finish { padding: var(--s7) var(--s5); text-align: center; }
+	.finish {
+		padding: var(--s7) var(--s5);
+		text-align: center;
+		max-width: var(--measure);
+		width: 100%;
+	}
 	.finish h1 {
+		font-family: var(--display);
+		font-style: italic;
+		font-weight: 400;
 		font-size: clamp(1.35rem, 3vw, 1.6rem);
 		margin: 0 0 var(--s3);
 	}

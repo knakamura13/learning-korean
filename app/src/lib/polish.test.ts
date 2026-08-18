@@ -6,13 +6,18 @@ import labRunner from './components/LabRunner.svelte?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
 import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
+import mouthStep from './components/steps/MouthStep.svelte?raw';
 import options from './components/Options.svelte?raw';
 import themeToggle from './components/ThemeToggle.svelte?raw';
+import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
+import labPreview from './components/shell/LabPreview.svelte?raw';
+import labSpread from './components/shell/LabSpread.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import review from '../routes/review/+page.svelte?raw';
 import reference from '../routes/reference/+page.svelte?raw';
+import labPage from '../routes/lab/[id]/+page.svelte?raw';
 import errorPage from '../routes/+error.svelte?raw';
 import appHtml from '../app.html?raw';
 import manifest from '../../static/manifest.webmanifest?raw';
@@ -88,7 +93,21 @@ describe('polish audit regressions', () => {
 	it('uses logical properties in shared directional layout', () => {
 		expect(appCss).not.toMatch(/\bmargin-left\s*:/);
 		expect(labRunner).not.toMatch(/\bleft\s*:\s*0/);
-		const chrome = [appCss, labRunner, progressBackup, layout, home, review, reference, options, errorPage];
+		const chrome = [
+			appCss,
+			labRunner,
+			progressBackup,
+			layout,
+			home,
+			review,
+			reference,
+			options,
+			errorPage,
+			labPage,
+			labIndexRail,
+			labPreview,
+			labSpread
+		];
 		for (const src of chrome) {
 			expect(physicalBoxProps(src)).toEqual([]);
 			expect(src).not.toMatch(/text-align:\s*(?:left|right)/);
@@ -100,6 +119,10 @@ describe('polish audit regressions', () => {
 		expect(physicalLeftRight(styleBlock(review))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(reference))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(errorPage))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(labPage))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(labIndexRail))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(labPreview))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(labSpread))).toEqual([]);
 	});
 
 	it('prevents a late Hangul font swap from causing layout shift', () => {
@@ -124,6 +147,56 @@ describe('polish audit regressions', () => {
 		expect(systemCss).toMatch(/NotoSerifKR-subset\.woff2/);
 		expect(systemCss).toMatch(/font-display:\s*optional/);
 		expect(layout).toMatch(/activeSystem\.fonts/);
+	});
+
+	it('self-hosts Newsreader italic for English display type', () => {
+		expect(existsSync(new URL('../../static/fonts/Newsreader-Italic-latin.woff2', import.meta.url))).toBe(true);
+		expect(existsSync(new URL('../../static/fonts/Newsreader-latin.woff2', import.meta.url))).toBe(true);
+		expect(systemCss).toMatch(/font-family: 'Newsreader'/);
+		expect(systemCss).toMatch(/Newsreader-Italic-latin\.woff2/);
+		expect(systemCss).toMatch(/font-style:\s*italic/);
+		expect(systemCss).toMatch(/unicode-range:/);
+		expect(systemCss).toMatch(/font-family: 'Noto Sans KR'/);
+		expect(layout).toMatch(/var\(--display\)/);
+		expect(appCss).toMatch(
+			/h1,\s*h2,\s*h3,\s*h4\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
+		);
+		expect(appCss.indexOf(':lang(ko)')).toBeGreaterThan(appCss.indexOf('h1, h2, h3, h4'));
+		expect(appCss).toMatch(/:lang\(ko\)\s*\{[^}]*font-family:\s*var\(--hangul\);[^}]*font-style:\s*normal/s);
+		expect(styleBlock(home)).not.toMatch(/\.lab h3\s*\{[^}]*font-family:/s);
+		expect(styleBlock(reference)).not.toMatch(/h1\s*\{[^}]*font-family:/s);
+		expect(styleBlock(review)).not.toMatch(/\.empty h2\s*\{[^}]*font-family:/s);
+		expect(systemCss).not.toMatch(/fonts\.googleapis\.com/);
+		expect(layout).not.toMatch(/fonts\.googleapis\.com/);
+	});
+
+	it('sets lab card .do in sans, not display italic', () => {
+		const runnerCss = styleBlock(labRunner);
+		const doBlock = runnerCss.match(/\.do\s*\{[^}]*\}/)?.[0];
+		expect(doBlock).toBeTruthy();
+		expect(doBlock).toMatch(/font-family:\s*var\(--sans\)/);
+		expect(doBlock).toMatch(/font-style:\s*normal/);
+		expect(doBlock).not.toMatch(/var\(--display\)/);
+		expect(doBlock).not.toMatch(/font-style:\s*italic/);
+		expect(runnerCss).toMatch(
+			/\.do\s+:global\(em\)\s*\{[^}]*font-style:\s*italic;[^}]*font-weight:\s*600/s
+		);
+
+		expect(runnerCss).toMatch(
+			/\.head h1\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
+		);
+		expect(runnerCss).toMatch(
+			/\.finish h1\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/\.name\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
+		);
+		expect(styleBlock(home)).toMatch(
+			/\.sec\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
+		);
+		expect(styleBlock(home)).toMatch(
+			/\.continue-title\s*\{[^}]*font-family:\s*var\(--display\);[^}]*font-style:\s*italic/s
+		);
 	});
 
 	it('makes the Baseline Widely Available browser target explicit', () => {
@@ -171,11 +244,15 @@ describe('polish audit regressions', () => {
 		}
 	});
 
-	it('sizes peek, backup summary, and pip hits to at least 44px with pip buffers', () => {
+	it('sizes peek, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
 		expect(styleBlock(home)).toMatch(/\.peek\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(review)).toMatch(/\.backup-card summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
+		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(themeToggle)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
 	});
 
 	it('uses an h1 on the error page and the lab finish screen', () => {
@@ -186,14 +263,102 @@ describe('polish audit regressions', () => {
 		expect(finish).not.toMatch(/<h2>/);
 	});
 
-	it('mounts cards as herbarium specimens without grain on the face', () => {
+	it('mounts home lab cards as herbarium specimens without grain on the face', () => {
 		expect(appCss).toMatch(/\.card\s*\{[^}]*position:\s*relative/s);
-		expect(appCss).toMatch(/\.card::before/);
-		expect(appCss).toMatch(/\.card::after/);
+		expect(appCss).toMatch(/\.lab\.card::before/);
+		expect(appCss).toMatch(/\.lab\.card::after/);
+		expect(appCss).not.toMatch(/(?<!\.lab)\.card::before/);
+		expect(appCss).not.toMatch(/(?<!\.lab)\.card::after/);
+		expect(home).toMatch(/class="lab card/);
 		expect(appCss).toMatch(/body\s*\{[\s\S]*background-image:/);
 		expect(appCss).not.toMatch(/body::before[\s\S]{0,200}z-index:\s*1000/);
 		expect(appCss).toMatch(/width='400'\s+height='400'/);
 		expect(appCss).toMatch(/background-size:\s*400px\s+400px/);
+	});
+
+	it('keeps the lab well free of specimen ticks', () => {
+		expect(labSpread).toMatch(/class="well"/);
+		expect(labSpread).not.toMatch(/\.well::before/);
+		expect(labSpread).not.toMatch(/\.well::after/);
+		expect(labRunner).not.toMatch(/class="card step"/);
+	});
+
+	it('lets spatial lab widgets occupy the well instead of old card figures', () => {
+		const wellCss = styleBlock(labSpread);
+		const workCss = styleBlock(labRunner);
+		const mouthCss = styleBlock(mouthStep);
+		const vowelCss = styleBlock(vowelStep);
+		const zoneBoard = vowelCss.match(/\.zone\s*\{[^}]+\}/)?.[0] ?? '';
+
+		expect(wellCss).toMatch(/\.well\s*\{[^}]*display:\s*flex/s);
+		expect(workCss).toMatch(/\.work\s*\{[^}]*width:\s*100%/s);
+		expect(workCss).toMatch(/\.work\s*\{[^}]*flex:\s*1 1 auto/s);
+
+		expect(mouthCss).toMatch(/\.mouth-wrap\s*\{[^}]*width:\s*100%/s);
+		expect(mouthCss).not.toMatch(/\.mouth-wrap\s*\{[^}]*max-width:\s*30rem/s);
+		expect(mouthCss).not.toMatch(/\.mouth-wrap\s*\{[^}]*margin:\s*0 auto/s);
+		expect(mouthCss).toMatch(/\.mouth-stage\s*\{[^}]*width:\s*100%/s);
+		expect(mouthCss).toMatch(/\.mouth\s*\{[^}]*width:\s*100%/s);
+		expect(mouthStep).toMatch(/viewBox="0 0 440 300"/);
+		expect(mouthStep).not.toMatch(/<svg[^>]*\swidth="/);
+		expect(mouthStep).not.toMatch(/<svg[^>]*\sheight="/);
+
+		expect(zoneBoard).toMatch(/aspect-ratio:\s*1/);
+		expect(zoneBoard).toMatch(/width:\s*min\(100%/);
+		expect(zoneBoard).not.toMatch(/12rem/);
+		expect(zoneBoard).not.toMatch(/paper-sunk/);
+		expect(zoneBoard).toMatch(/paper-raised/);
+		expect(vowelCss).toMatch(/\.dock\s*\{[^}]*width:\s*2\.75rem/s);
+	});
+
+	it('keeps a labeled Labs / Review / Reference header without journal chrome', () => {
+		expect(layout).toMatch(/label: 'Labs'/);
+		expect(layout).toMatch(/label: 'Review'/);
+		expect(layout).toMatch(/label: 'Reference'/);
+		expect(layout).not.toMatch(/>ToC</);
+		expect(layout).not.toMatch(/>¶</);
+		expect(layout).not.toMatch(/Colophon/);
+		expect(layout).not.toMatch(/folio/);
+		expect(layout).toMatch(/ThemeToggle/);
+		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*height:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
+		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
+		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
+		expect(labIndexRail).toMatch(/aria-label="Labs"/);
+	});
+
+	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
+		expect(layout).toMatch(/class="brand"[^>]*aria-label="Korean"/);
+		expect(layout).toMatch(/class="mark" lang="ko"/);
+		expect(layout).toMatch(/pathname === '\/' \|\| page\.url\.pathname\.startsWith\('\/lab\/'\)/);
+		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);
+		expect(home).toMatch(/Labs teach Hangul/);
+		expect(home).toMatch(/Review quizzes only what you have already met/);
+		expect(home).toMatch(/Reference is the letter list/);
+		expect(home).toMatch(/<h2 id="sec-review-heading" class="sec">Review pile<\/h2>/);
+		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
+		expect(home).not.toMatch(/sec-deck-heading/);
+	});
+
+	it('does not ship fascicle journal words in UI chrome', () => {
+		const chrome = layout + home + labRunner + labPage + labIndexRail + labPreview + labSpread + review;
+		expect(chrome).not.toMatch(/Colophon/);
+		expect(chrome).not.toMatch(/>ToC</);
+		expect(chrome).not.toMatch(/label: 'ToC'/);
+		expect(chrome).not.toMatch(/fascicle/i);
+		expect(chrome).not.toMatch(/folio/i);
+		expect(review).toMatch(/Back up or restore your progress/);
+		expect(review).toMatch(/Loading Review/);
+		expect(review).toMatch(/Nothing in Review yet/);
+		expect(review).toMatch(/Review is clear/);
+		expect(review).not.toMatch(/Deck clear/);
+		expect(review).not.toMatch(/Nothing in the deck/);
+		expect(labPage).toMatch(/Need a letter\?/);
+		expect(labPage).toMatch(/Look up any letter in/);
+		expect(labPage).toMatch(/resolve\('\/reference'\)/);
+		expect(labPage).not.toMatch(/jamo/);
+		expect(labPage).not.toMatch(/same\s+module these cards use/);
+		expect(styleBlock(labRunner)).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);
 	});
 
 	it('paints due and resume rose, and keeps primary actions moss', () => {
@@ -206,7 +371,15 @@ describe('polish audit regressions', () => {
 		expect(homeCss).toMatch(/\.lab\.resume\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/a\.lab\.resume:hover\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*var\(--accent\)/s);
-		expect(homeCss).toMatch(/\.continue\s*\{[^}]*var\(--accent\)/s);
+		expect(homeCss).toMatch(/\.continue\[data-kind='start'\]\s*\{[^}]*var\(--accent\)/s);
+		expect(homeCss).toMatch(/\.continue\[data-kind='start'\]\s*\{[^}]*var\(--accent-soft\)/s);
+		expect(homeCss).toMatch(
+			/\.continue\[data-kind='resume'\],\s*\.continue\[data-kind='review'\]\s*\{[^}]*var\(--rose\)[^}]*var\(--rose-soft\)/s
+		);
+		expect(homeCss).toMatch(
+			/\.continue\[data-kind='resume'\] \.continue-go,\s*\.continue\[data-kind='review'\] \.continue-go\s*\{[^}]*var\(--rose\)/s
+		);
+		expect(homeCss).not.toMatch(/\.continue\s*\{[^}]*var\(--accent\)/s);
 		expect(layoutCss).toMatch(/\.badge\s*\{[^}]*var\(--rose\)/s);
 		expect(layoutCss).toMatch(/nav a\.active\s*\{[^}]*var\(--accent\)/s);
 		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);

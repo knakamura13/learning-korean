@@ -4,7 +4,7 @@ import { labFinishCopy } from './labFinishCopy';
 describe('labFinishCopy', () => {
 	it('does not claim a replay unlocked anything', () => {
 		expect(labFinishCopy(0, { queue: 10, newLeft: 10, unseen: 9 })).toEqual({
-			lead: 'These cards are already in your deck.',
+			lead: 'These cards are already in Review.',
 			detail: 'You have 10 waiting.'
 		});
 	});

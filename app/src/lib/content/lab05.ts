@@ -97,7 +97,7 @@ export const lab05: Lab = {
 			answer: 0,
 			miss: '<p>Look for a pattern that separates them — there genuinely is not one.</p>',
 			teach:
-				'<p>There is no derivable rule. <span class="jamo">ㄺ ㄻ ㄿ</span> take the second letter; the other eight take the first. That is a list.</p><p>This is the one place in Hangul where the system stops being generative and you simply learn eleven facts. It is also why these eleven are in your review deck — spaced repetition exists precisely for material like this.</p>'
+				'<p>There is no derivable rule. <span class="jamo">ㄺ ㄻ ㄿ</span> take the second letter; the other eight take the first. That is a list.</p><p>This is the one place in Hangul where the system stops being generative and you simply learn eleven facts. It is also why these eleven are in Review — spaced repetition exists precisely for material like this.</p>'
 		},
 		{
 			type: 'cluster',

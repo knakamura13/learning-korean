@@ -43,6 +43,9 @@
 	.empty h1 {
 		margin-bottom: var(--s2);
 		font-size: clamp(1.35rem, 3vw, 1.6rem);
+		font-family: var(--display);
+		font-style: italic;
+		font-weight: 400;
 	}
 	.empty p:not(.eyebrow) {
 		color: var(--ink-soft);

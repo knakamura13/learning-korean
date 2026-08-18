@@ -34,7 +34,9 @@ export interface Palette {
 }
 
 export interface TypeStacks {
-	/** Headings. */
+	/** Literary English (Newsreader). Named `--display`. Never on Hangul. */
+	display: string;
+	/** Headings fallback (Noto Serif KR on Botanical Korea). */
 	serif: string;
 	/** Body and UI chrome. Named `--sans` in CSS for historical reasons. */
 	sans: string;
@@ -66,6 +68,7 @@ export interface FontFaceSpec {
 	style?: 'normal' | 'italic';
 	weight?: string;
 	display?: 'auto' | 'block' | 'swap' | 'fallback' | 'optional';
+	unicodeRange?: string;
 }
 
 export interface DesignSystem {
@@ -111,6 +114,7 @@ export const PALETTE_CSS_VARS = {
 } as const satisfies Record<keyof Palette, string>;
 
 export const TYPE_CSS_VARS = {
+	display: '--display',
 	serif: '--serif',
 	sans: '--sans',
 	mono: '--mono',
