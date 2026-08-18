@@ -144,12 +144,11 @@
 	});
 
 	/**
-	 * Resolve the step. `correct` is false only for step types where a wrong
-	 * answer still advances (choice and read cards teach through the
-	 * explanation rather than through retrying). Cluster and liaison are
-	 * retry-until-correct. An earlier miss dents the first-try tally but must
-	 * not turn a correct final answer into a "not quite" — the learner did get
-	 * there, and saying otherwise is just discouraging.
+	 * Resolve the step. Choice, read, cluster, and liaison retry until
+	 * correct — a miss nudges without advancing. An earlier miss dents the
+	 * first-try tally but must not turn a correct final answer into a
+	 * "not quite" — the learner did get there, and saying otherwise is just
+	 * discouraging.
 	 */
 	function onSettle(overrideTeach?: string, correct = true) {
 		if (settled) return;

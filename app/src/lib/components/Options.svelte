@@ -7,7 +7,8 @@
 	} from '$lib/a11y/choiceKeys';
 
 	/**
-	 * A grid of answer buttons with right/wrong reveal.
+	 * A grid of answer buttons. A miss marks that option and leaves the rest
+	 * open; only a correct pick reveals the answer and locks the set.
 	 *
 	 * Options are shuffled on mount so the correct answer is not positionally
 	 * predictable. Authoring rule (enforced by review, not code): every option
@@ -47,13 +48,18 @@
 	// Digit chips collide with numeric answers after shuffle (Lab 04/05 counts).
 	const keyScheme = $derived(choiceKeyScheme(options));
 
-	let picked = $state<number | null>(null);
-	const settled = $derived(picked !== null);
+	let misses = $state<number[]>([]);
+	let solved = $state(false);
 
 	function pick(i: number) {
-		if (settled || disabled) return;
-		picked = i;
-		onPick(choices[i].correct, i);
+		if (solved || disabled || misses.includes(i)) return;
+		if (choices[i].correct) {
+			solved = true;
+			onPick(true, i);
+			return;
+		}
+		misses = [...misses, i];
+		onPick(false, i);
 	}
 
 	export function keyPick(key: string) {
@@ -67,10 +73,10 @@
 		<button
 			class="opt"
 			class:hangul
-			class:right={settled && choice.correct}
-			class:wrong={settled && picked === i && !choice.correct}
-			class:dim={settled && !choice.correct && picked !== i}
-			disabled={settled || disabled}
+			class:right={solved && choice.correct}
+			class:wrong={misses.includes(i)}
+			class:dim={solved && !choice.correct && !misses.includes(i)}
+			disabled={solved || disabled || misses.includes(i)}
 			onclick={() => pick(i)}
 			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {choice.text}"
 		>

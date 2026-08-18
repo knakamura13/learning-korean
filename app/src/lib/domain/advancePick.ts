@@ -1,9 +1,8 @@
 /**
- * advancePick.ts — how choice and read cards settle a pick.
+ * advancePick.ts — how choice and read cards resolve a pick.
  *
- * Those cards always advance: the teaching is in the explanation, not in
- * retrying. A wrong pick must still say so — otherwise the options go red
- * while the verdict says "Yes".
+ * A correct pick settles and shows the teaching. A wrong pick nudges
+ * without revealing the answer, so the learner can try again.
  */
 
 export interface AdvanceTeach {
@@ -11,12 +10,14 @@ export interface AdvanceTeach {
 	miss?: string;
 }
 
-export interface AdvanceSettle {
-	overrideTeach?: string;
-	correct: boolean;
-}
+export type ChoicePickResult =
+	| { action: 'settle'; correct: true }
+	| { action: 'nudge'; html: string };
 
-export function settleAdvancePick(correct: boolean, step: AdvanceTeach): AdvanceSettle {
-	if (correct) return { correct: true };
-	return { overrideTeach: step.miss ?? step.teach, correct: false };
+/** Shown when a wrong pick has no authored miss hint. Must not name the answer. */
+export const CHOICE_RETRY_COPY = '<p>Not that one. Try another option.</p>';
+
+export function resolveChoicePick(correct: boolean, step: AdvanceTeach): ChoicePickResult {
+	if (correct) return { action: 'settle', correct: true };
+	return { action: 'nudge', html: step.miss ?? CHOICE_RETRY_COPY };
 }

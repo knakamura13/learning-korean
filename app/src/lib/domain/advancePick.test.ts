@@ -1,24 +1,26 @@
 import { describe, it, expect } from 'vitest';
-import { settleAdvancePick } from './advancePick';
+import { CHOICE_RETRY_COPY, resolveChoicePick } from './advancePick';
 
-describe('settleAdvancePick', () => {
-	it('treats a correct pick as a yes with no override copy', () => {
-		expect(settleAdvancePick(true, { teach: 'that is pizza', miss: 'not pasta' })).toEqual({
+describe('resolveChoicePick', () => {
+	it('settles a correct pick without override copy', () => {
+		expect(resolveChoicePick(true, { teach: 'that is pizza', miss: 'not pasta' })).toEqual({
+			action: 'settle',
 			correct: true
 		});
 	});
 
-	it('treats a wrong pick as not-quite and uses the miss copy', () => {
-		expect(settleAdvancePick(false, { teach: 'that is pizza', miss: 'not pasta' })).toEqual({
-			overrideTeach: 'not pasta',
-			correct: false
+	it('nudges a wrong pick with the miss copy and does not settle', () => {
+		expect(resolveChoicePick(false, { teach: 'that is pizza', miss: 'not pasta' })).toEqual({
+			action: 'nudge',
+			html: 'not pasta'
 		});
 	});
 
-	it('falls back to the teach copy when a wrong pick has no miss', () => {
-		expect(settleAdvancePick(false, { teach: 'that is pizza' })).toEqual({
-			overrideTeach: 'that is pizza',
-			correct: false
+	it('does not reveal the teach copy when a wrong pick has no miss', () => {
+		expect(resolveChoicePick(false, { teach: 'that is pizza' })).toEqual({
+			action: 'nudge',
+			html: CHOICE_RETRY_COPY
 		});
+		expect(CHOICE_RETRY_COPY).not.toContain('pizza');
 	});
 });

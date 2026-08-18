@@ -22,7 +22,7 @@ interface BaseStep {
 	hint?: string;
 	/** Shown after a correct answer — the teaching, not just confirmation. */
 	teach: string;
-	/** Shown after a wrong answer, when a specific nudge helps more. */
+	/** Shown after a wrong answer as a retry hint. Must not name the answer. */
 	miss?: string;
 }
 

@@ -153,9 +153,9 @@ of that session only — treat it as gone. Everything below is in `app/`.
   against the domain.
 - `src/lib/components/` — `LabRunner.svelte` plus one component per step type:
   `mouth`, `choice`, `build`, `assemble`, `vowel`, `fusion`, `cluster`, `liaison`,
-  `read`. Wrong answers on `mouth`, `build`, `assemble`, `vowel`, `fusion`,
-  `cluster` and `liaison` do *not* advance; `choice` and `read` resolve either way,
-  because their teaching is in the explanation rather than in retrying.
+  `read`. Wrong answers do *not* advance on any step type; `choice` and `read`
+  mark the missed option and ask the learner to try again, revealing the
+  teaching only after a correct pick.
 - `src/routes/` — `/` dashboard, `/lab/[id]`, `/review`, `/reference`.
 
 **`onNudge(html, soft)`** — composer widgets pass `soft: true` so valid intermediate
@@ -164,7 +164,7 @@ Penalising exploration would discourage the poking-around the widget exists for.
 `assemble` stays hard-graded: there a completed wrong block really is a wrong answer.
 
 **`onSettle(teach?, correct?)`** — an earlier miss dents the tally but must never turn
-a correct final answer into a "not quite". Only `choice`/`read` pass `correct: false`.
+a correct final answer into a "not quite". Steps settle only on a correct answer.
 
 **The reference page is generated from `hangul.ts`**, including the eight sound
 changes, ganada order, block layouts and the 표준 발음법 citations that used to live in
