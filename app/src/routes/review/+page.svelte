@@ -377,10 +377,10 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.stat span {
-		font-size: 0.58rem;
-		letter-spacing: 0.1em;
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: var(--ink-faint);
+		color: var(--ink);
 	}
 
 	.review { padding: var(--s5); }

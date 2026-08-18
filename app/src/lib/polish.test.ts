@@ -255,6 +255,29 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
 	});
 
+	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
+		const css = styleBlock(reference);
+		expect(css).toMatch(/section\s*\{[^}]*scroll-margin-top:\s*calc\(var\(--s7\) \+ 2rem\)/s);
+		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100dvh/s);
+	});
+
+	it('sizes Need a letter and reference source links to at least 44px', () => {
+		expect(styleBlock(labPage)).toMatch(/\.ask a\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(reference)).toMatch(/\.src a\s*\{[^}]*min-height:\s*44px/s);
+	});
+
+	it('paints stats labels in ink so they clear 7:1 on raised paper and rose-soft', () => {
+		const { light, dark } = activeSystem;
+		expect(styleBlock(home)).toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink\)/s);
+		expect(styleBlock(review)).toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink\)/s);
+		expect(styleBlock(home)).not.toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+		expect(styleBlock(review)).not.toMatch(/\.stat span\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+		for (const palette of [light, dark]) {
+			expect(contrastRatio(palette.ink, palette.paperRaised)).toBeGreaterThanOrEqual(7);
+			expect(contrastRatio(palette.ink, palette.roseSoft)).toBeGreaterThanOrEqual(7);
+		}
+	});
+
 	it('uses an h1 on the error page and the lab finish screen', () => {
 		expect(errorPage).toMatch(/<h1>/);
 		expect(errorPage).not.toMatch(/<h2>/);
