@@ -59,7 +59,7 @@
 				<span class="slot-name">{slot.name}</span>
 			{/if}
 			<span class="slot-value">{slot.value ?? ''}</span>
-			<span class="slot-reading" lang="en" aria-hidden="true">{reading}</span>
+			<span class="slot-reading" lang="en" aria-hidden="true">{#if reading}{reading}{/if}</span>
 		</div>
 	{/each}
 	<span class="op">=</span>
