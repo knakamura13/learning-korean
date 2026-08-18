@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pickActiveSection, REFERENCE_SECTIONS } from './referenceNav';
+import { pickActiveSection, REFERENCE_SECTIONS, referencePreviewModel } from './referenceNav';
 
 describe('reference jump list', () => {
 	it('covers every long-page heading with a short chip label', () => {
@@ -20,6 +20,22 @@ describe('reference jump list', () => {
 			expect(section.nav.length).toBeLessThanOrEqual(14);
 			expect(section.nav).not.toMatch(/\.\.\./);
 		}
+	});
+
+	it('gives each jump a heading and a covers line for the hover preview', () => {
+		for (const section of REFERENCE_SECTIONS) {
+			const preview = referencePreviewModel(section);
+			expect(preview.id).toBe(section.id);
+			expect(preview.nav).toBe(section.nav);
+			expect(preview.title.length).toBeGreaterThan(0);
+			expect(preview.covers.length).toBeGreaterThan(20);
+			expect(preview.covers).not.toMatch(/\.\.\./);
+			expect(JSON.stringify(preview)).not.toMatch(/title=/);
+		}
+		expect(referencePreviewModel(REFERENCE_SECTIONS[0]).title).toMatch(/19 consonants/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[0]).covers).toMatch(/lead|consonant/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[3]).title).toMatch(/batchim/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[7]).covers).toMatch(/sound change|pronunciation/i);
 	});
 
 	it('prefers the intersecting section nearest the header', () => {
