@@ -45,7 +45,10 @@ src/lib/content/    lessons as typed data
   lab01..lab05.ts     the course
 src/lib/theme/      swappable design systems (the look)
   active.ts           one-line switch for the current look
-  systems/taegeuk.ts  ink-and-paper palette, type, shape, webfonts
+  systems/botanicalKorea.ts  pressed-flowers look (current)
+  systems/taegeuk.ts         previous ink-and-paper palette
+  systems/watercolor.ts      unused pigment-wash option
+  systems/academia.ts        unused Light/Dark Academia option
   css.ts              emits custom properties + @font-face only
   manifest.ts         PWA theme/background colours from the system
 src/lib/components/ the runner and one component per step type
