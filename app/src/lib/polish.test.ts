@@ -90,6 +90,16 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(review)).toMatch(/\.backup-card summary:active\s*\{/);
 	});
 
+	it('keeps every Reference section on screen instead of a hiding carousel', () => {
+		expect(reference).toMatch(/REFERENCE_SECTIONS/);
+		expect(styleBlock(reference)).toMatch(/\.quick-nav\s*\{[^}]*flex-wrap:\s*wrap/s);
+		expect(styleBlock(reference)).not.toMatch(/flex-wrap:\s*nowrap/);
+		expect(styleBlock(reference)).not.toMatch(/overflow-x:\s*auto/);
+		expect(styleBlock(reference)).toMatch(/\.toc\s*\{[^}]*position:\s*sticky/s);
+		expect(home).toMatch(/Review still waits/);
+		expect(styleBlock(home)).toMatch(/grid-template-areas:/);
+	});
+
 	it('uses logical properties in shared directional layout', () => {
 		expect(appCss).not.toMatch(/\bmargin-left\s*:/);
 		expect(labRunner).not.toMatch(/\bleft\s*:\s*0/);
