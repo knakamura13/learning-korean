@@ -3,6 +3,7 @@ import {
 	continueAction,
 	followingLab,
 	labCardState,
+	labTone,
 	nextLabId,
 	showPrerequisiteGate,
 	type CourseLab,
@@ -155,6 +156,24 @@ describe('continueAction', () => {
 			title: 'Review is clear',
 			detail: 'Nothing is due. Open Review if you want to check.'
 		});
+	});
+});
+
+describe('labTone', () => {
+	it('maps mutually exclusive card flags to one visual tone', () => {
+		expect(labTone({ locked: true, done: false, resumeAt: null, startHere: false })).toBe(
+			'locked'
+		);
+		expect(labTone({ locked: false, done: false, resumeAt: 2, startHere: false })).toBe('resume');
+		expect(labTone({ locked: false, done: false, resumeAt: null, startHere: true })).toBe('now');
+		expect(labTone({ locked: false, done: true, resumeAt: null, startHere: false })).toBe('done');
+		expect(labTone({ locked: false, done: false, resumeAt: null, startHere: false })).toBe(
+			'idle'
+		);
+	});
+
+	it('lets a sitting beat done and startHere so a resume is never archived or next-up', () => {
+		expect(labTone({ locked: false, done: true, resumeAt: 1, startHere: true })).toBe('resume');
 	});
 });
 

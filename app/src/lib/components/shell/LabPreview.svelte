@@ -157,15 +157,10 @@
 		background: var(--rose-soft);
 		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
 	}
-	.chip[data-kind='done'] {
-		color: var(--good);
-		background: var(--good-soft);
-		border-color: color-mix(in srgb, var(--good) 30%, transparent);
-	}
 	.chip[data-kind='start'] {
-		color: var(--accent);
-		background: var(--accent-soft);
-		border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+		color: var(--accent-ink);
+		background: var(--accent);
+		border-color: var(--accent);
 	}
 
 	.actions {

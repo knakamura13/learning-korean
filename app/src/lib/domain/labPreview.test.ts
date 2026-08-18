@@ -177,6 +177,19 @@ describe('labPreviewModel', () => {
 			expect(mapped).toBe(kind);
 		}
 	});
+
+	it('archives a finished lab without a completed chip', () => {
+		const after = view({ unlocked: ['lab01'] });
+		const model = labPreviewModel(
+			labs[0],
+			'No reading ahead.',
+			labCardState(labs[0], labs, after),
+			null
+		);
+		expect(model.chipKind).toBe('done');
+		expect(model.chip).toBe('');
+		expect(model.accessibleName).toMatch(/completed/);
+	});
 });
 
 describe('decideUnlockedPress', () => {

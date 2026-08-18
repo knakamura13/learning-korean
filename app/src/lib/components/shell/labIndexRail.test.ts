@@ -35,6 +35,15 @@ describe('LabIndexRail source contracts', () => {
 		expect(src).not.toMatch(/folio/i);
 	});
 
+	it('fills the next-up number and keeps completed numbers faint, not mint', () => {
+		const css = styleBlock(src);
+		expect(css).toMatch(/\.num\.go\s*\{[^}]*background:\s*var\(--accent\)/s);
+		expect(css).toMatch(/\.num\.go\s*\{[^}]*color:\s*var\(--accent-ink\)/s);
+		expect(css).toMatch(/\.num\.done\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+		expect(css).not.toMatch(/\.num\.done\s*\{[^}]*var\(--good\)/s);
+		expect(src).toMatch(/current \? `\$\{tone\} current` : tone|current && 'current'/);
+	});
+
 	it('does not use title= as the lab preview', () => {
 		expect(src).not.toMatch(/title=\{/);
 		expect(src).not.toMatch(/title="/);

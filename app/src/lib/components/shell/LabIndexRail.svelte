@@ -165,8 +165,7 @@
 		pendingPointer = { id: item.id, pointerType: e.pointerType || 'mouse' };
 	}
 
-	function toneClass(kind: PreviewChipKind, current: boolean): string {
-		if (current) return 'current';
+	function toneClass(kind: PreviewChipKind): string {
 		switch (kind) {
 			case 'locked':
 				return 'locked';
@@ -396,7 +395,7 @@
 				{#if item.locked}
 					<button
 						type="button"
-						class={['num', toneClass(item.chipKind, current)]}
+						class={['num', toneClass(item.chipKind), current && 'current']}
 						data-lab-index-item
 						data-lab-id={item.id}
 						aria-label={item.accessibleName}
@@ -416,7 +415,7 @@
 					</button>
 				{:else}
 					<a
-						class={['num', toneClass(item.chipKind, current)]}
+						class={['num', toneClass(item.chipKind), current && 'current']}
 						href={resolve('/lab/[id]', { id: item.id })}
 						data-lab-index-item
 						data-lab-id={item.id}
@@ -505,7 +504,11 @@
 		cursor: pointer;
 	}
 
-	.num.go,
+	.num.go {
+		color: var(--accent-ink);
+		background: var(--accent);
+		border-color: var(--accent);
+	}
 	.num.open {
 		color: var(--accent);
 	}
@@ -513,15 +516,13 @@
 		color: var(--rose);
 	}
 	.num.done {
-		color: var(--good);
+		color: var(--ink-faint);
 	}
 	.num.locked {
 		color: var(--ink-faint);
 	}
 	.num.current {
-		color: var(--accent);
-		background: var(--accent-soft);
-		border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+		box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--accent);
 	}
 
 	.num:hover,
@@ -529,10 +530,11 @@
 		background: var(--paper-sunk);
 		color: var(--ink);
 	}
-	.num.current:hover,
-	.num.current:focus-visible {
-		background: var(--accent-soft);
-		color: var(--accent);
+	.num.go:hover,
+	.num.go:focus-visible {
+		background: var(--accent);
+		color: var(--accent-ink);
+		filter: brightness(1.07);
 	}
 
 	@media (forced-colors: active) {
@@ -543,6 +545,7 @@
 		.num.current {
 			background: Highlight;
 			color: HighlightText;
+			box-shadow: none;
 		}
 		.num.resume {
 			color: LinkText;

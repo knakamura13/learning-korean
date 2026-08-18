@@ -57,6 +57,17 @@ export interface LabCardState {
 	startHere: boolean;
 }
 
+/** Mutually exclusive visual role. Callers style from this, not from flag soup. */
+export type LabTone = 'now' | 'resume' | 'done' | 'locked' | 'idle';
+
+export function labTone(state: LabCardState): LabTone {
+	if (state.locked) return 'locked';
+	if (state.resumeAt !== null) return 'resume';
+	if (state.startHere) return 'now';
+	if (state.done) return 'done';
+	return 'idle';
+}
+
 export interface CourseNavView {
 	/** True once local progress has been read. False is the prerender default. */
 	ready: boolean;
