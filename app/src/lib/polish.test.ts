@@ -419,7 +419,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/border-start-start-radius:\s*var\(--tab-r\)/);
 		expect(styleBlock(layout)).toMatch(/nav a\.active::before/);
 		expect(styleBlock(layout)).toMatch(/nav a\.active::after/);
-		expect(styleBlock(layout)).toMatch(/radial-gradient\(circle at 0 0/);
+		expect(styleBlock(layout)).toMatch(/radial-gradient\(\s*circle at 0 0/);
 		expect(styleBlock(layout)).toMatch(/margin-block-end:\s*-1px/);
 		expect(labIndexRail).toMatch(/aria-label="Labs"/);
 	});

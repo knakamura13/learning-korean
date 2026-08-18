@@ -128,8 +128,7 @@
 		top: 0;
 		z-index: 5;
 		padding-top: env(safe-area-inset-top);
-		background: color-mix(in srgb, var(--paper-sunk) 92%, transparent);
-		backdrop-filter: blur(10px);
+		background: color-mix(in srgb, var(--paper-sunk) 82%, black);
 		border-bottom: 1px solid var(--rule);
 		overflow: visible;
 	}
@@ -177,13 +176,14 @@
 	}
 
 	nav {
-		--tab-r: 10px;
+		--tab-r: 12px;
 		display: flex;
 		flex-wrap: wrap;
 		align-self: stretch;
 		align-items: stretch;
-		gap: 0.2rem;
+		gap: 0.35rem;
 		margin-inline-start: auto;
+		padding-inline: var(--tab-r);
 		min-width: 0;
 		flex-shrink: 1;
 		justify-content: flex-end;
@@ -210,6 +210,8 @@
 	nav a.active {
 		color: var(--accent);
 		background: var(--paper);
+		border: 1px solid var(--rule);
+		border-block-end: none;
 		border-start-start-radius: var(--tab-r);
 		border-start-end-radius: var(--tab-r);
 		margin-block-end: -1px;
@@ -227,11 +229,23 @@
 	}
 	nav a.active::before {
 		inset-inline-start: calc(-1 * var(--tab-r));
-		background: radial-gradient(circle at 0 0, transparent var(--tab-r), var(--paper) calc(var(--tab-r) + 0.5px));
+		background: radial-gradient(
+			circle at 0 0,
+			transparent calc(var(--tab-r) - 1px),
+			var(--rule) calc(var(--tab-r) - 1px),
+			var(--rule) var(--tab-r),
+			var(--paper) calc(var(--tab-r) + 0.5px)
+		);
 	}
 	nav a.active::after {
 		inset-inline-end: calc(-1 * var(--tab-r));
-		background: radial-gradient(circle at 100% 0, transparent var(--tab-r), var(--paper) calc(var(--tab-r) + 0.5px));
+		background: radial-gradient(
+			circle at 100% 0,
+			transparent calc(var(--tab-r) - 1px),
+			var(--rule) calc(var(--tab-r) - 1px),
+			var(--rule) var(--tab-r),
+			var(--paper) calc(var(--tab-r) + 0.5px)
+		);
 	}
 
 	.badge {
@@ -286,7 +300,6 @@
 			background: Canvas;
 			color: CanvasText;
 			border-bottom: 1px solid ButtonBorder;
-			backdrop-filter: none;
 		}
 		.badge {
 			background: Highlight;
@@ -295,12 +308,25 @@
 		nav a.active {
 			background: Highlight;
 			color: HighlightText;
+			border-color: ButtonBorder;
 		}
 		nav a.active::before {
-			background: radial-gradient(circle at 0 0, transparent var(--tab-r), Highlight calc(var(--tab-r) + 0.5px));
+			background: radial-gradient(
+				circle at 0 0,
+				transparent calc(var(--tab-r) - 1px),
+				ButtonBorder calc(var(--tab-r) - 1px),
+				ButtonBorder var(--tab-r),
+				Highlight calc(var(--tab-r) + 0.5px)
+			);
 		}
 		nav a.active::after {
-			background: radial-gradient(circle at 100% 0, transparent var(--tab-r), Highlight calc(var(--tab-r) + 0.5px));
+			background: radial-gradient(
+				circle at 100% 0,
+				transparent calc(var(--tab-r) - 1px),
+				ButtonBorder calc(var(--tab-r) - 1px),
+				ButtonBorder var(--tab-r),
+				Highlight calc(var(--tab-r) + 0.5px)
+			);
 		}
 	}
 </style>

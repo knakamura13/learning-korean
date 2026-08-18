@@ -89,10 +89,10 @@
 	.theme::before {
 		content: '';
 		position: absolute;
-		inset: 8px;
-		border: 1px solid var(--rule);
+		inset: 10px;
+		border: 1px solid var(--rule-strong);
 		border-radius: var(--r-sm);
-		background: var(--paper-sunk);
+		background: var(--paper);
 		pointer-events: none;
 		transition: background var(--fast) var(--ease);
 	}
@@ -101,6 +101,7 @@
 	}
 	.theme:hover::before {
 		background: var(--paper-raised);
+		border-color: var(--accent);
 	}
 	.theme:active { transform: translateY(1px); }
 	.theme:focus-visible {
@@ -124,8 +125,8 @@
 	.auto {
 		position: absolute;
 		z-index: 1;
-		inset-inline-end: 9px;
-		inset-block-end: 9px;
+		inset-inline-end: 11px;
+		inset-block-end: 11px;
 		font-size: 0.5rem;
 		font-weight: 700;
 		line-height: 1;

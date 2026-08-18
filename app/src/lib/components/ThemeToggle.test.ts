@@ -25,7 +25,7 @@ describe('ThemeToggle glyphs', () => {
 	it('keeps a 44px hit target, reduced-motion, and forced-colors styles', () => {
 		expect(css).toMatch(/min-width:\s*44px/);
 		expect(css).toMatch(/min-height:\s*44px/);
-		expect(css).toMatch(/\.theme::before\s*\{[^}]*inset:\s*8px/s);
+		expect(css).toMatch(/\.theme::before\s*\{[^}]*inset:\s*10px/s);
 		expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
 	});
