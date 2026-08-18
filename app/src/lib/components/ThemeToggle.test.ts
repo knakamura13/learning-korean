@@ -52,4 +52,14 @@ describe('ThemeToggle glyphs', () => {
 	it('still cycles through nextThemePref', () => {
 		expect(src).toMatch(/setPref\(nextThemePref\(pref\)\)/);
 	});
+
+	it('exposes data-pref on the button and a visible Auto mark for system', () => {
+		expect(src).toMatch(/data-pref=\{pref\}/);
+		const glyphEnd = src.indexOf('{/if}', src.indexOf(`glyph === 'sun'`));
+		const systemIf = src.indexOf(`{#if pref === 'system'}`);
+		expect(systemIf).toBeGreaterThan(glyphEnd);
+		expect(src).toMatch(
+			/\{#if pref === 'system'\}[\s\S]*?aria-hidden="true"[\s\S]*?Auto/
+		);
+	});
 });
