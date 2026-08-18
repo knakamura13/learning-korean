@@ -283,6 +283,45 @@ describe('mouth steps', () => {
 	});
 });
 
+describe('lab 03 ㅐ/ㅔ merger beat', () => {
+	const lab = LABS_BY_ID['0003'];
+	const fuseAe = lab.steps[1];
+	const fuseE = lab.steps[2];
+	const news = lab.steps[3];
+
+	it('keeps the two fusions parallel, then asks if they are two sounds', () => {
+		expect(fuseAe.type).toBe('fusion');
+		expect(fuseE.type).toBe('fusion');
+		if (fuseAe.type !== 'fusion' || fuseE.type !== 'fusion') return;
+		expect(fuseAe.do).toBe('Fuse the two pieces that make <em>ae</em>.');
+		expect(fuseE.do).toBe('Same rule. Fuse the two pieces that make <em>e</em>.');
+		expect(fuseE.hint).toBe('This time start from ㅓ. Pick its two parts.');
+		expect(fuseE.teach).toContain('</span> = <span class="jamo">ㅔ</span>');
+		expect(fuseE.teach).toContain('<em>ae</em> (<span class="jamo">ㅐ</span>)');
+		expect(fuseE.teach).toContain('<em>e</em> (<span class="jamo">ㅔ</span>)');
+		expect(fuseE.teach).toMatch(/Are they two different sounds\?/);
+		expect(fuseE.teach).not.toMatch(/nobody warns you/);
+	});
+
+	it('asks for the good news with two same / two differ options', () => {
+		expect(news.type).toBe('choice');
+		if (news.type !== 'choice') return;
+		expect(news.do).toBe(
+			'You just built <span class="jamo">ㅐ</span> and <span class="jamo">ㅔ</span> from different parts. Now, what is the good news?'
+		);
+		expect(news.options).toEqual([
+			'They sound the same in modern Korean',
+			'They differ only in their vowel length',
+			'They sound the same only when spoken slowly',
+			'They differ only in formal Korean speech'
+		]);
+		expect(news.answer).toBe(0);
+		expect(news.options.filter((o) => o.includes('sound the same'))).toHaveLength(2);
+		expect(news.options.filter((o) => o.includes('differ only'))).toHaveLength(2);
+		expect(news.teach).toMatch(/one fewer sound to hear/);
+	});
+});
+
 describe('deck alignment', () => {
 	it('unlocks a tier whose size matches what the lab claims to teach', () => {
 		for (const lab of LABS) {
