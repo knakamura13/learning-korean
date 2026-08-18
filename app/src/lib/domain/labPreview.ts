@@ -10,6 +10,7 @@ import { labCardState, type CourseLab, type CourseNavView, type LabCardState } f
 
 export const POPOVER_OFFSET_PX = 12;
 export const POPOVER_PAD_PX = 8;
+export const PREVIEW_HOVER_BUFFER_PX = 4;
 export const HOVER_CLOSE_MS = 160;
 
 export interface ViewportBox {
@@ -41,30 +42,6 @@ export interface HoverBox {
 	top: number;
 	right: number;
 	bottom: number;
-}
-
-export interface ViewportBox {
-	w: number;
-	h: number;
-}
-
-export interface PanelBox {
-	w: number;
-	h: number;
-}
-
-export interface CursorPoint {
-	x: number;
-	y: number;
-}
-
-export interface AnchorRect {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-	top: number;
-	right: number;
 }
 
 export type PopoverAnchor = CursorPoint | AnchorRect;
@@ -175,18 +152,18 @@ function isRect(cursor: PopoverAnchor): cursor is AnchorRect {
 	return 'width' in cursor;
 }
 
-/** 12px from the cursor (or the number’s box), flipping and clamping to the viewport. */
+/** 12px to the right of the cursor (or the number), top edge on the cursor / number midline. */
 export function anchorPopover(
 	cursor: PopoverAnchor,
 	panel: PanelBox,
 	viewport: ViewportBox
 ): PopoverPlacement {
 	const origin = isRect(cursor)
-		? { x: cursor.right, y: cursor.top }
+		? { x: cursor.right, y: cursor.top + cursor.height / 2 }
 		: { x: cursor.x, y: cursor.y };
 
 	let left = origin.x + POPOVER_OFFSET_PX;
-	let top = origin.y + POPOVER_OFFSET_PX;
+	let top = origin.y;
 
 	if (left + panel.w > viewport.w - POPOVER_PAD_PX) {
 		left = origin.x - POPOVER_OFFSET_PX - panel.w;
@@ -203,6 +180,18 @@ export function anchorPopover(
 	if (top < POPOVER_PAD_PX) top = POPOVER_PAD_PX;
 
 	return { left, top };
+}
+
+export function expandHoverBox(
+	box: HoverBox,
+	buffer = PREVIEW_HOVER_BUFFER_PX
+): HoverBox {
+	return {
+		left: box.left - buffer,
+		top: box.top - buffer,
+		right: box.right + buffer,
+		bottom: box.bottom + buffer
+	};
 }
 
 export type HoverIntentDecision =

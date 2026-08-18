@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import type { LabPreviewModel, PopoverPlacement, PreviewOpenMode } from '$lib/domain/labPreview';
+	import {
+		PREVIEW_HOVER_BUFFER_PX,
+		type LabPreviewModel,
+		type PopoverPlacement,
+		type PreviewOpenMode
+	} from '$lib/domain/labPreview';
 
 	let {
 		model,
@@ -49,50 +54,59 @@
 	class="preview"
 	style:--preview-x="{placement.left}px"
 	style:--preview-y="{placement.top}px"
+	style:--preview-buffer="{PREVIEW_HOVER_BUFFER_PX}px"
 	role="group"
 	aria-labelledby="{panelId}-title"
 	onpointerenter={onPointerEnter}
 	onpointerleave={onPointerLeave}
-	{@attach reportSize}
 >
-	<p class="eyebrow">{model.eyebrow}</p>
-	<h2 id="{panelId}-title">{model.title}</h2>
-	<p class="standfirst">{model.standfirst}</p>
-	<p class="meta">~{model.minutes} min · {model.cardCount} cards</p>
-	{#if model.chip}
-		<p class="chip" data-kind={model.chipKind}>{model.chip}</p>
-	{/if}
-	<div class="actions">
-		<a
-			class={actionClass(model.actionLabel)}
-			href={resolve('/lab/[id]', { id: model.id })}
-			title={model.locked
-				? 'You can look at the cards. Review still waits until you finish the previous lab.'
-				: undefined}
-		>
-			{model.actionLabel}
-		</a>
-		{#if mode !== 'pointer'}
-			<button class="btn ghost" type="button" onclick={onClose}>Close</button>
+	<div class="face" {@attach reportSize}>
+		<p class="eyebrow">{model.eyebrow}</p>
+		<h2 id="{panelId}-title">{model.title}</h2>
+		<p class="standfirst">{model.standfirst}</p>
+		<p class="meta">~{model.minutes} min · {model.cardCount} cards</p>
+		{#if model.chip}
+			<p class="chip" data-kind={model.chipKind}>{model.chip}</p>
 		{/if}
+		<div class="actions">
+			<a
+				class={actionClass(model.actionLabel)}
+				href={resolve('/lab/[id]', { id: model.id })}
+				title={model.locked
+					? 'You can look at the cards. Review still waits until you finish the previous lab.'
+					: undefined}
+			>
+				{model.actionLabel}
+			</a>
+			{#if mode !== 'pointer'}
+				<button class="btn ghost" type="button" onclick={onClose}>Close</button>
+			{/if}
+		</div>
 	</div>
 </div>
 
 <style>
 	.preview {
 		position: fixed;
-		inset-inline-start: var(--preview-x);
-		inset-block-start: var(--preview-y);
+		inset-inline-start: calc(var(--preview-x) - var(--preview-buffer));
+		inset-block-start: calc(var(--preview-y) - var(--preview-buffer));
 		z-index: 6;
+		padding: var(--preview-buffer);
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		color: var(--ink);
+		opacity: 1;
+		transition: opacity var(--fast) var(--ease);
+	}
+
+	.face {
 		width: min(20rem, calc(100vw - 1.5rem));
 		padding: var(--s4);
 		background: var(--paper-raised);
 		border: 1px solid var(--rule-strong);
 		border-radius: var(--r-md);
 		box-shadow: var(--shadow-2);
-		color: var(--ink);
-		opacity: 1;
-		transition: opacity var(--fast) var(--ease);
 	}
 
 	.eyebrow {
@@ -162,7 +176,7 @@
 	}
 
 	@media (forced-colors: active) {
-		.preview {
+		.face {
 			background: Canvas;
 			color: CanvasText;
 			border-color: ButtonBorder;

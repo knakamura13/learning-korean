@@ -54,6 +54,8 @@ describe('LabIndexRail source contracts', () => {
 		expect(src).toMatch(/decideHoverIntent/);
 		expect(src).toMatch(/<svelte:body onpointermove=\{onHoverIntentMove\}/);
 		expect(src).toMatch(/onPointerEnter=\{onPreviewPointerEnter\}/);
+		expect(src).toMatch(/expandHoverBox/);
+		expect(preview).toMatch(/PREVIEW_HOVER_BUFFER_PX|--preview-buffer|padding:\s*4px/);
 	});
 
 	it('treats the preview as a disclosure, not a fake modal', () => {

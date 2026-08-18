@@ -14,6 +14,7 @@
 		decideItemFocusOpen,
 		decideUnlockedPress,
 		decideWindowEscape,
+		expandHoverBox,
 		isPointInHoverBridge,
 		isPressPointerType,
 		labPreviewModels,
@@ -81,12 +82,14 @@
 		anchor ? anchorPopover(anchor, panelSize, viewportSize) : { left: 8, top: 8 }
 	);
 
-	const panelBox = $derived({
-		left: placement.left,
-		top: placement.top,
-		right: placement.left + panelSize.w,
-		bottom: placement.top + panelSize.h
-	});
+	const panelBox = $derived(
+		expandHoverBox({
+			left: placement.left,
+			top: placement.top,
+			right: placement.left + panelSize.w,
+			bottom: placement.top + panelSize.h
+		})
+	);
 
 	const panelId = 'lab-index-preview';
 
