@@ -183,6 +183,7 @@
 		align-items: stretch;
 		gap: 0.35rem;
 		margin-inline-start: auto;
+		padding-block-start: 0.25rem;
 		padding-inline: var(--tab-r);
 		min-width: 0;
 		flex-shrink: 1;
@@ -195,7 +196,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--s1);
-		min-height: 44px;
+		min-height: calc(44px - 0.25rem);
 		padding: 0 0.75rem;
 		border-radius: 0;
 		font-size: 0.84rem;

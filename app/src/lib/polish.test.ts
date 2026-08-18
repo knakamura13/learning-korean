@@ -415,6 +415,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.25rem/s);
+		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(44px - 0\.25rem\)/s);
 		expect(styleBlock(layout)).toMatch(/nav a\.active\s*\{[^}]*background:\s*var\(--paper\)/s);
 		expect(styleBlock(layout)).toMatch(/border-start-start-radius:\s*var\(--tab-r\)/);
 		expect(styleBlock(layout)).toMatch(/nav a\.active::before/);
