@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { hasHangul } from '$lib/a11y/lang';
+	import { jamoReading, VOWELS, type JamoSlot } from '$lib/domain/hangul';
 	import { trayLift } from './trayLift.svelte';
 
 	/**
@@ -22,10 +23,25 @@
 		result: string;
 		state?: 'empty' | 'partial' | 'win' | 'dead';
 	} = $props();
+
+	/** Phonetic job from slot shape — fusion trays are named first/second, not vowel. */
+	function phoneticColumn(slot: Slot): JamoSlot {
+		if (slot.bottom) return 'batchim';
+		if (slot.value && (VOWELS as readonly string[]).includes(slot.value)) return 'vowel';
+		return 'lead';
+	}
+
+	function slotAriaLabel(slot: Slot, reading: string): string | undefined {
+		if (!slot.name) return undefined;
+		if (!slot.value) return `${slot.name}: empty`;
+		if (!reading) return `${slot.name}: ${slot.value}`;
+		return `${slot.name}: ${slot.value}, ${reading}`;
+	}
 </script>
 
 <div class="asm">
 	{#each slots as slot, i (i)}
+		{@const reading = slot.value ? jamoReading(slot.value, phoneticColumn(slot)) : ''}
 		{#if i > 0}<span class="op">+</span>{/if}
 		<div
 			class={[
@@ -37,12 +53,13 @@
 			]}
 			data-slot={slot.name}
 			lang={hasHangul(slot.value ?? '') ? 'ko' : undefined}
-			aria-label={slot.name ? `${slot.name}: ${slot.value ?? 'empty'}` : undefined}
+			aria-label={slotAriaLabel(slot, reading)}
 		>
 			{#if slot.name}
 				<span class="slot-name">{slot.name}</span>
 			{/if}
 			<span class="slot-value">{slot.value ?? ''}</span>
+			<span class="slot-reading" lang="en" aria-hidden="true">{#if reading}{reading}{/if}</span>
 		</div>
 	{/each}
 	<span class="op">=</span>
@@ -77,7 +94,7 @@
 	.slot {
 		min-width: 4.2rem;
 		width: max-content;
-		min-height: 4.2rem;
+		min-height: 5.42rem;
 		padding: 0.4rem 0.9rem;
 		border: 2px dashed var(--rule-strong);
 		border-radius: var(--r-md);
@@ -85,9 +102,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.1rem;
-		font-family: var(--hangul);
-		font-size: 2.3rem;
+		gap: 0.12rem;
 		font-weight: 500;
 		color: var(--ink-faint);
 		position: relative;
@@ -136,14 +151,39 @@
 		box-shadow: var(--focus-ring);
 	}
 
-	.slot-value { line-height: 1; }
+	.slot-value {
+		line-height: 1;
+		font-family: var(--hangul);
+		font-size: 2.3rem;
+	}
+
+	/* Italic + regular weight distinguish the RR footnote from uppercase FIRST/SECOND; extra --s2 sits under the glyph; do not use opacity to quiet the caption. */
+	.slot-reading {
+		font-family: var(--mono);
+		font-size: 0.72rem;
+		font-style: italic;
+		font-weight: 400;
+		letter-spacing: 0.06em;
+		line-height: 1;
+		min-height: 0.72rem;
+		margin-block-start: var(--s2);
+		color: var(--ink-faint);
+		text-transform: none;
+		text-align: center;
+		opacity: 0;
+		transition: opacity var(--fast) var(--ease);
+	}
+
+	.slot.filled .slot-reading:not(:empty) {
+		opacity: 1;
+	}
 
 	.slot.bottom {
 		align-self: flex-end;
 		border-bottom-width: 3px;
 		border-color: var(--blue);
 	}
-	.slot.bottom.filled { background: var(--blue-soft); border-color: var(--blue); }
+	.slot.bottom.filled { border-color: var(--blue); }
 
 	.out {
 		width: 5.4rem;
@@ -184,8 +224,14 @@
 	.mark.bad { color: var(--bad); }
 
 	@media (max-width: 34rem) {
-		.slot { min-width: 3.8rem; min-height: 3.6rem; font-size: 1.8rem; padding: 0.3rem 0.6rem; }
+		.slot { min-width: 3.8rem; min-height: 4.82rem; padding: 0.3rem 0.6rem; }
+		.slot-value { font-size: 1.8rem; }
+		.slot-reading { font-size: 0.62rem; min-height: 0.64rem; }
 		.out { width: 4.4rem; height: 4.4rem; font-size: 2.6rem; }
 		.asm { gap: var(--s2); }
+	}
+
+	@media (forced-colors: active) {
+		.slot-reading { color: CanvasText; }
 	}
 </style>

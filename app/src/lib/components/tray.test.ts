@@ -341,6 +341,39 @@ describe('FusionStep trays', () => {
 		expect(root.querySelector('.out')?.textContent).not.toContain('✕');
 	});
 
+	it('prints independent readings under filled slots, not on trays or the result', () => {
+		const root = render(FusionStep, {
+			step: fusionStep,
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		const emptySlots = [...root.querySelectorAll<HTMLElement>('.slot')];
+		expect(emptySlots).toHaveLength(2);
+		for (const slot of emptySlots) {
+			expect(slot.getAttribute('aria-label')).toBe(`${slot.dataset.slot}: empty`);
+			expect(slot.querySelector('.slot-reading')?.textContent).toBe('');
+		}
+		expect(root.querySelector('.out .slot-reading')).toBeNull();
+
+		radioNamed(labeledGroup(root, 'first vowel'), 'ㅜ').click();
+		flushSync();
+		radioNamed(labeledGroup(root, 'second vowel'), 'ㅓ').click();
+		flushSync();
+
+		const [first, second] = [...root.querySelectorAll<HTMLElement>('.slot')];
+		expect(first.querySelector('.slot-reading')?.textContent).toBe('u');
+		expect(second.querySelector('.slot-reading')?.textContent).toBe('eo');
+		expect(first.querySelector('.slot-reading')?.getAttribute('aria-hidden')).toBe('true');
+		expect(first.getAttribute('aria-label')).toBe('first: ㅜ, u');
+		expect(second.getAttribute('aria-label')).toBe('second: ㅓ, eo');
+
+		const tray = labeledGroup(root, 'first vowel');
+		expect(radioNamed(tray, 'ㅜ').getAttribute('aria-label')).toBe('first vowel: ㅜ');
+		expect(radioNamed(tray, 'ㅜ').querySelector('.slot-reading')).toBeNull();
+		expect(root.querySelector('.out')?.textContent?.replace(/\s+/g, '')).toBe('ㅝ');
+	});
+
 	it('seats a dragged second-tray vowel onto the second slot', async () => {
 		const root = render(FusionStep, {
 			step: fusionStep,
@@ -389,6 +422,41 @@ describe('AssembleStep trays', () => {
 		expect(slotLead).toBe('ㅁ');
 		expect(slotVowel).toBe('ㅏ');
 		expect(slotFinal).toBe('ㅂ');
+
+		const [leadSlot, vowelSlot, batchimSlot] = [...root.querySelectorAll<HTMLElement>('.slot')];
+		expect(leadSlot.querySelector('.slot-reading')?.textContent).toBe('m');
+		expect(vowelSlot.querySelector('.slot-reading')?.textContent).toBe('a');
+		expect(batchimSlot.querySelector('.slot-reading')?.textContent).toBe('p');
+		expect(leadSlot.getAttribute('aria-label')).toBe('consonant: ㅁ, m');
+		expect(batchimSlot.getAttribute('aria-label')).toBe('batchim: ㅂ, p');
+	});
+
+	it('leaves a silent lead ㅇ unlabeled on the plate', () => {
+		const root = render(AssembleStep, {
+			step: {
+				type: 'assemble',
+				do: 'Build',
+				teach: 'ok',
+				target: '위',
+				targetName: 'wi',
+				consonants: ['ㅇ', 'ㄱ', 'ㅁ'],
+				vowels: ['ㅟ', 'ㅜ', 'ㅣ']
+			},
+			onSettle: () => {},
+			onNudge: () => {}
+		});
+
+		radioNamed(labeledGroup(root, 'consonant'), 'ㅇ').click();
+		flushSync();
+		radioNamed(labeledGroup(root, 'vowel'), 'ㅟ').click();
+		flushSync();
+
+		const [leadSlot, vowelSlot] = [...root.querySelectorAll<HTMLElement>('.slot')];
+		const reading = leadSlot.querySelector('.slot-reading');
+		expect(reading?.textContent).toBe('');
+		expect(reading?.matches(':empty')).toBe(true);
+		expect(leadSlot.getAttribute('aria-label')).toBe('consonant: ㅇ');
+		expect(vowelSlot.querySelector('.slot-reading')?.textContent).toBe('wi');
 	});
 
 	it('seats a dragged vowel onto the vowel slot without a click', async () => {

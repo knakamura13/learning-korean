@@ -28,6 +28,7 @@ import { activeSystem } from './theme/active';
 import { contrastRatio } from './theme/contrast';
 import { designSystemCss } from './theme/css';
 import { applyDesignSystem } from './theme/placeholders';
+import slots from './components/Slots.svelte?raw';
 
 const appCss = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
 const systemCss = designSystemCss(activeSystem);
@@ -353,6 +354,22 @@ describe('polish audit regressions', () => {
 
 	it('sizes reference source links to at least 44px', () => {
 		expect(styleBlock(reference)).toMatch(/\.src a\s*\{[^}]*min-height:\s*44px/s);
+	});
+
+	it('keeps composer plate readings faint on paper, not the batchim wash', () => {
+		const css = styleBlock(slots);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*font-style:\s*italic/s);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*font-weight:\s*400/s);
+		expect(css).toMatch(/\.slot-reading\s*\{[^}]*margin-block-start:\s*var\(--s2\)/s);
+		expect(css).not.toMatch(/\.slot-name\s*\{[^}]*font-style:\s*italic/s);
+		expect(css).not.toMatch(/\.slot\.bottom\.filled\s*\{[^}]*background:\s*var\(--blue-soft\)/s);
+		expect(css).toMatch(/\.slot\.bottom\.filled\s*\{[^}]*border-color:\s*var\(--blue\)/s);
+		const { light, dark } = activeSystem;
+		expect(contrastRatio(light.inkFaint, light.paperRaised)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(dark.inkFaint, dark.paperRaised)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
 	it('paints stats labels in ink so they clear 7:1 on raised paper and rose-soft', () => {

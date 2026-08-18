@@ -349,10 +349,33 @@ const FINAL_RR: Record<string, string> = {
 	'ㅇ': 'ng', 'ㅈ': 't', 'ㅊ': 't', 'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 't'
 };
 
+/** Phonetic job of a composer cell — not a tray label. */
+export type JamoSlot = 'lead' | 'vowel' | 'batchim';
+
+/**
+ * Isolated Revised Romanization of one jamo in that job.
+ * Empty when the glyph is missing, not a jamo, or silent (ㅇ as lead).
+ */
+export function jamoReading(jamo: string, slot: JamoSlot): string {
+	switch (slot) {
+		case 'lead':
+			return LEAD_RR[jamo] ?? '';
+		case 'vowel':
+			return VOWEL_RR[jamo] ?? '';
+		case 'batchim':
+			return FINAL_RR[jamo] ?? '';
+		default: {
+			const _exhaustive: never = slot;
+			void _exhaustive;
+			return '';
+		}
+	}
+}
+
 export function romanizeSyllable(ch: string): string {
 	const parts = decompose(ch);
 	if (!parts) return '';
-	return `${LEAD_RR[parts.lead] ?? ''}${VOWEL_RR[parts.vowel] ?? ''}${FINAL_RR[parts.final] ?? ''}`;
+	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
 }
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */

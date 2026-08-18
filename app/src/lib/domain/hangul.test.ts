@@ -4,7 +4,7 @@ import {
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
-	romanizeSyllable, romanizeWord
+	romanizeSyllable, romanizeWord, jamoReading
 } from './hangul';
 
 describe('syllable composition', () => {
@@ -312,5 +312,26 @@ describe('romanize spoken syllables', () => {
 	it('returns empty string for a non-syllable', () => {
 		expect(romanizeSyllable('ㄱ')).toBe('');
 		expect(romanizeWord('한!')).toBe('');
+	});
+});
+
+describe('jamoReading', () => {
+	it('names isolated vowels with Revised Romanization', () => {
+		expect(jamoReading('ㅕ', 'vowel')).toBe('yeo');
+		expect(jamoReading('ㅣ', 'vowel')).toBe('i');
+		expect(jamoReading('ㅖ', 'vowel')).toBe('ye');
+	});
+
+	it('uses onset g and batchim k for ㄱ, and leaves lead ㅇ silent', () => {
+		expect(jamoReading('ㄱ', 'lead')).toBe('g');
+		expect(jamoReading('ㄱ', 'batchim')).toBe('k');
+		expect(jamoReading('ㅇ', 'lead')).toBe('');
+		expect(jamoReading('ㅇ', 'batchim')).toBe('ng');
+	});
+
+	it('returns empty for a missing glyph or the wrong slot', () => {
+		expect(jamoReading('', 'vowel')).toBe('');
+		expect(jamoReading('ㄱ', 'vowel')).toBe('');
+		expect(jamoReading('ㅕ', 'lead')).toBe('');
 	});
 });
