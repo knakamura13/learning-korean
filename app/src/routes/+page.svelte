@@ -90,8 +90,10 @@
 					<a
 						class="lab card"
 						href={resolve('/lab/[id]', { id: lab.id })}
+						class:now={card.startHere}
 						class:done={card.done}
 						class:resume={card.resumeAt !== null}
+						aria-current={card.startHere ? 'step' : undefined}
 						aria-labelledby="lab-{lab.id}-title"
 					>
 						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
@@ -219,7 +221,17 @@
 		transform: translateY(0);
 		box-shadow: var(--shadow-1);
 	}
+	a.lab.now:hover { border-color: var(--accent); }
 	a.lab.resume:hover { border-color: var(--rose); }
+	a.lab.done:hover {
+		transform: none;
+		box-shadow: var(--shadow-1);
+		border-color: var(--rule-strong);
+		color: inherit;
+	}
+	a.lab:hover .chip-status.go {
+		color: var(--accent-ink);
+	}
 
 	.num {
 		font-family: var(--mono);
@@ -228,7 +240,12 @@
 		flex: 0 0 auto;
 		line-height: 1.2;
 	}
-	.lab.done .num { color: var(--good); }
+	.lab.now {
+		border-color: var(--accent);
+		border-inline-start-width: 3px;
+	}
+	.lab.now .num { color: var(--accent); }
+	.lab.done .num { color: var(--ink-faint); }
 	.lab.resume { border-color: var(--rose); }
 	.lab.resume .num { color: var(--rose); }
 
@@ -261,9 +278,9 @@
 		border: 1px solid transparent;
 	}
 	.chip-status.ok {
-		color: var(--good);
-		background: var(--good-soft);
-		border-color: color-mix(in srgb, var(--good) 30%, transparent);
+		color: var(--ink-faint);
+		background: transparent;
+		border-color: var(--rule-strong);
 	}
 	.chip-status.wait {
 		color: var(--warn);
@@ -271,9 +288,9 @@
 		border-color: color-mix(in srgb, var(--warn) 30%, transparent);
 	}
 	.chip-status.go {
-		color: var(--accent);
-		background: var(--accent-soft);
-		border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+		color: var(--accent-ink);
+		background: var(--accent);
+		border-color: var(--accent);
 	}
 	.chip-status.due {
 		color: var(--rose);
@@ -361,6 +378,7 @@
 	.sw.n { background: var(--rule-strong); }
 
 	@media (forced-colors: active) {
+		.lab.now { border-color: Highlight; }
 		.lab.resume { border-color: Highlight; }
 		.track { background: Canvas; }
 		.track .m { background: Highlight; }
