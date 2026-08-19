@@ -6,6 +6,8 @@ export { DEFAULT_LOOK_ID, isLookId, LOOKS, type LookId } from './catalog';
 export { LOOK_KEY, paperFor, readLookId, writeLookId } from './look';
 
 import { activeSystem } from './active';
+import type { LookId } from './catalog';
+import { paperFor, readLookId } from './look';
 
 export const THEME_KEY = 'korean-theme';
 export const PAPER_LIGHT = activeSystem.light.paper;
@@ -79,7 +81,7 @@ export function themeToggleLabel(pref: ThemePref, prefersDark = systemPrefersDar
 	return `Theme: ${themePrefLabel(current)}. Next: ${themePrefLabel(next)}`;
 }
 
-export function applyTheme(pref: ThemePref): void {
+export function applyTheme(pref: ThemePref, lookId: LookId = readLookId()): void {
 	const root = document.documentElement;
 	if (pref === 'light' || pref === 'dark') {
 		root.setAttribute('data-theme', pref);
@@ -89,9 +91,15 @@ export function applyTheme(pref: ThemePref): void {
 		root.style.colorScheme = '';
 	}
 
-	const color = resolvedTheme(pref) === 'dark' ? PAPER_DARK : PAPER_LIGHT;
+	const color = paperFor(lookId, resolvedTheme(pref));
 	const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"][data-resolved]');
 	if (themeColor) themeColor.content = color;
 	const scheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
 	if (scheme) scheme.content = pref === 'system' ? 'light dark' : pref;
+}
+
+/** Paint the selected look onto the DOM. Does not touch localStorage. */
+export function applyLook(id: LookId, pref: ThemePref = readThemePref()): void {
+	document.documentElement.setAttribute('data-look', id);
+	applyTheme(pref, id);
 }

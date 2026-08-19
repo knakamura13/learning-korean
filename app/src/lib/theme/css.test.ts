@@ -5,6 +5,7 @@ import pluginSrc from './vitePlugin.ts?raw';
 import { allDesignSystemsCss, designSystemCss } from './css';
 import {
 	applyDesignSystem,
+	BOOT_PLACEHOLDER,
 	CSS_PLACEHOLDER,
 	PAPER_PLACEHOLDER_DARK,
 	PAPER_PLACEHOLDER_LIGHT
@@ -264,18 +265,34 @@ describe('allDesignSystemsCss', () => {
 });
 
 describe('applyDesignSystem', () => {
+	const beta: DesignSystem = {
+		...fixture,
+		id: 'beta',
+		name: 'Beta',
+		summary: 'Second look.',
+		light: paint('#eeeeee', '#020202'),
+		dark: paint('#0a0a0a', '#fafafa'),
+		fonts: []
+	};
+
 	it('stamps paper colours and token CSS into one HTML pass', () => {
 		const html = [
 			`light:${PAPER_PLACEHOLDER_LIGHT}`,
 			`dark:${PAPER_PLACEHOLDER_DARK}`,
-			`<style>${CSS_PLACEHOLDER}</style>`
+			`<style>${CSS_PLACEHOLDER}</style>`,
+			`<script>${BOOT_PLACEHOLDER}</script>`
 		].join('\n');
-		const stamped = applyDesignSystem(html, fixture);
+		const stamped = applyDesignSystem(html, [fixture, beta], fixture);
 		expect(stamped).toContain(`light:${fixture.light.paper}`);
 		expect(stamped).toContain(`dark:${fixture.dark.paper}`);
 		expect(stamped).toContain('--paper: #fefefe');
+		expect(stamped).toMatch(/html\[data-look='fixture'\]/);
+		expect(stamped).toMatch(/html\[data-look='beta'\]/);
+		expect(stamped).toContain('"fixture":{"light":"#fefefe","dark":"#121212"}');
+		expect(stamped).toContain('"beta":{"light":"#eeeeee","dark":"#0a0a0a"}');
 		expect(stamped).not.toContain(CSS_PLACEHOLDER);
 		expect(stamped).not.toContain(PAPER_PLACEHOLDER_LIGHT);
+		expect(stamped).not.toContain(BOOT_PLACEHOLDER);
 	});
 });
 

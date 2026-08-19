@@ -26,9 +26,10 @@ import errorPage from '../routes/+error.svelte?raw';
 import appHtml from '../app.html?raw';
 import manifest from '../../static/manifest.webmanifest?raw';
 import { activeSystem } from './theme/active';
+import { LOOKS } from './theme/catalog';
 import { contrastRatio } from './theme/contrast';
 import { designSystemCss } from './theme/css';
-import { applyDesignSystem } from './theme/placeholders';
+import { applyDesignSystem, BOOT_PLACEHOLDER } from './theme/placeholders';
 import slots from './components/Slots.svelte?raw';
 
 const appCss = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
@@ -649,9 +650,11 @@ describe('polish audit regressions', () => {
 		expect(appHtml).toMatch(/manifest-dark\.webmanifest/);
 		expect(appHtml).toMatch(/prefers-color-scheme:\s*dark/);
 		expect(appHtml).toContain('%%DESIGN_PAPER_LIGHT%%');
-		const resolvedHtml = applyDesignSystem(appHtml, activeSystem);
+		expect(appHtml).toContain(BOOT_PLACEHOLDER);
+		const resolvedHtml = applyDesignSystem(appHtml, LOOKS, activeSystem);
 		expect(resolvedHtml).toContain(activeSystem.light.paper);
 		expect(resolvedHtml).toContain(activeSystem.dark.paper);
+		expect(resolvedHtml).not.toContain(BOOT_PLACEHOLDER);
 		expect(manifest).toContain(`"theme_color": "${activeSystem.light.paper}"`);
 		const darkPath = new URL('../../static/manifest-dark.webmanifest', import.meta.url);
 		expect(existsSync(darkPath)).toBe(true);
@@ -666,7 +669,8 @@ describe('polish audit regressions', () => {
 		expect(tags[0]).toMatch(/\bdata-resolved\b/);
 		expect(tags[0]).not.toMatch(/\bmedia=/);
 		expect(appHtml).not.toMatch(/name="theme-color"[^>]*\bmedia=/);
-		expect(appHtml).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
+		const stamped = applyDesignSystem(appHtml, LOOKS, activeSystem);
+		expect(stamped).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
 	});
 
 	it('sizes eyebrow chrome at 0.75rem so small uppercase type clears APCA', () => {
