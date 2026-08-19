@@ -485,6 +485,13 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.25rem/s);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
+		expect(layout).toMatch(/class="review-w"/);
+		expect(layout).toMatch(/class="badge" aria-hidden="true"/);
+		expect(layout).toMatch(/Review, \$\{queue\} cards due/);
+		expect(styleBlock(layout)).toMatch(/\.review-w\s*\{[^}]*position:\s*relative/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*position:\s*absolute/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*inset-block-end:/s);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);
 		expect(styleBlock(layout)).not.toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(/s);
 		expect(styleBlock(layout)).toMatch(/nav a\.active\s*\{[^}]*background:\s*var\(--paper\)/s);

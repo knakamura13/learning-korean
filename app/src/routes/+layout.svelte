@@ -87,10 +87,14 @@
 					href={resolve(item.href)}
 					class:active={isActive}
 					aria-current={isActive ? 'page' : undefined}
+					aria-label={item.href === '/review' && queue > 0
+						? `Review, ${queue} cards due`
+						: undefined}
 				>
-					{item.label}
-					{#if item.href === '/review' && queue > 0}
-						<span class="badge" aria-label="{queue} cards due for review">{queue}</span>
+					{#if item.href === '/review'}
+						Revie<span class="review-w">w{#if queue > 0}<span class="badge" aria-hidden="true">{queue}</span>{/if}</span>
+					{:else}
+						{item.label}
 					{/if}
 				</a>
 			{/each}
@@ -209,7 +213,7 @@
 	nav {
 		--tab-r: 12px;
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		align-self: stretch;
 		align-items: stretch;
 		gap: 0.35rem;
@@ -226,7 +230,6 @@
 		position: relative;
 		display: inline-flex;
 		align-items: center;
-		gap: var(--s1);
 		/* 40px keeps a 0.25rem gap under the bar’s top edge. 44px would kiss that edge. */
 		min-height: 40px;
 		padding: 0 0.75rem;
@@ -281,14 +284,32 @@
 		);
 	}
 
+	.review-w {
+		position: relative;
+	}
+
 	.badge {
+		position: absolute;
+		inset-inline-start: 50%;
+		inset-block-end: calc(100% - 0.1rem);
+		margin-inline-start: -0.31rem;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		min-inline-size: 0.62rem;
+		min-block-size: 0.62rem;
+		padding: 0 0.1rem;
 		font-family: var(--mono);
-		font-size: 0.62rem;
+		font-size: 0.45rem;
+		font-weight: 600;
+		line-height: 1;
 		background: var(--rose);
 		color: var(--accent-ink);
 		border-radius: var(--r-pill);
-		padding: 0.05rem 0.36rem;
 		font-variant-numeric: tabular-nums;
+		pointer-events: none;
 	}
 
 	@media (min-width: 72rem) {
@@ -299,7 +320,18 @@
 
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
-		nav a { padding-inline: 0.55rem; }
+		nav { gap: 0.2rem; }
+		nav a {
+			padding-inline: 0.4rem;
+			font-size: 0.76rem;
+		}
+		.badge {
+			min-inline-size: 0.5rem;
+			min-block-size: 0.5rem;
+			font-size: 0.4rem;
+			padding-inline: 0.08rem;
+			margin-inline-start: -0.25rem;
+		}
 	}
 
 	@media (max-width: 30rem) {
@@ -308,7 +340,15 @@
 			gap: var(--s2);
 		}
 		.name { font-size: 0.8125rem; }
-		nav a { letter-spacing: -0.02em; padding-inline: 0.45rem; }
+		nav {
+			gap: 0.1rem;
+			padding-inline: 0.45rem;
+		}
+		nav a {
+			letter-spacing: -0.03em;
+			padding-inline: 0.28rem;
+			font-size: 0.7rem;
+		}
 	}
 
 	@media (max-width: 20rem) {
