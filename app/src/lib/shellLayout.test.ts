@@ -40,7 +40,8 @@ describe('shell layout source contracts', () => {
 		expect(styleBlock(layout)).toMatch(/main\.skip-landed::after/);
 		expect(styleBlock(layout)).toMatch(/main:focus::after/);
 		expect(styleBlock(layout)).toMatch(/outline:\s*3px solid var\(--blue\)/);
-		expect(styleBlock(layout)).toMatch(/border:\s*3px solid var\(--blue\)/);
+		expect(styleBlock(layout)).toMatch(/border:\s*4px solid var\(--blue\)/);
+		expect(styleBlock(layout)).toMatch(/inset:\s*1\.5rem/);
 		expect(styleBlock(layout)).not.toMatch(/#main:focus[^{]*\{[^}]*outline:\s*none/s);
 	});
 

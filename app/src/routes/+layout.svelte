@@ -125,17 +125,19 @@
 		position: relative;
 	}
 
-	/* Inset overlay (not outline): descendants would cover an inset outline. */
+	/* Overlay, not outline: page content would cover an inset outline.
+	   1.5rem inset keeps the ring on paper, not flush with the viewport. */
 	main:focus::after,
 	main:focus-visible::after,
 	main.skip-landed::after {
 		content: '';
 		position: absolute;
-		inset: 8px;
-		border: 3px solid var(--blue);
+		inset: 1.5rem;
+		border: 4px solid var(--blue);
 		border-radius: 6px;
 		pointer-events: none;
 		z-index: 6;
+		box-shadow: 0 0 0 3px var(--paper);
 	}
 
 	:global(#main:focus),
