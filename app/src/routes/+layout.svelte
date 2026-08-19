@@ -21,12 +21,19 @@
 
 	const queue = $derived(progress.stats.queue);
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+	let skipLanded = $state(false);
 
 	function skipToMain(event: MouseEvent) {
 		event.preventDefault();
 		const main = document.getElementById('main');
 		if (!(main instanceof HTMLElement)) return;
-		main.focus();
+		skipLanded = true;
+		main.focus({ focusVisible: true });
+		main.scrollIntoView({ block: 'start' });
+	}
+
+	function clearSkipLanded() {
+		skipLanded = false;
 	}
 </script>
 
@@ -87,7 +94,7 @@
 	</div>
 </header>
 
-<main id="main" tabindex="-1">
+<main id="main" tabindex="-1" class:skip-landed={skipLanded} onblur={clearSkipLanded}>
 	{@render children()}
 </main>
 {#if !labRoute}
@@ -115,12 +122,31 @@
 
 	main {
 		flex: 1 1 auto;
+		position: relative;
 	}
 
-	main:focus,
-	main:focus-visible {
-		outline: none;
-		box-shadow: none;
+	/* Overlay, not outline: page content would cover an inset outline.
+	   1.5rem inset keeps the ring on paper, not flush with the viewport. */
+	main:focus::after,
+	main:focus-visible::after,
+	main.skip-landed::after {
+		content: '';
+		position: absolute;
+		inset: 1.5rem;
+		border: 4px solid var(--blue);
+		border-radius: 6px;
+		pointer-events: none;
+		z-index: 6;
+		box-shadow: 0 0 0 3px var(--paper);
+	}
+
+	:global(#main:focus),
+	:global(#main:focus-visible),
+	main.skip-landed {
+		outline: 3px solid var(--blue);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+		border-radius: 3px;
 	}
 
 	.bar {
@@ -196,7 +222,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--s1);
-		min-height: calc(44px - 0.25rem);
+		/* 40px keeps a 0.25rem gap under the bar’s top edge. 44px would kiss that edge. */
+		min-height: 40px;
 		padding: 0 0.75rem;
 		border-radius: 0;
 		font-size: 0.84rem;
@@ -297,6 +324,17 @@
 	}
 
 	@media (forced-colors: active) {
+		main:focus::after,
+		main:focus-visible::after,
+		main.skip-landed::after {
+			border-color: Highlight;
+		}
+		:global(#main:focus),
+		:global(#main:focus-visible),
+		main.skip-landed {
+			outline: 3px solid Highlight;
+			box-shadow: none;
+		}
 		.bar {
 			background: Canvas;
 			color: CanvasText;

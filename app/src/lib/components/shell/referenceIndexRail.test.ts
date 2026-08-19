@@ -13,6 +13,7 @@ describe('ReferenceIndexRail source contracts', () => {
 	it('names the nav Jump to section and keeps 44px targets', () => {
 		expect(src).toMatch(/aria-label="Jump to section"/);
 		expect(src).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(src)).toMatch(/\.jump:active/);
 		expect(styleBlock(src)).toMatch(/\.jump\s*\{[^}]*background:\s*transparent/s);
 		expect(styleBlock(src)).not.toMatch(/\.jump\s*\{[^}]*background:\s*var\(--paper-sunk\)/s);
 		expect(styleBlock(src)).not.toMatch(/\.jump\s*\{[^}]*background:\s*var\(--paper-raised\)/s);
@@ -39,7 +40,7 @@ describe('ReferenceIndexRail source contracts', () => {
 		expect(src).toMatch(/HoverPreview/);
 		expect(hoverPreview).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
 		expect(hoverPreview).toMatch(/decideHoverIntent/);
-		expect(src).toMatch(/<svelte:body onpointermove=\{hover\.onHoverIntentMove\}/);
+		expect(src).toMatch(/<svelte:body onpointermove=\{hover\.openId \? hover\.onHoverIntentMove : undefined\}/);
 		expect(src).toMatch(/onPointerEnter=\{hover\.onPreviewPointerEnter\}/);
 		expect(hoverPreview).toMatch(/isHoverPointerType/);
 		expect(hoverPreview).toMatch(/expandHoverBox/);

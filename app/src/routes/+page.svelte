@@ -247,10 +247,15 @@
 			aria-label="Review pile by letter family"
 		>
 			{#if pile.body === 'loading'}
-				<p class="pile-empty loading-copy" aria-hidden="true">
-					<span class="skel line-ph"></span>
-					<span class="skel line-ph short"></span>
-				</p>
+				<div class="pile-skel" aria-hidden="true">
+					{#each tiers as tier (tier.id)}
+						<div class="tier skel-row">
+							<span class="nm"><span class="skel line-ph"></span></span>
+							<span class="track"></span>
+							<span class="ct"><span class="skel line-ph short"></span></span>
+						</div>
+					{/each}
+				</div>
 			{:else if pile.body === 'empty'}
 				<p class="pile-empty">
 					Letters land here after you finish a lab. Lab 01 unlocks {tiers[0]?.size ?? 19} consonants.
@@ -353,6 +358,7 @@
 		gap: var(--s3);
 		flex-wrap: wrap;
 		margin: 0 0 var(--s3);
+		min-height: 44px;
 	}
 	.sec-row .sec { margin: 0; }
 
@@ -432,7 +438,7 @@
 		align-items: center;
 	}
 	.flag {
-		min-height: 1.4em;
+		min-height: 1.6rem;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--s2);
@@ -492,22 +498,18 @@
 		line-height: 1.55;
 		color: var(--ink-soft);
 		max-width: 32rem;
+		min-height: 16rem;
 	}
-	.pile-empty.loading-copy {
-		display: flex;
-		flex-direction: column;
-		gap: var(--s2);
-		min-height: 2.6rem;
-		justify-content: center;
-	}
-	.pile-empty .line-ph {
-		width: 22rem;
+	.pile-skel .line-ph {
+		width: 7rem;
 		max-width: 90%;
-		height: 0.85rem;
+		height: 0.7rem;
 	}
-	.pile-empty .line-ph.short {
-		width: 14rem;
-		max-width: 70%;
+	.pile-skel .line-ph.short {
+		width: 4.5rem;
+	}
+	.skel-row .track {
+		background: var(--paper-sunk);
 	}
 
 	.tier {

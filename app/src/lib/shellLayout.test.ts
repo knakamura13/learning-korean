@@ -33,7 +33,16 @@ describe('shell layout source contracts', () => {
 		expect(layout).toMatch(/function skipToMain/);
 		expect(layout).toMatch(/preventDefault\(\)/);
 		expect(layout).toMatch(/getElementById\(['"]main['"]\)/);
-		expect(layout).toMatch(/main:focus-visible/);
+		expect(layout).toMatch(/main\.focus\(\{\s*focusVisible:\s*true\s*\}\)/);
+		expect(layout).toMatch(/skipLanded = true/);
+		expect(layout).toMatch(/class:skip-landed=\{skipLanded\}/);
+		expect(layout).toMatch(/:global\(#main:focus\)/);
+		expect(styleBlock(layout)).toMatch(/main\.skip-landed::after/);
+		expect(styleBlock(layout)).toMatch(/main:focus::after/);
+		expect(styleBlock(layout)).toMatch(/outline:\s*3px solid var\(--blue\)/);
+		expect(styleBlock(layout)).toMatch(/border:\s*4px solid var\(--blue\)/);
+		expect(styleBlock(layout)).toMatch(/inset:\s*1\.5rem/);
+		expect(styleBlock(layout)).not.toMatch(/#main:focus[^{]*\{[^}]*outline:\s*none/s);
 	});
 
 	it('home and lab pages put .shell before LabIndexRail in DOM order', () => {

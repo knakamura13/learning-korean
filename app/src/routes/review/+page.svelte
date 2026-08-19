@@ -496,6 +496,7 @@
 		}
 		.in.right { border-color: Highlight; background: Canvas; color: CanvasText; }
 		.in.wrong { border-color: ButtonText; background: Canvas; color: CanvasText; }
+		.ans em { color: CanvasText; }
 	}
 
 	.fb {
@@ -522,7 +523,7 @@
 	.fb[data-tone='wrong'] .v { color: var(--bad); }
 
 	.ans { display: block; font-family: var(--mono); font-size: 1.05rem; margin-bottom: var(--s1); }
-	.ans em { font-size: 0.78rem; opacity: 0.6; font-style: normal; }
+	.ans em { font-size: 0.78rem; color: var(--ink-soft); font-style: normal; }
 	.note { display: block; color: var(--ink-soft); }
 	.sched {
 		display: block;
