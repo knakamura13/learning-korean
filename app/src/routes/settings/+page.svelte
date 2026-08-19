@@ -72,7 +72,7 @@
 		margin: 0;
 		font-family: var(--display);
 		font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
-		font-weight: 600;
+		font-weight: 400;
 		line-height: 1.2;
 		color: var(--ink);
 	}
@@ -82,7 +82,7 @@
 		margin: 0 0 var(--s4);
 		font-family: var(--display);
 		font-size: 1.25rem;
-		font-weight: 600;
+		font-weight: 400;
 		color: var(--ink);
 	}
 

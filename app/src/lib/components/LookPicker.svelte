@@ -139,7 +139,8 @@
 		margin-block-end: var(--s3);
 		font-family: var(--display);
 		font-size: 1.05rem;
-		font-weight: 600;
+		font-weight: 400;
+		font-style: italic;
 		color: var(--ink);
 	}
 
@@ -170,12 +171,17 @@
 		transition:
 			border-color var(--fast) var(--ease),
 			background var(--fast) var(--ease),
-			box-shadow var(--fast) var(--ease);
+			box-shadow var(--fast) var(--ease),
+			transform var(--fast) var(--ease);
 	}
 
 	.look-card:hover {
 		border-color: var(--rule-strong);
 		background: var(--paper);
+	}
+	.look-card:active {
+		background: var(--paper-sunk);
+		transform: translateY(1px);
 	}
 
 	.look-card:has(input:checked) {
@@ -209,7 +215,8 @@
 	.look-name {
 		font-family: var(--display);
 		font-size: 1.05rem;
-		font-weight: 600;
+		font-weight: 400;
+		font-style: italic;
 		line-height: 1.3;
 	}
 
@@ -254,12 +261,17 @@
 		cursor: pointer;
 		transition:
 			border-color var(--fast) var(--ease),
-			background var(--fast) var(--ease);
+			background var(--fast) var(--ease),
+			transform var(--fast) var(--ease);
 	}
 
 	.color-option:hover {
 		border-color: var(--rule-strong);
 		background: var(--paper);
+	}
+	.color-option:active {
+		background: var(--paper-sunk);
+		transform: translateY(1px);
 	}
 
 	.color-option:has(input:checked) {
@@ -288,6 +300,10 @@
 		.look-card,
 		.color-option {
 			transition: none;
+		}
+		.look-card:active,
+		.color-option:active {
+			transform: none;
 		}
 	}
 

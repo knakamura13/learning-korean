@@ -123,7 +123,7 @@
 	.key {
 		box-sizing: border-box;
 		font-family: var(--mono);
-		font-size: 0.44rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		line-height: 1;
 		color: var(--ink-faint);

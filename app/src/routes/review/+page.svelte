@@ -533,7 +533,7 @@
 
 	.v {
 		display: block;
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;

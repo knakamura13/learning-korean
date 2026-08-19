@@ -351,7 +351,7 @@
 		}
 		.name { font-size: 0.8125rem; }
 		nav {
-			gap: 0.1rem;
+			gap: 0.35rem;
 			padding-inline: 0.45rem;
 		}
 		nav a {
