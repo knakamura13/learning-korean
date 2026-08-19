@@ -194,6 +194,24 @@ describe('labPreviewModel', () => {
 		expect(model.priorActionLabel).toBeNull();
 		expect(model.accessibleName).toMatch(/completed/);
 	});
+
+	it('keeps the next lab available, not start-here, while Review is due', () => {
+		const due = {
+			ready: true,
+			isUnlocked: (tier: string) => tier === 'lab01',
+			sessionFor: () => undefined,
+			queue: 10
+		};
+		const model = labPreviewModel(
+			labs[1],
+			'Vowels next.',
+			labCardState(labs[1], labs, due),
+			labs[0]
+		);
+		expect(model.chipKind).toBe('available');
+		expect(model.chip).toBe('');
+		expect(model.locked).toBe(false);
+	});
 });
 
 describe('decideUnlockedPress', () => {

@@ -132,8 +132,17 @@ export function labCardState(lab: CourseLab, labs: CourseLab[], view: CourseNavV
 		locked: blocked && !resume && !done,
 		done: done && !resume,
 		resumeAt: resume ? resume.nextIndex : null,
-		startHere: nextLabId(labs, view) === lab.id
+		startHere: nextLabId(labs, view) === lab.id && canHighlightStart(view)
 	};
+}
+
+/**
+ * Invert a lab as "start here" only when Review is not waiting.
+ * Newly unlocked cards should be reviewed before the next lesson; painting
+ * the next lab as the primary action fights that rule.
+ */
+export function canHighlightStart(view: Pick<CourseNavView, 'ready' | 'queue'>): boolean {
+	return !view.ready || view.queue <= 0;
 }
 
 /**
@@ -208,6 +217,13 @@ export function reviewPileView(
 	if (!ready) return { body: 'loading', due: 0 };
 	if (unlockedFamilies <= 0) return { body: 'empty', due: 0 };
 	return { body: 'progress', due: Math.max(0, queue) };
+}
+
+/** Home pile lede when cards are due. Null when the pile is not asking for a sitting. */
+export function reviewPileDueCopy(due: number, next: CourseLab | null): string | null {
+	if (due <= 0) return null;
+	if (!next) return 'Due now.';
+	return `Due now — before Lab ${padLab(next.number)}.`;
 }
 
 /** The next lab in course order after `currentId`, or null on the last lab. */

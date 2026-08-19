@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+	canHighlightStart,
 	continueAction,
 	followingLab,
 	labCardState,
 	labTone,
 	nextLabId,
+	reviewPileDueCopy,
 	reviewPileView,
 	showPrerequisiteGate,
 	type CourseLab,
@@ -99,6 +101,18 @@ describe('nextLabId', () => {
 		expect(labCardState(labs[1], labs, after).locked).toBe(false);
 		expect(labCardState(labs[1], labs, after).startHere).toBe(true);
 		expect(labCardState(labs[2], labs, after).locked).toBe(true);
+	});
+
+	it('does not invert the next lab as start-here while Review is due', () => {
+		const due = view({ unlocked: ['lab01'], queue: 10 });
+		expect(nextLabId(labs, due)).toBe('0002');
+		expect(labCardState(labs[1], labs, due)).toMatchObject({
+			locked: false,
+			done: false,
+			startHere: false
+		});
+		expect(canHighlightStart(due)).toBe(false);
+		expect(canHighlightStart(view({ ready: false, queue: 10 }))).toBe(true);
 	});
 });
 
@@ -227,6 +241,12 @@ describe('reviewPileView', () => {
 	it('shows progress and due count once a family is in the pile', () => {
 		expect(reviewPileView(true, 19, 10)).toEqual({ body: 'progress', due: 10 });
 		expect(reviewPileView(true, 19, 0)).toEqual({ body: 'progress', due: 0 });
+	});
+
+	it('names the next lab when cards are due, and stays quiet when they are not', () => {
+		expect(reviewPileDueCopy(10, labs[1])).toBe('Due now — before Lab 02.');
+		expect(reviewPileDueCopy(1, null)).toBe('Due now.');
+		expect(reviewPileDueCopy(0, labs[1])).toBeNull();
 	});
 });
 

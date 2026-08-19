@@ -4,7 +4,9 @@
 	import { LABS } from '$lib/content';
 	import {
 		labCardState,
+		nextLabId,
 		requiredLab,
+		reviewPileDueCopy,
 		reviewPileView,
 		toCourseLab,
 		type CourseNavView
@@ -53,6 +55,12 @@
 
 	const pile = $derived(
 		reviewPileView(navView.ready, tiers.filter((tier) => tier.unlocked).length, navView.queue)
+	);
+	const dueCopy = $derived(
+		reviewPileDueCopy(
+			pile.due,
+			course.find((lab) => lab.id === nextLabId(course, navView)) ?? null
+		)
 	);
 
 	function pct(part: number, whole: number) {
@@ -242,9 +250,12 @@
 		</div>
 		<div
 			class="tiers card"
+			class:due={pile.due > 0}
 			role="region"
 			aria-busy={pile.body === 'loading'}
-			aria-label="Review pile by letter family"
+			aria-label={pile.due > 0
+				? `Review pile by letter family, ${pile.due} cards due`
+				: 'Review pile by letter family'}
 		>
 			{#if pile.body === 'loading'}
 				<div class="pile-skel" aria-hidden="true">
@@ -261,6 +272,9 @@
 					Letters land here after you finish a lab. Lab 01 unlocks {tiers[0]?.size ?? 19} consonants.
 				</p>
 			{:else}
+				{#if dueCopy}
+					<p class="pile-due">{dueCopy}</p>
+				{/if}
 				{#each tiers as tier (tier.id)}
 					{@const pctMature = pct(tier.mature, tier.size)}
 					{@const pctYoung = pct(tier.young, tier.size)}
@@ -423,6 +437,11 @@
 		border-color: color-mix(in srgb, var(--accent-ink) 40%, transparent);
 	}
 	.lab.done .num { color: var(--ink-faint); }
+	.lab.done h3,
+	.lab.done p {
+		color: var(--ink-soft);
+	}
+	a.lab:not(.now):not(.done):not(.resume) .num { color: var(--accent); }
 	.lab.resume { border-color: var(--rose); }
 	.lab.resume .num { color: var(--rose); }
 
@@ -491,6 +510,17 @@
 	}
 
 	.tiers { padding: var(--s4); }
+	.tiers.due {
+		border-color: var(--rose);
+	}
+
+	.pile-due {
+		margin: 0 0 var(--s3);
+		font-size: 0.88rem;
+		line-height: 1.45;
+		color: var(--rose);
+		max-width: 32rem;
+	}
 
 	.pile-empty {
 		margin: 0;
@@ -583,6 +613,9 @@
 			border-color: HighlightText;
 		}
 		.lab.resume { border-color: Highlight; }
+		a.lab:not(.now):not(.done):not(.resume) .num { color: LinkText; }
+		.tiers.due { border-color: Highlight; }
+		.pile-due { color: LinkText; }
 		.track { background: Canvas; }
 		.track .m { background: Highlight; }
 		.track .y { background: ButtonText; }

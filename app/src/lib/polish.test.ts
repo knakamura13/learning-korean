@@ -533,6 +533,7 @@ describe('polish audit regressions', () => {
 		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
 		expect(home).not.toMatch(/sec-deck-heading/);
 		expect(home).toMatch(/reviewPileView/);
+		expect(home).toMatch(/reviewPileDueCopy/);
 		expect(home).toMatch(/<span class="chip-status wait">/);
 		expect(home).not.toMatch(/<a[^>]*chip-status/);
 		expect(home).not.toMatch(/class="peek"/);
@@ -594,6 +595,10 @@ describe('polish audit regressions', () => {
 		expect(homeCss).toMatch(/\.lab\.now \.num\s*\{[^}]*var\(--accent-ink\)/s);
 		expect(homeCss).not.toMatch(/\.lab\.done \.num\s*\{[^}]*var\(--good\)/s);
 		expect(homeCss).toMatch(/\.lab\.done \.num\s*\{[^}]*var\(--ink-faint\)/s);
+		expect(homeCss).toMatch(/\.lab\.done h3/);
+		expect(homeCss).toMatch(
+			/a\.lab:not\(\.now\):not\(\.done\):not\(\.resume\) \.num\s*\{[^}]*var\(--accent\)/s
+		);
 		expect(homeCss).toMatch(/a\.lab:hover[\s\S]*translateY\(-2px\)/);
 		expect(homeCss).not.toMatch(/a\.lab\.done:hover\s*\{[^}]*transform:\s*none/s);
 		expect(homeCss).toMatch(/a\.lab\.now:hover\s*\{[^}]*var\(--accent-ink\)/s);
@@ -613,7 +618,11 @@ describe('polish audit regressions', () => {
 		const layoutCss = styleBlock(layout);
 		const reviewCss = styleBlock(review);
 		expect(home).toMatch(/chip-status due/);
+		expect(home).toMatch(/reviewPileDueCopy/);
+		expect(home).toMatch(/class:due=\{pile\.due > 0\}/);
 		expect(homeCss).toMatch(/\.chip-status\.due\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/\.tiers\.due\s*\{[^}]*var\(--rose\)/s);
+		expect(homeCss).toMatch(/\.pile-due\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/\.lab\.resume\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/a\.lab\.resume:hover\s*\{[^}]*var\(--rose\)/s);
 		expect(homeCss).toMatch(/\.chip-status\.go\s*\{[^}]*var\(--accent\)/s);
