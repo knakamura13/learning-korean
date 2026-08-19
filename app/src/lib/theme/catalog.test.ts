@@ -20,13 +20,13 @@ describe('LOOKS catalog', () => {
 		expect(academia.summary).toBe('Library lamp, scholarly serif.');
 	});
 
-	it('accepts only the four ids', () => {
-		expect(isLookId('botanicalKorea')).toBe(true);
-		expect(isLookId('taegeuk')).toBe(true);
-		expect(isLookId('watercolor')).toBe(true);
-		expect(isLookId('academia')).toBe(true);
+	it('accepts every LOOK_IDS entry and rejects others', () => {
+		for (const id of LOOK_IDS) {
+			expect(isLookId(id)).toBe(true);
+		}
 		expect(isLookId('system')).toBe(false);
 		expect(isLookId('')).toBe(false);
 		expect(isLookId(null)).toBe(false);
+		expect(isLookId('not-a-look')).toBe(false);
 	});
 });

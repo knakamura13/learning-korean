@@ -93,6 +93,15 @@ describe('Settings page — Appearance', () => {
 		selectRadio(root, 'color', 'system');
 		expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
 	});
+
+	it('omits the persist-fail sentence on the happy path', () => {
+		const root = render();
+		selectRadio(root, 'look', 'taegeuk');
+		selectRadio(root, 'color', 'dark');
+
+		const note = root.querySelector('.backup-note');
+		expect(note?.textContent).not.toContain('This browser did not save your look or color.');
+	});
 });
 
 describe('Settings page — Backup', () => {

@@ -5,6 +5,7 @@
 		LOOKS,
 		applyLook,
 		applyTheme,
+		isLookId,
 		readLookId,
 		readThemePref,
 		resolvedTheme,
@@ -27,13 +28,6 @@
 	onMount(() => {
 		lookId = readLookId();
 		pref = readThemePref();
-		applyLook(lookId, pref);
-		const mq = matchMedia('(prefers-color-scheme: dark)');
-		const onChange = () => {
-			if (readThemePref() === 'system') applyTheme('system', lookId);
-		};
-		mq.addEventListener('change', onChange);
-		return () => mq.removeEventListener('change', onChange);
 	});
 
 	function chooseLook(id: LookId) {
@@ -50,7 +44,7 @@
 
 	function onLookChange(event: Event) {
 		const value = (event.currentTarget as HTMLInputElement).value;
-		chooseLook(value as LookId);
+		if (isLookId(value)) chooseLook(value);
 	}
 
 	function onColorChange(event: Event) {

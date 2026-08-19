@@ -71,12 +71,14 @@ function expectDomMatchesResolver(
 	const expectedTheme = document.documentElement.getAttribute('data-theme');
 	const expectedPaper = themeColor?.getAttribute('content');
 	const expectedScheme = colorScheme?.getAttribute('content');
+	const expectedColorScheme = document.documentElement.style.colorScheme;
 
 	setupDom();
 	runBootScript(input.look, input.theme, input.prefersDark);
 
 	expect(document.documentElement.getAttribute('data-look')).toBe(expectedLook);
 	expect(document.documentElement.getAttribute('data-theme')).toBe(expectedTheme);
+	expect(document.documentElement.style.colorScheme).toBe(expectedColorScheme);
 	expect(
 		document.querySelector<HTMLMetaElement>('meta[name="theme-color"][data-resolved]')?.getAttribute(
 			'content'
@@ -185,6 +187,11 @@ describe('themeBootScript', () => {
 
 	it('matches for taegeuk + light + prefersDark', () => {
 		expectDomMatchesResolver({ look: 'taegeuk', theme: 'light', prefersDark: true });
+	});
+
+	it('matches for explicit dark theme and sets colorScheme', () => {
+		expectDomMatchesResolver({ look: 'academia', theme: 'dark', prefersDark: false });
+		expect(document.documentElement.style.colorScheme).toBe('dark');
 	});
 
 	it('matches for unknown look without rewriting storage', () => {

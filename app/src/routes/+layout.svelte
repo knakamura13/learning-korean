@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from 'svelte';
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
@@ -7,6 +8,7 @@
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { activeSystem } from '$lib/theme/active';
+	import { applyLook, readLookId, readThemePref, subscribeSystemTheme } from '$lib/theme';
 
 	let { children } = $props();
 
@@ -21,6 +23,11 @@
 
 	const queue = $derived(progress.stats.queue);
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+
+	onMount(() => {
+		applyLook(readLookId(), readThemePref());
+		return subscribeSystemTheme();
+	});
 
 	function skipToMain(event: MouseEvent) {
 		event.preventDefault();

@@ -10,5 +10,5 @@ export const DEFAULT_LOOK_ID: LookId = 'botanicalKorea';
 export const LOOKS: DesignSystem[] = [botanicalKorea, taegeuk, watercolor, academia];
 
 export function isLookId(value: string | null): value is LookId {
-	return value === 'botanicalKorea' || value === 'taegeuk' || value === 'watercolor' || value === 'academia';
+	return value !== null && (LOOK_IDS as readonly string[]).includes(value);
 }

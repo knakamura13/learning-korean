@@ -164,4 +164,10 @@ describe('LookPicker selection', () => {
 		expect(document.documentElement.getAttribute('data-theme')).toBe('light');
 		expect(onPersistFail).toHaveBeenCalledOnce();
 	});
+
+	it('does not subscribe to prefers-color-scheme itself (layout owns that)', () => {
+		expect(src).not.toMatch(/matchMedia\s*\(\s*['"]\(prefers-color-scheme/);
+		expect(src).not.toMatch(/addEventListener\s*\(\s*['"]change['"]/);
+		expect(src).toMatch(/isLookId/);
+	});
 });

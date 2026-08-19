@@ -5,10 +5,14 @@ import {
 	PAPER_DARK,
 	PAPER_LIGHT,
 	resolvedTheme,
+	subscribeSystemTheme,
 	THEME_KEY,
 	writeThemePref
 } from './index';
 import { activeSystem } from './active';
+import { LOOK_KEY } from './look';
+import { academia } from './systems/academia';
+import layoutSrc from '../../routes/+layout.svelte?raw';
 
 describe('isThemePref', () => {
 	it('accepts stored light and dark, and leftover system', () => {
@@ -66,5 +70,104 @@ describe('writeThemePref', () => {
 		});
 
 		expect(writeThemePref('light')).toBe(false);
+	});
+
+	it('returns false when removeItem throws for system', () => {
+		localStorage.setItem(THEME_KEY, 'dark');
+		vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+			throw new Error('blocked');
+		});
+
+		expect(writeThemePref('system')).toBe(false);
+	});
+});
+
+describe('subscribeSystemTheme', () => {
+	let changeHandler: (() => void) | null = null;
+	let removeListener: ReturnType<typeof vi.fn>;
+
+	beforeEach(() => {
+		localStorage.clear();
+		changeHandler = null;
+		removeListener = vi.fn();
+		document.head.innerHTML = `
+			<meta name="color-scheme" content="light dark" />
+			<meta name="theme-color" content="${PAPER_LIGHT}" data-resolved />
+		`;
+		document.documentElement.removeAttribute('data-theme');
+		document.documentElement.removeAttribute('data-look');
+		vi.stubGlobal('matchMedia', (query: string) => ({
+			matches: false,
+			media: query,
+			onchange: null,
+			addEventListener: (_event: string, handler: () => void) => {
+				changeHandler = handler;
+			},
+			removeEventListener: removeListener,
+			dispatchEvent: vi.fn()
+		}));
+	});
+
+	afterEach(() => {
+		localStorage.clear();
+		vi.restoreAllMocks();
+		vi.unstubAllGlobals();
+	});
+
+	it('re-applies system theme-color when OS scheme flips and pref is system', () => {
+		localStorage.setItem(LOOK_KEY, 'academia');
+		const unsubscribe = subscribeSystemTheme();
+
+		expect(changeHandler).toBeTypeOf('function');
+		vi.stubGlobal('matchMedia', (query: string) => ({
+			matches: query.includes('prefers-color-scheme: dark'),
+			media: query,
+			onchange: null,
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn()
+		}));
+
+		changeHandler?.();
+
+		const themeColor = document.querySelector<HTMLMetaElement>(
+			'meta[name="theme-color"][data-resolved]'
+		);
+		expect(themeColor?.content).toBe(academia.dark.paper);
+
+		unsubscribe();
+		expect(removeListener).toHaveBeenCalled();
+	});
+
+	it('ignores OS flips when an explicit theme is stored', () => {
+		localStorage.setItem(THEME_KEY, 'light');
+		localStorage.setItem(LOOK_KEY, 'academia');
+		subscribeSystemTheme();
+
+		const before = document.querySelector<HTMLMetaElement>(
+			'meta[name="theme-color"][data-resolved]'
+		)?.content;
+
+		vi.stubGlobal('matchMedia', (query: string) => ({
+			matches: query.includes('prefers-color-scheme: dark'),
+			media: query,
+			onchange: null,
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn()
+		}));
+		changeHandler?.();
+
+		expect(
+			document.querySelector<HTMLMetaElement>('meta[name="theme-color"][data-resolved]')?.content
+		).toBe(before);
+	});
+});
+
+describe('layout appearance reconciliation', () => {
+	it('paints applyLook on mount and uses subscribeSystemTheme', () => {
+		expect(layoutSrc).toMatch(/onMount\s*\(/);
+		expect(layoutSrc).toMatch(/applyLook\s*\(\s*readLookId\s*\(\s*\)\s*,\s*readThemePref\s*\(\s*\)\s*\)/);
+		expect(layoutSrc).toMatch(/subscribeSystemTheme\s*\(/);
 	});
 });

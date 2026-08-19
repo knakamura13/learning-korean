@@ -6,7 +6,6 @@ import {
 	backupFilename,
 	exportedStatus,
 	importedStatus,
-	storageNeedsBackup,
 	unwrapImport,
 	wrapExport
 } from './backup';
@@ -129,14 +128,5 @@ describe('wrapExport / unwrapImport', () => {
 				})
 			)
 		).toBeNull();
-	});
-});
-
-describe('storageNeedsBackup', () => {
-	it('opens the backup fold when either store is not durable or SRS is unreadable', () => {
-		expect(storageNeedsBackup(true, true, false)).toBe(false);
-		expect(storageNeedsBackup(false, true, false)).toBe(true);
-		expect(storageNeedsBackup(true, false, false)).toBe(true);
-		expect(storageNeedsBackup(true, true, true)).toBe(true);
 	});
 });

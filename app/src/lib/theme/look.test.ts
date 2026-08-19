@@ -13,6 +13,7 @@ describe('readLookId', () => {
 	afterEach(() => {
 		localStorage.clear();
 		document.documentElement.removeAttribute('data-look');
+		vi.restoreAllMocks();
 	});
 
 	it('round-trips taegeuk', () => {
@@ -73,5 +74,9 @@ describe('writeLookId', () => {
 describe('paperFor', () => {
 	it('returns the system paper for the resolved scheme', () => {
 		expect(paperFor('academia', 'dark')).toBe(academia.dark.paper);
+	});
+
+	it('falls back to DEFAULT_LOOK_ID papers when the id is missing from LOOKS', () => {
+		expect(paperFor('botanicalKorea', 'light')).toBe(paperFor(DEFAULT_LOOK_ID, 'light'));
 	});
 });

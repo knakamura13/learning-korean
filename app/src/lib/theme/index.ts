@@ -83,3 +83,17 @@ export function applyLook(id: LookId, pref: ThemePref = readThemePref()): void {
 	document.documentElement.setAttribute('data-look', id);
 	applyTheme(pref, id);
 }
+
+/**
+ * Keep `theme-color` in sync when the OS scheme flips under a stored `system`
+ * pref. Mount once from the root layout so routes without LookPicker still refresh.
+ */
+export function subscribeSystemTheme(): () => void {
+	if (typeof matchMedia !== 'function') return () => {};
+	const mq = matchMedia('(prefers-color-scheme: dark)');
+	const onChange = () => {
+		if (readThemePref() === 'system') applyTheme('system');
+	};
+	mq.addEventListener('change', onChange);
+	return () => mq.removeEventListener('change', onChange);
+}

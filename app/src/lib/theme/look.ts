@@ -22,6 +22,9 @@ export function writeLookId(id: LookId): boolean {
 }
 
 export function paperFor(id: LookId, resolved: 'light' | 'dark'): string {
-	const system = LOOKS.find((look) => look.id === id)!;
+	const system =
+		LOOKS.find((look) => look.id === id) ??
+		LOOKS.find((look) => look.id === DEFAULT_LOOK_ID) ??
+		LOOKS[0];
 	return resolved === 'dark' ? system.dark.paper : system.light.paper;
 }
