@@ -119,8 +119,10 @@
 
 	main:focus,
 	main:focus-visible {
-		outline: none;
-		box-shadow: none;
+		outline: 2px solid var(--paper);
+		outline-offset: 4px;
+		box-shadow: var(--focus-ring);
+		border-radius: 3px;
 	}
 
 	.bar {
@@ -196,7 +198,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--s1);
-		min-height: calc(44px - 0.25rem);
+		/* 40px keeps a 0.25rem gap under the bar’s top edge. 44px would kiss that edge. */
+		min-height: 40px;
 		padding: 0 0.75rem;
 		border-radius: 0;
 		font-size: 0.84rem;
@@ -297,6 +300,11 @@
 	}
 
 	@media (forced-colors: active) {
+		main:focus,
+		main:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
+		}
 		.bar {
 			background: Canvas;
 			color: CanvasText;

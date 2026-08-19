@@ -34,6 +34,10 @@ describe('shell layout source contracts', () => {
 		expect(layout).toMatch(/preventDefault\(\)/);
 		expect(layout).toMatch(/getElementById\(['"]main['"]\)/);
 		expect(layout).toMatch(/main:focus-visible/);
+		expect(styleBlock(layout)).toMatch(
+			/main:focus(?:,\s*main:focus-visible)?\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/s
+		);
+		expect(styleBlock(layout)).not.toMatch(/main:focus-visible\s*\{[^}]*outline:\s*none/s);
 	});
 
 	it('home and lab pages put .shell before LabIndexRail in DOM order', () => {
