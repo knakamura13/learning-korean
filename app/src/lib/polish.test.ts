@@ -670,4 +670,13 @@ describe('polish audit regressions', () => {
 		expect(manifestDark).toContain(`"theme_color": "${activeSystem.dark.paper}"`);
 		expect(manifestDark).toContain(`"background_color": "${activeSystem.dark.paper}"`);
 	});
+
+	it('keeps one unscoped theme-color so in-app theme can update browser chrome', () => {
+		const tags = appHtml.match(/<meta\b[^>]*\bname="theme-color"[^>]*>/g) ?? [];
+		expect(tags).toHaveLength(1);
+		expect(tags[0]).toMatch(/\bdata-resolved\b/);
+		expect(tags[0]).not.toMatch(/\bmedia=/);
+		expect(appHtml).not.toMatch(/name="theme-color"[^>]*\bmedia=/);
+		expect(appHtml).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
+	});
 });
