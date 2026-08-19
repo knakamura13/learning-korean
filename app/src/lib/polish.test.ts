@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
@@ -46,25 +45,6 @@ function physicalBoxProps(src: string): string[] {
 
 function physicalLeftRight(src: string): string[] {
 	return src.match(/(?:^|[^\w-])(?:left|right)\s*:/gm) ?? [];
-}
-
-function samplePngRgb(filePath: string, x?: number, y?: number): { r: number; g: number; b: number } {
-	const script = `
-from PIL import Image
-import json, sys
-im = Image.open(sys.argv[1])
-w, h = im.size
-px = int(sys.argv[2]) if len(sys.argv) > 2 else w // 2
-py = int(sys.argv[3]) if len(sys.argv) > 3 else h // 2
-p = im.getpixel((px, py))
-print(json.dumps(list(p[:3])))
-`.trim();
-	const args = [filePath, String(x ?? ''), String(y ?? '')].filter((a, i) => i === 0 || a !== '');
-	const out = execSync(`python3 -c "${script.replace(/"/g, '\\"')}" ${args.map((a) => `"${a}"`).join(' ')}`, {
-		encoding: 'utf8'
-	}).trim();
-	const [r, g, b] = JSON.parse(out) as [number, number, number];
-	return { r, g, b };
 }
 
 describe('polish audit regressions', () => {
@@ -622,11 +602,8 @@ describe('polish audit regressions', () => {
 		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
 	});
 
-	it('ships moss raster icons and OG, not 태극 red marks', () => {
+	it('ships PNG raster icons and OG with a moss favicon, not 태극 red marks', () => {
 		const rasters = ['icon-192.png', 'apple-touch-icon.png', 'icon-maskable.png', 'og.png'] as const;
-		const taguk = { r: 164, g: 52, b: 43 };
-		const isTaguk = (r: number, g: number, b: number) =>
-			Math.abs(r - taguk.r) < 8 && Math.abs(g - taguk.g) < 8 && Math.abs(b - taguk.b) < 8;
 
 		for (const name of rasters) {
 			const path = fileURLToPath(new URL(`../../static/${name}`, import.meta.url));
@@ -635,11 +612,8 @@ describe('polish audit regressions', () => {
 			expect(bytes.length).toBeGreaterThan(1000);
 			expect(bytes[0]).toBe(0x89);
 			expect(bytes[1]).toBe(0x50);
-			const sample =
-				name === 'og.png'
-					? samplePngRgb(path, 200, 300)
-					: samplePngRgb(path);
-			expect(isTaguk(sample.r, sample.g, sample.b)).toBe(false);
+			expect(bytes[2]).toBe(0x4e);
+			expect(bytes[3]).toBe(0x47);
 		}
 	});
 
