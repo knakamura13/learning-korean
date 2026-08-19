@@ -25,24 +25,24 @@ describe('shell layout source contracts', () => {
 		expect(styleBlock(layout)).toMatch(/main\s*\{[^}]*flex:\s*1 1 auto/s);
 	});
 
-	it('layout exposes focusable main and skip link that focuses it', () => {
+	it('layout skip link lands on main without a permanent click-focus target', () => {
 		expect(layout).toMatch(/<main[^>]*id="main"/);
-		expect(layout).toMatch(/<main[^>]*tabindex="-1"/);
+		expect(layout).not.toMatch(/<main[^>]*tabindex="/);
 		expect(layout).toMatch(/class="skip"[^>]*href="#main"/);
 		expect(layout).toMatch(/onclick=\{skipToMain\}/);
 		expect(layout).toMatch(/function skipToMain/);
 		expect(layout).toMatch(/preventDefault\(\)/);
 		expect(layout).toMatch(/getElementById\(['"]main['"]\)/);
-		expect(layout).toMatch(/main\.focus\(\{\s*focusVisible:\s*true\s*\}\)/);
-		expect(layout).toMatch(/skipLanded = true/);
-		expect(layout).toMatch(/class:skip-landed=\{skipLanded\}/);
-		expect(layout).toMatch(/:global\(#main:focus\)/);
-		expect(styleBlock(layout)).toMatch(/main\.skip-landed::after/);
-		expect(styleBlock(layout)).toMatch(/main:focus::after/);
-		expect(styleBlock(layout)).toMatch(/outline:\s*3px solid var\(--blue\)/);
-		expect(styleBlock(layout)).toMatch(/border:\s*4px solid var\(--blue\)/);
-		expect(styleBlock(layout)).toMatch(/inset:\s*1\.5rem/);
-		expect(styleBlock(layout)).not.toMatch(/#main:focus[^{]*\{[^}]*outline:\s*none/s);
+		expect(layout).toMatch(/from '\$lib\/a11y\/skipLanding'/);
+		expect(layout).toMatch(/armSkipLanding\(/);
+		expect(layout).toMatch(/disarmSkipLanding\(/);
+		expect(layout).toMatch(/onblur=\{/);
+		expect(layout).not.toMatch(/skipLanded/);
+		expect(layout).not.toMatch(/:global\(#main:focus\)/);
+		expect(styleBlock(layout)).toMatch(/main\s*\{[^}]*position:\s*relative/s);
+		expect(styleBlock(layout)).not.toMatch(/main:focus::after/);
+		expect(styleBlock(layout)).not.toMatch(/main:focus-visible::after/);
+		expect(styleBlock(layout)).not.toMatch(/data-skip-landed/);
 	});
 
 	it('home and lab pages put .shell before LabIndexRail in DOM order', () => {

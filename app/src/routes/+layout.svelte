@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
+	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { activeSystem } from '$lib/theme/active';
@@ -21,19 +22,17 @@
 
 	const queue = $derived(progress.stats.queue);
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
-	let skipLanded = $state(false);
 
 	function skipToMain(event: MouseEvent) {
 		event.preventDefault();
 		const main = document.getElementById('main');
 		if (!(main instanceof HTMLElement)) return;
-		skipLanded = true;
-		main.focus({ focusVisible: true });
+		armSkipLanding(main);
 		main.scrollIntoView({ block: 'start' });
 	}
 
-	function clearSkipLanded() {
-		skipLanded = false;
+	function clearSkipLanding(event: FocusEvent) {
+		if (event.currentTarget instanceof HTMLElement) disarmSkipLanding(event.currentTarget);
 	}
 </script>
 
@@ -99,7 +98,7 @@
 	</div>
 </header>
 
-<main id="main" tabindex="-1" class:skip-landed={skipLanded} onblur={clearSkipLanded}>
+<main id="main" onblur={clearSkipLanding}>
 	{@render children()}
 </main>
 {#if !labRoute}
@@ -128,30 +127,6 @@
 	main {
 		flex: 1 1 auto;
 		position: relative;
-	}
-
-	/* Overlay, not outline: page content would cover an inset outline.
-	   1.5rem inset keeps the ring on paper, not flush with the viewport. */
-	main:focus::after,
-	main:focus-visible::after,
-	main.skip-landed::after {
-		content: '';
-		position: absolute;
-		inset: 1.5rem;
-		border: 4px solid var(--blue);
-		border-radius: 6px;
-		pointer-events: none;
-		z-index: 6;
-		box-shadow: 0 0 0 3px var(--paper);
-	}
-
-	:global(#main:focus),
-	:global(#main:focus-visible),
-	main.skip-landed {
-		outline: 3px solid var(--blue);
-		outline-offset: 2px;
-		box-shadow: var(--focus-ring);
-		border-radius: 3px;
 	}
 
 	.bar {
@@ -329,17 +304,6 @@
 	}
 
 	@media (forced-colors: active) {
-		main:focus::after,
-		main:focus-visible::after,
-		main.skip-landed::after {
-			border-color: Highlight;
-		}
-		:global(#main:focus),
-		:global(#main:focus-visible),
-		main.skip-landed {
-			outline: 3px solid Highlight;
-			box-shadow: none;
-		}
 		.bar {
 			background: Canvas;
 			color: CanvasText;
