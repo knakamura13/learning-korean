@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import SettingsLink from '$lib/components/SettingsLink.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -93,7 +93,7 @@
 				</a>
 			{/each}
 		</nav>
-		<ThemeToggle />
+		<SettingsLink />
 	</div>
 </header>
 
@@ -289,7 +289,7 @@
 			flex-wrap: wrap;
 			row-gap: 0;
 		}
-		.inner :global(.theme) { order: 2; }
+		.inner :global(.settings) { order: 2; }
 		nav {
 			order: 3;
 			flex: 1 0 100%;

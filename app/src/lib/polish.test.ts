@@ -8,7 +8,7 @@ import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
 import options from './components/Options.svelte?raw';
-import themeToggle from './components/ThemeToggle.svelte?raw';
+import settingsLink from './components/SettingsLink.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
@@ -81,8 +81,8 @@ describe('polish audit regressions', () => {
 		expect(promptOpen).not.toMatch(/data-prompt-live/);
 	});
 
-	it('gives the theme control pressed-state feedback', () => {
-		expect(themeToggle).toMatch(/\.theme:active\s*\{/);
+	it('gives the settings control pressed-state feedback', () => {
+		expect(settingsLink).toMatch(/\.settings:active\s*\{/);
 	});
 
 	it('gives remaining interactive chrome a pressed state', () => {
@@ -345,14 +345,14 @@ describe('polish audit regressions', () => {
 		expect(labPreview).toMatch(/openLab/);
 	});
 
-	it('sizes popover actions, pip, theme, brand, and lab-index hits to at least 44px', () => {
+	it('sizes popover actions, pip, settings, brand, and lab-index hits to at least 44px', () => {
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
 		expect(home).toMatch(/LockedLabPopover/);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/min-height:\s*44px/);
-		expect(styleBlock(themeToggle)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
 	});
@@ -464,7 +464,8 @@ describe('polish audit regressions', () => {
 		expect(layout).not.toMatch(/>¶</);
 		expect(layout).not.toMatch(/Colophon/);
 		expect(layout).not.toMatch(/folio/);
-		expect(layout).toMatch(/ThemeToggle/);
+		expect(layout).toMatch(/SettingsLink/);
+		expect(layout).not.toMatch(/ThemeToggle/);
 		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(layout)).not.toMatch(/\.inner\s*\{[^}]*(?<!min-)height:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.name\s*\{[^}]*font-size:\s*1rem/s);

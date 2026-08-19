@@ -2,13 +2,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	isThemePref,
-	nextThemePref,
 	PAPER_DARK,
 	PAPER_LIGHT,
 	resolvedTheme,
 	THEME_KEY,
-	themeToggleGlyph,
-	themeToggleLabel,
 	writeThemePref
 } from './index';
 import { activeSystem } from './active';
@@ -32,36 +29,6 @@ describe('resolvedTheme', () => {
 	it('follows the system flag when unset', () => {
 		expect(resolvedTheme('system', true)).toBe('dark');
 		expect(resolvedTheme('system', false)).toBe('light');
-	});
-});
-
-describe('nextThemePref', () => {
-	it('flips light ↔ dark, and leaves system for the opposite of the resolved scheme', () => {
-		expect(nextThemePref('light')).toBe('dark');
-		expect(nextThemePref('dark')).toBe('light');
-		expect(nextThemePref('system', false)).toBe('dark');
-		expect(nextThemePref('system', true)).toBe('light');
-	});
-});
-
-describe('themeToggleGlyph', () => {
-	it('shows the resolved sun or moon on first visit (empty storage → system)', () => {
-		expect(themeToggleGlyph('system', false)).toBe('sun');
-		expect(themeToggleGlyph('system', true)).toBe('moon');
-	});
-
-	it('honors an explicit choice over the system scheme', () => {
-		expect(themeToggleGlyph('light', true)).toBe('sun');
-		expect(themeToggleGlyph('dark', false)).toBe('moon');
-	});
-});
-
-describe('themeToggleLabel', () => {
-	it('names the resolved scheme and the other binary step', () => {
-		expect(themeToggleLabel('system', false)).toBe('Theme: Light. Next: Dark');
-		expect(themeToggleLabel('system', true)).toBe('Theme: Dark. Next: Light');
-		expect(themeToggleLabel('light', true)).toBe('Theme: Light. Next: Dark');
-		expect(themeToggleLabel('dark', false)).toBe('Theme: Dark. Next: Light');
 	});
 });
 

@@ -46,14 +46,6 @@ export function resolvedTheme(pref: ThemePref, prefersDark = systemPrefersDark()
 	return pref;
 }
 
-/** Flip light ↔ dark. Unset (`system`) follows the OS until the first click. */
-export function nextThemePref(
-	pref: ThemePref,
-	prefersDark = systemPrefersDark()
-): 'light' | 'dark' {
-	return resolvedTheme(pref, prefersDark) === 'light' ? 'dark' : 'light';
-}
-
 export function themePrefLabel(pref: ThemePref): string {
 	switch (pref) {
 		case 'light':
@@ -67,18 +59,6 @@ export function themePrefLabel(pref: ThemePref): string {
 			return _exhaustive;
 		}
 	}
-}
-
-/** Visible glyph: stored light/dark, or the system scheme when nothing is stored. */
-export function themeToggleGlyph(pref: ThemePref, prefersDark = systemPrefersDark()): 'sun' | 'moon' {
-	return resolvedTheme(pref, prefersDark) === 'dark' ? 'moon' : 'sun';
-}
-
-/** Accessible name for the binary light ↔ dark control. */
-export function themeToggleLabel(pref: ThemePref, prefersDark = systemPrefersDark()): string {
-	const current = resolvedTheme(pref, prefersDark);
-	const next = nextThemePref(pref, prefersDark);
-	return `Theme: ${themePrefLabel(current)}. Next: ${themePrefLabel(next)}`;
 }
 
 export function applyTheme(pref: ThemePref, lookId: LookId = readLookId()): void {
