@@ -29,6 +29,11 @@ describe('review answer field', () => {
 		expect(src).toMatch(/checkAnswer\(card, value\)/);
 	});
 
+	it('caps typed answers and gives the field a hover border', () => {
+		expect(src).toMatch(/maxlength=\{REVIEW_ANSWER_MAX_LENGTH\}/);
+		expect(src).toMatch(/\.in:hover:not\(:disabled\)\s*\{[^}]*border-color:\s*var\(--accent\)/s);
+	});
+
 	it('uses a spoken-form placeholder for pronunciation cards', () => {
 		expect(src).toMatch(/reviewAnswerPlaceholder\(card\.kind\)/);
 		expect(src).toMatch(/card\?\.kind === 'pron'/);

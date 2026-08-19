@@ -128,6 +128,30 @@ describe('designSystemCss', () => {
 		expect(ranged).toContain('unicode-range: U+0000-00FF');
 	});
 
+	it('emits local metric-matched fallback faces without a webfont URL', () => {
+		const css = designSystemCss({
+			...fixture,
+			fonts: [
+				...fixture.fonts,
+				{
+					family: 'Test Fallback',
+					local: ['Georgia', 'Palatino'],
+					style: 'italic',
+					ascentOverride: '73.5%',
+					descentOverride: '26.5%',
+					lineGapOverride: '0%'
+				}
+			]
+		});
+		expect(css).toContain("font-family: 'Test Fallback'");
+		expect(css).toContain("src: local('Georgia'), local('Palatino')");
+		expect(css).toContain('ascent-override: 73.5%');
+		expect(css).toContain('descent-override: 26.5%');
+		expect(css).toContain('line-gap-override: 0%');
+		expect(css).toContain('font-style: italic');
+		expect(css).not.toContain("url('/fonts/undefined')");
+	});
+
 	it('emits look tokens for size, leading, and shape', () => {
 		expect(css).toContain('--html-size: 100%');
 		expect(css).toContain('--leading: 1.5');
@@ -204,5 +228,6 @@ describe('delivery', () => {
 		expect(layoutSrc).toMatch(/activeSystem\.fonts/);
 		expect(layoutSrc).toMatch(/rel="preload"/);
 		expect(layoutSrc).not.toMatch(/%sveltekit\.assets%/);
+		expect(layoutSrc).toMatch(/face\.file/);
 	});
 });

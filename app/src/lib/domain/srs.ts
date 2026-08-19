@@ -24,6 +24,12 @@ export const MATURE_DAYS = 21;
 /** Sized to keep a session near the ten-minute budget. */
 export const DEFAULT_NEW_PER_DAY = 10;
 
+/** Overdue reviews drawn into one sitting; leftover debt stays in `stats.due`. */
+export const DEFAULT_REVIEW_PER_SITTING = 10;
+
+/** Imported backup files larger than this are rejected. */
+export const MAX_BACKUP_CHARS = 100_000;
+
 /** A missed card comes back inside the same sitting. */
 export const RELEARN_MS = 600_000;
 
@@ -83,6 +89,55 @@ export function emptyState(): SrsState {
 	};
 }
 
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+function asFiniteNumber(value: unknown): number | null {
+	return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function reviveCard(raw: unknown): CardState | null {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+	const rec = raw as Record<string, unknown>;
+	const ease = asFiniteNumber(rec.ease);
+	const ivl = asFiniteNumber(rec.ivl);
+	const reps = asFiniteNumber(rec.reps);
+	const lapses = asFiniteNumber(rec.lapses);
+	const due = asFiniteNumber(rec.due);
+	if (ease === null || ivl === null || reps === null || lapses === null || due === null) return null;
+	if (ivl < 0 || reps < 0 || lapses < 0) return null;
+	return { ease, ivl, reps: Math.trunc(reps), lapses: Math.trunc(lapses), due };
+}
+
+function reviveCards(raw: unknown): Record<string, CardState> {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+	const cards: Record<string, CardState> = {};
+	for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
+		if (!id) continue;
+		const card = reviveCard(value);
+		if (card) cards[id] = card;
+	}
+	return cards;
+}
+
+function isDaysRecord(raw: unknown): raw is Record<string, number> {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+	return Object.entries(raw as Record<string, unknown>).every(
+		([day, count]) => ISO_DAY.test(day) && asFiniteNumber(count) !== null && (count as number) >= 0
+	);
+}
+
+function reviveDays(raw: unknown): Record<string, number> {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+	const days: Record<string, number> = {};
+	for (const [day, count] of Object.entries(raw as Record<string, unknown>)) {
+		if (!ISO_DAY.test(day)) continue;
+		const n = asFiniteNumber(count);
+		if (n === null || n < 0) continue;
+		days[day] = Math.trunc(n);
+	}
+	return days;
+}
+
 /**
  * Accepts anything and returns a valid state — corrupt storage must not brick
  * the app, and must not silently discard real progress either.
@@ -97,16 +152,30 @@ export function reviveState(raw: unknown): SrsState {
 	const s = raw as Partial<SrsState> & { v?: number };
 	const version = s.version ?? s.v;
 	if (version !== 1) return emptyState();
+	const newCount = asFiniteNumber(s.newCount);
 	return {
 		version: 1,
 		unlocked: Array.isArray(s.unlocked) ? s.unlocked.filter((x) => typeof x === 'string') : [],
 		openedLabs: Array.isArray(s.openedLabs) ? s.openedLabs.filter((x) => typeof x === 'string') : [],
-		cards: s.cards && typeof s.cards === 'object' ? s.cards : {},
-		days: s.days && typeof s.days === 'object' ? s.days : {},
+		cards: reviveCards(s.cards),
+		days: reviveDays(s.days),
 		newDate: typeof s.newDate === 'string' ? s.newDate : '',
-		newCount: typeof s.newCount === 'number' ? s.newCount : 0,
+		newCount: newCount !== null && newCount >= 0 ? Math.trunc(newCount) : 0,
 		newIds: Array.isArray(s.newIds) ? s.newIds.filter((id) => typeof id === 'string') : []
 	};
+}
+
+/**
+ * JSON.parse of localStorage can throw. Keep the raw blob so a later persist
+ * cannot overwrite unread history with an empty deck.
+ */
+export function decodeStoredState(raw: string | null): { state: SrsState; corrupt: string | null } {
+	if (raw == null || raw === '') return { state: emptyState(), corrupt: null };
+	try {
+		return { state: reviveState(JSON.parse(raw)), corrupt: null };
+	} catch {
+		return { state: emptyState(), corrupt: raw };
+	}
 }
 
 /** Strict shape check for file restore — unlike reviveState, rejects unknown payloads. */
@@ -117,11 +186,16 @@ export function isSrsBackup(raw: unknown): boolean {
 	if (version !== 1) return false;
 	if (!Array.isArray(s.unlocked)) return false;
 	if (!s.cards || typeof s.cards !== 'object' || Array.isArray(s.cards)) return false;
+	for (const value of Object.values(s.cards as Record<string, unknown>)) {
+		if (!reviveCard(value)) return false;
+	}
+	if (s.days !== undefined && !isDaysRecord(s.days)) return false;
 	return true;
 }
 
 /** Parse and validate an imported backup; returns null on any failure. */
 export function parseImportedBackup(json: string): SrsState | null {
+	if (json.length > MAX_BACKUP_CHARS) return null;
 	try {
 		const parsed = JSON.parse(json);
 		if (!isSrsBackup(parsed)) return null;
@@ -131,8 +205,13 @@ export function parseImportedBackup(json: string): SrsState | null {
 	}
 }
 
+/** Local calendar date (YYYY-MM-DD), not UTC. */
 export function isoDay(now: number): string {
-	return new Date(now).toISOString().slice(0, 10);
+	const d = new Date(now);
+	const y = d.getFullYear();
+	const month = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	return `${y}-${month}-${day}`;
 }
 
 /* ------------------------------------------------------------------ *
@@ -223,12 +302,13 @@ export function grade(state: SrsState, id: string, g: Grade, now: number): Grade
 
 	const wasNew = !rolled.cards[id];
 	const card = nextCard(rolled.cards[id], g, now);
+	const prevDays = asFiniteNumber(rolled.days[today]) ?? 0;
 
 	return {
 		state: {
 			...rolled,
 			cards: { ...rolled.cards, [id]: card },
-			days: { ...rolled.days, [today]: (rolled.days[today] ?? 0) + 1 },
+			days: { ...rolled.days, [today]: prevDays + 1 },
 			newCount: rolled.newCount + (wasNew ? 1 : 0)
 		},
 		card,
@@ -242,6 +322,7 @@ export function grade(state: SrsState, id: string, g: Grade, now: number): Grade
 
 export interface QueueOptions {
 	newPerDay?: number;
+	reviewPerSitting?: number;
 	/** Injectable so tests are deterministic; defaults to Math.random. */
 	shuffle?: <T>(items: T[]) => T[];
 }
@@ -314,8 +395,8 @@ export function pinNewForDay<T extends SchedulableCard>(
 }
 
 /**
- * Everything overdue, then a capped trickle of unseen cards. Reviews come
- * first: clearing debt matters more than taking on new material.
+ * Overdue reviews first (capped per sitting), then a capped trickle of unseen
+ * cards. Leftover debt stays in `stats.due` so Review can offer another sitting.
  *
  * When `state.newIds` is pinned for today, those ids are used instead of a
  * fresh shuffle so `/review` does not reshuffle unseen cards on every load.
@@ -327,15 +408,17 @@ export function due<T extends SchedulableCard>(
 	opts: QueueOptions = {}
 ): T[] {
 	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
+	const reviewPerSitting = opts.reviewPerSitting ?? DEFAULT_REVIEW_PER_SITTING;
 	const shuffle = opts.shuffle ?? defaultShuffle;
 	const today = isoDay(now);
 	const usedToday = state.newDate === today ? state.newCount : 0;
 	const { reviews, fresh } = splitQueue(state, deck, now);
+	const sittingReviews = reviews.slice(0, reviewPerSitting);
 	const room = Math.max(0, newPerDay - usedToday);
 
 	const pin = state.newDate === today ? state.newIds : [];
 	if (pin.length === 0) {
-		return [...reviews, ...shuffle(fresh).slice(0, room)];
+		return [...sittingReviews, ...shuffle(fresh).slice(0, room)];
 	}
 
 	const byId = new Map(fresh.map((c) => [c.id, c]));
@@ -345,7 +428,7 @@ export function due<T extends SchedulableCard>(
 		const card = byId.get(id);
 		if (card) pinned.push(card);
 	}
-	return [...reviews, ...pinned];
+	return [...sittingReviews, ...pinned];
 }
 
 /** Epoch ms of the soonest upcoming card, or null when nothing is scheduled. */

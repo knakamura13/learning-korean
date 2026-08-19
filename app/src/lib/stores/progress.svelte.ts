@@ -8,7 +8,7 @@
 
 import { browser } from '$app/environment';
 import {
-	emptyState, reviveState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
+	emptyState, decodeStoredState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
 	openLab as openLabAccess, isOpened,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
 	weakest as weakestCards, gradeFromAttempt, tierReviewProgress,
@@ -19,36 +19,32 @@ import { browserStorage, memoryStorage, type Storage } from '$lib/domain/storage
 
 const STORAGE_KEY = 'korean-srs-v1';
 
-function load(store: Storage): SrsState {
-	const raw = store.read();
-	if (!raw) return emptyState();
-	try {
-		return reviveState(JSON.parse(raw));
-	} catch {
-		return emptyState();
-	}
-}
-
-function createProgress() {
-	// On the server (prerender) there is no storage; start empty and hydrate.
-	const store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage();
-
-	let state = $state<SrsState>(load(store));
+export function createProgress(store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage()) {
+	const loaded = decodeStoredState(store.read());
+	let state = $state<SrsState>(loaded.state);
 	let now = $state(Date.now());
+	let durable = $state(store.durable);
+	let corruptRaw = $state<string | null>(loaded.corrupt);
 
 	function persistPin() {
 		const next = pinNewForDay(state, DECK, now);
 		if (next !== state) commit(next);
 	}
 
-	function commit(next: SrsState) {
+	function commit(next: SrsState): boolean {
+		if (corruptRaw) return false;
 		state = next;
-		store.write(JSON.stringify(next));
+		if (!store.write(JSON.stringify(next))) {
+			durable = false;
+			return false;
+		}
+		return true;
 	}
 
 	return {
 		get state() { return state; },
-		get durable() { return store.durable; },
+		get durable() { return durable; },
+		get corrupt() { return corruptRaw !== null; },
 
 		/** Re-read the clock so `due` and `stats` recompute. */
 		tick() {
@@ -98,7 +94,7 @@ function createProgress() {
 			const before = state.unlocked.length;
 			const next = unlockTiers(state, tiers);
 			if (next === state) return 0;
-			commit(next);
+			if (!commit(next)) return 0;
 			persistPin();
 			return tiers
 				.filter((t) => !state.unlocked.slice(0, before).includes(t))
@@ -121,17 +117,25 @@ function createProgress() {
 
 		reset() {
 			store.clear();
+			corruptRaw = null;
+			durable = store.durable;
 			state = emptyState();
 		},
 
 		export(): string {
+			if (corruptRaw) return corruptRaw;
 			return JSON.stringify(state, null, 2);
 		},
 
 		import(json: string): boolean {
 			const next = parseImportedBackup(json);
 			if (!next) return false;
-			commit(next);
+			if (!store.write(JSON.stringify(next))) {
+				durable = false;
+				return false;
+			}
+			corruptRaw = null;
+			state = next;
 			return true;
 		}
 	};

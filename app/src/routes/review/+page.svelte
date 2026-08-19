@@ -9,7 +9,12 @@
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
-	import { reviewAnswerPlaceholder, reviewBody, reviewChrome } from '$lib/domain/reviewChrome';
+	import {
+		REVIEW_ANSWER_MAX_LENGTH,
+		reviewAnswerPlaceholder,
+		reviewBody,
+		reviewChrome
+	} from '$lib/domain/reviewChrome';
 
 	let queue = $state<Card[]>([]);
 	let index = $state(0);
@@ -147,7 +152,13 @@
 		{/if}
 	</header>
 
-	{#if ready && !progress.durable}
+	{#if ready && progress.corrupt}
+		<div class="warn card">
+			<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
+			overwrite the unread file until you restore or reset.
+			<a href="#progress-backup">Download a backup</a>
+		</div>
+	{:else if ready && !progress.durable}
 		<div class="warn card">
 			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
 			origin, so your review history will vanish when you close the tab.
@@ -259,6 +270,7 @@
 							autocapitalize="off"
 							autocorrect="off"
 							spellcheck="false"
+							maxlength={REVIEW_ANSWER_MAX_LENGTH}
 							placeholder={reviewAnswerPlaceholder(card.kind)}
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
@@ -376,7 +388,7 @@
 
 	.tag {
 		text-align: center;
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.13em;
 		text-transform: uppercase;
@@ -440,7 +452,7 @@
 	}
 
 	.answer-label {
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
@@ -473,12 +485,19 @@
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 	}
+	.in:hover:not(:disabled) {
+		border-color: var(--accent);
+	}
 	.in:user-invalid,
 	.in[aria-invalid='true'] {
 		border-color: var(--bad);
 	}
-	.in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
-	.in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+	.in:hover:not(:disabled):user-invalid,
+	.in:hover:not(:disabled)[aria-invalid='true'] {
+		border-color: var(--bad);
+	}
+	.answer-controls .in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+	.answer-controls .in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
 	@media (forced-colors: active) {
 		.stat {

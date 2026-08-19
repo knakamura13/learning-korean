@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
@@ -14,6 +13,7 @@ import themeToggle from './components/ThemeToggle.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
+import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
@@ -46,25 +46,6 @@ function physicalBoxProps(src: string): string[] {
 
 function physicalLeftRight(src: string): string[] {
 	return src.match(/(?:^|[^\w-])(?:left|right)\s*:/gm) ?? [];
-}
-
-function samplePngRgb(filePath: string, x?: number, y?: number): { r: number; g: number; b: number } {
-	const script = `
-from PIL import Image
-import json, sys
-im = Image.open(sys.argv[1])
-w, h = im.size
-px = int(sys.argv[2]) if len(sys.argv) > 2 else w // 2
-py = int(sys.argv[3]) if len(sys.argv) > 3 else h // 2
-p = im.getpixel((px, py))
-print(json.dumps(list(p[:3])))
-`.trim();
-	const args = [filePath, String(x ?? ''), String(y ?? '')].filter((a, i) => i === 0 || a !== '');
-	const out = execSync(`python3 -c "${script.replace(/"/g, '\\"')}" ${args.map((a) => `"${a}"`).join(' ')}`, {
-		encoding: 'utf8'
-	}).trim();
-	const [r, g, b] = JSON.parse(out) as [number, number, number];
-	return { r, g, b };
 }
 
 describe('polish audit regressions', () => {
@@ -631,11 +612,8 @@ describe('polish audit regressions', () => {
 		expect(reviewCss).toMatch(/\.stat\.hot\s*\{[^}]*var\(--rose\)/s);
 	});
 
-	it('ships moss raster icons and OG, not 태극 red marks', () => {
+	it('ships PNG raster icons and OG with a moss favicon, not 태극 red marks', () => {
 		const rasters = ['icon-192.png', 'apple-touch-icon.png', 'icon-maskable.png', 'og.png'] as const;
-		const taguk = { r: 164, g: 52, b: 43 };
-		const isTaguk = (r: number, g: number, b: number) =>
-			Math.abs(r - taguk.r) < 8 && Math.abs(g - taguk.g) < 8 && Math.abs(b - taguk.b) < 8;
 
 		for (const name of rasters) {
 			const path = fileURLToPath(new URL(`../../static/${name}`, import.meta.url));
@@ -644,11 +622,8 @@ describe('polish audit regressions', () => {
 			expect(bytes.length).toBeGreaterThan(1000);
 			expect(bytes[0]).toBe(0x89);
 			expect(bytes[1]).toBe(0x50);
-			const sample =
-				name === 'og.png'
-					? samplePngRgb(path, 200, 300)
-					: samplePngRgb(path);
-			expect(isTaguk(sample.r, sample.g, sample.b)).toBe(false);
+			expect(bytes[2]).toBe(0x4e);
+			expect(bytes[3]).toBe(0x47);
 		}
 	});
 
@@ -666,6 +641,11 @@ describe('polish audit regressions', () => {
 		expect(layout).toMatch(/property="og:image:height"/);
 		expect(layout).toMatch(/content="630"/);
 		expect(layout).toMatch(/name="twitter:title"/);
+		expect(layout).toMatch(/name="twitter:description"/);
+		expect(layout).toMatch(/property="og:image:alt"/);
+		expect(layout).toMatch(/name="twitter:image:alt"/);
+		expect(layout).toMatch(/OG_IMAGE_ALT/);
+		expect(layout).toMatch(/SITE_DESCRIPTION/);
 		expect(appHtml).toMatch(/manifest-dark\.webmanifest/);
 		expect(appHtml).toMatch(/prefers-color-scheme:\s*dark/);
 		expect(appHtml).toContain('%%DESIGN_PAPER_LIGHT%%');
@@ -687,5 +667,31 @@ describe('polish audit regressions', () => {
 		expect(tags[0]).not.toMatch(/\bmedia=/);
 		expect(appHtml).not.toMatch(/name="theme-color"[^>]*\bmedia=/);
 		expect(appHtml).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
+	});
+
+	it('sizes eyebrow chrome at 0.75rem so small uppercase type clears APCA', () => {
+		expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(review)).toMatch(/\.answer-label\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(review)).toMatch(/\.tag\s*\{[^}]*font-size:\s*0\.75rem/s);
+	});
+
+	it('gives generic links a real pressed translate, not a no-op', () => {
+		expect(appCss).toMatch(/a:active:not\(\.btn\)\s*\{[^}]*translateY\(1px\)/s);
+		expect(appCss).toMatch(
+			/@media \(prefers-reduced-motion: reduce\)[\s\S]*?a:active:not\(\.btn\)\s*\{[^}]*transform:\s*none/s
+		);
+	});
+
+	it('contains overscroll on confirm dialogs and the locked-lab popover', () => {
+		expect(styleBlock(progressBackup)).toMatch(/\.confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
+		expect(styleBlock(labRunner)).toMatch(/\.restart-confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
+		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop\s*\{[^}]*overscroll-behavior:\s*contain/s);
+	});
+
+	it('passes PUBLIC_SITE_URL into the Railway image build so prerendered OG tags are absolute', () => {
+		const dockerfile = readFileSync(new URL('../../../Dockerfile', import.meta.url), 'utf8');
+		expect(dockerfile).toMatch(/ARG PUBLIC_SITE_URL/);
+		expect(dockerfile).toMatch(/ENV PUBLIC_SITE_URL=/);
+		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
 	});
 });

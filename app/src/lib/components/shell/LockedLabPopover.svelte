@@ -94,6 +94,7 @@
 		border-radius: var(--r-md);
 		box-shadow: var(--shadow-2);
 		color: var(--ink);
+		overscroll-behavior: contain;
 	}
 
 	h2 {
