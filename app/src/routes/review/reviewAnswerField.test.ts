@@ -44,4 +44,9 @@ describe('review answer field', () => {
 		expect(src).toMatch(/@media \(max-width: 36rem\)/);
 		expect(src).toMatch(/\.answer-controls \.in,\s*\.answer-controls \.btn \{ flex: 1 1 100%; \}/);
 	});
+
+	it('paints alternate answers in solid ink-soft, not opacity', () => {
+		expect(src).toMatch(/\.ans em\s*\{[^}]*color:\s*var\(--ink-soft\)/);
+		expect(src).not.toMatch(/\.ans em\s*\{[^}]*opacity\s*:/);
+	});
 });
