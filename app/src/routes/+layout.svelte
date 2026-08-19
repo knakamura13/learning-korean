@@ -286,7 +286,9 @@
 
 	.review-w {
 		position: relative;
+		display: inline-block;
 		overflow: visible;
+		vertical-align: baseline;
 	}
 
 	.badge {
@@ -336,20 +338,27 @@
 			font-size: 0.76rem;
 			overflow: visible;
 		}
-		/* Phones: a presence pip only. The count stays in the accessible name. */
+		.review-w {
+			/* Room for the hanging half of the pip without widening the tab. */
+			padding-inline-end: 4px;
+			margin-inline-end: -4px;
+		}
+		/* Phones: a presence pip only. The count stays in the accessible name.
+		   8px (not 0.5rem): --html-size is 106.25%, so 0.5rem is 8.5px and
+		   translate -50% lands on a half-pixel, which paints an oval. */
 		.badge {
-			min-inline-size: 0.5rem;
-			min-block-size: 0.5rem;
-			max-inline-size: 0.5rem;
-			max-block-size: 0.5rem;
-			inline-size: 0.5rem;
-			block-size: 0.5rem;
+			min-inline-size: 8px;
+			min-block-size: 8px;
+			max-inline-size: 8px;
+			max-block-size: 8px;
+			inline-size: 8px;
+			block-size: 8px;
 			aspect-ratio: 1;
 			padding: 0;
 			font-size: 0;
 			border-radius: 50%;
-			inset-inline-start: 100%;
-			/* Sit on the cap of the w so the disk is not bitten by the glyph. */
+			translate: none;
+			inset-inline-start: calc(100% - 8px);
 			inset-block-end: 100%;
 		}
 		.badge-n {

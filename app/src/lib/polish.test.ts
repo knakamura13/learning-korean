@@ -499,7 +499,10 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*min-block-size:\s*1\.35rem/s);
 		expect(styleBlock(layout)).toMatch(/\.badge-n\s*\{[^}]*text-box:\s*trim-both cap alphabetic/s);
 		expect(styleBlock(layout)).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inline-size:\s*0\.5rem/s
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inline-size:\s*8px/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*block-size:\s*8px/s
 		);
 		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*aspect-ratio:\s*1/s
@@ -508,7 +511,10 @@ describe('polish audit regressions', () => {
 			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*border-radius:\s*50%/s
 		);
 		expect(styleBlock(layout)).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inset-inline-start:\s*100%/s
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*translate:\s*none/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inset-inline-start:\s*calc\(100% - 8px\)/s
 		);
 		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.badge-n\s*\{[^}]*display:\s*none/s
