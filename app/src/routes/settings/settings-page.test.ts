@@ -4,6 +4,8 @@ import { flushSync, mount, unmount } from 'svelte';
 import { LOOKS, PAPER_LIGHT } from '$lib/theme';
 import SettingsPage from './+page.svelte';
 import src from './+page.svelte?raw';
+import layout from '../+layout.svelte?raw';
+import review from '../review/+page.svelte?raw';
 
 let instance: ReturnType<typeof mount> | undefined;
 
@@ -61,8 +63,7 @@ describe('Settings page — Appearance', () => {
 
 		const root = render();
 		expect(root.querySelector('h1')?.textContent?.trim()).toBe('Settings');
-		expect(root.querySelector('h2')?.textContent?.trim()).toBe('Appearance');
-		expect(root.querySelector('#backup')).toBeNull();
+		expect(root.querySelector('.appearance h2')?.textContent?.trim()).toBe('Appearance');
 	});
 
 	it('lists four locked look names and summaries plus Color radios', () => {
@@ -91,5 +92,67 @@ describe('Settings page — Appearance', () => {
 
 		selectRadio(root, 'color', 'system');
 		expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+	});
+});
+
+describe('Settings page — Backup', () => {
+	it('exposes #backup with Backup heading, note copy, and ProgressBackup — not a details fold', () => {
+		expect(src).toMatch(/id="backup"/);
+		expect(src).toMatch(/<h2[^>]*>Backup<\/h2>/);
+		expect(src).toMatch(/ProgressBackup/);
+		expect(src).toMatch(/wrapExport\(progress\.export\(\), labSession\.snapshot\)/);
+		expect(src).toMatch(/unwrapImport/);
+		expect(src).toMatch(/labSession\.replaceAll/);
+		expect(src).toMatch(/Your progress lives only in this browser/);
+		expect(src).toMatch(/as a precaution\./);
+		expect(src).toMatch(/right now, since this browser will not keep it for you\./);
+		expect(src).toMatch(/Saved progress could not be read/);
+		expect(src).toMatch(/This browser did not save your look or color\./);
+		expect(src).not.toMatch(/<details/);
+		expect(src).not.toMatch(/backup-fold/);
+		expect(src).not.toMatch(/progress-backup/);
+		expect(src).toMatch(
+			/#backup\s*\{[^}]*scroll-margin-top:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ 0\.75rem\)/s
+		);
+
+		const root = render();
+		const section = root.querySelector('#backup');
+		expect(section).toBeTruthy();
+		expect(section?.querySelector('h2')?.textContent?.trim()).toBe('Backup');
+		expect(section?.querySelector('.backup-note')).toBeTruthy();
+	});
+
+	it('importJson does not apply look or theme from the backup file', () => {
+		const importBody = src.match(/function importJson\([\s\S]*?\n\t\}/)?.[0] ?? '';
+		expect(importBody).toMatch(/unwrapImport/);
+		expect(importBody).not.toMatch(/writeLookId/);
+		expect(importBody).not.toMatch(/writeThemePref/);
+		expect(importBody).not.toMatch(/applyLook/);
+	});
+
+	it('appends the persist-fail sentence to the Backup note when look write fails', () => {
+		const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation((key: string) => {
+			if (key === 'korean-look') throw new Error('quota');
+		});
+
+		const root = render();
+		selectRadio(root, 'look', 'taegeuk');
+
+		const note = root.querySelector('.backup-note');
+		expect(note?.textContent).toContain('This browser did not save your look or color.');
+		setItem.mockRestore();
+	});
+});
+
+describe('Settings backup deep link — layout and Review', () => {
+	it('layout no longer mounts SiteFooter', () => {
+		expect(layout).not.toMatch(/SiteFooter/);
+	});
+
+	it('Review storage warnings deep-link to Settings #backup', () => {
+		expect(review).toMatch(/href="\{resolve\('\/settings'\)\}#backup"/);
+		expect(review).not.toMatch(/#progress-backup/);
+		expect(review).toMatch(/Download a backup/);
+		expect(review).not.toMatch(/ProgressBackup/);
 	});
 });

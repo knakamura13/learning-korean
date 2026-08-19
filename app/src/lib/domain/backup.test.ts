@@ -75,6 +75,32 @@ describe('wrapExport / unwrapImport', () => {
 		expect(parsed.sessions).toEqual(sessions);
 	});
 
+	it('exports only kind, version, srs, and sessions keys', () => {
+		const packed = wrapExport(JSON.stringify(srsV1), emptySessions());
+		expect(Object.keys(JSON.parse(packed) as object).sort()).toEqual([
+			'kind',
+			'sessions',
+			'srs',
+			'version'
+		]);
+	});
+
+	it('ignores extra look and theme fields on unwrapImport', () => {
+		const sessions = emptySessions();
+		const withExtras = JSON.stringify({
+			kind: APP_BACKUP_KIND,
+			version: APP_BACKUP_VERSION,
+			srs: srsV1,
+			sessions,
+			look: 'taegeuk',
+			theme: 'dark'
+		});
+		expect(unwrapImport(withExtras)).toEqual({
+			srsText: JSON.stringify(srsV1),
+			sessions
+		});
+	});
+
 	it('leaves a corrupt unread blob unwrapped so restore can still save it', () => {
 		expect(wrapExport('{not-json', emptySessions())).toBe('{not-json');
 	});

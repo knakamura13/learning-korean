@@ -3,7 +3,6 @@
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -101,9 +100,6 @@
 <main id="main" onblur={clearSkipLanding}>
 	{@render children()}
 </main>
-{#if !labRoute}
-	<SiteFooter />
-{/if}
 </div>
 
 <style>
