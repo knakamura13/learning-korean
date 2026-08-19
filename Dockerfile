@@ -32,7 +32,11 @@ ENV HOST_HEADER=x-forwarded-host
 # ORIGIN and PORT are runtime service variables — do not bake ORIGIN into the image.
 
 COPY --from=build /app/build ./build
-COPY --from=build /app/package.json ./
+COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/.npmrc ./
+
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable && corepack prepare pnpm@10.33.3 --activate \
+	&& pnpm install --prod --frozen-lockfile
 
 USER node
 

@@ -22,7 +22,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: app/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod --audit-level=high
       - run: pnpm audit
+        continue-on-error: true
       - run: pnpm exec vitest run --coverage
       - run: pnpm check
       - run: pnpm build

@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { memoryStorage, type Storage } from '$lib/domain/storage';
+/**
+ * @vitest-environment jsdom
+ */
+import { afterEach, describe, expect, it } from 'vitest';
+import { browserStorage, memoryStorage, type Storage } from '$lib/domain/storage';
 import { createLabSession } from './labSession.svelte';
 
 const mid = {
@@ -9,6 +12,11 @@ const mid = {
 	finished: false,
 	outcomes: [null, null, null]
 };
+
+afterEach(() => {
+	localStorage.clear();
+	window.dispatchEvent(new StorageEvent('storage', { key: null, storageArea: localStorage }));
+});
 
 describe('createLabSession persistence', () => {
 	it('flips durable when a write fails after a successful probe', () => {
@@ -51,10 +59,27 @@ describe('createLabSession persistence', () => {
 		expect(session.durable).toBe(store.durable);
 	});
 
-	it('loads an empty sitting from missing or unreadable storage', () => {
+	it('loads an empty sitting from missing storage', () => {
 		expect(createLabSession(memoryStorage()).all).toEqual({});
-		expect(createLabSession(memoryStorage('{not-json')).all).toEqual({});
-		expect(createLabSession(memoryStorage('null')).all).toEqual({});
+	});
+
+	it('does not overwrite a corrupt sitting blob on save', () => {
+		const raw = '{not-json';
+		const store = memoryStorage(raw);
+		const session = createLabSession(store);
+		expect(session.corrupt).toBe(true);
+		expect(session.all).toEqual({});
+		session.save('0001', mid);
+		expect(store.read()).toBe(raw);
+	});
+
+	it('clears the sitting quarantine after reset', () => {
+		const store = memoryStorage('{not-json');
+		const session = createLabSession(store);
+		expect(session.corrupt).toBe(true);
+		session.reset();
+		expect(session.corrupt).toBe(false);
+		expect(store.read()).toBeNull();
 	});
 
 	it('saves, lists, and clears a known lab and ignores unknown ids', () => {
@@ -66,5 +91,28 @@ describe('createLabSession persistence', () => {
 		session.clear('0001');
 		expect(session.forLab('0001')).toBeUndefined();
 		session.clear('0001');
+	});
+
+	it('adopts a sitting write from another tab', () => {
+		const key = 'korean-lab-session-v1';
+		localStorage.removeItem(key);
+		const session = createLabSession(browserStorage(key));
+		expect(session.forLab('0001')).toBeUndefined();
+
+		localStorage.setItem(
+			key,
+			JSON.stringify({
+				version: 1,
+				labs: { '0001': mid }
+			})
+		);
+		window.dispatchEvent(
+			new StorageEvent('storage', {
+				key,
+				newValue: localStorage.getItem(key),
+				storageArea: localStorage
+			})
+		);
+		expect(session.forLab('0001')?.nextIndex).toBe(2);
 	});
 });

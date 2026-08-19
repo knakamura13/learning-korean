@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { browserStorage, memoryStorage } from './storage';
+import { browserStorage, memoryStorage, onStorageKey } from './storage';
 
 afterEach(() => {
 	localStorage.clear();
@@ -46,5 +46,35 @@ describe('browserStorage', () => {
 		});
 		expect(store.write('too-big')).toBe(false);
 		expect(store.durable).toBe(false);
+	});
+});
+
+describe('onStorageKey', () => {
+	it('notifies when another tab writes the watched key', () => {
+		const seen: Array<string | null> = [];
+		const stop = onStorageKey('korean-srs-v1', (value) => seen.push(value));
+		window.dispatchEvent(
+			new StorageEvent('storage', {
+				key: 'korean-srs-v1',
+				newValue: '{"version":1}',
+				storageArea: localStorage
+			})
+		);
+		expect(seen).toEqual(['{"version":1}']);
+		stop();
+	});
+
+	it('ignores other keys', () => {
+		const seen: Array<string | null> = [];
+		const stop = onStorageKey('korean-srs-v1', (value) => seen.push(value));
+		window.dispatchEvent(
+			new StorageEvent('storage', {
+				key: 'korean-look',
+				newValue: 'taegeuk',
+				storageArea: localStorage
+			})
+		);
+		expect(seen).toEqual([]);
+		stop();
 	});
 });

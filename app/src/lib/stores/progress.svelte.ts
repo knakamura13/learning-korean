@@ -15,16 +15,25 @@ import {
 	type SrsState, type Grade, type Stats
 } from '$lib/domain/srs';
 import { DECK, TIERS, cardsOfTier, type Card } from '$lib/domain/deck';
-import { browserStorage, memoryStorage, type Storage } from '$lib/domain/storage';
+import { browserStorage, memoryStorage, onStorageKey, type Storage } from '$lib/domain/storage';
 
-const STORAGE_KEY = 'korean-srs-v1';
+export const SRS_STORAGE_KEY = 'korean-srs-v1';
 
-export function createProgress(store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage()) {
+export function createProgress(store: Storage = browser ? browserStorage(SRS_STORAGE_KEY) : memoryStorage()) {
 	const loaded = decodeStoredState(store.read());
 	let state = $state<SrsState>(loaded.state);
 	let now = $state(Date.now());
 	let durable = $state(store.durable);
 	let corruptRaw = $state<string | null>(loaded.corrupt);
+
+	function applyStored() {
+		const next = decodeStoredState(store.read());
+		state = next.state;
+		corruptRaw = next.corrupt;
+		durable = store.durable;
+	}
+
+	onStorageKey(SRS_STORAGE_KEY, applyStored);
 
 	function persistPin() {
 		const next = pinNewForDay(state, DECK, now);

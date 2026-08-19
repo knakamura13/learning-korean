@@ -153,11 +153,12 @@
 		{/if}
 	</header>
 
-	{#if ready && progress.corrupt}
+	{#if ready && (progress.corrupt || labSession.corrupt)}
 		<div class="warn card">
 			<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
 			overwrite the unread file until you restore or reset.
 			<a href="{resolve('/settings')}#backup">Download a backup</a>
+			<a href="{resolve('/settings')}#reset">Reset progress</a>
 		</div>
 	{:else if ready && (!progress.durable || !labSession.durable)}
 		<div class="warn card">

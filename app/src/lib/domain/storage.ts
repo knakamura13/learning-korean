@@ -72,3 +72,17 @@ export function browserStorage(key: string): Storage {
 		}
 	};
 }
+
+/** Other tabs fire `storage`; this window does not. `key === null` is a full clear. */
+export function onStorageKey(key: string, handler: (value: string | null) => void): () => void {
+	if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
+		return () => {};
+	}
+	const listener = (event: StorageEvent) => {
+		if (event.storageArea && event.storageArea !== localStorage) return;
+		if (event.key !== key && event.key !== null) return;
+		handler(event.key === null ? null : event.newValue);
+	};
+	window.addEventListener('storage', listener);
+	return () => window.removeEventListener('storage', listener);
+}

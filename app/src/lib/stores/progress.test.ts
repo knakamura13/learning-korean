@@ -3,11 +3,13 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DAY_MS, RELEARN_MS } from '$lib/domain/srs';
-import { memoryStorage, type Storage } from '$lib/domain/storage';
+import { browserStorage, memoryStorage, type Storage } from '$lib/domain/storage';
 import { createProgress } from './progress.svelte';
 
 afterEach(() => {
 	vi.useRealTimers();
+	localStorage.clear();
+	window.dispatchEvent(new StorageEvent('storage', { key: null, storageArea: localStorage }));
 });
 
 function failingDurableStore(): Storage {
@@ -36,6 +38,21 @@ describe('createProgress persistence', () => {
 		expect(progress.unlock(['lab01'])).toBe(0);
 		expect(store.read()).toBe(raw);
 		expect(progress.export()).toBe(raw);
+	});
+
+	it('does not overwrite a future-version document on tick', () => {
+		const raw = JSON.stringify({
+			version: 99,
+			unlocked: ['lab01'],
+			cards: { 'c-g': { ease: 2.5, ivl: 3, reps: 2, lapses: 0, due: 0 } }
+		});
+		const store = memoryStorage(raw);
+		const progress = createProgress(store);
+
+		expect(progress.corrupt).toBe(true);
+		progress.tick();
+		expect(store.read()).toBe(raw);
+		expect(progress.isUnlocked('lab01')).toBe(false);
 	});
 
 	it('flips durable when a write fails after a successful probe', () => {
@@ -176,5 +193,46 @@ describe('createProgress persistence', () => {
 	it('rejects an import that is not an SRS document', () => {
 		const progress = createProgress(memoryStorage());
 		expect(progress.import('{"nope":true}')).toBe(false);
+	});
+
+	it('adopts a write from another tab', () => {
+		const key = 'korean-srs-v1';
+		localStorage.setItem(
+			key,
+			JSON.stringify({
+				version: 1,
+				unlocked: [],
+				openedLabs: [],
+				cards: {},
+				days: {},
+				newDate: '',
+				newCount: 0,
+				newIds: []
+			})
+		);
+		const progress = createProgress(browserStorage(key));
+		expect(progress.isUnlocked('lab01')).toBe(false);
+
+		localStorage.setItem(
+			key,
+			JSON.stringify({
+				version: 1,
+				unlocked: ['lab01'],
+				openedLabs: [],
+				cards: {},
+				days: {},
+				newDate: '',
+				newCount: 0,
+				newIds: []
+			})
+		);
+		window.dispatchEvent(
+			new StorageEvent('storage', {
+				key,
+				newValue: localStorage.getItem(key),
+				storageArea: localStorage
+			})
+		);
+		expect(progress.isUnlocked('lab01')).toBe(true);
 	});
 });

@@ -165,14 +165,24 @@ export function reviveState(raw: unknown): SrsState {
 	};
 }
 
+function isReadableSrsDocument(raw: unknown): boolean {
+	if (!raw || typeof raw !== 'object') return false;
+	const s = raw as Partial<SrsState> & { v?: number };
+	return (s.version ?? s.v) === 1;
+}
+
 /**
  * JSON.parse of localStorage can throw. Keep the raw blob so a later persist
- * cannot overwrite unread history with an empty deck.
+ * cannot overwrite unread history with an empty deck. Parsed JSON that is not
+ * a v1 document is quarantined the same way — `reviveState` would otherwise
+ * return empty and the next pin would wipe the unread file.
  */
 export function decodeStoredState(raw: string | null): { state: SrsState; corrupt: string | null } {
 	if (raw == null || raw === '') return { state: emptyState(), corrupt: null };
 	try {
-		return { state: reviveState(JSON.parse(raw)), corrupt: null };
+		const parsed: unknown = JSON.parse(raw);
+		if (!isReadableSrsDocument(parsed)) return { state: emptyState(), corrupt: raw };
+		return { state: reviveState(parsed), corrupt: null };
 	} catch {
 		return { state: emptyState(), corrupt: raw };
 	}

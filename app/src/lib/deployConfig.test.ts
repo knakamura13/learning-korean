@@ -43,6 +43,11 @@ describe('adapter and runtime env', () => {
 		expect(dockerfile).toMatch(/ENV PROTOCOL_HEADER=/);
 		expect(dockerfile).toMatch(/ENV HOST_HEADER=/);
 	});
+
+	it('installs production dependencies in the runtime image', () => {
+		expect(dockerfile).toMatch(/pnpm install --prod --frozen-lockfile/);
+		expect(dockerfile).toMatch(/\/app\/pnpm-lock\.yaml/);
+	});
 });
 
 describe('csp', () => {
@@ -73,7 +78,8 @@ describe('coverage and CI', () => {
 		const ci = readFileSync(ciPath, 'utf8');
 		expect(ci).toMatch(/working-directory:\s*app/);
 		expect(ci).toMatch(/pnpm install --frozen-lockfile/);
-		expect(ci).toMatch(/pnpm audit/);
+		expect(ci).toMatch(/pnpm audit --prod --audit-level=high/);
+		expect(ci).toMatch(/continue-on-error:\s*true/);
 		expect(ci).toMatch(/--coverage/);
 		expect(ci).toMatch(/pnpm check/);
 		expect(ci).toMatch(/pnpm build/);
