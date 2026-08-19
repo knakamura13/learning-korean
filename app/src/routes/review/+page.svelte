@@ -147,7 +147,13 @@
 		{/if}
 	</header>
 
-	{#if ready && !progress.durable}
+	{#if ready && progress.corrupt}
+		<div class="warn card">
+			<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
+			overwrite the unread file until you restore or reset.
+			<a href="#progress-backup">Download a backup</a>
+		</div>
+	{:else if ready && !progress.durable}
 		<div class="warn card">
 			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
 			origin, so your review history will vanish when you close the tab.

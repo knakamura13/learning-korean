@@ -21,11 +21,11 @@ describe('SiteFooter — quiet progress backup', () => {
 		expect(review).not.toMatch(/backupFirst/);
 	});
 
-	it('keeps backup behind a collapsed disclosure until storage is not durable', () => {
+	it('keeps backup behind a collapsed disclosure until storage is not durable or progress is unreadable', () => {
 		expect(src).toMatch(/<footer\b/);
 		expect(src).toMatch(/id="progress-backup"/);
 		expect(src).toMatch(/<details[^>]*class="backup-fold"/);
-		expect(src).toMatch(/open=\{ready && !progress\.durable\}/);
+		expect(src).toMatch(/open=\{ready && \(!progress\.durable \|\| progress\.corrupt\)\}/);
 		expect(src).toMatch(/<summary>Back up or restore your progress<\/summary>/);
 		expect(src).toMatch(/<ProgressBackup /);
 		expect(src).not.toMatch(/class="[^"]*card/);
@@ -34,6 +34,7 @@ describe('SiteFooter — quiet progress backup', () => {
 	it('points the Review storage warning at the footer instead of embedding the buttons', () => {
 		expect(review).toMatch(/href="#progress-backup"/);
 		expect(review).toMatch(/Download a backup/);
+		expect(review).toMatch(/progress\.corrupt/);
 	});
 
 	it('keeps a 44px summary, pressed state, and logical layout', () => {

@@ -1,13 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import {
 	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS, DEFAULT_NEW_PER_DAY,
-	emptyState, reviveState, isSrsBackup, parseImportedBackup, unlock, isUnlocked, grade, gradeFromAttempt,
+	DEFAULT_REVIEW_PER_SITTING, MAX_BACKUP_CHARS,
+	emptyState, reviveState, decodeStoredState, isSrsBackup, parseImportedBackup,
+	unlock, isUnlocked, grade, gradeFromAttempt,
 	due, pinNewForDay, nextDueAt, stats, streak, weakest, isoDay,
 	tierCountLabel, tierReviewProgress,
 	type SrsState, type SchedulableCard
 } from './srs';
 
-const T0 = Date.parse('2026-03-01T09:00:00.000Z');
+/** Local noon so calendar-day tests do not depend on the host timezone. */
+const T0 = new Date(2026, 2, 1, 12, 0, 0).getTime();
 const deck: SchedulableCard[] = [
 	...Array.from({ length: 19 }, (_, i) => ({ id: `c${i}`, tier: 'lab01' })),
 	...Array.from({ length: 10 }, (_, i) => ({ id: `v${i}`, tier: 'lab02' }))
@@ -29,6 +32,37 @@ describe('state hygiene', () => {
 		expect(reviveState({ version: 99 }).cards).toEqual({});
 		expect(reviveState({ nope: true })).toEqual(emptyState());
 		expect(reviveState({ version: 1, unlocked: ['lab01', 7] }).unlocked).toEqual(['lab01']);
+	});
+
+	it('keeps valid cards and drops entries whose fields are not finite numbers', () => {
+		const revived = reviveState({
+			version: 1,
+			unlocked: ['lab01'],
+			cards: {
+				c0: { ease: 2.5, ivl: 3, reps: 2, lapses: 0, due: T0 },
+				poison: { ease: 'nope', ivl: 3, reps: 2, lapses: 0, due: T0 }
+			},
+			days: { '2026-03-01': 12 }
+		});
+		expect(Object.keys(revived.cards)).toEqual(['c0']);
+		expect(revived.cards.c0.ivl).toBe(3);
+	});
+
+	it('drops non-numeric day counts so a later grade cannot concatenate strings', () => {
+		const revived = reviveState({
+			version: 1,
+			unlocked: ['lab01'],
+			cards: {},
+			days: { '2026-03-01': '5', nope: 1, '2026-03-02': 2 }
+		});
+		expect(revived.days).toEqual({ '2026-03-02': 2 });
+	});
+
+	it('quarantines raw JSON that does not parse, without inventing a writeable state', () => {
+		expect(decodeStoredState(null)).toEqual({ state: emptyState(), corrupt: null });
+		expect(decodeStoredState('')).toEqual({ state: emptyState(), corrupt: null });
+		const bad = '{not json';
+		expect(decodeStoredState(bad)).toEqual({ state: emptyState(), corrupt: bad });
 	});
 
 	it('adopts progress written by the pre-rewrite app, which used `v` not `version`', () => {
@@ -98,6 +132,30 @@ describe('backup validation', () => {
 	it('parseImportedBackup fails closed on invalid input', () => {
 		expect(parseImportedBackup('{"nope":true}')).toBeNull();
 		expect(parseImportedBackup('not json')).toBeNull();
+	});
+
+	it('parseImportedBackup rejects a poison card instead of importing NaN intervals', () => {
+		const payload = {
+			version: 1,
+			unlocked: ['lab01'],
+			cards: { c0: { ease: 'nope', ivl: 3, reps: 2, lapses: 0, due: T0 } }
+		};
+		expect(isSrsBackup(payload)).toBe(false);
+		expect(parseImportedBackup(JSON.stringify(payload))).toBeNull();
+	});
+
+	it('parseImportedBackup rejects non-numeric day counts', () => {
+		const payload = {
+			version: 1,
+			unlocked: [],
+			cards: {},
+			days: { '2026-03-01': '5' }
+		};
+		expect(parseImportedBackup(JSON.stringify(payload))).toBeNull();
+	});
+
+	it('parseImportedBackup rejects oversized payloads', () => {
+		expect(parseImportedBackup(`{"version":1,${'x'.repeat(MAX_BACKUP_CHARS)}}`)).toBeNull();
 	});
 
 	it('parseImportedBackup revives a valid v1 payload', () => {
@@ -296,6 +354,15 @@ describe('the queue', () => {
 		expect(q.map((c) => c.id)).toEqual(['c1', 'c2']);
 	});
 
+	it('caps overdue reviews per sitting and leaves the rest in stats.due', () => {
+		let s = unlock(emptyState(), ['lab01', 'lab02']);
+		for (const c of deck) s = grade(s, c.id, GOOD, T0).state;
+		const later = T0 + 10 * DAY_MS;
+		const q = due(s, deck, later, { shuffle: noShuffle, newPerDay: 0 });
+		expect(q).toHaveLength(DEFAULT_REVIEW_PER_SITTING);
+		expect(stats(s, deck, later, { newPerDay: 0 }).due).toBe(deck.length);
+	});
+
 	it('reports when the next card comes back', () => {
 		let s = unlock(emptyState(), ['lab01']);
 		expect(nextDueAt(s, deck)).toBeNull();
@@ -417,8 +484,16 @@ describe('weakest', () => {
 });
 
 describe('day boundaries', () => {
-	it('derives an ISO day from an instant', () => {
-		expect(isoDay(Date.parse('2026-03-01T23:59:00.000Z'))).toBe('2026-03-01');
+	it('formats the local calendar date, including late evening', () => {
+		expect(isoDay(new Date(2026, 2, 1, 0, 30, 0).getTime())).toBe('2026-03-01');
+		expect(isoDay(new Date(2026, 2, 1, 23, 59, 0).getTime())).toBe('2026-03-01');
+	});
+
+	it('differs from UTC when the local date has not rolled yet', () => {
+		const ts = new Date(2026, 2, 1, 0, 30, 0).getTime();
+		const utc = new Date(ts).toISOString().slice(0, 10);
+		expect(isoDay(ts)).toBe('2026-03-01');
+		if (utc !== '2026-03-01') expect(isoDay(ts)).not.toBe(utc);
 	});
 
 	it('rolls the new-card allowance when the date changes', () => {
