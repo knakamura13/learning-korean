@@ -55,7 +55,7 @@
 </script>
 
 <svelte:window onkeydown={hover.onWindowKey} onresize={hover.syncViewport} />
-<svelte:body onpointermove={hover.onHoverIntentMove} />
+<svelte:body onpointermove={hover.openId ? hover.onHoverIntentMove : undefined} />
 
 <nav class="ref-index" aria-label="Jump to section" {@attach hover.bindNav}>
 	<p class="rail-label" aria-hidden="true">Jump to section</p>
@@ -162,10 +162,20 @@
 		background: var(--paper-sunk);
 		color: var(--ink);
 	}
+	.jump:active {
+		background: var(--paper-sunk);
+		color: var(--ink);
+		transform: translateY(1px);
+	}
 	.jump.current:hover,
 	.jump.current:focus-visible {
 		background: var(--accent-soft);
 		color: var(--accent);
+	}
+	.jump.current:active {
+		background: var(--accent-soft);
+		color: var(--accent);
+		transform: translateY(1px);
 	}
 
 	@media (min-width: 72rem) {

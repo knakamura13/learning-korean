@@ -30,6 +30,7 @@ describe('LabIndexRail source contracts', () => {
 	it('names the nav Labs and keeps 44px targets', () => {
 		expect(src).toMatch(/aria-label="Labs"/);
 		expect(src).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(src)).toMatch(/\.num:active/);
 		expect(src).not.toMatch(/Plate/);
 		expect(src).not.toMatch(/ToC/);
 		expect(src).not.toMatch(/Colophon/);
@@ -78,7 +79,7 @@ describe('LabIndexRail source contracts', () => {
 	it('keeps a hover bridge between the number and the preview', () => {
 		expect(hoverPreview).toMatch(/hoverBridgePolygon|isPointInHoverBridge/);
 		expect(hoverPreview).toMatch(/decideHoverIntent/);
-		expect(src).toMatch(/<svelte:body onpointermove=\{hover\.onHoverIntentMove\}/);
+		expect(src).toMatch(/<svelte:body onpointermove=\{hover\.openId \? hover\.onHoverIntentMove : undefined\}/);
 		expect(src).toMatch(/onPointerEnter=\{hover\.onPreviewPointerEnter\}/);
 		expect(hoverPreview).toMatch(/expandHoverBox/);
 		expect(hoverPreview).toMatch(/pointerAnchor/);

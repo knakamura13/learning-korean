@@ -159,7 +159,7 @@
 	onkeydown={hover.onWindowKey}
 	onresize={hover.syncViewport}
 />
-<svelte:body onpointermove={hover.onHoverIntentMove} />
+<svelte:body onpointermove={hover.openId ? hover.onHoverIntentMove : undefined} />
 
 <nav class="lab-index" aria-label="Labs" {@attach hover.bindNav}>
 	<ol>
@@ -305,11 +305,22 @@
 		background: var(--paper-sunk);
 		color: var(--ink);
 	}
+	.num:active {
+		background: var(--paper-sunk);
+		color: var(--ink);
+		transform: translateY(1px);
+	}
 	.num.go:hover,
 	.num.go:focus-visible {
 		background: var(--accent);
 		color: var(--accent-ink);
 		filter: brightness(1.07);
+	}
+	.num.go:active {
+		background: var(--accent);
+		color: var(--accent-ink);
+		filter: brightness(0.96);
+		transform: translateY(1px);
 	}
 
 	@media (forced-colors: active) {
