@@ -8,14 +8,15 @@
 	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
+	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 	import {
-		pipRailCenteredScrollLeft,
-		pipRailEdgeFades,
-		pipRailMaxScroll,
-		pipRailSnapScrollLeft
-	} from '$lib/domain/pipRail';
+		hydrateLabRunner,
+		labProgressFromRunner,
+		shouldPersistOnLeave
+	} from '$lib/domain/labRunnerSession';
+	import { attachPipRail } from '$lib/components/labRunnerPipRail.svelte';
 	import { followingLab, toCourseLab } from '$lib/domain/courseNav';
 	import { labFinishCopy } from '$lib/domain/labFinishCopy';
 	import { LABS } from '$lib/content';
@@ -75,6 +76,14 @@
 	let confirmingRestart = $state(false);
 	let restartButton = $state<HTMLButtonElement>();
 
+	const keepSelectedVisible = attachPipRail(
+		() => index,
+		(left, right) => {
+			fadeLeft = left;
+			fadeRight = right;
+		}
+	);
+
 	/**
 	 * Scroll and focus are managed in exactly one place: here. Advancing or
 	 * pip-jumping remounts the card via {#key index}, which would otherwise
@@ -114,39 +123,36 @@
 	}
 
 	function persist(nextIndex: number, done = false) {
-		labSession.save(lab.id, {
-			nextIndex,
-			firstTry,
-			elapsedMs: segmentElapsed(),
-			finished: done,
-			outcomes: outcomes.slice()
-		});
+		labSession.save(
+			lab.id,
+			labProgressFromRunner({
+				nextIndex,
+				firstTry,
+				elapsedMs: segmentElapsed(),
+				finished: done,
+				outcomes: outcomes.slice()
+			})
+		);
 	}
 
 	onMount(() => {
-		const saved = labSession.forLab(lab.id);
-		if (saved) {
-			firstTry = saved.firstTry;
-			elapsedMs = saved.elapsedMs;
-			startedAt = Date.now();
-			outcomes = saved.outcomes.slice();
-			furthest = saved.nextIndex;
-			if (saved.finished || saved.nextIndex >= lab.steps.length) {
-				finish();
-			} else {
-				index = saved.nextIndex;
-				showResumeNote = saved.nextIndex > 0;
-			}
+		const restored = hydrateLabRunner(labSession.forLab(lab.id), lab.steps.length);
+		firstTry = restored.firstTry;
+		elapsedMs = restored.elapsedMs;
+		startedAt = Date.now();
+		outcomes = restored.outcomes;
+		furthest = restored.furthest;
+		if (restored.shouldFinish) {
+			finish();
 		} else {
-			outcomes = emptyOutcomes(lab.steps.length);
+			index = restored.index;
+			showResumeNote = restored.showResumeNote;
 		}
 		ready = true;
 	});
 
 	onDestroy(() => {
-		if (!ready || finished || settled) return;
-		if (furthest === 0 && firstTry === 0 && outcomes.every((o) => o == null)) return;
-		// Mid-card leave: keep the furthest card, not a card the learner jumped back to.
+		if (!shouldPersistOnLeave({ ready, finished, settled, furthest, firstTry, outcomes })) return;
 		persist(furthest);
 	});
 
@@ -250,29 +256,6 @@
 		restart();
 	}
 
-	/** Native modal; jsdom has no showModal, so fall back to the open attribute. */
-	function openRestartDialog(node: HTMLDialogElement) {
-		try {
-			node.showModal();
-		} catch {
-			node.setAttribute('open', '');
-		}
-		const onCancel = () => {
-			void cancelRestart();
-		};
-		node.addEventListener('cancel', onCancel);
-		return () => {
-			node.removeEventListener('cancel', onCancel);
-			if (node.open) {
-				try {
-					node.close();
-				} catch {
-					node.removeAttribute('open');
-				}
-			}
-		};
-	}
-
 	function onKey(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
 		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -293,63 +276,6 @@
 			e.preventDefault();
 			choiceRef?.key(e.key);
 		}
-	}
-
-	/** Keep the current pip in view and fade overflowing rail edges. */
-	function keepSelectedVisible(node: HTMLOListElement) {
-		function applyFades() {
-			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
-			const fades = pipRailEdgeFades(node.scrollLeft, max);
-			fadeLeft = fades.left;
-			fadeRight = fades.right;
-		}
-
-		function scrollSelected() {
-			const pip = node.querySelector<HTMLElement>('[data-selected]');
-			if (!pip) {
-				applyFades();
-				return;
-			}
-			const pipRect = pip.getBoundingClientRect();
-			const railRect = node.getBoundingClientRect();
-			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
-			const first = node.querySelector('li');
-			const stride = first?.getBoundingClientRect().width ?? 0;
-			const startPad = first?.offsetLeft ?? 0;
-			node.scrollLeft = pipRailSnapScrollLeft(
-				pipRailCenteredScrollLeft(
-					pipRect.left,
-					pipRect.width,
-					railRect.left,
-					railRect.width,
-					node.scrollLeft,
-					max
-				),
-				stride,
-				max,
-				startPad
-			);
-			applyFades();
-		}
-
-		$effect(() => {
-			const ro =
-				typeof ResizeObserver === 'function'
-					? new ResizeObserver(() => scrollSelected())
-					: null;
-			ro?.observe(node);
-			node.addEventListener('scroll', applyFades, { passive: true });
-			return () => {
-				ro?.disconnect();
-				node.removeEventListener('scroll', applyFades);
-			};
-		});
-
-		$effect(() => {
-			void index;
-			const raf = requestAnimationFrame(() => scrollSelected());
-			return () => cancelAnimationFrame(raf);
-		});
 	}
 
 </script>
@@ -386,7 +312,10 @@
 						<dialog
 							class="restart-confirm"
 							aria-labelledby="restart-confirmation"
-							{@attach openRestartDialog}
+							{@attach (node: HTMLDialogElement) =>
+								attachModalDialog(node, () => {
+									void cancelRestart();
+								})}
 						>
 							<p id="restart-confirmation">Start over? Your completed lab summary will be cleared.</p>
 							<div class="restart-confirm-actions">

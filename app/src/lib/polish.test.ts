@@ -59,9 +59,9 @@ describe('polish audit regressions', () => {
 
 	it('opens restore and restart confirmations as native modal dialogs', () => {
 		expect(progressBackup).toMatch(/<dialog\b[^>]*class="confirm"/);
-		expect(progressBackup).toMatch(/showModal\s*\(/);
+		expect(progressBackup).toMatch(/attachModalDialog/);
 		expect(labRunner).toMatch(/<dialog\b[^>]*class="restart-confirm"/);
-		expect(labRunner).toMatch(/showModal\s*\(/);
+		expect(labRunner).toMatch(/attachModalDialog/);
 	});
 
 	it('moves card-change focus to the first well control, not the instruction heading', () => {
@@ -684,5 +684,14 @@ describe('polish audit regressions', () => {
 		expect(dockerfile).toMatch(/ARG PUBLIC_SITE_URL/);
 		expect(dockerfile).toMatch(/ENV PUBLIC_SITE_URL=/);
 		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
+	});
+
+	it('extracts lab session persist, pip-rail attach, and dialog open from LabRunner', () => {
+		expect(labRunner).toMatch(/from '\$lib\/domain\/labRunnerSession'/);
+		expect(labRunner).toMatch(/hydrateLabRunner/);
+		expect(labRunner).toMatch(/shouldPersistOnLeave/);
+		expect(labRunner).toMatch(/from '\$lib\/components\/labRunnerPipRail\.svelte'/);
+		expect(labRunner).not.toMatch(/function keepSelectedVisible/);
+		expect(labRunner).not.toMatch(/function openRestartDialog/);
 	});
 });

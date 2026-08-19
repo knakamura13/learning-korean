@@ -33,19 +33,29 @@ function load(store: Storage): LabSessions {
 	}
 }
 
-function createLabSession() {
-	const store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage();
+export function createLabSession(
+	store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage()
+) {
 	let state = $state<LabSessions>(load(store));
+	let durable = $state(store.durable);
 
 	function commit(next: LabSessions) {
 		if (next === state) return;
 		state = next;
-		store.write(JSON.stringify(next));
+		if (!store.write(JSON.stringify(next))) durable = false;
 	}
 
 	return {
 		get all() {
 			return state.labs;
+		},
+
+		get snapshot(): LabSessions {
+			return state;
+		},
+
+		get durable() {
+			return durable;
 		},
 
 		forLab(labId: string): LabProgress | undefined {
@@ -60,6 +70,16 @@ function createLabSession() {
 
 		clear(labId: string) {
 			commit(clearLab(state, labId));
+		},
+
+		replaceAll(raw: unknown) {
+			commit(reviveSessions(raw, STEP_COUNTS));
+		},
+
+		reset() {
+			store.clear();
+			durable = store.durable;
+			state = emptySessions();
 		}
 	};
 }

@@ -497,12 +497,8 @@ export const SOUND_CHANGES: SoundChange[] = [
  * ------------------------------------------------------------------ */
 
 /** South Korean dictionary order (가나다순). North Korea orders differently. */
-export const GANADA_CONSONANTS = [
-	'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'
-];
-export const GANADA_VOWELS = [
-	'ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'
-];
+export const GANADA_CONSONANTS = LEADS;
+export const GANADA_VOWELS = VOWELS;
 
 /** How a syllable block is laid out, decided entirely by the vowel's shape. */
 export const BLOCK_LAYOUTS = [

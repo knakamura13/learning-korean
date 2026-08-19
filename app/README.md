@@ -23,7 +23,7 @@ The default build output is plain files. Anything can serve it:
 cd build && python3 -m http.server 8777
 ```
 
-Railway uses `@sveltejs/adapter-node` instead (`ADAPTER=node` or `RAILWAY_ENVIRONMENT`). After that build, `pnpm start` runs `node build/index.js`.
+Railway uses `@sveltejs/adapter-node` instead (`ADAPTER=node`). After that build, `pnpm start` runs `node build/index.js`.
 
 ## Checks
 
@@ -77,9 +77,10 @@ it has already caught one real slip.
 
 ## Persistence
 
-State lives in `localStorage` under `korean-srs-v1`. `storage.ts` probes on
-startup and reports `durable: false` when the browser refuses writes — the
-review page then says so loudly rather than losing history in silence.
+State lives in `localStorage` under `korean-srs-v1` and `korean-lab-session-v1`.
+`storage.ts` probes on startup and reports `durable: false` when the browser
+refuses writes — the footer and review page then say so loudly rather than
+losing history in silence.
 
 `reviveState` also accepts the pre-rewrite payload shape (`v` instead of
 `version`), so serving this build from the old app's origin adopts existing

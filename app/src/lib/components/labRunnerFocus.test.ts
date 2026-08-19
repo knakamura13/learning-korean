@@ -5,6 +5,8 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { flushSync, mount, tick, unmount, type Component } from 'svelte';
 import LabRunner from './LabRunner.svelte';
 import type { Lab } from '$lib/content/types';
+import { progress } from '$lib/stores/progress.svelte';
+import { labSession } from '$lib/stores/labSession.svelte';
 
 beforeAll(() => {
 	Element.prototype.animate = vi.fn().mockReturnValue({
@@ -41,6 +43,8 @@ afterEach(() => {
 	while (mounted.length) unmount(mounted.pop()!);
 	document.body.innerHTML = '';
 	localStorage.clear();
+	progress.reset();
+	labSession.reset();
 	vi.unstubAllGlobals();
 });
 

@@ -22,7 +22,7 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		coverage: {
 			provider: 'v8',
-			include: ['src/lib/domain/**/*.ts'],
+			include: ['src/lib/domain/**/*.ts', 'src/lib/stores/**/*.ts', 'src/lib/stores/**/*.svelte.ts'],
 			thresholds: { statements: 90, branches: 85, functions: 90, lines: 90 }
 		}
 	}
