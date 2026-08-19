@@ -493,7 +493,41 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
-		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.25rem/s);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.6rem/s);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
+		expect(layout).toMatch(/class="review-w"/);
+		expect(layout).toMatch(/class="badge" aria-hidden="true"/);
+		expect(layout).toMatch(/Review, \$\{queue\} cards due/);
+		expect(styleBlock(layout)).toMatch(/\.review-w\s*\{[^}]*position:\s*relative/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*position:\s*absolute/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*inset-block-end:/s);
+		expect(layout).toMatch(/class="badge-n"/);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*padding-block:\s*0\.22rem/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*padding-inline:\s*0\.36rem/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*place-items:\s*center/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*min-block-size:\s*1\.35rem/s);
+		expect(styleBlock(layout)).toMatch(/\.badge-n\s*\{[^}]*text-box:\s*trim-both cap alphabetic/s);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inline-size:\s*8px/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*block-size:\s*8px/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*aspect-ratio:\s*1/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*border-radius:\s*50%/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*translate:\s*none/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inset-inline-start:\s*calc\(100% - 8px\)/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge-n\s*\{[^}]*display:\s*none/s
+		);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);
 		expect(styleBlock(layout)).not.toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(/s);
 		expect(styleBlock(layout)).toMatch(/nav a\.active\s*\{[^}]*background:\s*var\(--paper\)/s);

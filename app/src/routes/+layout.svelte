@@ -86,10 +86,14 @@
 					href={resolve(item.href)}
 					class:active={isActive}
 					aria-current={isActive ? 'page' : undefined}
+					aria-label={item.href === '/review' && queue > 0
+						? `Review, ${queue} cards due`
+						: undefined}
 				>
-					{item.label}
-					{#if item.href === '/review' && queue > 0}
-						<span class="badge" aria-label="{queue} cards due for review">{queue}</span>
+					{#if item.href === '/review'}
+						Revie<span class="review-w">w{#if queue > 0}<span class="badge" aria-hidden="true"><span class="badge-n">{queue}</span></span>{/if}</span>
+					{:else}
+						{item.label}
 					{/if}
 				</a>
 			{/each}
@@ -184,12 +188,12 @@
 	nav {
 		--tab-r: 12px;
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		align-self: stretch;
 		align-items: stretch;
 		gap: 0.35rem;
 		margin-inline-start: auto;
-		padding-block-start: 0.25rem;
+		padding-block-start: 0.6rem;
 		padding-inline: var(--tab-r);
 		min-width: 0;
 		flex-shrink: 1;
@@ -201,7 +205,6 @@
 		position: relative;
 		display: inline-flex;
 		align-items: center;
-		gap: var(--s1);
 		/* 40px keeps a 0.25rem gap under the bar’s top edge. 44px would kiss that edge. */
 		min-height: 40px;
 		padding: 0 0.75rem;
@@ -256,14 +259,41 @@
 		);
 	}
 
+	.review-w {
+		position: relative;
+		display: inline-block;
+		overflow: visible;
+		vertical-align: baseline;
+	}
+
 	.badge {
+		position: absolute;
+		inset-inline-start: 50%;
+		/* Overlap the w so a padded pip stays inside the bar. */
+		inset-block-end: calc(100% - 0.38rem);
+		translate: -50% 0;
+		z-index: 2;
+		display: grid;
+		place-items: center;
+		box-sizing: border-box;
+		min-inline-size: 1.35rem;
+		min-block-size: 1.35rem;
+		padding-block: 0.22rem;
+		padding-inline: 0.36rem;
 		font-family: var(--mono);
-		font-size: 0.62rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		line-height: 1;
 		background: var(--rose);
 		color: var(--accent-ink);
 		border-radius: var(--r-pill);
-		padding: 0.05rem 0.36rem;
 		font-variant-numeric: tabular-nums;
+		pointer-events: none;
+	}
+	.badge-n {
+		line-height: 1;
+		/* Trim font leading so 10 centers on cap-height, not the em box. */
+		text-box: trim-both cap alphabetic;
 	}
 
 	@media (min-width: 72rem) {
@@ -274,7 +304,41 @@
 
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
-		nav a { padding-inline: 0.55rem; }
+		nav {
+			gap: 0.2rem;
+			padding-block-start: 0.35rem;
+		}
+		nav a {
+			padding-inline: 0.4rem;
+			font-size: 0.76rem;
+			overflow: visible;
+		}
+		.review-w {
+			/* Room for the hanging half of the pip without widening the tab. */
+			padding-inline-end: 4px;
+			margin-inline-end: -4px;
+		}
+		/* Phones: a presence pip only. The count stays in the accessible name.
+		   8px (not 0.5rem): --html-size is 106.25%, so 0.5rem is 8.5px and
+		   translate -50% lands on a half-pixel, which paints an oval. */
+		.badge {
+			min-inline-size: 8px;
+			min-block-size: 8px;
+			max-inline-size: 8px;
+			max-block-size: 8px;
+			inline-size: 8px;
+			block-size: 8px;
+			aspect-ratio: 1;
+			padding: 0;
+			font-size: 0;
+			border-radius: 50%;
+			translate: none;
+			inset-inline-start: calc(100% - 8px);
+			inset-block-end: 100%;
+		}
+		.badge-n {
+			display: none;
+		}
 	}
 
 	@media (max-width: 30rem) {
@@ -283,7 +347,15 @@
 			gap: var(--s2);
 		}
 		.name { font-size: 0.8125rem; }
-		nav a { letter-spacing: -0.02em; padding-inline: 0.45rem; }
+		nav {
+			gap: 0.1rem;
+			padding-inline: 0.45rem;
+		}
+		nav a {
+			letter-spacing: -0.03em;
+			padding-inline: 0.28rem;
+			font-size: 0.7rem;
+		}
 	}
 
 	@media (max-width: 20rem) {
