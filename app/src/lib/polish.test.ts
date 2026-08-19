@@ -8,6 +8,7 @@ import siteFooter from './components/SiteFooter.svelte?raw';
 import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
+import readStep from './components/steps/ReadStep.svelte?raw';
 import options from './components/Options.svelte?raw';
 import themeToggle from './components/ThemeToggle.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
@@ -110,6 +111,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.lab:active/);
 		expect(styleBlock(home)).toMatch(/button\.lab:active/);
+		expect(styleBlock(labIndexRail)).toMatch(/\.num:active/);
+		expect(styleBlock(referenceIndexRail)).toMatch(/\.jump:active/);
 		expect(appCss).toMatch(/\.btn:active\s*\{/);
 	});
 
@@ -423,6 +426,8 @@ describe('polish audit regressions', () => {
 	it('uses an h1 on the error page and the lab finish screen', () => {
 		expect(errorPage).toMatch(/<h1>/);
 		expect(errorPage).not.toMatch(/<h2>/);
+		expect(styleBlock(errorPage)).toMatch(/@media \(forced-colors:\s*active\)/);
+		expect(styleBlock(readStep)).toMatch(/@media \(forced-colors:\s*active\)/);
 		const finish = labRunner.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
 		expect(finish).toMatch(/<h1>/);
 		expect(finish).not.toMatch(/<h2>/);
@@ -499,7 +504,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.25rem/s);
-		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(44px - 0\.25rem\)/s);
+		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);
+		expect(styleBlock(layout)).not.toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(/s);
 		expect(styleBlock(layout)).toMatch(/nav a\.active\s*\{[^}]*background:\s*var\(--paper\)/s);
 		expect(styleBlock(layout)).toMatch(/border-start-start-radius:\s*var\(--tab-r\)/);
 		expect(styleBlock(layout)).toMatch(/nav a\.active::before/);
@@ -534,8 +540,12 @@ describe('polish audit regressions', () => {
 		expect(home).toMatch(/LockedLabPopover/);
 		expect(home).toMatch(/Review \{pile\.due\} due/);
 		expect(home).toMatch(/Letters land here after you finish a lab/);
-		expect(home).toMatch(/pile-empty loading-copy/);
-		expect(styleBlock(home)).toMatch(/\.pile-empty\.loading-copy/);
+		expect(home).toMatch(/class="pile-skel"/);
+		expect(home).toMatch(/class="tier skel-row"/);
+		expect(styleBlock(home)).toMatch(/\.flag\s*\{[^}]*min-height:\s*1\.6rem/s);
+		expect(styleBlock(home)).toMatch(/\.sec-row\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(home)).toMatch(/\.pile-empty\s*\{[^}]*min-height:\s*16rem/s);
+		expect(home).not.toMatch(/pile-empty loading-copy/);
 	});
 
 	it('does not ship fascicle journal words in UI chrome', () => {
