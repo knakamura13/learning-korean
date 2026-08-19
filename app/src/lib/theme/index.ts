@@ -2,6 +2,8 @@ export type ThemePref = 'light' | 'dark' | 'system';
 
 export { activeSystem } from './active';
 export type { ContrastOverrides, DesignSystem, Palette, TypeStacks } from './types';
+export { DEFAULT_LOOK_ID, isLookId, LOOKS, type LookId } from './catalog';
+export { LOOK_KEY, paperFor, readLookId, writeLookId } from './look';
 
 import { activeSystem } from './active';
 
@@ -23,12 +25,13 @@ export function readThemePref(): ThemePref {
 	return 'system';
 }
 
-export function writeThemePref(pref: ThemePref): void {
+export function writeThemePref(pref: ThemePref): boolean {
 	try {
 		if (pref === 'system') localStorage.removeItem(THEME_KEY);
 		else localStorage.setItem(THEME_KEY, pref);
+		return true;
 	} catch {
-		/* ignore */
+		return false;
 	}
 }
 

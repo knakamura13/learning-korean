@@ -1,12 +1,15 @@
-import { describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	isThemePref,
 	nextThemePref,
 	PAPER_DARK,
 	PAPER_LIGHT,
 	resolvedTheme,
+	THEME_KEY,
 	themeToggleGlyph,
-	themeToggleLabel
+	themeToggleLabel,
+	writeThemePref
 } from './index';
 import { activeSystem } from './active';
 
@@ -66,5 +69,35 @@ describe('paper colours', () => {
 	it('come from the active design system', () => {
 		expect(PAPER_LIGHT).toBe(activeSystem.light.paper);
 		expect(PAPER_DARK).toBe(activeSystem.dark.paper);
+	});
+});
+
+describe('writeThemePref', () => {
+	beforeEach(() => {
+		localStorage.clear();
+	});
+
+	afterEach(() => {
+		localStorage.clear();
+		vi.restoreAllMocks();
+	});
+
+	it('persists dark under korean-theme', () => {
+		expect(writeThemePref('dark')).toBe(true);
+		expect(localStorage.getItem(THEME_KEY)).toBe('dark');
+	});
+
+	it('removes korean-theme when pref is system', () => {
+		localStorage.setItem(THEME_KEY, 'dark');
+		expect(writeThemePref('system')).toBe(true);
+		expect(localStorage.getItem(THEME_KEY)).toBeNull();
+	});
+
+	it('returns false when setItem throws', () => {
+		vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+			throw new Error('quota');
+		});
+
+		expect(writeThemePref('light')).toBe(false);
 	});
 });
