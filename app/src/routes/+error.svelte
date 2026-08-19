@@ -53,4 +53,13 @@
 		max-width: 28rem;
 		margin: 0 auto var(--s4);
 	}
+
+	@media (forced-colors: active) {
+		.empty {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.empty p:not(.eyebrow) { color: CanvasText; }
+	}
 </style>

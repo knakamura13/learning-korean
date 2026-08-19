@@ -128,4 +128,18 @@
 	@media (max-width: 34rem) {
 		.ch { font-size: 2.6rem; }
 	}
+
+	@media (forced-colors: active) {
+		.blk {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.blk.open {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+		}
+		.rd { color: Highlight; }
+	}
 </style>
