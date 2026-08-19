@@ -483,15 +483,15 @@
 		border-color: var(--accent);
 	}
 	.in:user-invalid,
-	.in:user-invalid:hover,
-	.in[aria-invalid='true'],
-	.in[aria-invalid='true']:hover {
+	.in[aria-invalid='true'] {
 		border-color: var(--bad);
 	}
-	.in.right,
-	.in.right:hover { border-color: var(--good); background: var(--good-soft); color: var(--good); }
-	.in.wrong,
-	.in.wrong:hover { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+	.in:hover:not(:disabled):user-invalid,
+	.in:hover:not(:disabled)[aria-invalid='true'] {
+		border-color: var(--bad);
+	}
+	.answer-controls .in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+	.answer-controls .in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
 	@media (forced-colors: active) {
 		.stat {

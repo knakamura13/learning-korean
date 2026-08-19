@@ -18,7 +18,7 @@ describe('labDrag deferral', () => {
 		const destroy = labDrag({ draggable: '.chip' })(node);
 
 		expect(idle).toHaveBeenCalledTimes(1);
-		destroy();
+		if (typeof destroy === 'function') destroy();
 	});
 
 	it('flushLabDrag loads Shopify without waiting for idle', async () => {
@@ -34,6 +34,6 @@ describe('labDrag deferral', () => {
 		await flushLabDrag();
 		expect(add).toHaveBeenCalledWith('touchmove', expect.any(Function), expect.anything());
 		add.mockRestore();
-		destroy();
+		if (typeof destroy === 'function') destroy();
 	});
 });
