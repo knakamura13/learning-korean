@@ -169,11 +169,11 @@
 	}
 	.jump.current:hover,
 	.jump.current:focus-visible {
-		background: var(--paper-sunk);
+		background: transparent;
 		color: var(--ink);
 	}
 	.jump.current:active {
-		background: var(--paper-sunk);
+		background: transparent;
 		color: var(--ink);
 		transform: translateY(1px);
 	}

@@ -91,6 +91,19 @@ describe('reference jump list', () => {
 			)
 		).toBe('batchim');
 	});
+
+	it('ignores a stale previous heading that is no longer intersecting', () => {
+		expect(
+			pickActiveSection(
+				[
+					{ id: 'compound-vowels', ratio: 0, top: 40 },
+					{ id: 'batchim', ratio: 0, top: -90 },
+					{ id: 'clusters', ratio: 0.6, top: 120 }
+				],
+				'batchim'
+			)
+		).toBe('clusters');
+	});
 });
 
 describe('reference jump pin', () => {

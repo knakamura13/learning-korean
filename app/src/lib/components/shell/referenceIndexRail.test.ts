@@ -70,6 +70,8 @@ describe('ReferenceIndexRail source contracts', () => {
 		);
 		expect(css).toMatch(/\.jump\.current\s*\{[^}]*background:\s*transparent/s);
 		expect(css).not.toMatch(/\.jump\.current\s*\{[^}]*background:\s*var\(--accent-soft\)/s);
-		expect(css).not.toMatch(/\.jump\.current\s*\{[^}]*border-color:\s*color-mix/s);
+		expect(css).toMatch(/\.jump\.current:hover/);
+		expect(css).toMatch(/\.jump\.current:hover[^}]*background:\s*transparent/s);
+		expect(css).not.toMatch(/\.jump\.current:hover[^}]*background:\s*var\(--paper-sunk\)/s);
 	});
 });

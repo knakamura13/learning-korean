@@ -146,9 +146,9 @@ export function pickActiveSection(
 	pinnedId: string | null = null
 ): string | null {
 	if (pinnedId) return pinnedId;
-	const crossed = hits.filter((hit) => hit.top <= REFERENCE_ACTIVATION_LINE);
+	const visible = hits.filter((hit) => hit.ratio > 0);
+	const crossed = visible.filter((hit) => hit.top <= REFERENCE_ACTIVATION_LINE);
 	if (crossed.length === 0) {
-		const visible = hits.filter((hit) => hit.ratio > 0);
 		if (visible.length === 0) return fallback;
 		visible.sort((a, b) => a.top - b.top);
 		return visible[0]?.id ?? fallback;
