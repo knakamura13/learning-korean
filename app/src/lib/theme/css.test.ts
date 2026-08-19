@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import hooksSrc from '../../hooks.server.ts?raw';
 import layoutSrc from '../../routes/+layout.svelte?raw';
 import pluginSrc from './vitePlugin.ts?raw';
+import manifestSrc from './manifest.ts?raw';
 import { allDesignSystemsCss, designSystemCss } from './css';
 import {
 	applyDesignSystem,
@@ -301,6 +302,7 @@ describe('delivery', () => {
 		expect(hooksSrc).toMatch(/transformPageChunk/);
 		expect(hooksSrc).toMatch(/applyDesignSystem/);
 		expect(pluginSrc).toMatch(/writeManifests/);
+		expect(manifestSrc).toMatch(/writeIfChanged/);
 		expect(pluginSrc).not.toMatch(/transformIndexHtml/);
 		expect(pluginSrc).not.toMatch(/virtual:design-system/);
 	});

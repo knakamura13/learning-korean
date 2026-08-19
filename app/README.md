@@ -42,7 +42,7 @@ src/lib/domain/     pure logic, no framework, no I/O
   storage.ts          persistence as a port
 src/lib/content/    lessons as typed data
   types.ts            the step union every lab is built from
-  lab01..lab05.ts     the course
+  lab01..lab06.ts     the course
 src/lib/theme/      swappable design systems (the look)
   active.ts           default / build-time look (Botanical Korea) for manifests, font preloads, and no-JS `:root`
   systems/botanicalKorea.ts  pressed-flowers look (default)

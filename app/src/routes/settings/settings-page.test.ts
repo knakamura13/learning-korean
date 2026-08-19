@@ -114,8 +114,8 @@ describe('Settings page — Backup', () => {
 		expect(src).toMatch(/labSession\.reset\(\)/);
 		expect(src).toMatch(/id="reset"/);
 		expect(src).toMatch(/wrapExport\(progress\.export\(\), labSession\.snapshot\)/);
-		expect(src).toMatch(/unwrapImport/);
-		expect(src).toMatch(/labSession\.replaceAll/);
+		expect(src).toMatch(/applyImportedBackup/);
+		expect(src).toMatch(/labSession\.replaceAll\(plan\.sessions\)/);
 		expect(src).toMatch(/Your progress lives only in this browser/);
 		expect(src).toMatch(/as a precaution\./);
 		expect(src).toMatch(/right now, since this browser will not keep it for you\./);
@@ -137,7 +137,7 @@ describe('Settings page — Backup', () => {
 
 	it('importJson does not apply look or theme from the backup file', () => {
 		const importBody = src.match(/function importJson\([\s\S]*?\n\t\}/)?.[0] ?? '';
-		expect(importBody).toMatch(/unwrapImport/);
+		expect(importBody).toMatch(/applyImportedBackup/);
 		expect(importBody).not.toMatch(/writeLookId/);
 		expect(importBody).not.toMatch(/writeThemePref/);
 		expect(importBody).not.toMatch(/applyLook/);

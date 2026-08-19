@@ -10,7 +10,7 @@ builder = "DOCKERFILE"
 watchPatterns = ["/app/**", "/Dockerfile", "/.dockerignore", "/railway.toml"]
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 300
+healthcheckPath = "/healthz"
+healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3

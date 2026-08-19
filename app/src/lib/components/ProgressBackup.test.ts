@@ -115,6 +115,22 @@ describe('ProgressBackup — restore', () => {
 		expect(status?.getAttribute('data-tone')).toBe('right');
 	});
 
+	it('rejects an oversized file before reading it', async () => {
+		const importJson = vi.fn(() => true);
+		const root = render({ exportJson: () => '{}', importJson });
+		const file = new File(['{"version":1}'], 'huge.json', { type: 'application/json' });
+		Object.defineProperty(file, 'size', { value: 200_001 });
+		await selectFile(root, file);
+		const [confirm] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
+		confirm.click();
+		flushSync();
+		await macrotask();
+
+		expect(importJson).not.toHaveBeenCalled();
+		const status = root.querySelector('.status');
+		expect(status?.getAttribute('data-tone')).toBe('wrong');
+	});
+
 	it('reports failure without alarming the learner into thinking data was lost', async () => {
 		const importJson = vi.fn(() => false);
 		const root = render({ exportJson: () => '{}', importJson });

@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 import { withLangKo } from './lang';
 
 /** Tags `withLangKo` and authored lab copy actually emit. */
@@ -29,6 +29,7 @@ function ensureClassHook() {
 
 /** Strip anything lab HTML does not use. `lang="ko"` and jamo/hg/rom classes stay. */
 export function sanitizeLabHtml(html: string): string {
+	if (typeof window === 'undefined') return html;
 	ensureClassHook();
 	return DOMPurify.sanitize(html, CONFIG);
 }

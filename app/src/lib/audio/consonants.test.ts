@@ -17,7 +17,9 @@ describe('consonant audio mapping', () => {
 		expect(LEADS).toHaveLength(19);
 		for (const jamo of LEADS) {
 			const src = consonantAudioSrc(jamo);
-			expect(src, jamo).toBe(`/audio/consonants/${CONSONANT_AUDIO_SLUG[jamo]}.opus`);
+			expect(src, jamo).toMatch(
+				new RegExp(`/audio/consonants/${CONSONANT_AUDIO_SLUG[jamo]}\\.opus$`)
+			);
 		}
 	});
 

@@ -37,6 +37,8 @@ const EASE_FLOOR = 1.3;
 const EASE_CEILING = 2.8;
 const EASE_START = 2.5;
 const MAX_INTERVAL_DAYS = 365;
+const MAX_STORED_DAYS = 400;
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 export type Grade = 0 | 1 | 2 | 3;
 export const AGAIN: Grade = 0;
@@ -95,6 +97,10 @@ function asFiniteNumber(value: unknown): number | null {
 	return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
+function isStringArray(raw: unknown): raw is string[] {
+	return Array.isArray(raw) && raw.every((value) => typeof value === 'string');
+}
+
 function reviveCard(raw: unknown): CardState | null {
 	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
 	const rec = raw as Record<string, unknown>;
@@ -105,7 +111,13 @@ function reviveCard(raw: unknown): CardState | null {
 	const due = asFiniteNumber(rec.due);
 	if (ease === null || ivl === null || reps === null || lapses === null || due === null) return null;
 	if (ivl < 0 || reps < 0 || lapses < 0) return null;
-	return { ease, ivl, reps: Math.trunc(reps), lapses: Math.trunc(lapses), due };
+	return {
+		ease: clamp(ease, EASE_FLOOR, EASE_CEILING),
+		ivl: Math.min(MAX_INTERVAL_DAYS, ivl),
+		reps: Math.trunc(reps),
+		lapses: Math.trunc(lapses),
+		due
+	};
 }
 
 function reviveCards(raw: unknown): Record<string, CardState> {
@@ -126,6 +138,15 @@ function isDaysRecord(raw: unknown): raw is Record<string, number> {
 	);
 }
 
+function pruneDays(days: Record<string, number>): Record<string, number> {
+	const keys = Object.keys(days);
+	if (keys.length <= MAX_STORED_DAYS) return days;
+	const keep = keys.sort().slice(-MAX_STORED_DAYS);
+	const out: Record<string, number> = {};
+	for (const iso of keep) out[iso] = days[iso];
+	return out;
+}
+
 function reviveDays(raw: unknown): Record<string, number> {
 	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
 	const days: Record<string, number> = {};
@@ -135,7 +156,7 @@ function reviveDays(raw: unknown): Record<string, number> {
 		if (n === null || n < 0) continue;
 		days[day] = Math.trunc(n);
 	}
-	return days;
+	return pruneDays(days);
 }
 
 /**
@@ -194,7 +215,9 @@ export function isSrsBackup(raw: unknown): boolean {
 	const s = raw as Partial<SrsState> & { v?: number };
 	const version = s.version ?? s.v;
 	if (version !== 1) return false;
-	if (!Array.isArray(s.unlocked)) return false;
+	if (!isStringArray(s.unlocked)) return false;
+	if (s.openedLabs !== undefined && !isStringArray(s.openedLabs)) return false;
+	if (s.newIds !== undefined && !isStringArray(s.newIds)) return false;
 	if (!s.cards || typeof s.cards !== 'object' || Array.isArray(s.cards)) return false;
 	for (const value of Object.values(s.cards as Record<string, unknown>)) {
 		if (!reviveCard(value)) return false;
@@ -267,8 +290,6 @@ export function gradeFromAttempt(correct: boolean, ms: number, isNew: boolean): 
 	return HARD;
 }
 
-const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
-
 function nextCard(prev: CardState | undefined, g: Grade, now: number): CardState {
 	const card: CardState = prev ?? { ease: EASE_START, ivl: 0, reps: 0, lapses: 0, due: 0 };
 
@@ -318,7 +339,7 @@ export function grade(state: SrsState, id: string, g: Grade, now: number): Grade
 		state: {
 			...rolled,
 			cards: { ...rolled.cards, [id]: card },
-			days: { ...rolled.days, [today]: prevDays + 1 },
+			days: pruneDays({ ...rolled.days, [today]: prevDays + 1 }),
 			newCount: rolled.newCount + (wasNew ? 1 : 0)
 		},
 		card,

@@ -61,6 +61,19 @@ export function shouldPersistOnLeave(input: {
 	return true;
 }
 
+export function placeAfterCorrectSettle(
+	isLast: boolean,
+	furthest: number,
+	stepCount: number
+): { nextIndex: number; finished: boolean } {
+	if (isLast) return { nextIndex: stepCount, finished: true };
+	return { nextIndex: furthest, finished: false };
+}
+
+export function sittingElapsedMinutes(elapsedMs: number): number {
+	return Math.max(1, Math.round(elapsedMs / 60_000));
+}
+
 export function labProgressFromRunner(input: {
 	nextIndex: number;
 	firstTry: number;

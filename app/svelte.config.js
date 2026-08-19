@@ -31,7 +31,10 @@ const config = {
 					precompress: false,
 					strict: true
 				}),
-		prerender: { handleHttpError: 'fail' },
+		prerender: {
+			handleHttpError: 'fail',
+			entries: ['*', '/healthz']
+		},
 		csp: {
 			mode: 'auto',
 			directives: {

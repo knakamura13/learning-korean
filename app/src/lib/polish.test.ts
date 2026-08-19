@@ -763,10 +763,8 @@ describe('polish audit regressions', () => {
 		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
 	});
 
-	it('extracts lab session persist, pip-rail attach, and dialog open from LabRunner', () => {
+	it('extracts pip-rail attach and dialog open from LabRunner', () => {
 		expect(labRunner).toMatch(/from '\$lib\/domain\/labRunnerSession'/);
-		expect(labRunner).toMatch(/hydrateLabRunner/);
-		expect(labRunner).toMatch(/shouldPersistOnLeave/);
 		expect(labRunner).toMatch(/from '\$lib\/components\/labRunnerPipRail\.svelte'/);
 		expect(labRunner).not.toMatch(/function keepSelectedVisible/);
 		expect(labRunner).not.toMatch(/function openRestartDialog/);

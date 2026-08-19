@@ -3,6 +3,8 @@ import { emptySessions } from './labSession';
 import {
 	APP_BACKUP_KIND,
 	APP_BACKUP_VERSION,
+	MAX_BACKUP_BYTES,
+	applyImportedBackup,
 	backupFilename,
 	exportedStatus,
 	importedStatus,
@@ -128,5 +130,40 @@ describe('wrapExport / unwrapImport', () => {
 				})
 			)
 		).toBeNull();
+	});
+
+	it('rejects an envelope larger than MAX_BACKUP_BYTES', () => {
+		expect(unwrapImport('{"version":1,'.padEnd(MAX_BACKUP_BYTES + 1, 'x'))).toBeNull();
+	});
+});
+
+const COUNTS = { '0001': 17 };
+
+describe('applyImportedBackup', () => {
+	it('clears lab sittings when restoring a v1 SRS-only file', () => {
+		const plan = applyImportedBackup(JSON.stringify(srsV1), COUNTS);
+		expect(plan).toEqual({ srsText: JSON.stringify(srsV1), sessions: emptySessions() });
+	});
+
+	it('keeps v2 sittings that revive', () => {
+		const sitting = {
+			version: 1 as const,
+			labs: {
+				'0001': { nextIndex: 2, firstTry: 1, elapsedMs: 10, finished: false, outcomes: [null, null] }
+			}
+		};
+		const packed = wrapExport(JSON.stringify(srsV1), sitting);
+		const plan = applyImportedBackup(packed, COUNTS);
+		expect(plan?.sessions.labs['0001']?.nextIndex).toBe(2);
+	});
+
+	it('fails closed when v2 names a known lab whose payload cannot revive', () => {
+		const packed = JSON.stringify({
+			kind: APP_BACKUP_KIND,
+			version: APP_BACKUP_VERSION,
+			srs: srsV1,
+			sessions: { version: 1, labs: { '0001': { nextIndex: -1 } } }
+		});
+		expect(applyImportedBackup(packed, COUNTS)).toBeNull();
 	});
 });

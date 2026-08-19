@@ -13,10 +13,12 @@
  */
 
 import { isSrsBackup } from './srs';
-import type { LabSessions } from './labSession';
+import { emptySessions, sessionsFromBackup, type LabSessions } from './labSession';
 
 export const APP_BACKUP_KIND = 'korean-progress';
 export const APP_BACKUP_VERSION = 2 as const;
+/** Reject restore payloads before parse / FileReader work. */
+export const MAX_BACKUP_BYTES = 200_000;
 
 export function backupFilename(now: number): string {
 	const d = new Date(now);
@@ -63,6 +65,7 @@ export function wrapExport(srsText: string, sessions: LabSessions): string {
 export function unwrapImport(
 	json: string
 ): { srsText: string; sessions: unknown | null } | null {
+	if (json.length > MAX_BACKUP_BYTES) return null;
 	try {
 		const parsed = JSON.parse(json) as unknown;
 		if (isAppBackup(parsed)) {
@@ -77,10 +80,34 @@ export function unwrapImport(
 	}
 }
 
+/**
+ * Validate a restore file and build the sitting map to write. v1 SRS-only
+ * files clear lab place. A v2 envelope with an unrevivable known lab fails
+ * closed so SRS is not imported first.
+ */
+export function applyImportedBackup(
+	json: string,
+	stepCounts: Record<string, number>
+): { srsText: string; sessions: LabSessions } | null {
+	const unpacked = unwrapImport(json);
+	if (!unpacked) return null;
+	if (unpacked.sessions === null) {
+		return { srsText: unpacked.srsText, sessions: emptySessions() };
+	}
+	const sessions = sessionsFromBackup(unpacked.sessions, stepCounts);
+	if (!sessions) return null;
+	return { srsText: unpacked.srsText, sessions };
+}
+
 function isAppBackup(
 	raw: unknown
 ): raw is { kind: string; version: number; srs: unknown; sessions: unknown } {
 	if (!raw || typeof raw !== 'object') return false;
 	const rec = raw as Record<string, unknown>;
-	return rec.kind === APP_BACKUP_KIND && rec.version === APP_BACKUP_VERSION && isSrsBackup(rec.srs);
+	return (
+		rec.kind === APP_BACKUP_KIND &&
+		rec.version === APP_BACKUP_VERSION &&
+		isSrsBackup(rec.srs) &&
+		'sessions' in rec
+	);
 }
