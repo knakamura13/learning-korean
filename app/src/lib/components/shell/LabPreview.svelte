@@ -151,6 +151,7 @@
 		font-weight: 600;
 		line-height: 1.2;
 		border: 1px solid transparent;
+		cursor: default;
 	}
 	.chip[data-kind='locked'] {
 		color: var(--warn);

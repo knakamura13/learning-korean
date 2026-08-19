@@ -101,7 +101,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.lab:active\s*\{/);
-		expect(styleBlock(home)).toMatch(/\.peek:active\s*\{/);
+		expect(appCss).toMatch(/\.btn:active\s*\{/);
 	});
 
 	it('gives the backup summary a hover state', () => {
@@ -329,9 +329,23 @@ describe('polish audit regressions', () => {
 		}
 	});
 
-	it('sizes peek, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
-		expect(styleBlock(home)).toMatch(/\.peek\s*\{[^}]*min-height:\s*44px/s);
-		expect(styleBlock(home)).toMatch(/a\.chip-status\.wait\s*\{[^}]*min-height:\s*44px/s);
+	it('keeps status pills as labels and actions as boxed .btn controls', () => {
+		const homeCss = styleBlock(home);
+		expect(appCss).toMatch(/\.btn\s*\{[^}]*border-radius:\s*var\(--r-md\)/s);
+		expect(appCss).toMatch(/\.btn\s*\{[^}]*text-decoration:\s*none/s);
+		expect(appCss).toMatch(/\.btn\.ghost\s*\{[^}]*text-decoration:\s*none/s);
+		expect(appCss).toMatch(/\.btn\.ghost\s*\{[^}]*border-color:\s*var\(--rule-strong\)/s);
+		expect(homeCss).toMatch(/\.chip-status\s*\{[^}]*border-radius:\s*var\(--r-pill\)/s);
+		expect(homeCss).toMatch(/\.chip-status\s*\{[^}]*cursor:\s*default/s);
+		expect(home).not.toMatch(/<a[^>]*chip-status/);
+		expect(labPreview).toMatch(/class="btn ghost"/);
+		expect(labPreview).toMatch(/model\.priorActionLabel/);
+	});
+
+	it('sizes lab actions, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
+		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
+		expect(home).toMatch(/class="lab-actions"/);
+		expect(home).toMatch(/class="btn ghost"/);
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
@@ -490,7 +504,11 @@ describe('polish audit regressions', () => {
 		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
 		expect(home).not.toMatch(/sec-deck-heading/);
 		expect(home).toMatch(/reviewPileView/);
-		expect(home).toMatch(/<a\s[^>]*class="chip-status wait"/);
+		expect(home).toMatch(/<span class="chip-status wait">/);
+		expect(home).not.toMatch(/<a[^>]*chip-status/);
+		expect(home).not.toMatch(/class="peek"/);
+		expect(home).toMatch(/Open Lab \{pad\(prior\.number\)\}/);
+		expect(home).toMatch(/Review \{pile\.due\} due/);
 		expect(home).toMatch(/Letters land here after you finish a lab/);
 		expect(home).toMatch(/pile-empty loading-copy/);
 		expect(styleBlock(home)).toMatch(/\.pile-empty\.loading-copy/);

@@ -284,7 +284,7 @@ function chipCopy(
 	switch (kind) {
 		case 'locked':
 			return {
-				chip: prior ? `Finish Lab ${padLab(prior.number)} first` : 'Finish the previous lab first',
+				chip: prior ? `Needs Lab ${padLab(prior.number)}` : 'Locked',
 				actionLabel: 'Open anyway',
 				statusPhrase: 'locked'
 			};

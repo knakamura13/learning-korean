@@ -80,22 +80,29 @@
 								<span>~{lab.minutes} min</span>
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
-									{#if prior}
-										<a
-											class="chip-status wait"
-											href={resolve('/lab/[id]', { id: prior.id })}
-											aria-label="Open Lab {pad(prior.number)} first: {prior.title}"
-										>Finish Lab {pad(prior.number)} first</a>
-									{:else}
-										<span class="chip-status wait">Finish the previous lab first</span>
-									{/if}
-									<a
-										class="peek"
-										href={resolve('/lab/[id]', { id: lab.id })}
-										title="You can look at the cards. Review still waits until you finish Lab {prior ? pad(prior.number) : ''}."
-										aria-label="Preview Lab {pad(lab.number)} without finishing Lab {prior ? pad(prior.number) : ''}. Review still waits."
-									>Open anyway</a>
+									<span class="chip-status wait">
+										{#if prior}
+											Needs Lab {pad(prior.number)}
+										{:else}
+											Locked
+										{/if}
+									</span>
 								</span>
+							</div>
+							<div class="lab-actions">
+								{#if prior}
+									<a
+										class="btn"
+										href={resolve('/lab/[id]', { id: prior.id })}
+										aria-label="Open Lab {pad(prior.number)} first: {prior.title}"
+									>Open Lab {pad(prior.number)}</a>
+								{/if}
+								<a
+									class="btn ghost"
+									href={resolve('/lab/[id]', { id: lab.id })}
+									title="You can look at the cards. Review still waits until you finish Lab {prior ? pad(prior.number) : ''}."
+									aria-label="Preview Lab {pad(lab.number)} without finishing Lab {prior ? pad(prior.number) : ''}. Review still waits."
+								>Open anyway</a>
 							</div>
 						</div>
 					</article>
@@ -136,10 +143,10 @@
 			<h2 id="sec-review-heading" class="sec">Review pile</h2>
 			{#if pile.body === 'progress' && pile.due > 0}
 				<a
-					class="chip-status due"
+					class="btn"
 					href={resolve('/review')}
 					aria-label="{pile.due} cards due for review"
-				>{pile.due} due</a>
+				>Review {pile.due} due</a>
 			{/if}
 		</div>
 		<div
@@ -155,8 +162,7 @@
 				</p>
 			{:else if pile.body === 'empty'}
 				<p class="pile-empty">
-					Letters land here after you finish a lab. Lab 01 unlocks
-					{tiers[0]?.size ?? 19} consonants.
+					Letters land here after you finish a lab. Lab 01 unlocks {tiers[0]?.size ?? 19} consonants.
 				</p>
 			{:else}
 				{#each tiers as tier (tier.id)}
@@ -245,10 +251,6 @@
 		margin: 0 0 var(--s3);
 	}
 	.sec-row .sec { margin: 0; }
-	.sec-row .chip-status {
-		text-decoration: none;
-		min-height: 44px;
-	}
 
 	section { margin-bottom: var(--s7); }
 
@@ -332,24 +334,12 @@
 		font-weight: 600;
 		line-height: 1.2;
 		border: 1px solid transparent;
+		cursor: default;
 	}
 	.chip-status.wait {
 		color: var(--warn);
 		background: var(--warn-soft);
 		border-color: color-mix(in srgb, var(--warn) 30%, transparent);
-	}
-	a.chip-status.wait {
-		text-decoration: none;
-		min-height: 44px;
-		cursor: pointer;
-	}
-	a.chip-status.wait:hover {
-		color: var(--warn);
-		border-color: var(--warn);
-		background: color-mix(in srgb, var(--warn-soft) 70%, var(--paper));
-	}
-	a.chip-status.wait:active {
-		transform: translateY(1px);
 	}
 	.chip-status.go {
 		color: var(--accent-ink);
@@ -366,9 +356,13 @@
 		background: var(--rose-soft);
 		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
 	}
-	a.chip-status.due:hover {
-		color: var(--rose);
-		border-color: var(--rose);
+
+	.lab-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s2);
+		align-items: center;
+		margin-top: var(--s3);
 	}
 
 	.lab.ahead {
@@ -377,22 +371,6 @@
 	.lab.ahead h3,
 	.lab.ahead p {
 		color: var(--ink-soft);
-	}
-	.peek {
-		display: inline-flex;
-		align-items: center;
-		min-height: 44px;
-		font-size: 0.66rem;
-		font-weight: 500;
-		color: var(--ink-faint);
-		text-decoration: none;
-		border-bottom: 1px solid var(--rule-strong);
-		line-height: 1.2;
-	}
-	.peek:hover { color: var(--accent); border-bottom-color: var(--accent); }
-	.peek:active {
-		transform: translateY(0);
-		box-shadow: var(--shadow-1);
 	}
 
 	.tiers { padding: var(--s4); }
@@ -474,10 +452,6 @@
 	.sw.y { background: var(--accent); }
 	.sw.n { background: var(--rule-strong); }
 
-	@media (prefers-reduced-motion: reduce) {
-		a.chip-status.wait:active { transform: none; }
-	}
-
 	@media (forced-colors: active) {
 		.lab.now {
 			background: Highlight;
@@ -503,9 +477,11 @@
 		.sw.m { background: Highlight; }
 		.sw.y { background: ButtonText; }
 		.sw.n { background: GrayText; }
-		a.chip-status.wait,
-		a.chip-status.due {
-			background: Canvas;
+		.chip-status.wait {
+			color: GrayText;
+			border-color: GrayText;
+		}
+		.chip-status.due {
 			color: LinkText;
 			border-color: LinkText;
 		}

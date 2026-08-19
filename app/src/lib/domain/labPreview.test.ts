@@ -161,7 +161,7 @@ describe('labPreviewModel', () => {
 		);
 		expect(model.locked).toBe(true);
 		expect(model.actionLabel).toBe('Open anyway');
-		expect(model.chip).toMatch(/Finish Lab 01 first/);
+		expect(model.chip).toMatch(/Needs Lab 01/);
 		expect(model.priorId).toBe('0001');
 		expect(model.priorActionLabel).toBe('Open Lab 01');
 		expect(model).not.toHaveProperty('prerequisite');
