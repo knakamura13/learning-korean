@@ -122,14 +122,27 @@
 
 	main {
 		flex: 1 1 auto;
+		position: relative;
 	}
 
-	/* Inset so the sticky bar does not cover the top edge of the ring. */
+	/* Inset overlay (not outline): descendants would cover an inset outline. */
+	main:focus::after,
+	main:focus-visible::after,
+	main.skip-landed::after {
+		content: '';
+		position: absolute;
+		inset: 8px;
+		border: 3px solid var(--blue);
+		border-radius: 6px;
+		pointer-events: none;
+		z-index: 6;
+	}
+
 	:global(#main:focus),
 	:global(#main:focus-visible),
 	main.skip-landed {
 		outline: 3px solid var(--blue);
-		outline-offset: -3px;
+		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 		border-radius: 3px;
 	}
@@ -309,6 +322,11 @@
 	}
 
 	@media (forced-colors: active) {
+		main:focus::after,
+		main:focus-visible::after,
+		main.skip-landed::after {
+			border-color: Highlight;
+		}
 		:global(#main:focus),
 		:global(#main:focus-visible),
 		main.skip-landed {

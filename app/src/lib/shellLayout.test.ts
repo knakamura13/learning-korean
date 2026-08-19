@@ -37,9 +37,10 @@ describe('shell layout source contracts', () => {
 		expect(layout).toMatch(/skipLanded = true/);
 		expect(layout).toMatch(/class:skip-landed=\{skipLanded\}/);
 		expect(layout).toMatch(/:global\(#main:focus\)/);
-		expect(styleBlock(layout)).toMatch(/main\.skip-landed/);
+		expect(styleBlock(layout)).toMatch(/main\.skip-landed::after/);
+		expect(styleBlock(layout)).toMatch(/main:focus::after/);
 		expect(styleBlock(layout)).toMatch(/outline:\s*3px solid var\(--blue\)/);
-		expect(styleBlock(layout)).toMatch(/outline-offset:\s*-3px/);
+		expect(styleBlock(layout)).toMatch(/border:\s*3px solid var\(--blue\)/);
 		expect(styleBlock(layout)).not.toMatch(/#main:focus[^{]*\{[^}]*outline:\s*none/s);
 	});
 
