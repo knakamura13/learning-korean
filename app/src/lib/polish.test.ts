@@ -501,7 +501,10 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labSpread)).toMatch(/\.after\s*\{[^}]*flex-shrink:\s*0/s);
 		expect(styleBlock(labIndexRail)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
-		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
+		expect(styleBlock(layout)).toMatch(/@media \(max-width: 30rem\)/);
+		expect(styleBlock(layout)).not.toMatch(/@media \(max-width: 20rem\)/);
+		expect(styleBlock(layout)).toMatch(/flex: 1 0 100%/);
+		expect(styleBlock(layout)).toMatch(/flex-wrap:\s*nowrap/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.25rem/s);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);

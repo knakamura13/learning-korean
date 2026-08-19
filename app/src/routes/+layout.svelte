@@ -297,26 +297,26 @@
 		nav a { padding-inline: 0.55rem; }
 	}
 
+	/* Phones: a dedicated tab row. Between ~21–27rem the three labels wrap
+	   mid-nav (Reference drops under Review) while brand and theme stay put.
+	   The 20rem stacked header already kept all three tabs together — use it
+	   for the whole phone band instead of orphaning one destination. */
 	@media (max-width: 30rem) {
 		.inner {
 			padding-inline: max(var(--s4), env(safe-area-inset-left)) max(var(--s4), env(safe-area-inset-right));
 			gap: var(--s2);
-		}
-		.name { font-size: 0.8125rem; }
-		nav a { letter-spacing: -0.02em; padding-inline: 0.45rem; }
-	}
-
-	@media (max-width: 20rem) {
-		.inner {
 			height: auto;
 			min-height: 44px;
 			flex-wrap: wrap;
 			row-gap: 0;
 		}
+		.name { font-size: 0.8125rem; }
+		nav a { letter-spacing: -0.02em; padding-inline: 0.45rem; }
 		.inner :global(.theme) { order: 2; }
 		nav {
 			order: 3;
 			flex: 1 0 100%;
+			flex-wrap: nowrap;
 			justify-content: flex-start;
 			margin-inline-start: 0;
 			gap: var(--s1);
