@@ -9,8 +9,11 @@
 		derive, baseShapeOf
 	} from '$lib/domain/hangul';
 	import {
+		jumpScrollY,
 		pickActiveSection,
+		referenceJumpOffset,
 		REFERENCE_SECTIONS,
+		shouldReleaseJumpPin,
 		type SectionHit
 	} from '$lib/domain/referenceNav';
 
@@ -41,6 +44,8 @@
 	};
 
 	let activeSection = $state<string | null>(null);
+	let pinnedSection = $state<string | null>(null);
+	let lastHits: SectionHit[] = [];
 
 	$effect(() => {
 		const hits = new Map<string, SectionHit>();
@@ -53,7 +58,8 @@
 						top: entry.boundingClientRect.top
 					});
 				}
-				activeSection = pickActiveSection([...hits.values()], activeSection);
+				lastHits = [...hits.values()];
+				activeSection = pickActiveSection(lastHits, activeSection, pinnedSection);
 			},
 			{
 				rootMargin: '-72px 0px -50% 0px',
@@ -67,14 +73,48 @@
 		return () => observer.disconnect();
 	});
 
+	function railBottom(): number | null {
+		const rail = document.querySelector('.ref-index');
+		if (!(rail instanceof HTMLElement)) return null;
+		return rail.getBoundingClientRect().bottom;
+	}
+
 	function jumpToSection(id: string, event: MouseEvent) {
+		pinnedSection = id;
 		activeSection = id;
 		const el = document.getElementById(id);
 		if (!el) return;
 		event.preventDefault();
 		history.replaceState(null, '', `#${id}`);
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+		const offset = referenceJumpOffset(window.innerWidth, railBottom());
+		window.scrollTo({
+			top: jumpScrollY(el.getBoundingClientRect().top, window.scrollY, offset),
+			behavior: reduce ? 'auto' : 'smooth'
+		});
+	}
+
+	function releaseJumpPin() {
+		if (!shouldReleaseJumpPin('user')) return;
+		if (!pinnedSection) return;
+		pinnedSection = null;
+		activeSection = pickActiveSection(lastHits, activeSection, null);
+	}
+
+	function onWindowKey(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'ArrowDown':
+			case 'ArrowUp':
+			case 'PageDown':
+			case 'PageUp':
+			case 'Home':
+			case 'End':
+			case ' ':
+				releaseJumpPin();
+				return;
+			default:
+				return;
+		}
 	}
 
 	const SOUND: Record<string, string> = {
@@ -89,6 +129,7 @@
 </script>
 
 <svelte:head><title>Reference — every letter and rule</title></svelte:head>
+<svelte:window onwheel={releaseJumpPin} ontouchstart={releaseJumpPin} onkeydown={onWindowKey} />
 
 <div class="with-rail">
 	<div class="shell">

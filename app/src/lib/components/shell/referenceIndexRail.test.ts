@@ -62,4 +62,16 @@ describe('ReferenceIndexRail source contracts', () => {
 		expect(src).not.toMatch(/decideUnlockedPress/);
 		expect(src).not.toMatch(/armedForNavigate/);
 	});
+
+	it('matches the lab rail selected mark: transparent fill, accent ring', () => {
+		const css = styleBlock(src);
+		expect(css).toMatch(
+			/\.jump\.current\s*\{[^}]*box-shadow:\s*0 0 0 2px var\(--paper\), 0 0 0 3px var\(--accent\)/s
+		);
+		expect(css).toMatch(/\.jump\.current\s*\{[^}]*background:\s*transparent/s);
+		expect(css).not.toMatch(/\.jump\.current\s*\{[^}]*background:\s*var\(--accent-soft\)/s);
+		expect(css).toMatch(/\.jump\.current:hover/);
+		expect(css).toMatch(/\.jump\.current:hover[^}]*background:\s*transparent/s);
+		expect(css).not.toMatch(/\.jump\.current:hover[^}]*background:\s*var\(--paper-sunk\)/s);
+	});
 });

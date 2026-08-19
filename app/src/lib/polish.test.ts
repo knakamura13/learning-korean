@@ -150,7 +150,10 @@ describe('polish audit regressions', () => {
 	it('keeps every Reference section on screen instead of a hiding carousel', () => {
 		expect(reference).toMatch(/ReferenceIndexRail/);
 		expect(reference).toMatch(/function jumpToSection/);
-		expect(reference).toMatch(/scrollIntoView/);
+		expect(reference).toMatch(/jumpScrollY/);
+		expect(reference).toMatch(/pinnedSection/);
+		expect(reference).toMatch(/shouldReleaseJumpPin/);
+		expect(reference).toMatch(/releaseJumpPin/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/flex-wrap:\s*wrap/);
 		expect(styleBlock(referenceIndexRail)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/\.ref-index\s*\{[^}]*position:\s*sticky/s);
