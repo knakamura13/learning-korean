@@ -1,12 +1,13 @@
 import type { DesignSystem, FontFaceSpec, Palette } from '../types.ts';
 
 const DISPLAY =
-	"'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif";
+	"'Newsreader', 'Newsreader Fallback', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif";
 const SERIF =
 	"'Noto Serif KR', 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
 const SANS = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
-const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
+const HANGUL =
+	"'Noto Sans KR', 'Noto Sans KR Fallback', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
 
 /** Latin + punctuation the UI uses. Hangul never matches this range. */
 export const LATIN_UNICODE_RANGE =
@@ -105,7 +106,27 @@ export const botanicalKorea: DesignSystem = {
 			style: 'italic',
 			weight: '400',
 			display: 'optional'
-		})
+		}),
+		{
+			family: 'Newsreader Fallback',
+			local: ['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Georgia'],
+			style: 'italic',
+			weight: '400',
+			display: 'optional',
+			ascentOverride: '73.5%',
+			descentOverride: '26.5%',
+			lineGapOverride: '0%'
+		},
+		{
+			family: 'Noto Sans KR Fallback',
+			local: ['Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic'],
+			style: 'normal',
+			weight: '400',
+			display: 'optional',
+			ascentOverride: '116%',
+			descentOverride: '28.8%',
+			lineGapOverride: '0%'
+		}
 	],
 	light,
 	dark,

@@ -63,6 +63,36 @@ describe('botanicalKorea', () => {
 		expect(css).toContain('Newsreader');
 	});
 
+	it('pairs LCP faces with local fallbacks whose vertical metrics match the webfont', () => {
+		const displayFallback = botanicalKorea.fonts.find((face) => face.family === 'Newsreader Fallback');
+		const hangulFallback = botanicalKorea.fonts.find((face) => face.family === 'Noto Sans KR Fallback');
+		expect(displayFallback).toMatchObject({
+			style: 'italic',
+			ascentOverride: '73.5%',
+			descentOverride: '26.5%',
+			lineGapOverride: '0%'
+		});
+		expect(displayFallback?.file).toBeUndefined();
+		expect(displayFallback?.local).toEqual([
+			'Iowan Old Style',
+			'Palatino Linotype',
+			'Palatino',
+			'Georgia'
+		]);
+		expect(hangulFallback).toMatchObject({
+			ascentOverride: '116%',
+			descentOverride: '28.8%',
+			lineGapOverride: '0%'
+		});
+		expect(hangulFallback?.local).toEqual(['Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic']);
+		expect(botanicalKorea.type.display).toMatch(/'Newsreader Fallback'/);
+		expect(botanicalKorea.type.hangul).toMatch(/'Noto Sans KR Fallback'/);
+		const css = designSystemCss(botanicalKorea);
+		expect(css).toContain("src: local('Iowan Old Style')");
+		expect(css).toContain('ascent-override: 73.5%');
+		expect(css).toContain('ascent-override: 116%');
+	});
+
 	it('puts moss and rose contrast-more deltas on the system, not a full palette dump', () => {
 		expect(botanicalKorea.contrastMoreLight).toMatchObject({
 			accent: '#1e3d2c',

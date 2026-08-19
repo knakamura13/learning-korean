@@ -15,6 +15,12 @@ COPY app/ ./
 # adapter-node (see app/svelte.config.js). Must be set at image build time;
 # Railway does not inject RAILWAY_ENVIRONMENT into `docker build`.
 ENV ADAPTER=node
+
+# Prerendered OG/canonical tags read PUBLIC_SITE_URL at `pnpm build`.
+# Railway forwards matching service variables as Docker build-args when ARG is declared.
+ARG PUBLIC_SITE_URL
+ENV PUBLIC_SITE_URL=$PUBLIC_SITE_URL
+
 RUN pnpm build
 
 FROM node:22-alpine AS runtime

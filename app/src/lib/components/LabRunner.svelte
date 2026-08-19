@@ -1018,6 +1018,7 @@
 		height: fit-content;
 		margin: auto;
 		box-shadow: var(--shadow-2);
+		overscroll-behavior: contain;
 	}
 	.restart-confirm::backdrop {
 		background: color-mix(in srgb, var(--ink) 42%, transparent);

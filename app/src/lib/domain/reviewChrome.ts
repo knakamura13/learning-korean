@@ -44,6 +44,9 @@ export function reviewBody(input: {
 	return 'sitting';
 }
 
+/** Caps the Review field. Longer than every accepted deck answer, including Hangul. */
+export const REVIEW_ANSWER_MAX_LENGTH = 64;
+
 /** Short enough to sit in a phone-width field; examples beat the word "romanization". */
 export function reviewAnswerPlaceholder(kind: string): string {
 	return kind === 'pron' ? 'han-gu-geo or 한구거' : 'g, eo, silent';

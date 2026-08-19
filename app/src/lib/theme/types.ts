@@ -64,11 +64,17 @@ export interface ContrastOverrides {
 
 export interface FontFaceSpec {
 	family: string;
-	file: string;
+	/** Self-hosted woff2 under `/fonts/`. Omit on local metric-matched fallbacks. */
+	file?: string;
+	/** `local()` names, tried in order. Used by fallback faces instead of a URL. */
+	local?: string[];
 	style?: 'normal' | 'italic';
 	weight?: string;
 	display?: 'auto' | 'block' | 'swap' | 'fallback' | 'optional';
 	unicodeRange?: string;
+	ascentOverride?: string;
+	descentOverride?: string;
+	lineGapOverride?: string;
 }
 
 export interface DesignSystem {

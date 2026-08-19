@@ -53,6 +53,7 @@ describe('academia', () => {
 	it('self-hosts Academia Latin faces next to Hangul', () => {
 		const fontsDir = new URL('../../../../static/fonts/', import.meta.url);
 		for (const face of academia.fonts) {
+			if (!face.file) continue;
 			expect(existsSync(new URL(face.file, fontsDir)), face.file).toBe(true);
 		}
 		const families = academia.fonts.map((face) => face.family);
