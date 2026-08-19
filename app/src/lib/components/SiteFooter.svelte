@@ -11,13 +11,18 @@
 </script>
 
 <footer class="site-foot">
-	<details class="backup-fold" id="progress-backup" open={ready && !progress.durable}>
+	<details class="backup-fold" id="progress-backup" open={ready && (!progress.durable || progress.corrupt)}>
 		<summary>Back up or restore your progress</summary>
 		<p class="backup-note">
-			Your progress lives only in this browser. Back it up before switching browsers or
-			devices, clearing site data, or resetting this one — {progress.durable
-				? 'as a precaution.'
-				: 'right now, since this browser will not keep it for you.'}
+			{#if progress.corrupt}
+				Saved progress could not be read. Back it up now — reviews will not overwrite it
+				until you restore or reset.
+			{:else}
+				Your progress lives only in this browser. Back it up before switching browsers or
+				devices, clearing site data, or resetting this one — {progress.durable
+					? 'as a precaution.'
+					: 'right now, since this browser will not keep it for you.'}
+			{/if}
 		</p>
 		<ProgressBackup exportJson={() => progress.export()} importJson={(json) => progress.import(json)} />
 	</details>

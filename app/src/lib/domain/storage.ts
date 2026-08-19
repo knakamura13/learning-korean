@@ -5,11 +5,16 @@
  * browser refusing storage on file:// origins would silently discard a month of
  * reviews. Here persistence is an interface: the app injects a real one, tests
  * inject memory, and a future sync backend slots in without touching srs.ts.
+ *
+ * `write` returns whether this adapter stored the value. `durable` is whether
+ * that value will survive a reload — a later quota error flips it to false so
+ * the UI cannot keep claiming history is saved.
  */
 
 export interface Storage {
 	read(): string | null;
-	write(value: string): void;
+	/** True when this adapter now holds `value`. */
+	write(value: string): boolean;
 	clear(): void;
 	/** False when writes will not survive — the UI must say so out loud. */
 	readonly durable: boolean;
@@ -19,7 +24,10 @@ export function memoryStorage(initial: string | null = null): Storage {
 	let value = initial;
 	return {
 		read: () => value,
-		write: (v) => { value = v; },
+		write: (v) => {
+			value = v;
+			return true;
+		},
 		clear: () => { value = null; },
 		durable: false
 	};
@@ -48,11 +56,19 @@ export function browserStorage(key: string): Storage {
 			try { return localStorage.getItem(key); } catch { return null; }
 		},
 		write: (v) => {
-			try { localStorage.setItem(key, v); } catch { /* quota or blocked */ }
+			try {
+				localStorage.setItem(key, v);
+				return true;
+			} catch {
+				durable = false;
+				return false;
+			}
 		},
 		clear: () => {
 			try { localStorage.removeItem(key); } catch { /* ignore */ }
 		},
-		durable: true
+		get durable() {
+			return durable;
+		}
 	};
 }
