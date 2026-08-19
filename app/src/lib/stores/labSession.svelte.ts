@@ -23,24 +23,23 @@ const STEP_COUNTS: Record<string, number> = Object.fromEntries(
 	LABS.map((lab) => [lab.id, lab.steps.length])
 );
 
-function decodeSessions(raw: string | null): { state: LabSessions; corrupt: string | null } {
-	if (raw == null || raw === '') return { state: emptySessions(), corrupt: null };
+function load(store: Storage): LabSessions {
+	const raw = store.read();
+	if (!raw) return emptySessions();
 	try {
-		return { state: reviveSessions(JSON.parse(raw), STEP_COUNTS), corrupt: null };
+		return reviveSessions(JSON.parse(raw), STEP_COUNTS);
 	} catch {
-		return { state: emptySessions(), corrupt: raw };
+		return emptySessions();
 	}
 }
 
-export function createLabSession(store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage()) {
-	const loaded = decodeSessions(store.read());
-	let state = $state<LabSessions>(loaded.state);
-	let corruptRaw = $state<string | null>(loaded.corrupt);
+function createLabSession() {
+	const store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage();
+	let state = $state<LabSessions>(load(store));
 
 	function commit(next: LabSessions) {
 		if (next === state) return;
 		state = next;
-		if (corruptRaw) return;
 		store.write(JSON.stringify(next));
 	}
 

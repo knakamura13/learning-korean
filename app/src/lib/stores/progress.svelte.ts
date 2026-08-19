@@ -32,8 +32,8 @@ export function createProgress(store: Storage = browser ? browserStorage(STORAGE
 	}
 
 	function commit(next: SrsState): boolean {
-		state = next;
 		if (corruptRaw) return false;
+		state = next;
 		if (!store.write(JSON.stringify(next))) {
 			durable = false;
 			return false;
@@ -94,7 +94,7 @@ export function createProgress(store: Storage = browser ? browserStorage(STORAGE
 			const before = state.unlocked.length;
 			const next = unlockTiers(state, tiers);
 			if (next === state) return 0;
-			commit(next);
+			if (!commit(next)) return 0;
 			persistPin();
 			return tiers
 				.filter((t) => !state.unlocked.slice(0, before).includes(t))
@@ -130,8 +130,13 @@ export function createProgress(store: Storage = browser ? browserStorage(STORAGE
 		import(json: string): boolean {
 			const next = parseImportedBackup(json);
 			if (!next) return false;
+			if (!store.write(JSON.stringify(next))) {
+				durable = false;
+				return false;
+			}
 			corruptRaw = null;
-			return commit(next);
+			state = next;
+			return true;
 		}
 	};
 }

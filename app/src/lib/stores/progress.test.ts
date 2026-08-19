@@ -28,7 +28,7 @@ describe('createProgress persistence', () => {
 
 		expect(progress.corrupt).toBe(true);
 		progress.tick();
-		progress.unlock(['lab01']);
+		expect(progress.unlock(['lab01'])).toBe(0);
 		expect(store.read()).toBe(raw);
 		expect(progress.export()).toBe(raw);
 	});
@@ -54,5 +54,34 @@ describe('createProgress persistence', () => {
 		expect(progress.corrupt).toBe(false);
 		expect(progress.isUnlocked('lab01')).toBe(true);
 		expect(store.read()).toContain('"unlocked"');
+	});
+
+	it('keeps the unread blob if a valid restore cannot be written', () => {
+		const raw = '{not-json';
+		let durable = true;
+		const store: Storage = {
+			read: () => raw,
+			write: () => {
+				durable = false;
+				return false;
+			},
+			clear: () => {},
+			get durable() {
+				return durable;
+			}
+		};
+		const progress = createProgress(store);
+		const ok = progress.import(
+			JSON.stringify({
+				version: 1,
+				unlocked: ['lab01'],
+				cards: {}
+			})
+		);
+		expect(ok).toBe(false);
+		expect(progress.corrupt).toBe(true);
+		expect(progress.export()).toBe(raw);
+		progress.tick();
+		expect(store.read()).toBe(raw);
 	});
 });

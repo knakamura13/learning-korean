@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
 	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS, DEFAULT_NEW_PER_DAY,
 	DEFAULT_REVIEW_PER_SITTING, MAX_BACKUP_CHARS,
@@ -489,11 +489,12 @@ describe('day boundaries', () => {
 		expect(isoDay(new Date(2026, 2, 1, 23, 59, 0).getTime())).toBe('2026-03-01');
 	});
 
-	it('differs from UTC when the local date has not rolled yet', () => {
-		const ts = new Date(2026, 2, 1, 0, 30, 0).getTime();
-		const utc = new Date(ts).toISOString().slice(0, 10);
-		expect(isoDay(ts)).toBe('2026-03-01');
-		if (utc !== '2026-03-01') expect(isoDay(ts)).not.toBe(utc);
+	it('reads local date fields rather than toISOString', () => {
+		const iso = vi.spyOn(Date.prototype, 'toISOString');
+		const ts = new Date(2026, 5, 15, 12, 0, 0).getTime();
+		expect(isoDay(ts)).toBe('2026-06-15');
+		expect(iso).not.toHaveBeenCalled();
+		iso.mockRestore();
 	});
 
 	it('rolls the new-card allowance when the date changes', () => {
