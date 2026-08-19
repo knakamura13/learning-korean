@@ -286,6 +286,7 @@
 
 	.review-w {
 		position: relative;
+		overflow: visible;
 	}
 
 	.badge {
@@ -333,17 +334,23 @@
 		nav a {
 			padding-inline: 0.4rem;
 			font-size: 0.76rem;
+			overflow: visible;
 		}
 		/* Phones: a presence pip only. The count stays in the accessible name. */
 		.badge {
 			min-inline-size: 0.5rem;
 			min-block-size: 0.5rem;
+			max-inline-size: 0.5rem;
+			max-block-size: 0.5rem;
 			inline-size: 0.5rem;
 			block-size: 0.5rem;
+			aspect-ratio: 1;
 			padding: 0;
 			font-size: 0;
+			border-radius: 50%;
 			inset-inline-start: 100%;
-			inset-block-end: calc(100% - 0.18rem);
+			/* Sit on the cap of the w so the disk is not bitten by the glyph. */
+			inset-block-end: 100%;
 		}
 		.badge-n {
 			display: none;
