@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS, SOUND_CHANGES,
+	GANADA_CONSONANTS, GANADA_VOWELS,
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
@@ -333,5 +334,12 @@ describe('jamoReading', () => {
 		expect(jamoReading('', 'vowel')).toBe('');
 		expect(jamoReading('ㄱ', 'vowel')).toBe('');
 		expect(jamoReading('ㅕ', 'lead')).toBe('');
+	});
+});
+
+describe('ganada order', () => {
+	it('is the Unicode lead and vowel tables, not a second copy', () => {
+		expect(GANADA_CONSONANTS).toBe(LEADS);
+		expect(GANADA_VOWELS).toBe(VOWELS);
 	});
 });

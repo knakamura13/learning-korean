@@ -12,8 +12,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY app/ ./
 
-# adapter-node (see app/svelte.config.js). Must be set at image build time;
-# Railway does not inject RAILWAY_ENVIRONMENT into `docker build`.
+# adapter-node (see app/svelte.config.js). Must be set at image build time.
 ENV ADAPTER=node
 
 # Prerendered OG/canonical tags read PUBLIC_SITE_URL at `pnpm build`.
@@ -30,6 +29,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PROTOCOL_HEADER=x-forwarded-proto
 ENV HOST_HEADER=x-forwarded-host
+# ORIGIN and PORT are runtime service variables — do not bake ORIGIN into the image.
 
 COPY --from=build /app/build ./build
 COPY --from=build /app/package.json ./

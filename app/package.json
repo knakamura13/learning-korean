@@ -20,22 +20,26 @@
 		"study": "vite build && vite preview --port 8777 --strictPort"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.63.0",
+		"@sveltejs/kit": "2.70.3",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@types/node": "^26.2.0",
 		"@vitest/coverage-v8": "^4.1.10",
 		"jsdom": "^26.1.0",
-		"svelte": "^5.56.1",
+		"svelte": "5.56.9",
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.16",
+		"vite": "8.2.1",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@shopify/draggable": "^1.2.1",
 		"isomorphic-dompurify": "2.30.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"cookie": "^1.0.2"
+		}
 	}
 }

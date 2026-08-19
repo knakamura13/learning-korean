@@ -3,10 +3,8 @@ import adapterStatic from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 // Local `pnpm build` stays a static folder you can serve with anything.
-// Railway's Dockerfile sets ADAPTER=node at image build time. Railpack/Nixpacks
-// builds also see RAILWAY_ENVIRONMENT; `docker build` does not unless it is an ARG.
-const useNodeAdapter =
-	process.env.ADAPTER === 'node' || process.env.RAILWAY_ENVIRONMENT != null;
+// Railway's Dockerfile sets ADAPTER=node at image build time.
+const useNodeAdapter = process.env.ADAPTER === 'node';
 
 /**
  * Static output on purpose, unless we're building the Railway Node server.
@@ -33,7 +31,22 @@ const config = {
 					precompress: false,
 					strict: true
 				}),
-		prerender: { handleHttpError: 'fail' }
+		prerender: { handleHttpError: 'fail' },
+		csp: {
+			mode: 'auto',
+			directives: {
+				'default-src': ['self'],
+				'script-src': ['self'],
+				// Svelte transitions inject a <style> element; hashes cannot cover those.
+				'style-src': ['self', 'unsafe-inline'],
+				'img-src': ['self', 'data:'],
+				'font-src': ['self'],
+				'connect-src': ['self'],
+				'object-src': ['none'],
+				'base-uri': ['self'],
+				'frame-ancestors': ['none']
+			}
+		}
 	}
 };
 

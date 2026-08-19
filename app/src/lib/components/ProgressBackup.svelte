@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { focusWhen } from '$lib/a11y/shortcuts';
+	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
 	import { backupFilename, exportedStatus, importedStatus, type BackupStatus } from '$lib/domain/backup';
 
 	/**
@@ -97,23 +98,7 @@
 		<dialog
 			class="confirm"
 			aria-labelledby="restore-copy"
-			{@attach (node: HTMLDialogElement) => {
-				try {
-					node.showModal();
-				} catch {
-					node.setAttribute('open', '');
-				}
-				const onCancel = () => cancelRestore();
-				node.addEventListener('cancel', onCancel);
-				return () => {
-					node.removeEventListener('cancel', onCancel);
-					try {
-						if (node.open) node.close();
-					} catch {
-						node.removeAttribute('open');
-					}
-				};
-			}}
+			{@attach (node: HTMLDialogElement) => attachModalDialog(node, cancelRestore)}
 		>
 			<p id="restore-copy">
 				Replace current progress with <strong>{pending.name}</strong>? Everything you have

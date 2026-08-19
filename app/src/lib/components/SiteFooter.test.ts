@@ -25,7 +25,12 @@ describe('SiteFooter — quiet progress backup', () => {
 		expect(src).toMatch(/<footer\b/);
 		expect(src).toMatch(/id="progress-backup"/);
 		expect(src).toMatch(/<details[^>]*class="backup-fold"/);
-		expect(src).toMatch(/open=\{ready && \(!progress\.durable \|\| progress\.corrupt\)\}/);
+		expect(src).toMatch(
+			/open=\{ready && storageNeedsBackup\(progress\.durable, labSession\.durable, progress\.corrupt\)\}/
+		);
+		expect(src).toMatch(/wrapExport\(progress\.export\(\), labSession\.snapshot\)/);
+		expect(src).toMatch(/unwrapImport/);
+		expect(src).toMatch(/labSession\.replaceAll/);
 		expect(src).toMatch(/<summary>Back up or restore your progress<\/summary>/);
 		expect(src).toMatch(/<ProgressBackup /);
 		expect(src).not.toMatch(/class="[^"]*card/);
@@ -35,6 +40,7 @@ describe('SiteFooter — quiet progress backup', () => {
 		expect(review).toMatch(/href="#progress-backup"/);
 		expect(review).toMatch(/Download a backup/);
 		expect(review).toMatch(/progress\.corrupt/);
+		expect(review).toMatch(/labSession\.durable/);
 	});
 
 	it('keeps a 44px summary, pressed state, and logical layout', () => {

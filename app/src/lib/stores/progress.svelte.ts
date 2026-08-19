@@ -57,7 +57,6 @@ export function createProgress(store: Storage = browser ? browserStorage(STORAGE
 		},
 
 		get queue(): Card[] {
-			persistPin();
 			return dueCards(state, DECK, now);
 		},
 
@@ -102,15 +101,17 @@ export function createProgress(store: Storage = browser ? browserStorage(STORAGE
 		},
 
 		answer(cardId: string, correct: boolean, elapsedMs: number) {
+			now = Date.now();
 			const wasNew = !state.cards[cardId];
 			const g = gradeFromAttempt(correct, elapsedMs, wasNew);
-			const result = gradeCard(state, cardId, g, Date.now());
+			const result = gradeCard(state, cardId, g, now);
 			commit(result.state);
 			return result;
 		},
 
 		grade(cardId: string, g: Grade) {
-			const result = gradeCard(state, cardId, g, Date.now());
+			now = Date.now();
+			const result = gradeCard(state, cardId, g, now);
 			commit(result.state);
 			return result;
 		},

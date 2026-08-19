@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { labSession } from '$lib/stores/labSession.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import { isConsonantLead } from '$lib/audio/consonants';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
@@ -158,7 +159,7 @@
 			overwrite the unread file until you restore or reset.
 			<a href="#progress-backup">Download a backup</a>
 		</div>
-	{:else if ready && !progress.durable}
+	{:else if ready && (!progress.durable || !labSession.durable)}
 		<div class="warn card">
 			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
 			origin, so your review history will vanish when you close the tab.
