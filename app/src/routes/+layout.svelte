@@ -326,10 +326,26 @@
 
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
-		nav { gap: 0.2rem; }
+		nav {
+			gap: 0.2rem;
+			padding-block-start: 0.35rem;
+		}
 		nav a {
 			padding-inline: 0.4rem;
 			font-size: 0.76rem;
+		}
+		/* Phones: a presence pip only. The count stays in the accessible name. */
+		.badge {
+			min-inline-size: 0.5rem;
+			min-block-size: 0.5rem;
+			inline-size: 0.5rem;
+			block-size: 0.5rem;
+			padding: 0;
+			font-size: 0;
+			inset-block-end: calc(100% - 0.18rem);
+		}
+		.badge-n {
+			display: none;
 		}
 	}
 
