@@ -13,6 +13,17 @@ describe('normalizeSiteUrl', () => {
 		expect(normalizeSiteUrl('')).toBe('');
 		expect(normalizeSiteUrl(undefined)).toBe('');
 	});
+
+	it('adds https when the value is a host without a scheme', () => {
+		expect(normalizeSiteUrl('learning-korean-production.up.railway.app')).toBe(
+			'https://learning-korean-production.up.railway.app'
+		);
+		expect(normalizeSiteUrl('example.test/app/')).toBe('https://example.test/app');
+	});
+
+	it('keeps an explicit http origin', () => {
+		expect(normalizeSiteUrl('http://localhost:3000/')).toBe('http://localhost:3000');
+	});
 });
 
 describe('absolutePageUrl', () => {

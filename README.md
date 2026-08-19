@@ -33,7 +33,7 @@ Connect this GitHub repo as a new Railway service. The root `Dockerfile` and `ra
 
 1. New project → Deploy from GitHub → `learning-korean`
 2. Settings → Networking → Generate Domain
-3. Variables: set `PUBLIC_SITE_URL` to that public origin with **no trailing slash** (today: `https://learning-korean-production.up.railway.app`). The Dockerfile declares `ARG PUBLIC_SITE_URL` so Railway can pass it into `docker build` and prerender absolute OG tags. Rebuild after changing it.
+3. Variables: set `PUBLIC_SITE_URL` to that public origin **including `https://`**, with **no trailing slash** (today: `https://learning-korean-production.up.railway.app`). A host without a scheme is treated as https, but crawlers need an absolute URL, so prefer the full origin. The Dockerfile declares `ARG PUBLIC_SITE_URL` so Railway can pass it into `docker build` and prerender absolute OG tags. Rebuild after changing it.
 4. Optional: set `ORIGIN` to the same URL (only needed if you add server form actions later)
 
 To run the same Node server locally (after `ADAPTER=node pnpm build`):
