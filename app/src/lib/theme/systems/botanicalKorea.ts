@@ -77,6 +77,7 @@ const dark: Palette = {
 export const botanicalKorea: DesignSystem = {
 	id: 'botanicalKorea',
 	name: 'Botanical Korea',
+	summary: 'Pressed-flowers paper and moss green.',
 	htmlSize: '106.25%',
 	leading: '1.6',
 	shape: {

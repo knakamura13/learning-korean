@@ -69,6 +69,7 @@ const dark: Palette = {
 export const watercolor: DesignSystem = {
 	id: 'watercolor',
 	name: 'Watercolor',
+	summary: 'Pigment washes on paper.',
 	htmlSize: '106.25%',
 	leading: '1.7',
 	shape: {

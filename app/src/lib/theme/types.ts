@@ -80,6 +80,7 @@ export interface FontFaceSpec {
 export interface DesignSystem {
 	id: string;
 	name: string;
+	summary: string;
 	fonts: FontFaceSpec[];
 	type: TypeStacks;
 	shape: ShapeTokens;

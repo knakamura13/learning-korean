@@ -63,6 +63,7 @@ const contrastDark: ContrastOverrides = {
 const fixture: DesignSystem = {
 	id: 'fixture',
 	name: 'Fixture',
+	summary: 'Fixture look.',
 	htmlSize: '100%',
 	leading: '1.5',
 	shape: { rSm: '1px', rMd: '2px', rLg: '3px', rPill: '4px' },
