@@ -72,6 +72,8 @@ export interface CourseNavView {
 	/** True once local progress has been read. False is the prerender default. */
 	ready: boolean;
 	isUnlocked: (tier: string) => boolean;
+	/** Skip-ahead grant — this lab is open even if the prerequisite is not. */
+	isOpened?: (labId: string) => boolean;
 	sessionFor: (labId: string) => LabProgress | undefined;
 	queue: number;
 }
@@ -93,8 +95,9 @@ function priorUnlocks(lab: CourseLab, labs: CourseLab[]): string | null {
 function isBlocked(
 	lab: CourseLab,
 	labs: CourseLab[],
-	view: Pick<CourseNavView, 'ready' | 'isUnlocked'>
+	view: Pick<CourseNavView, 'ready' | 'isUnlocked' | 'isOpened'>
 ): boolean {
+	if (view.isOpened?.(lab.id)) return false;
 	const needed = priorUnlocks(lab, labs);
 	if (!needed) return false;
 	// Before hydration, labs with a prerequisite render as locked — the
@@ -186,6 +189,27 @@ export function continueAction(labs: CourseLab[], view: CourseNavView): Continue
 	};
 }
 
+export type ReviewPileBody = 'loading' | 'empty' | 'progress';
+
+export type ReviewPileView = {
+	body: ReviewPileBody;
+	due: number;
+};
+
+/**
+ * Home Review pile: do not paint six locked rows and a color legend before
+ * any family has unlocked. Due count is 0 until progress has been read.
+ */
+export function reviewPileView(
+	ready: boolean,
+	unlockedFamilies: number,
+	queue: number
+): ReviewPileView {
+	if (!ready) return { body: 'loading', due: 0 };
+	if (unlockedFamilies <= 0) return { body: 'empty', due: 0 };
+	return { body: 'progress', due: Math.max(0, queue) };
+}
+
 /** The next lab in course order after `currentId`, or null on the last lab. */
 export function followingLab(labs: CourseLab[], currentId: string): CourseLab | null {
 	const i = labs.findIndex((lab) => lab.id === currentId);
@@ -202,7 +226,7 @@ export function requiredLab(labs: CourseLab[], requires: string | undefined): Co
 export function showPrerequisiteGate(
 	lab: CourseLab,
 	labs: CourseLab[],
-	view: Pick<CourseNavView, 'ready' | 'isUnlocked'>
+	view: Pick<CourseNavView, 'ready' | 'isUnlocked' | 'isOpened'>
 ): boolean {
 	return isBlocked(lab, labs, view) && !isDone(lab, view);
 }

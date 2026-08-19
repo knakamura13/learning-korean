@@ -9,6 +9,7 @@
 import { browser } from '$app/environment';
 import {
 	emptyState, reviveState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
+	openLab as openLabAccess, isOpened,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
 	weakest as weakestCards, gradeFromAttempt, tierReviewProgress,
 	type SrsState, type Grade, type Stats
@@ -74,6 +75,16 @@ function createProgress() {
 
 		isUnlocked(tier: string) {
 			return isUnlocked(state, tier);
+		},
+
+		isOpened(labId: string) {
+			return isOpened(state, labId);
+		},
+
+		openLab(labId: string) {
+			const next = openLabAccess(state, labId);
+			if (next === state) return;
+			commit(next);
 		},
 
 		/** Per-tier progress for the dashboard. */

@@ -151,7 +151,7 @@ describe('labPreviewModel', () => {
 		expect(JSON.stringify(model)).not.toMatch(/Colophon|ToC|folio|plate/i);
 	});
 
-	it('uses Open anyway and the lock chip without duplicating prerequisite copy', () => {
+	it('keeps Open anyway secondary and points the primary action at the prior lab', () => {
 		const firstVisit = view({ ready: false });
 		const model = labPreviewModel(
 			labs[1],
@@ -161,7 +161,9 @@ describe('labPreviewModel', () => {
 		);
 		expect(model.locked).toBe(true);
 		expect(model.actionLabel).toBe('Open anyway');
-		expect(model.chip).toMatch(/Finish Lab 01 first/);
+		expect(model.chip).toMatch(/Needs Lab 01/);
+		expect(model.priorId).toBe('0001');
+		expect(model.priorActionLabel).toBe('Open Lab 01');
 		expect(model).not.toHaveProperty('prerequisite');
 	});
 
@@ -188,6 +190,8 @@ describe('labPreviewModel', () => {
 		);
 		expect(model.chipKind).toBe('done');
 		expect(model.chip).toBe('');
+		expect(model.priorId).toBeNull();
+		expect(model.priorActionLabel).toBeNull();
 		expect(model.accessibleName).toMatch(/completed/);
 	});
 });

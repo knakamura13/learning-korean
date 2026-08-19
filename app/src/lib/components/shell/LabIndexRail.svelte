@@ -45,6 +45,7 @@
 		return {
 			ready,
 			isUnlocked: (tier) => unlocked.has(tier),
+			isOpened: (id) => progress.isOpened(id),
 			sessionFor: (id) => labSession.all[id],
 			queue: progress.stats.queue
 		};

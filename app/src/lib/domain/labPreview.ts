@@ -149,6 +149,9 @@ export interface LabPreviewModel {
 	chip: string;
 	chipKind: PreviewChipKind;
 	actionLabel: 'Open lab' | 'Open anyway';
+	/** When locked, the honest primary action is the prerequisite lab. */
+	priorId: string | null;
+	priorActionLabel: string | null;
 	accessibleName: string;
 	locked: boolean;
 }
@@ -281,7 +284,7 @@ function chipCopy(
 	switch (kind) {
 		case 'locked':
 			return {
-				chip: prior ? `Finish Lab ${padLab(prior.number)} first` : 'Finish the previous lab first',
+				chip: prior ? `Needs Lab ${padLab(prior.number)}` : 'Locked',
 				actionLabel: 'Open anyway',
 				statusPhrase: 'locked'
 			};
@@ -338,6 +341,8 @@ export function labPreviewModel(
 		chip: copy.chip,
 		chipKind: kind,
 		actionLabel: copy.actionLabel,
+		priorId: kind === 'locked' ? (prior?.id ?? null) : null,
+		priorActionLabel: kind === 'locked' && prior ? `Open Lab ${padLab(prior.number)}` : null,
 		accessibleName: `${eyebrow}, ${lab.title}, ${copy.statusPhrase}`,
 		locked: kind === 'locked'
 	};

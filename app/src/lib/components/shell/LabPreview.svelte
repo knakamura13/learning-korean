@@ -6,6 +6,7 @@
 		type PopoverPlacement,
 		type PreviewOpenMode
 	} from '$lib/domain/labPreview';
+	import { progress } from '$lib/stores/progress.svelte';
 
 	let {
 		model,
@@ -69,12 +70,20 @@
 			<p class="chip" data-kind={model.chipKind}>{model.chip}</p>
 		{/if}
 		<div class="actions">
+			{#if model.priorId && model.priorActionLabel}
+				<a class="btn" href={resolve('/lab/[id]', { id: model.priorId })}>
+					{model.priorActionLabel}
+				</a>
+			{/if}
 			<a
 				class={actionClass(model.actionLabel)}
 				href={resolve('/lab/[id]', { id: model.id })}
 				title={model.locked
-					? 'You can look at the cards. Review still waits until you finish the previous lab.'
+					? 'This skip stays open. Review still waits until you finish the sitting.'
 					: undefined}
+				onclick={() => {
+					if (model.locked) progress.openLab(model.id);
+				}}
 			>
 				{model.actionLabel}
 			</a>
@@ -146,6 +155,7 @@
 		font-weight: 600;
 		line-height: 1.2;
 		border: 1px solid transparent;
+		cursor: default;
 	}
 	.chip[data-kind='locked'] {
 		color: var(--warn);

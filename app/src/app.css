@@ -217,7 +217,10 @@ button { font: inherit; color: inherit; }
 	border-inline-end-width: 1px;
 }
 
-/* --- buttons --- */
+/* --- buttons ---
+   .btn is a filled rounded-rect control. .btn.ghost is the same box with an
+   outline and no underline. Status pills are labels in components, never links.
+   Prose links keep the blue underline above. */
 
 .btn {
 	appearance: none;
@@ -235,7 +238,8 @@ button { font: inherit; color: inherit; }
 	align-items: center;
 	gap: var(--s2);
 	transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
-		filter var(--fast) var(--ease), background var(--fast) var(--ease);
+		filter var(--fast) var(--ease), background var(--fast) var(--ease),
+		color var(--fast) var(--ease), border-color var(--fast) var(--ease);
 }
 
 .btn:hover {
@@ -253,8 +257,9 @@ button { font: inherit; color: inherit; }
 
 .btn.ghost {
 	background: transparent;
-	color: var(--ink-soft);
+	color: var(--ink);
 	border-color: var(--rule-strong);
+	text-decoration: none;
 }
 .btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; }
 
