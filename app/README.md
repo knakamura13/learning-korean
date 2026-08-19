@@ -7,23 +7,9 @@ data fetching, works offline.
 
 ## Run it
 
-```bash
-pnpm install
-pnpm dev          # http://localhost:5199
-```
-
-```bash
-pnpm build        # -> build/
-pnpm preview      # serve the built output
-```
-
-The default build output is plain files. Anything can serve it:
-
-```bash
-cd build && python3 -m http.server 8777
-```
-
-Railway uses `@sveltejs/adapter-node` instead (`ADAPTER=node`). After that build, `pnpm start` runs `node build/index.js`.
+Install, `pnpm dev`, `pnpm build`, preview, checks, Railway, and `ADAPTER=node`
+are documented in the repository README at the repo root. This file is the app
+layout and the two content rules.
 
 ## Checks
 

@@ -11,7 +11,7 @@
 		"dev": "vite dev --port 5199 --strictPort",
 		"build": "vite build",
 		"preview": "vite preview --strictPort",
-		"start": "node build/index.js",
+		"start": "node scripts/start.mjs",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

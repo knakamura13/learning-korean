@@ -1,5 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { activeSystem } from './active.ts';
+import { LOOKS } from './catalog.ts';
+import { themeBootScript } from './boot.ts';
 import type { DesignSystem } from './types.ts';
 
 const ICONS = [
@@ -63,6 +65,10 @@ export function webManifest(system: DesignSystem, scheme: 'light' | 'dark'): str
 export function writeManifests(dir = new URL('../../../static/', import.meta.url)): void {
 	writeIfChanged(new URL('manifest.webmanifest', dir), webManifest(activeSystem, 'light'));
 	writeIfChanged(new URL('manifest-dark.webmanifest', dir), webManifest(activeSystem, 'dark'));
+	const lookPapers = Object.fromEntries(
+		LOOKS.map((system) => [system.id, { light: system.light.paper, dark: system.dark.paper }])
+	);
+	writeIfChanged(new URL('theme-boot.js', dir), `${themeBootScript(lookPapers)}\n`);
 }
 
 function writeIfChanged(url: URL, contents: string): void {
