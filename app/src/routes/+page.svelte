@@ -9,18 +9,30 @@
 		toCourseLab,
 		type CourseNavView
 	} from '$lib/domain/courseNav';
+	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { tierCountLabel } from '$lib/domain/srs';
 	import { progress } from '$lib/stores/progress.svelte';
 	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
+	import LockedLabPopover from '$lib/components/shell/LockedLabPopover.svelte';
 
 	// Prerendered HTML has no stored progress. Gate completion badges
 	// and deck-tier counts until the client has ticked, so we never flash
 	// empty or stored values into static HTML.
 	let ready = $state(false);
+	let lockedOpen = $state<{ labId: string; x: number; y: number } | null>(null);
+	let panelSize = $state({ w: 320, h: 220 });
+	let viewport = $state({ w: 1200, h: 800 });
+
 	onMount(() => {
 		progress.tick();
 		ready = true;
+		const sync = () => {
+			viewport = { w: window.innerWidth, h: window.innerHeight };
+		};
+		sync();
+		window.addEventListener('resize', sync);
+		return () => window.removeEventListener('resize', sync);
 	});
 
 	const stats = $derived(progress.stats);
@@ -33,6 +45,7 @@
 		return {
 			ready,
 			isUnlocked: (tier) => unlocked.has(tier),
+			isOpened: (id) => progress.isOpened(id),
 			sessionFor: (id) => sessions[id],
 			queue: stats.queue
 		};
@@ -49,9 +62,74 @@
 	function pad(n: number) {
 		return String(n).padStart(2, '0');
 	}
+
+	const lockedLab = $derived.by(() => {
+		const open = lockedOpen;
+		if (!open) return null;
+		return LABS.find((item) => item.id === open.labId) ?? null;
+	});
+	const lockedPrior = $derived(lockedLab ? requiredLab(course, lockedLab.requires) : null);
+	const lockedCopy = $derived(
+		lockedLab
+			? lockedLabPopoverCopy(
+					{ number: lockedLab.number, title: lockedLab.title },
+					lockedPrior ? { number: lockedPrior.number, title: lockedPrior.title } : null
+				)
+			: null
+	);
+	const lockedPlacement = $derived(
+		lockedOpen ? placeClickPopover(lockedOpen, panelSize, viewport) : null
+	);
+
+	function openLocked(e: MouseEvent, labId: string) {
+		const node = e.currentTarget;
+		let x = e.clientX;
+		let y = e.clientY;
+		if (x === 0 && y === 0 && node instanceof HTMLElement) {
+			const box = node.getBoundingClientRect();
+			x = box.left + Math.min(48, box.width / 2);
+			y = box.top + Math.min(48, box.height / 2);
+		}
+		lockedOpen = { labId, x, y };
+	}
+
+	function dismissLocked() {
+		lockedOpen = null;
+	}
+
+	function closeLocked() {
+		const id = lockedOpen?.labId;
+		dismissLocked();
+		if (!id) return;
+		queueMicrotask(() =>
+			document.querySelector<HTMLButtonElement>(`button.lab.ahead[data-lab-id="${id}"]`)?.focus()
+		);
+	}
+
+	function skipLocked() {
+		if (!lockedOpen) return;
+		progress.openLab(lockedOpen.labId);
+	}
+
+	function onWindowPointerDown(e: PointerEvent) {
+		if (!lockedOpen) return;
+		const target = e.target;
+		if (!(target instanceof Node)) return;
+		const pop = document.getElementById('locked-lab-pop');
+		if (pop?.contains(target)) return;
+		if (target instanceof Element && target.closest('button.lab.ahead')) return;
+		dismissLocked();
+	}
+
+	function onWindowKey(e: KeyboardEvent) {
+		if (e.key !== 'Escape' || !lockedOpen) return;
+		e.preventDefault();
+		closeLocked();
+	}
 </script>
 
 <svelte:head><title>Korean — labs and review</title></svelte:head>
+<svelte:window onpointerdown={onWindowPointerDown} onkeydown={onWindowKey} />
 
 <div class="with-rail">
 	<div class="shell">
@@ -71,7 +149,16 @@
 				{@const card = labCardState(item, course, navView)}
 				{@const prior = requiredLab(course, lab.requires)}
 				{#if card.locked}
-					<article class="lab card ahead" aria-labelledby="lab-{lab.id}-title">
+					<button
+						type="button"
+						class="lab card ahead"
+						data-lab-id={lab.id}
+						aria-labelledby="lab-{lab.id}-title"
+						aria-haspopup="dialog"
+						aria-expanded={lockedOpen?.labId === lab.id}
+						aria-controls={lockedOpen?.labId === lab.id ? 'locked-lab-pop' : undefined}
+						onclick={(e) => openLocked(e, lab.id)}
+					>
 						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
 						<div class="body">
 							<h3 id="lab-{lab.id}-title">{lab.title}</h3>
@@ -81,6 +168,25 @@
 								<span>{lab.steps.length} cards</span>
 								<span class="flag">
 									<span class="chip-status wait">
+										<svg class="lock" viewBox="0 0 16 16" aria-hidden="true">
+											<rect
+												x="3"
+												y="7"
+												width="10"
+												height="8"
+												rx="1.5"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="1.5"
+											/>
+											<path
+												d="M5 7V5a3 3 0 0 1 6 0v2"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="1.5"
+												stroke-linecap="round"
+											/>
+										</svg>
 										{#if prior}
 											Needs Lab {pad(prior.number)}
 										{:else}
@@ -89,23 +195,8 @@
 									</span>
 								</span>
 							</div>
-							<div class="lab-actions">
-								{#if prior}
-									<a
-										class="btn"
-										href={resolve('/lab/[id]', { id: prior.id })}
-										aria-label="Open Lab {pad(prior.number)} first: {prior.title}"
-									>Open Lab {pad(prior.number)}</a>
-								{/if}
-								<a
-									class="btn ghost"
-									href={resolve('/lab/[id]', { id: lab.id })}
-									title="You can look at the cards. Review still waits until you finish Lab {prior ? pad(prior.number) : ''}."
-									aria-label="Preview Lab {pad(lab.number)} without finishing Lab {prior ? pad(prior.number) : ''}. Review still waits."
-								>Open anyway</a>
-							</div>
 						</div>
-					</article>
+					</button>
 				{:else}
 					<a
 						class="lab card"
@@ -196,6 +287,19 @@
 	</section>
 	</div>
 	<LabIndexRail />
+	{#if lockedOpen && lockedCopy && lockedPlacement && lockedLab}
+		<LockedLabPopover
+			copy={lockedCopy}
+			placement={lockedPlacement}
+			priorId={lockedPrior?.id ?? null}
+			skipId={lockedLab.id}
+			onDismiss={closeLocked}
+			onSkip={skipLocked}
+			onMeasure={(size) => {
+				panelSize = size;
+			}}
+		/>
+	{/if}
 </div>
 
 <style>
@@ -267,8 +371,17 @@
 			border-color var(--fast) var(--ease), filter var(--fast) var(--ease),
 			background var(--fast) var(--ease), color var(--fast) var(--ease);
 	}
-	a.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
-	a.lab:active {
+	button.lab {
+		appearance: none;
+		font: inherit;
+		text-align: start;
+		width: 100%;
+		cursor: pointer;
+	}
+	a.lab:hover,
+	button.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+	a.lab:active,
+	button.lab:active {
 		transform: translateY(0);
 		box-shadow: var(--shadow-1);
 	}
@@ -340,6 +453,12 @@
 		color: var(--warn);
 		background: var(--warn-soft);
 		border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+		gap: 0.3rem;
+	}
+	.lock {
+		width: 0.75rem;
+		height: 0.75rem;
+		flex: 0 0 auto;
 	}
 	.chip-status.go {
 		color: var(--accent-ink);
@@ -355,14 +474,6 @@
 		color: var(--rose);
 		background: var(--rose-soft);
 		border-color: color-mix(in srgb, var(--rose) 30%, transparent);
-	}
-
-	.lab-actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--s2);
-		align-items: center;
-		margin-top: var(--s3);
 	}
 
 	.lab.ahead {

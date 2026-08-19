@@ -100,7 +100,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:active\s*\{/);
-		expect(styleBlock(home)).toMatch(/a\.lab:active\s*\{/);
+		expect(styleBlock(home)).toMatch(/a\.lab:active/);
+		expect(styleBlock(home)).toMatch(/button\.lab:active/);
 		expect(appCss).toMatch(/\.btn:active\s*\{/);
 	});
 
@@ -166,7 +167,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(referenceIndexRail)).toMatch(/flex-wrap:\s*wrap/);
 		expect(styleBlock(referenceIndexRail)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/\.ref-index\s*\{[^}]*position:\s*sticky/s);
-		expect(home).toMatch(/Review still waits/);
+		expect(home).toMatch(/lockedLabPopoverCopy/);
 		expect(styleBlock(home)).toMatch(/grid-template-areas:/);
 	});
 
@@ -329,7 +330,7 @@ describe('polish audit regressions', () => {
 		}
 	});
 
-	it('keeps status pills as labels and actions as boxed .btn controls', () => {
+	it('keeps status pills as labels and locked-card skip in a click popover', () => {
 		const homeCss = styleBlock(home);
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*border-radius:\s*var\(--r-md\)/s);
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*text-decoration:\s*none/s);
@@ -338,14 +339,20 @@ describe('polish audit regressions', () => {
 		expect(homeCss).toMatch(/\.chip-status\s*\{[^}]*border-radius:\s*var\(--r-pill\)/s);
 		expect(homeCss).toMatch(/\.chip-status\s*\{[^}]*cursor:\s*default/s);
 		expect(home).not.toMatch(/<a[^>]*chip-status/);
+		expect(home).not.toMatch(/class="lab-actions"/);
+		expect(home).toMatch(/type="button"/);
+		expect(home).toMatch(/class="lab card ahead"/);
+		expect(home).toMatch(/LockedLabPopover/);
+		expect(home).toMatch(/placeClickPopover/);
+		expect(home).toMatch(/class="lock"/);
 		expect(labPreview).toMatch(/class="btn ghost"/);
 		expect(labPreview).toMatch(/model\.priorActionLabel/);
+		expect(labPreview).toMatch(/openLab/);
 	});
 
-	it('sizes lab actions, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
+	it('sizes popover actions, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
-		expect(home).toMatch(/class="lab-actions"/);
-		expect(home).toMatch(/class="btn ghost"/);
+		expect(home).toMatch(/LockedLabPopover/);
 		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
@@ -507,7 +514,8 @@ describe('polish audit regressions', () => {
 		expect(home).toMatch(/<span class="chip-status wait">/);
 		expect(home).not.toMatch(/<a[^>]*chip-status/);
 		expect(home).not.toMatch(/class="peek"/);
-		expect(home).toMatch(/Open Lab \{pad\(prior\.number\)\}/);
+		expect(home).not.toMatch(/class="lab-actions"/);
+		expect(home).toMatch(/LockedLabPopover/);
 		expect(home).toMatch(/Review \{pile\.due\} due/);
 		expect(home).toMatch(/Letters land here after you finish a lab/);
 		expect(home).toMatch(/pile-empty loading-copy/);
@@ -560,7 +568,7 @@ describe('polish audit regressions', () => {
 		expect(homeCss).toMatch(/\.lab\.now \.num\s*\{[^}]*var\(--accent-ink\)/s);
 		expect(homeCss).not.toMatch(/\.lab\.done \.num\s*\{[^}]*var\(--good\)/s);
 		expect(homeCss).toMatch(/\.lab\.done \.num\s*\{[^}]*var\(--ink-faint\)/s);
-		expect(homeCss).toMatch(/a\.lab:hover\s*\{[^}]*translateY\(-2px\)/s);
+		expect(homeCss).toMatch(/a\.lab:hover[\s\S]*translateY\(-2px\)/);
 		expect(homeCss).not.toMatch(/a\.lab\.done:hover\s*\{[^}]*transform:\s*none/s);
 		expect(homeCss).toMatch(/a\.lab\.now:hover\s*\{[^}]*var\(--accent-ink\)/s);
 		expect(homeCss).toMatch(/\.lab\.now \.chip-status\.go\s*\{[^}]*background:\s*var\(--accent-ink\)/s);

@@ -72,6 +72,8 @@ export interface CourseNavView {
 	/** True once local progress has been read. False is the prerender default. */
 	ready: boolean;
 	isUnlocked: (tier: string) => boolean;
+	/** Skip-ahead grant — this lab is open even if the prerequisite is not. */
+	isOpened?: (labId: string) => boolean;
 	sessionFor: (labId: string) => LabProgress | undefined;
 	queue: number;
 }
@@ -93,8 +95,9 @@ function priorUnlocks(lab: CourseLab, labs: CourseLab[]): string | null {
 function isBlocked(
 	lab: CourseLab,
 	labs: CourseLab[],
-	view: Pick<CourseNavView, 'ready' | 'isUnlocked'>
+	view: Pick<CourseNavView, 'ready' | 'isUnlocked' | 'isOpened'>
 ): boolean {
+	if (view.isOpened?.(lab.id)) return false;
 	const needed = priorUnlocks(lab, labs);
 	if (!needed) return false;
 	// Before hydration, labs with a prerequisite render as locked — the
@@ -223,7 +226,7 @@ export function requiredLab(labs: CourseLab[], requires: string | undefined): Co
 export function showPrerequisiteGate(
 	lab: CourseLab,
 	labs: CourseLab[],
-	view: Pick<CourseNavView, 'ready' | 'isUnlocked'>
+	view: Pick<CourseNavView, 'ready' | 'isUnlocked' | 'isOpened'>
 ): boolean {
 	return isBlocked(lab, labs, view) && !isDone(lab, view);
 }

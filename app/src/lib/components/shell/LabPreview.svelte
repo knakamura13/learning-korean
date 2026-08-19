@@ -6,6 +6,7 @@
 		type PopoverPlacement,
 		type PreviewOpenMode
 	} from '$lib/domain/labPreview';
+	import { progress } from '$lib/stores/progress.svelte';
 
 	let {
 		model,
@@ -78,8 +79,11 @@
 				class={actionClass(model.actionLabel)}
 				href={resolve('/lab/[id]', { id: model.id })}
 				title={model.locked
-					? 'You can look at the cards. Review still waits until you finish the previous lab.'
+					? 'This skip stays open. Review still waits until you finish the sitting.'
 					: undefined}
+				onclick={() => {
+					if (model.locked) progress.openLab(model.id);
+				}}
 			>
 				{model.actionLabel}
 			</a>

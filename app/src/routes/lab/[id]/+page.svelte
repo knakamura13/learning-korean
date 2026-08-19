@@ -23,7 +23,8 @@
 		);
 		return showPrerequisiteGate(item, course, {
 			ready,
-			isUnlocked: (tier) => unlocked.has(tier)
+			isUnlocked: (tier) => unlocked.has(tier),
+			isOpened: (id) => progress.isOpened(id)
 		});
 	});
 	const prior = $derived(requiredLab(course, lab.requires));

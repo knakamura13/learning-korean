@@ -45,13 +45,16 @@ const labs: CourseLab[] = [
 function view(partial: {
 	ready?: boolean;
 	unlocked?: string[];
+	opened?: string[];
 	sessions?: Record<string, LabProgress>;
 	queue?: number;
 }): CourseNavView {
 	const unlocked = new Set(partial.unlocked ?? []);
+	const opened = new Set(partial.opened ?? []);
 	return {
 		ready: partial.ready ?? true,
 		isUnlocked: (tier) => unlocked.has(tier),
+		isOpened: (labId) => opened.has(labId),
 		sessionFor: (id) => partial.sessions?.[id],
 		queue: partial.queue ?? 0
 	};
@@ -197,6 +200,17 @@ describe('labCardState', () => {
 			done: true,
 			resumeAt: null
 		});
+	});
+
+	it('treats a skip-ahead grant as unlocked access without finishing the lab', () => {
+		const skipped = view({ opened: ['0002'] });
+		expect(labCardState(labs[1], labs, skipped)).toMatchObject({
+			locked: false,
+			done: false,
+			startHere: false
+		});
+		expect(labCardState(labs[0], labs, skipped).startHere).toBe(true);
+		expect(showPrerequisiteGate(labs[1], labs, skipped)).toBe(false);
 	});
 });
 

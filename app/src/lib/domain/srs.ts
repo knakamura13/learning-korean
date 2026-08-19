@@ -54,6 +54,8 @@ export interface CardState {
 export interface SrsState {
 	version: 1;
 	unlocked: string[];
+	/** Lab ids granted skip-ahead access without finishing the prerequisite. */
+	openedLabs: string[];
 	cards: Record<string, CardState>;
 	/** Reviews per ISO date, for streaks. */
 	days: Record<string, number>;
@@ -69,7 +71,16 @@ export interface SchedulableCard {
 }
 
 export function emptyState(): SrsState {
-	return { version: 1, unlocked: [], cards: {}, days: {}, newDate: '', newCount: 0, newIds: [] };
+	return {
+		version: 1,
+		unlocked: [],
+		openedLabs: [],
+		cards: {},
+		days: {},
+		newDate: '',
+		newCount: 0,
+		newIds: []
+	};
 }
 
 /**
@@ -89,6 +100,7 @@ export function reviveState(raw: unknown): SrsState {
 	return {
 		version: 1,
 		unlocked: Array.isArray(s.unlocked) ? s.unlocked.filter((x) => typeof x === 'string') : [],
+		openedLabs: Array.isArray(s.openedLabs) ? s.openedLabs.filter((x) => typeof x === 'string') : [],
 		cards: s.cards && typeof s.cards === 'object' ? s.cards : {},
 		days: s.days && typeof s.days === 'object' ? s.days : {},
 		newDate: typeof s.newDate === 'string' ? s.newDate : '',
@@ -135,6 +147,16 @@ export function unlock(state: SrsState, tiers: string[]): SrsState {
 
 export function isUnlocked(state: SrsState, tier: string): boolean {
 	return state.unlocked.includes(tier);
+}
+
+/** Grant skip-ahead access to a lab without releasing its review tier. */
+export function openLab(state: SrsState, labId: string): SrsState {
+	if (state.openedLabs.includes(labId)) return state;
+	return { ...state, openedLabs: [...state.openedLabs, labId] };
+}
+
+export function isOpened(state: SrsState, labId: string): boolean {
+	return state.openedLabs.includes(labId);
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
