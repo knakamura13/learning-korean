@@ -1,3 +1,4 @@
+import { assets } from '$app/paths';
 import { LEADS, type Lead } from '$lib/domain/hangul';
 
 /** ASCII filename stems under `/audio/consonants/{slug}.opus`. */
@@ -30,5 +31,5 @@ export function isConsonantLead(jamo: string): jamo is Lead {
 /** Static path for a lead consonant clip, or null when this slice has none. */
 export function consonantAudioSrc(jamo: string): string | null {
 	if (!isConsonantLead(jamo)) return null;
-	return `/audio/consonants/${CONSONANT_AUDIO_SLUG[jamo]}.opus`;
+	return `${assets}/audio/consonants/${CONSONANT_AUDIO_SLUG[jamo]}.opus`;
 }

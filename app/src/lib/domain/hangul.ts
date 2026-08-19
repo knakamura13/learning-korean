@@ -407,6 +407,8 @@ export interface SoundChange {
 	korean: string;
 	trigger: string;
 	examples: { written: string; spoken: string; gloss?: string }[];
+	/** Only liaison is implemented as a scored lab step. */
+	scored: boolean;
 }
 
 export const SOUND_CHANGES: SoundChange[] = [
@@ -414,6 +416,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'liaison',
 		name: 'Liaison',
 		korean: '연음',
+		scored: true,
 		trigger: 'a batchim followed by a syllable starting with ㅇ',
 		examples: [
 			{ written: '한국어', spoken: '한구거', gloss: 'Korean language' },
@@ -424,6 +427,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'tensification',
 		name: 'Tensification',
 		korean: '경음화',
+		scored: false,
 		trigger: 'a plain consonant after a ㄱ/ㄷ/ㅂ stop becomes tense',
 		examples: [
 			{ written: '학교', spoken: '학꾜', gloss: 'school' },
@@ -434,6 +438,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'nasalization',
 		name: 'Nasalization',
 		korean: '비음화',
+		scored: false,
 		trigger: 'ㄱ/ㄷ/ㅂ before ㄴ/ㅁ become ㅇ/ㄴ/ㅁ',
 		examples: [
 			{ written: '국물', spoken: '궁물', gloss: 'broth' },
@@ -444,6 +449,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'aspiration',
 		name: 'Aspiration',
 		korean: '격음화',
+		scored: false,
 		trigger: 'ㅎ next to ㄱ/ㄷ/ㅂ/ㅈ gives ㅋ/ㅌ/ㅍ/ㅊ',
 		examples: [
 			{ written: '좋고', spoken: '조코', gloss: 'good and…' },
@@ -454,6 +460,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'lateralization',
 		name: 'Lateralization',
 		korean: '유음화',
+		scored: false,
 		trigger: 'ㄴ+ㄹ or ㄹ+ㄴ become ㄹㄹ',
 		examples: [
 			{ written: '신라', spoken: '실라', gloss: 'Silla' },
@@ -464,6 +471,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'r-to-n',
 		name: 'ㄹ becomes ㄴ',
 		korean: 'ㄹ의 비음화',
+		scored: false,
 		trigger: 'ㄹ after ㅁ/ㅇ/ㄱ/ㅂ becomes ㄴ',
 		examples: [
 			{ written: '대통령', spoken: '대통녕', gloss: 'president' },
@@ -474,6 +482,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'h-deletion',
 		name: 'ㅎ deletion',
 		korean: 'ㅎ 탈락',
+		scored: false,
 		trigger: 'a ㅎ batchim before a vowel simply drops',
 		examples: [
 			{ written: '좋아요', spoken: '조아요', gloss: 'it is good' },
@@ -484,6 +493,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'palatalization',
 		name: 'Palatalization',
 		korean: '구개음화',
+		scored: false,
 		trigger: 'ㄷ/ㅌ followed by 이 become ㅈ/ㅊ',
 		examples: [
 			{ written: '같이', spoken: '가치', gloss: 'together' },

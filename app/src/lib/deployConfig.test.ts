@@ -22,6 +22,10 @@ describe('adapter and runtime env', () => {
 		expect(packageJson.devDependencies).not.toHaveProperty('@sveltejs/adapter-auto');
 	});
 
+	it('documents the six-lab course', () => {
+		expect(appReadme).toMatch(/lab01\.\.lab06/);
+	});
+
 	it('pins svelte, kit, and vite to exact versions', () => {
 		expect(packageJson.devDependencies.svelte).toMatch(/^\d/);
 		expect(packageJson.devDependencies['@sveltejs/kit']).toMatch(/^\d/);
@@ -84,5 +88,30 @@ describe('coverage and CI', () => {
 		expect(ci).toMatch(/pnpm check/);
 		expect(ci).toMatch(/pnpm build/);
 		expect(ci).toMatch(/ADAPTER=node pnpm build/);
+		expect(ci).toMatch(/permissions:\s*\n\s+contents:\s+read/s);
+		expect(ci).toMatch(/actions\/checkout@[0-9a-f]{40}/);
+		expect(ci).toMatch(/pnpm\/action-setup@[0-9a-f]{40}/);
+		expect(ci).toMatch(/actions\/setup-node@[0-9a-f]{40}/);
 	});
 });
+
+describe('license, health, and manifests', () => {
+	it('declares an SPDX license at the repository root', () => {
+		const licensePath = new URL('../../../LICENSE', import.meta.url);
+		expect(existsSync(licensePath)).toBe(true);
+		expect(readFileSync(licensePath, 'utf8')).toMatch(/MIT License/);
+	});
+
+	it('uses a short Railway healthcheck on /healthz', () => {
+		const railway = readFileSync(new URL('../../../railway.toml', import.meta.url), 'utf8');
+		expect(railway).toMatch(/healthcheckPath\s*=\s*"\/healthz"/);
+		expect(railway).toMatch(/healthcheckTimeout\s*=\s*30/);
+		expect(svelteConfig).toMatch(/['"]\/healthz['"]/);
+	});
+
+	it('does not depend on isomorphic-dompurify', () => {
+		expect(packageJson.dependencies).not.toHaveProperty('isomorphic-dompurify');
+		expect(packageJson.dependencies).toHaveProperty('dompurify');
+	});
+});
+

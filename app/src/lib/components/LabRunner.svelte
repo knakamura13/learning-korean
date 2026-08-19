@@ -14,7 +14,9 @@
 	import {
 		hydrateLabRunner,
 		labProgressFromRunner,
-		shouldPersistOnLeave
+		placeAfterCorrectSettle,
+		shouldPersistOnLeave,
+		sittingElapsedMinutes
 	} from '$lib/domain/labRunnerSession';
 	import { attachPipRail } from '$lib/components/labRunnerPipRail.svelte';
 	import { followingLab, toCourseLab } from '$lib/domain/courseNav';
@@ -175,15 +177,11 @@
 			blocking: false
 		};
 		furthest = holdFurthest(furthest, index, true, lab.steps.length);
-		// Advance the saved place now so leaving before Next still resumes
-		// on the following card. Last card: unlock immediately so a Review
-		// peek cannot swallow the sitting.
-		if (isLast) {
+		const place = placeAfterCorrectSettle(isLast, furthest, lab.steps.length);
+		if (place.finished) {
 			released = progress.unlock([lab.unlocks]);
-			persist(lab.steps.length, true);
-		} else {
-			persist(furthest);
 		}
+		persist(place.nextIndex, place.finished);
 	}
 
 	/** A wrong answer that should not advance. `soft` means "exploration, not error". */
@@ -218,7 +216,7 @@
 	}
 
 	function finish() {
-		elapsedMinutes = Math.max(1, Math.round(segmentElapsed() / 60_000));
+		elapsedMinutes = sittingElapsedMinutes(segmentElapsed());
 		if (released === 0) released = progress.unlock([lab.unlocks]);
 		finished = true;
 		labSession.clear(lab.id);

@@ -3,7 +3,9 @@ import { emptyOutcomes } from './pipState';
 import {
 	hydrateLabRunner,
 	labProgressFromRunner,
-	shouldPersistOnLeave
+	placeAfterCorrectSettle,
+	shouldPersistOnLeave,
+	sittingElapsedMinutes
 } from './labRunnerSession';
 import type { LabProgress } from './labSession';
 
@@ -98,5 +100,19 @@ describe('labProgressFromRunner', () => {
 			finished: false,
 			outcomes: ['right', null]
 		});
+	});
+});
+
+describe('placeAfterCorrectSettle', () => {
+	it('marks the last card finished and otherwise keeps furthest', () => {
+		expect(placeAfterCorrectSettle(true, 3, 4)).toEqual({ nextIndex: 4, finished: true });
+		expect(placeAfterCorrectSettle(false, 2, 4)).toEqual({ nextIndex: 2, finished: false });
+	});
+});
+
+describe('sittingElapsedMinutes', () => {
+	it('rounds up to at least one minute', () => {
+		expect(sittingElapsedMinutes(0)).toBe(1);
+		expect(sittingElapsedMinutes(90_000)).toBe(2);
 	});
 });

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { LABS } from '$lib/content';
 import { labHtml, sanitizeLabHtml } from './sanitize';

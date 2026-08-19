@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { activeSystem } from './active.ts';
 import type { DesignSystem } from './types.ts';
 
@@ -61,6 +61,11 @@ export function webManifest(system: DesignSystem, scheme: 'light' | 'dark'): str
 }
 
 export function writeManifests(dir = new URL('../../../static/', import.meta.url)): void {
-	writeFileSync(new URL('manifest.webmanifest', dir), webManifest(activeSystem, 'light'));
-	writeFileSync(new URL('manifest-dark.webmanifest', dir), webManifest(activeSystem, 'dark'));
+	writeIfChanged(new URL('manifest.webmanifest', dir), webManifest(activeSystem, 'light'));
+	writeIfChanged(new URL('manifest-dark.webmanifest', dir), webManifest(activeSystem, 'dark'));
+}
+
+function writeIfChanged(url: URL, contents: string): void {
+	if (existsSync(url) && readFileSync(url, 'utf8') === contents) return;
+	writeFileSync(url, contents);
 }

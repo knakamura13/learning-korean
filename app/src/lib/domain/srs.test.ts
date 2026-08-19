@@ -48,6 +48,18 @@ describe('state hygiene', () => {
 		expect(revived.cards.c0.ivl).toBe(3);
 	});
 
+	it('clamps revived ease and interval so a hand-edited blob cannot explode the scheduler', () => {
+		const revived = reviveState({
+			version: 1,
+			unlocked: ['lab01'],
+			cards: {
+				c0: { ease: 99, ivl: 10_000, reps: 2, lapses: 0, due: T0 }
+			}
+		});
+		expect(revived.cards.c0.ease).toBeLessThanOrEqual(2.8);
+		expect(revived.cards.c0.ivl).toBeLessThanOrEqual(365);
+	});
+
 	it('drops non-numeric day counts so a later grade cannot concatenate strings', () => {
 		const revived = reviveState({
 			version: 1,
@@ -56,6 +68,20 @@ describe('state hygiene', () => {
 			days: { '2026-03-01': '5', nope: 1, '2026-03-02': 2 }
 		});
 		expect(revived.days).toEqual({ '2026-03-02': 2 });
+	});
+
+	it('keeps at most 400 day keys, the most recent ones', () => {
+		const packed: Record<string, number> = {};
+		const start = Date.UTC(2020, 0, 1);
+		for (let i = 0; i < 401; i++) {
+			const iso = new Date(start + i * 86_400_000).toISOString().slice(0, 10);
+			packed[iso] = 1;
+		}
+		const revived = reviveState({ version: 1, unlocked: [], cards: {}, days: packed });
+		expect(Object.keys(revived.days)).toHaveLength(400);
+		expect(revived.days['2020-01-01']).toBeUndefined();
+		const last = new Date(start + 400 * 86_400_000).toISOString().slice(0, 10);
+		expect(revived.days[last]).toBe(1);
 	});
 
 	it('quarantines raw JSON that does not parse, without inventing a writeable state', () => {
@@ -135,6 +161,12 @@ describe('backup validation', () => {
 	it('accepts v1 backups with unlocked and cards', () => {
 		expect(isSrsBackup({ version: 1, unlocked: [], cards: {} })).toBe(true);
 		expect(isSrsBackup({ v: 1, unlocked: ['lab01'], cards: {} })).toBe(true);
+	});
+
+	it('rejects unlocked / openedLabs / newIds that are not string arrays', () => {
+		expect(isSrsBackup({ version: 1, unlocked: [1, 2], cards: {} })).toBe(false);
+		expect(isSrsBackup({ version: 1, unlocked: [], openedLabs: [0], cards: {} })).toBe(false);
+		expect(isSrsBackup({ version: 1, unlocked: [], cards: {}, newIds: [1] })).toBe(false);
 	});
 
 	it('parseImportedBackup fails closed on invalid input', () => {

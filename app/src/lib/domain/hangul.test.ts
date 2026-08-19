@@ -261,8 +261,17 @@ describe('liaison (Articles 13–14)', () => {
 	it('agrees with the reference-page liaison examples', () => {
 		const liaison = SOUND_CHANGES.find((s) => s.id === 'liaison');
 		expect(liaison).toBeDefined();
+		expect(liaison!.scored).toBe(true);
 		for (const ex of liaison!.examples) {
 			expect(applyLiaison(ex.written), ex.written).toBe(ex.spoken);
+		}
+	});
+
+	it('marks unimplemented sound changes so reference copy cannot claim they are scored', () => {
+		const unimplemented = SOUND_CHANGES.filter((s) => s.id !== 'liaison');
+		expect(unimplemented.length).toBe(7);
+		for (const change of unimplemented) {
+			expect(change.scored, change.id).toBe(false);
 		}
 	});
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { focusWhen } from '$lib/a11y/shortcuts';
 	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
-	import { backupFilename, exportedStatus, importedStatus, type BackupStatus } from '$lib/domain/backup';
+	import { backupFilename, exportedStatus, importedStatus, MAX_BACKUP_BYTES, type BackupStatus } from '$lib/domain/backup';
 
 	/**
 	 * `exportJson`/`importJson` are injected rather than importing the
@@ -59,6 +59,12 @@
 	async function confirmRestore() {
 		const file = pending;
 		if (!file) return;
+		if (file.size > MAX_BACKUP_BYTES) {
+			status = importedStatus(false);
+			pending = null;
+			if (fileInput) fileInput.value = '';
+			return;
+		}
 		busy = true;
 		try {
 			const text = await readText(file);

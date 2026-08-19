@@ -3,7 +3,8 @@
 	import LookPicker from '$lib/components/LookPicker.svelte';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import ProgressReset from '$lib/components/ProgressReset.svelte';
-	import { wrapExport, unwrapImport } from '$lib/domain/backup';
+	import { applyImportedBackup, wrapExport } from '$lib/domain/backup';
+	import { LABS } from '$lib/content';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
@@ -14,15 +15,19 @@
 		progress.tick();
 	});
 
+	const STEP_COUNTS: Record<string, number> = Object.fromEntries(
+		LABS.map((lab) => [lab.id, lab.steps.length])
+	);
+
 	function exportJson(): string {
 		return wrapExport(progress.export(), labSession.snapshot);
 	}
 
 	function importJson(json: string): boolean {
-		const unpacked = unwrapImport(json);
-		if (!unpacked) return false;
-		if (!progress.import(unpacked.srsText)) return false;
-		if (unpacked.sessions !== null) labSession.replaceAll(unpacked.sessions);
+		const plan = applyImportedBackup(json, STEP_COUNTS);
+		if (!plan) return false;
+		if (!progress.import(plan.srsText)) return false;
+		labSession.replaceAll(plan.sessions);
 		return true;
 	}
 </script>

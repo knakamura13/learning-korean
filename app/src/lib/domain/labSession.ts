@@ -80,6 +80,31 @@ export function reviveSessions(raw: unknown, stepCounts: Record<string, number>)
 	return { version: LAB_SESSION_VERSION, labs };
 }
 
+/**
+ * Strict restore for a backup file: unknown labs are skipped, but a known lab
+ * whose payload cannot revive fails the whole import so SRS is not applied
+ * against a sitting we then silently drop.
+ */
+export function sessionsFromBackup(
+	raw: unknown,
+	stepCounts: Record<string, number>
+): LabSessions | null {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+	const rec = raw as Record<string, unknown>;
+	if (rec.version !== LAB_SESSION_VERSION) return null;
+	if (!rec.labs || typeof rec.labs !== 'object' || Array.isArray(rec.labs)) return null;
+
+	const labs: Record<string, LabProgress> = {};
+	for (const [id, value] of Object.entries(rec.labs as Record<string, unknown>)) {
+		const count = stepCounts[id];
+		if (count === undefined) continue;
+		const progress = reviveOne(value, count);
+		if (!progress) return null;
+		labs[id] = progress;
+	}
+	return { version: LAB_SESSION_VERSION, labs };
+}
+
 function isReadableSessionDocument(raw: unknown): boolean {
 	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
 	const rec = raw as Record<string, unknown>;

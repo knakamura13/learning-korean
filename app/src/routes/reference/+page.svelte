@@ -292,6 +292,9 @@
 					<span class="scname">
 						{sc.name}
 						<em class="hg" lang="ko">{sc.korean}</em>
+						{#if !sc.scored}
+							<span class="muted tiny">not scored yet</span>
+						{/if}
 					</span>
 					<span class="vals">
 						<span class="rule wide"><KoText text={sc.trigger} /></span>

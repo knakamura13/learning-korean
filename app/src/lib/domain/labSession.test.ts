@@ -5,6 +5,7 @@ import {
 	emptySessions,
 	resumable,
 	reviveSessions,
+	sessionsFromBackup,
 	upsertLab,
 	type LabProgress
 } from './labSession';
@@ -139,5 +140,21 @@ describe('resumable', () => {
 		expect(resumable({ ...mid, finished: true }, 17)).toBeNull();
 		expect(resumable({ ...mid, nextIndex: 17, finished: true }, 17)).toBeNull();
 		expect(resumable(undefined, 17)).toBeNull();
+	});
+});
+
+describe('sessionsFromBackup', () => {
+	it('fails closed when a known lab in the backup cannot revive', () => {
+		expect(
+			sessionsFromBackup({ version: 1, labs: { '0001': { nextIndex: -1 } } }, COUNTS)
+		).toBeNull();
+	});
+
+	it('returns empty sittings for a valid empty labs map', () => {
+		expect(sessionsFromBackup({ version: 1, labs: {} }, COUNTS)).toEqual(emptySessions());
+	});
+
+	it('rejects a future session version', () => {
+		expect(sessionsFromBackup({ version: 99, labs: { '0001': mid } }, COUNTS)).toBeNull();
 	});
 });
