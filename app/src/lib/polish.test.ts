@@ -8,11 +8,13 @@ import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
 import options from './components/Options.svelte?raw';
+import tray from './components/Tray.svelte?raw';
 import settingsLink from './components/SettingsLink.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
 import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
+import lookPicker from './components/LookPicker.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
@@ -65,6 +67,16 @@ describe('polish audit regressions', () => {
 		expect(labRunner).toMatch(/attachModalDialog/);
 	});
 
+	it('opens the locked-lab overlay as a native modal dialog', () => {
+		expect(lockedLabPopover).toMatch(/<dialog\b[^>]*class="pop"/);
+		expect(lockedLabPopover).toMatch(/attachModalDialog/);
+		expect(lockedLabPopover).toMatch(/from '\$lib\/a11y\/attachModalDialog'/);
+		expect(lockedLabPopover).not.toMatch(/role="dialog"/);
+		expect(lockedLabPopover).not.toMatch(/e\.key !== 'Tab'/);
+		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop\s*\{[^}]*inset:\s*unset/s);
+		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop::backdrop/);
+	});
+
 	it('moves card-change focus to the first well control, not the instruction heading', () => {
 		expect(labRunner).not.toMatch(/querySelector\('h2'\)\?\.focus/);
 		expect(labRunner).not.toMatch(/<h2 class="do" tabindex="-1"/);
@@ -95,6 +107,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labIndexRail)).toMatch(/\.num:active/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/\.jump:active/);
 		expect(appCss).toMatch(/\.btn:active\s*\{/);
+		expect(styleBlock(lookPicker)).toMatch(/\.look-card:active\s*\{/);
+		expect(styleBlock(lookPicker)).toMatch(/\.color-option:active\s*\{/);
 	});
 
 	it('does not paint the control focus ring on the skip-to-content landmark', () => {
@@ -701,6 +715,32 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).toMatch(/\.answer-label\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).toMatch(/\.tag\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(review)).toMatch(/\.v\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(labRunner)).toMatch(/\.verdict\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(options)).toMatch(/\.key\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(slots)).toMatch(/\.slot-name\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(tray)).toMatch(/\.mark\s*\{[^}]*font-size:\s*0\.75rem/s);
+	});
+
+	it('keeps phone header tab hit boxes from sharing a 0.1rem gutter', () => {
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 30rem\)[\s\S]*?nav\s*\{[^}]*gap:\s*0\.35rem/s
+		);
+		expect(styleBlock(layout)).not.toMatch(
+			/@media \(max-width: 30rem\)[\s\S]*?nav\s*\{[^}]*gap:\s*0\.1rem/s
+		);
+	});
+
+	it('sets Settings display headings to the shipped Newsreader italic weight', () => {
+		expect(styleBlock(settingsPage)).toMatch(/\.head h1\s*\{[^}]*font-weight:\s*400/s);
+		expect(styleBlock(settingsPage)).toMatch(
+			/\.appearance h2,\s*\.backup h2\s*\{[^}]*font-weight:\s*400/s
+		);
+		expect(styleBlock(settingsPage)).not.toMatch(/font-weight:\s*600/);
+		expect(styleBlock(lookPicker)).toMatch(/legend\s*\{[^}]*font-weight:\s*400/s);
+		expect(styleBlock(lookPicker)).toMatch(/\.look-name\s*\{[^}]*font-weight:\s*400/s);
+		expect(styleBlock(lookPicker)).toMatch(/legend\s*\{[^}]*font-style:\s*italic/s);
+		expect(styleBlock(lookPicker)).toMatch(/\.look-name\s*\{[^}]*font-style:\s*italic/s);
 	});
 
 	it('gives generic links a real pressed translate, not a no-op', () => {

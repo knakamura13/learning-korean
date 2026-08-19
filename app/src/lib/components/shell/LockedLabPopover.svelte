@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
 	import type { LockedLabPopoverCopy, PopoverPlacement } from '$lib/domain/lockedLab';
 
 	let {
@@ -29,41 +30,29 @@
 		return () => ro?.disconnect();
 	}
 
-	function onPanelKey(e: KeyboardEvent) {
-		const root = e.currentTarget;
-		if (!(root instanceof HTMLElement)) return;
-		if (e.key === 'Escape') {
-			e.preventDefault();
-			onDismiss();
-			return;
-		}
-		if (e.key !== 'Tab') return;
-		const nodes = [...root.querySelectorAll<HTMLElement>('a.btn, button')];
-		if (nodes.length === 0) return;
-		const first = nodes[0];
-		const last = nodes[nodes.length - 1];
-		const active = document.activeElement;
-		if (e.shiftKey && active === first) {
-			e.preventDefault();
-			last.focus();
-		} else if (!e.shiftKey && active === last) {
-			e.preventDefault();
-			first.focus();
-		}
+	function attachLockedDialog(node: HTMLDialogElement) {
+		const stopMeasure = reportSize(node);
+		const stopModal = attachModalDialog(node, onDismiss);
+		return () => {
+			stopModal();
+			stopMeasure();
+		};
+	}
+
+	function onBackdropPointerDown(e: PointerEvent) {
+		if (e.target === e.currentTarget) onDismiss();
 	}
 </script>
 
-<div
+<dialog
 	id="locked-lab-pop"
 	class="pop"
 	style:--pop-x="{placement.left}px"
 	style:--pop-y="{placement.top}px"
-	role="dialog"
 	aria-labelledby="locked-lab-pop-title"
 	aria-describedby="locked-lab-pop-body"
-	tabindex="-1"
-	{@attach reportSize}
-	onkeydown={onPanelKey}
+	{@attach attachLockedDialog}
+	onpointerdown={onBackdropPointerDown}
 >
 	<p class="eyebrow">Locked</p>
 	<h2 id="locked-lab-pop-title">{copy.title}</h2>
@@ -79,13 +68,15 @@
 		>{copy.skipLabel}</a>
 		<button class="btn ghost" type="button" onclick={onDismiss}>{copy.dismissLabel}</button>
 	</div>
-</div>
+</dialog>
 
 <style>
 	.pop {
 		position: fixed;
+		inset: unset;
 		inset-inline-start: var(--pop-x);
 		inset-block-start: var(--pop-y);
+		margin: 0;
 		z-index: 7;
 		width: min(20rem, calc(100vw - 1.5rem));
 		padding: var(--s4);
@@ -95,6 +86,9 @@
 		box-shadow: var(--shadow-2);
 		color: var(--ink);
 		overscroll-behavior: contain;
+	}
+	.pop::backdrop {
+		background: color-mix(in srgb, var(--ink) 35%, transparent);
 	}
 
 	h2 {
@@ -129,6 +123,9 @@
 			color: CanvasText;
 			border-color: ButtonBorder;
 			box-shadow: none;
+		}
+		.pop::backdrop {
+			background: Canvas;
 		}
 	}
 </style>

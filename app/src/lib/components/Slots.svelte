@@ -131,7 +131,7 @@
 
 	.slot-name {
 		font-family: var(--sans);
-		font-size: 0.5rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.02em;
 		text-transform: uppercase;
