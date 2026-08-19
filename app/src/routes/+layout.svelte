@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
-	import { pageCanonical, siteAsset } from '$lib/site';
+	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { activeSystem } from '$lib/theme/active';
 
@@ -38,14 +38,16 @@
 </script>
 
 <svelte:head>
-	{#each activeSystem.fonts as face (face.file)}
-		<link
-			rel="preload"
-			href="{assets}/fonts/{face.file}"
-			as="font"
-			type="font/woff2"
-			crossorigin="anonymous"
-		/>
+	{#each activeSystem.fonts as face (face.file ?? face.family)}
+		{#if face.file}
+			<link
+				rel="preload"
+				href="{assets}/fonts/{face.file}"
+				as="font"
+				type="font/woff2"
+				crossorigin="anonymous"
+			/>
+		{/if}
 	{/each}
 	{#if canonical}
 		<link rel="canonical" href={canonical} />
@@ -53,14 +55,17 @@
 	{/if}
 	<meta property="og:type" content="website" />
 	<meta property="og:title" content="Korean — labs and review" />
-	<meta property="og:description" content="Interactive labs and spaced repetition for reading Korean." />
+	<meta property="og:description" content={SITE_DESCRIPTION} />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Korean — labs and review" />
+	<meta name="twitter:description" content={SITE_DESCRIPTION} />
 	{#if ogImage}
 		<meta property="og:image" content={ogImage} />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content={OG_IMAGE_ALT} />
 		<meta name="twitter:image" content={ogImage} />
+		<meta name="twitter:image:alt" content={OG_IMAGE_ALT} />
 	{/if}
 </svelte:head>
 

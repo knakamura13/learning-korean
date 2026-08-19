@@ -1,6 +1,12 @@
 import { env } from '$env/dynamic/public';
 import { base } from '$app/paths';
 
+export const SITE_DESCRIPTION = 'Interactive labs and spaced repetition for reading Korean.';
+
+/** Alt text for `static/og.png` — cream card, moss tile with 한, title. */
+export const OG_IMAGE_ALT =
+	'Cream card with a moss-green tile showing 한 and the title Korean — labs and review';
+
 /**
  * Public origin of a deployed build, including `kit.paths.base`, no trailing slash.
  * Read from `PUBLIC_SITE_URL`. Empty when unset — do not guess a host.

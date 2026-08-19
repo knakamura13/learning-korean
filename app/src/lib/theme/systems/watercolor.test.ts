@@ -41,6 +41,7 @@ describe('watercolor', () => {
 	it('self-hosts Watercolor Latin faces next to Hangul', () => {
 		const fontsDir = new URL('../../../../static/fonts/', import.meta.url);
 		for (const face of watercolor.fonts) {
+			if (!face.file) continue;
 			expect(existsSync(new URL(face.file, fontsDir)), face.file).toBe(true);
 		}
 		const families = watercolor.fonts.map((face) => face.family);

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { reviewAnswerPlaceholder, reviewBody, reviewChrome } from './reviewChrome';
+import { DECK } from './deck';
+import {
+	REVIEW_ANSWER_MAX_LENGTH,
+	reviewAnswerPlaceholder,
+	reviewBody,
+	reviewChrome
+} from './reviewChrome';
 
 describe('reviewChrome', () => {
 	it('hides stats on a first visit with nothing to save', () => {
@@ -87,5 +93,16 @@ describe('reviewAnswerPlaceholder', () => {
 	it('hints letter answers without the word romanization', () => {
 		expect(reviewAnswerPlaceholder('consonant')).toBe('g, eo, silent');
 		expect(reviewAnswerPlaceholder('vowel')).toBe('g, eo, silent');
+	});
+});
+
+describe('REVIEW_ANSWER_MAX_LENGTH', () => {
+	it('is longer than every accepted deck answer, including Hangul pronunciations', () => {
+		expect(REVIEW_ANSWER_MAX_LENGTH).toBeGreaterThanOrEqual(32);
+		for (const card of DECK) {
+			for (const answer of card.answers) {
+				expect(answer.length, `${card.id} / ${answer}`).toBeLessThan(REVIEW_ANSWER_MAX_LENGTH);
+			}
+		}
 	});
 });

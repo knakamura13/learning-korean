@@ -14,6 +14,7 @@ import themeToggle from './components/ThemeToggle.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
+import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
@@ -657,6 +658,11 @@ describe('polish audit regressions', () => {
 		expect(layout).toMatch(/property="og:image:height"/);
 		expect(layout).toMatch(/content="630"/);
 		expect(layout).toMatch(/name="twitter:title"/);
+		expect(layout).toMatch(/name="twitter:description"/);
+		expect(layout).toMatch(/property="og:image:alt"/);
+		expect(layout).toMatch(/name="twitter:image:alt"/);
+		expect(layout).toMatch(/OG_IMAGE_ALT/);
+		expect(layout).toMatch(/SITE_DESCRIPTION/);
 		expect(appHtml).toMatch(/manifest-dark\.webmanifest/);
 		expect(appHtml).toMatch(/prefers-color-scheme:\s*dark/);
 		expect(appHtml).toContain('%%DESIGN_PAPER_LIGHT%%');
@@ -678,5 +684,31 @@ describe('polish audit regressions', () => {
 		expect(tags[0]).not.toMatch(/\bmedia=/);
 		expect(appHtml).not.toMatch(/name="theme-color"[^>]*\bmedia=/);
 		expect(appHtml).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
+	});
+
+	it('sizes eyebrow chrome at 0.75rem so small uppercase type clears APCA', () => {
+		expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(review)).toMatch(/\.answer-label\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(review)).toMatch(/\.tag\s*\{[^}]*font-size:\s*0\.75rem/s);
+	});
+
+	it('gives generic links a real pressed translate, not a no-op', () => {
+		expect(appCss).toMatch(/a:active:not\(\.btn\)\s*\{[^}]*translateY\(1px\)/s);
+		expect(appCss).toMatch(
+			/@media \(prefers-reduced-motion: reduce\)[\s\S]*?a:active:not\(\.btn\)\s*\{[^}]*transform:\s*none/s
+		);
+	});
+
+	it('contains overscroll on confirm dialogs and the locked-lab popover', () => {
+		expect(styleBlock(progressBackup)).toMatch(/\.confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
+		expect(styleBlock(labRunner)).toMatch(/\.restart-confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
+		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop\s*\{[^}]*overscroll-behavior:\s*contain/s);
+	});
+
+	it('passes PUBLIC_SITE_URL into the Railway image build so prerendered OG tags are absolute', () => {
+		const dockerfile = readFileSync(new URL('../../../Dockerfile', import.meta.url), 'utf8');
+		expect(dockerfile).toMatch(/ARG PUBLIC_SITE_URL/);
+		expect(dockerfile).toMatch(/ENV PUBLIC_SITE_URL=/);
+		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
 	});
 });

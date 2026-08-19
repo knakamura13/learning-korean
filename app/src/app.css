@@ -61,6 +61,7 @@ html[data-theme='dark'] { color-scheme: dark; }
 		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
 	}
+	a:active:not(.btn) { transform: none; }
 }
 
 body {
@@ -113,8 +114,8 @@ a {
 }
 a:hover:not(.btn) { color: var(--accent); }
 
-a:active {
-	transform: translateY(0);
+a:active:not(.btn) {
+	transform: translateY(1px);
 }
 
 button { font: inherit; color: inherit; }
@@ -148,7 +149,7 @@ button { font: inherit; color: inherit; }
 .rom::after { content: ']'; }
 
 .eyebrow {
-	font-size: 0.66rem;
+	font-size: 0.75rem;
 	font-weight: 700;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;

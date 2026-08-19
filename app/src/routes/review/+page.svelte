@@ -9,7 +9,12 @@
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
-	import { reviewAnswerPlaceholder, reviewBody, reviewChrome } from '$lib/domain/reviewChrome';
+	import {
+		REVIEW_ANSWER_MAX_LENGTH,
+		reviewAnswerPlaceholder,
+		reviewBody,
+		reviewChrome
+	} from '$lib/domain/reviewChrome';
 
 	let queue = $state<Card[]>([]);
 	let index = $state(0);
@@ -259,6 +264,7 @@
 							autocapitalize="off"
 							autocorrect="off"
 							spellcheck="false"
+							maxlength={REVIEW_ANSWER_MAX_LENGTH}
 							placeholder={reviewAnswerPlaceholder(card.kind)}
 							aria-describedby={emptyHint ? 'empty-hint' : undefined}
 							aria-invalid={emptyHint ? true : undefined}
@@ -376,7 +382,7 @@
 
 	.tag {
 		text-align: center;
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.13em;
 		text-transform: uppercase;
@@ -440,7 +446,7 @@
 	}
 
 	.answer-label {
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
@@ -473,12 +479,19 @@
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 	}
+	.in:hover:not(:disabled) {
+		border-color: var(--accent);
+	}
 	.in:user-invalid,
-	.in[aria-invalid='true'] {
+	.in:user-invalid:hover,
+	.in[aria-invalid='true'],
+	.in[aria-invalid='true']:hover {
 		border-color: var(--bad);
 	}
-	.in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
-	.in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+	.in.right,
+	.in.right:hover { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+	.in.wrong,
+	.in.wrong:hover { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
 	@media (forced-colors: active) {
 		.stat {

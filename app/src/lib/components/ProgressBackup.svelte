@@ -174,6 +174,7 @@
 		color: inherit;
 		font-size: 0.87rem;
 		line-height: 1.6;
+		overscroll-behavior: contain;
 	}
 	.confirm::backdrop {
 		background: color-mix(in srgb, var(--ink) 35%, transparent);

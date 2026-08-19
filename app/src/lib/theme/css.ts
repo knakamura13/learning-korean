@@ -12,17 +12,30 @@ function cssVars<K extends string>(vars: Record<K, string>, values: Record<K, st
 	return (Object.keys(vars) as K[]).map((key) => `	${vars[key]}: ${values[key]};`).join('\n');
 }
 
+function fontSrc(face: FontFaceSpec): string {
+	const parts: string[] = [];
+	for (const name of face.local ?? []) {
+		parts.push(`local('${name}')`);
+	}
+	if (face.file) {
+		parts.push(`url('/fonts/${face.file}') format('woff2')`);
+	}
+	return parts.length ? `\n	src: ${parts.join(', ')};` : '';
+}
+
 function fontFaceCss(face: FontFaceSpec): string {
 	const style = face.style ?? 'normal';
 	const weight = face.weight ?? '400';
 	const display = face.display ?? 'swap';
 	const range = face.unicodeRange ? `\n	unicode-range: ${face.unicodeRange};` : '';
+	const ascent = face.ascentOverride ? `\n	ascent-override: ${face.ascentOverride};` : '';
+	const descent = face.descentOverride ? `\n	descent-override: ${face.descentOverride};` : '';
+	const lineGap = face.lineGapOverride ? `\n	line-gap-override: ${face.lineGapOverride};` : '';
 	return `@font-face {
 	font-family: '${face.family}';
 	font-style: ${style};
 	font-weight: ${weight};
-	font-display: ${display};
-	src: url('/fonts/${face.file}') format('woff2');${range}
+	font-display: ${display};${fontSrc(face)}${range}${ascent}${descent}${lineGap}
 }`;
 }
 
