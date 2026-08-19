@@ -44,23 +44,23 @@ src/lib/content/    lessons as typed data
   types.ts            the step union every lab is built from
   lab01..lab05.ts     the course
 src/lib/theme/      swappable design systems (the look)
-  active.ts           one-line switch for the current look
-  systems/botanicalKorea.ts  pressed-flowers look (current)
-  systems/taegeuk.ts         previous ink-and-paper palette
-  systems/watercolor.ts      unused pigment-wash option
-  systems/academia.ts        unused Light/Dark Academia option
+  active.ts           default / build-time look (Botanical Korea) for manifests, font preloads, and no-JS `:root`
+  systems/botanicalKorea.ts  pressed-flowers look (default)
+  systems/taegeuk.ts         ink-and-paper palette
+  systems/watercolor.ts      pigment-wash option
+  systems/academia.ts        Light/Dark Academia option
   css.ts              emits custom properties + @font-face only
   manifest.ts         PWA theme/background colours from the system
 src/lib/components/ the runner and one component per step type
-src/routes/         dashboard, /lab/[id], /review, /reference
+src/routes/         dashboard, /lab/[id], /review, /reference, /settings
 ```
 
 The look is a `DesignSystem` object: palettes, type stacks, shape, webfonts,
 and contrast-more overrides. Components only use semantic CSS variables
 (`--ink`, `--paper`, `--accent`, `--serif`, …). Space, motion, and shell width
-stay in `app.css`. To prototype a new look, add `src/lib/theme/systems/<name>.ts`
-and point `activeSystem` at it — token CSS, `theme-color`, font preloads, and
-PWA manifests follow.
+stay in `app.css`. Runtime look is `html[data-look]` chosen in Settings; `active.ts`
+only supplies the build-time default for manifests, font preloads, and the no-JS
+`:root` fallback.
 
 ## Two rules worth keeping
 
@@ -77,9 +77,10 @@ it has already caught one real slip.
 
 ## Persistence
 
-State lives in `localStorage` under `korean-srs-v1` and `korean-lab-session-v1`.
+State lives in `localStorage` under `korean-srs-v1`, `korean-lab-session-v1`,
+`korean-look`, and `korean-theme`.
 `storage.ts` probes on startup and reports `durable: false` when the browser
-refuses writes — the footer and review page then say so loudly rather than
+refuses writes — Settings Backup and Review warnings then say so loudly rather than
 losing history in silence.
 
 `reviveState` also accepts the pre-rewrite payload shape (`v` instead of

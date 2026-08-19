@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import hooksSrc from '../../hooks.server.ts?raw';
 import layoutSrc from '../../routes/+layout.svelte?raw';
 import pluginSrc from './vitePlugin.ts?raw';
-import { designSystemCss } from './css';
+import { allDesignSystemsCss, designSystemCss } from './css';
 import {
 	applyDesignSystem,
+	BOOT_PLACEHOLDER,
 	CSS_PLACEHOLDER,
 	PAPER_PLACEHOLDER_DARK,
 	PAPER_PLACEHOLDER_LIGHT
@@ -63,6 +64,7 @@ const contrastDark: ContrastOverrides = {
 const fixture: DesignSystem = {
 	id: 'fixture',
 	name: 'Fixture',
+	summary: 'Fixture look.',
 	htmlSize: '100%',
 	leading: '1.5',
 	shape: { rSm: '1px', rMd: '2px', rLg: '3px', rPill: '4px' },
@@ -199,19 +201,98 @@ describe('designSystemCss', () => {
 	});
 });
 
+function miniSystem(
+	id: string,
+	paper: string,
+	contrastAccent: string,
+	fonts: DesignSystem['fonts'] = []
+): DesignSystem {
+	return {
+		id,
+		name: id,
+		summary: `${id} look.`,
+		htmlSize: '100%',
+		leading: '1.5',
+		shape: { rSm: '0', rMd: '0', rLg: '0', rPill: '0' },
+		type: {
+			display: `${id} Display`,
+			serif: `${id} Serif`,
+			sans: `${id} Sans`,
+			mono: `${id} Mono`,
+			hangul: `${id} Hangul`
+		},
+		fonts,
+		light: paint(paper, '#000000'),
+		dark: paint('#010101', '#ffffff'),
+		contrastMoreLight: { ...contrastLight, accent: contrastAccent, inkFaint: contrastAccent }
+	};
+}
+
+describe('allDesignSystemsCss', () => {
+	const alpha = miniSystem('alpha', '#aaaaaa', '#111111', [
+		{ family: 'Shared', file: 'shared.woff2', weight: '400', display: 'swap' }
+	]);
+	const beta = miniSystem('beta', '#bbbbbb', '#222222', [
+		{ family: 'Shared', file: 'shared.woff2', weight: '400', display: 'swap' },
+		{ family: 'Beta Only', file: 'beta.woff2', weight: '700', display: 'optional' }
+	]);
+	const css = allDesignSystemsCss([alpha, beta], 'alpha');
+
+	it('keeps fallback :root tokens and scopes every look including the fallback', () => {
+		expect(css).toMatch(/:root\s*\{[^}]*--paper:\s*#aaaaaa/);
+		expect(css).toMatch(/html\[data-look='alpha'\]\s*\{/);
+		expect(css).toMatch(/html\[data-look='beta'\]\s*\{[^}]*--paper:\s*#bbbbbb/);
+		expect(css).toMatch(/html\[data-look='beta'\]\[data-theme='dark'\]/);
+		expect(css).not.toMatch(/html\s*\{/);
+		expect(css).not.toMatch(/body\s*\{/);
+	});
+
+	it('scopes contrast-more overrides per look, not only :root', () => {
+		const betaBodies = [...css.matchAll(/html\[data-look='beta'\]\s*\{([^}]*)\}/g)].map(
+			(m) => m[1]
+		);
+		const contrastBody = betaBodies.find((body) => body.includes('--accent: #222222'));
+		expect(contrastBody).toBeDefined();
+		expect(contrastBody).not.toContain('#111111');
+		expect(css).toMatch(/prefers-contrast:\s*more[\s\S]*html\[data-look='beta'\]/);
+	});
+
+	it('dedupes @font-face across systems on family+file+style+weight+unicodeRange', () => {
+		expect(css.match(/font-family: 'Shared'/g)?.length).toBe(1);
+		expect(css).toContain("font-family: 'Beta Only'");
+		expect(css).toContain('font-display: optional');
+	});
+});
+
 describe('applyDesignSystem', () => {
+	const beta: DesignSystem = {
+		...fixture,
+		id: 'beta',
+		name: 'Beta',
+		summary: 'Second look.',
+		light: paint('#eeeeee', '#020202'),
+		dark: paint('#0a0a0a', '#fafafa'),
+		fonts: []
+	};
+
 	it('stamps paper colours and token CSS into one HTML pass', () => {
 		const html = [
 			`light:${PAPER_PLACEHOLDER_LIGHT}`,
 			`dark:${PAPER_PLACEHOLDER_DARK}`,
-			`<style>${CSS_PLACEHOLDER}</style>`
+			`<style>${CSS_PLACEHOLDER}</style>`,
+			`<script>${BOOT_PLACEHOLDER}</script>`
 		].join('\n');
-		const stamped = applyDesignSystem(html, fixture);
+		const stamped = applyDesignSystem(html, [fixture, beta], fixture);
 		expect(stamped).toContain(`light:${fixture.light.paper}`);
 		expect(stamped).toContain(`dark:${fixture.dark.paper}`);
 		expect(stamped).toContain('--paper: #fefefe');
+		expect(stamped).toMatch(/html\[data-look='fixture'\]/);
+		expect(stamped).toMatch(/html\[data-look='beta'\]/);
+		expect(stamped).toContain('"fixture":{"light":"#fefefe","dark":"#121212"}');
+		expect(stamped).toContain('"beta":{"light":"#eeeeee","dark":"#0a0a0a"}');
 		expect(stamped).not.toContain(CSS_PLACEHOLDER);
 		expect(stamped).not.toContain(PAPER_PLACEHOLDER_LIGHT);
+		expect(stamped).not.toContain(BOOT_PLACEHOLDER);
 	});
 });
 

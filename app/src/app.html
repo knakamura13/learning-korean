@@ -14,24 +14,9 @@
 		<meta name="color-scheme" content="light dark" />
 		<!-- One tag, no media: the first matching theme-color wins, so OS media tags would beat the in-app toggle. -->
 		<meta name="theme-color" content="%%DESIGN_PAPER_LIGHT%%" data-resolved />
-		<!-- Theme boot before first paint. Prerender hashes this inline script. -->
+		<!-- Theme boot before first paint. Placed before SvelteKit injects CSP into head; it is not script-src-hashed. -->
 		<script>
-			(function () {
-				try {
-					var t = localStorage.getItem('korean-theme');
-					var dark =
-						t === 'dark' ||
-						(t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-					if (t === 'light' || t === 'dark') {
-						document.documentElement.setAttribute('data-theme', t);
-						document.documentElement.style.colorScheme = t;
-						var cs = document.querySelector('meta[name="color-scheme"]');
-						if (cs) cs.setAttribute('content', t);
-					}
-					var m = document.querySelector('meta[name="theme-color"][data-resolved]');
-					if (m) m.setAttribute('content', dark ? '%%DESIGN_PAPER_DARK%%' : '%%DESIGN_PAPER_LIGHT%%');
-				} catch (e) {}
-			})();
+%%THEME_BOOT%%
 		</script>
 		<meta name="description" content="Interactive labs and spaced repetition for reading Korean." />
 		%sveltekit.head%

@@ -95,12 +95,11 @@ writes will not survive. `progress.export()` / `progress.import()` are the escap
 
 **Fixed (2026-08-15):** that escape hatch had no UI — `export()`/`import()` sat
 unused since the rewrite, so the only way out of the durability warning, or to
-move a deck to a new browser/device, was the devtools console. `/review` now has
-a "Back up or restore your progress" disclosure (`ProgressBackup.svelte`,
-domain helpers in `domain/backup.ts`) that downloads the export as a dated JSON
-file and restores from one, with an inline (not `confirm()`) warning before a
-restore overwrites the current deck. Opens itself when storage is not durable,
-since that is exactly when backing up right now matters.
+move a deck to a new browser/device, was the devtools console. Backup now lives
+on Settings (`/settings#backup`) via `ProgressBackup.svelte` and domain helpers
+in `domain/backup.ts`: download a dated JSON export and restore from one, with
+an inline (not `confirm()`) warning before a restore overwrites the current deck.
+Review storage warnings deep-link there when writes will not survive.
 
 ## The app was rebuilt in SvelteKit (2026-08-12)
 

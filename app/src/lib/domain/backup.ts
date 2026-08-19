@@ -46,14 +46,6 @@ export function importedStatus(ok: boolean): BackupStatus {
 			};
 }
 
-export function storageNeedsBackup(
-	progressDurable: boolean,
-	labDurable: boolean,
-	corrupt: boolean
-): boolean {
-	return !progressDurable || !labDurable || corrupt;
-}
-
 export function wrapExport(srsText: string, sessions: LabSessions): string {
 	try {
 		const srs = JSON.parse(srsText) as unknown;

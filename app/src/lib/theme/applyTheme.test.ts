@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { applyTheme, PAPER_DARK, PAPER_LIGHT } from './index';
+import { academia } from './systems/academia';
+import { applyLook, applyTheme, PAPER_DARK, PAPER_LIGHT } from './index';
 
 function stubScheme(prefersDark: boolean) {
 	vi.stubGlobal('matchMedia', (query: string) => ({
@@ -16,6 +17,7 @@ function stubScheme(prefersDark: boolean) {
 describe('applyTheme theme-color', () => {
 	beforeEach(() => {
 		document.documentElement.removeAttribute('data-theme');
+		document.documentElement.removeAttribute('data-look');
 		document.documentElement.style.colorScheme = '';
 		document.head.innerHTML = `
 			<meta name="color-scheme" content="light dark" />
@@ -53,5 +55,38 @@ describe('applyTheme theme-color', () => {
 		expect(document.querySelector('meta[name="color-scheme"]')?.getAttribute('content')).toBe(
 			'light dark'
 		);
+	});
+
+	it('writes the selected look paper onto theme-color, not Botanical Korea constants', () => {
+		stubScheme(false);
+		applyTheme('dark', 'academia');
+		const tag = document.querySelector('meta[name="theme-color"][data-resolved]');
+		expect(academia.dark.paper).not.toBe(PAPER_DARK);
+		expect(tag?.getAttribute('content')).toBe(academia.dark.paper);
+	});
+});
+
+describe('applyLook', () => {
+	beforeEach(() => {
+		document.documentElement.removeAttribute('data-theme');
+		document.documentElement.removeAttribute('data-look');
+		document.documentElement.style.colorScheme = '';
+		document.head.innerHTML = `
+			<meta name="color-scheme" content="light dark" />
+			<meta name="theme-color" content="${PAPER_LIGHT}" data-resolved />
+		`;
+		localStorage.clear();
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		localStorage.clear();
+	});
+
+	it("sets data-look to taegeuk without writing localStorage", () => {
+		stubScheme(false);
+		applyLook('taegeuk', 'light');
+		expect(document.documentElement.getAttribute('data-look')).toBe('taegeuk');
+		expect(localStorage.getItem('korean-look')).toBeNull();
 	});
 });

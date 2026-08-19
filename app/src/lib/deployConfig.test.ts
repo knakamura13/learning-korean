@@ -46,12 +46,19 @@ describe('adapter and runtime env', () => {
 });
 
 describe('csp', () => {
-	it('declares a CSP; prerendered pages hash the inline theme boot script', () => {
+	it('declares a CSP; theme boot script runs before %sveltekit.head% injects CSP', () => {
 		expect(svelteConfig).toMatch(/csp:\s*\{/);
 		expect(svelteConfig).toMatch(/['"]script-src['"]/);
 		expect(svelteConfig).toMatch(/unsafe-inline/);
 		expect(appHtml).toMatch(/<script>/);
 		expect(appHtml).not.toMatch(/%sveltekit\.nonce%/);
+
+		const bootScript = appHtml.search(/<script>\s*%%THEME_BOOT%%/);
+		const kitHead = appHtml.indexOf('%sveltekit.head%');
+		expect(bootScript).toBeGreaterThan(-1);
+		expect(kitHead).toBeGreaterThan(bootScript);
+		expect(appHtml).toMatch(/not script-src-hashed/i);
+		expect(appHtml).not.toMatch(/Prerender hashes this inline script/i);
 	});
 });
 

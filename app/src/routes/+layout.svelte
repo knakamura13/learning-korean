@@ -1,13 +1,14 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from 'svelte';
 	import { assets, resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import SiteFooter from '$lib/components/SiteFooter.svelte';
+	import SettingsLink from '$lib/components/SettingsLink.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { activeSystem } from '$lib/theme/active';
+	import { applyLook, readLookId, readThemePref, subscribeSystemTheme } from '$lib/theme';
 
 	let { children } = $props();
 
@@ -22,6 +23,11 @@
 
 	const queue = $derived(progress.stats.queue);
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+
+	onMount(() => {
+		applyLook(readLookId(), readThemePref());
+		return subscribeSystemTheme();
+	});
 
 	function skipToMain(event: MouseEvent) {
 		event.preventDefault();
@@ -98,16 +104,13 @@
 				</a>
 			{/each}
 		</nav>
-		<ThemeToggle />
+		<SettingsLink />
 	</div>
 </header>
 
 <main id="main" onblur={clearSkipLanding}>
 	{@render children()}
 </main>
-{#if !labRoute}
-	<SiteFooter />
-{/if}
 </div>
 
 <style>
@@ -365,7 +368,7 @@
 			flex-wrap: wrap;
 			row-gap: 0;
 		}
-		.inner :global(.theme) { order: 2; }
+		.inner :global(.settings) { order: 2; }
 		nav {
 			order: 3;
 			flex: 1 0 100%;

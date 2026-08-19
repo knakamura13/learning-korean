@@ -3,13 +3,12 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
-import siteFooter from './components/SiteFooter.svelte?raw';
 import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
 import options from './components/Options.svelte?raw';
-import themeToggle from './components/ThemeToggle.svelte?raw';
+import settingsLink from './components/SettingsLink.svelte?raw';
 import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
@@ -20,15 +19,17 @@ import viteConfig from '../../vite.config.ts?raw';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import review from '../routes/review/+page.svelte?raw';
+import settingsPage from '../routes/settings/+page.svelte?raw';
 import reference from '../routes/reference/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
 import errorPage from '../routes/+error.svelte?raw';
 import appHtml from '../app.html?raw';
 import manifest from '../../static/manifest.webmanifest?raw';
 import { activeSystem } from './theme/active';
+import { LOOKS } from './theme/catalog';
 import { contrastRatio } from './theme/contrast';
 import { designSystemCss } from './theme/css';
-import { applyDesignSystem } from './theme/placeholders';
+import { applyDesignSystem, BOOT_PLACEHOLDER } from './theme/placeholders';
 import slots from './components/Slots.svelte?raw';
 
 const appCss = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
@@ -80,8 +81,8 @@ describe('polish audit regressions', () => {
 		expect(promptOpen).not.toMatch(/data-prompt-live/);
 	});
 
-	it('gives the theme control pressed-state feedback', () => {
-		expect(themeToggle).toMatch(/\.theme:active\s*\{/);
+	it('gives the settings control pressed-state feedback', () => {
+		expect(settingsLink).toMatch(/\.settings:active\s*\{/);
 	});
 
 	it('gives remaining interactive chrome a pressed state', () => {
@@ -89,26 +90,11 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(vowelStep)).toMatch(/\.stamp:active:not\(:disabled\)\s*\{/);
 		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
-		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.lab:active/);
 		expect(styleBlock(home)).toMatch(/button\.lab:active/);
 		expect(styleBlock(labIndexRail)).toMatch(/\.num:active/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/\.jump:active/);
 		expect(appCss).toMatch(/\.btn:active\s*\{/);
-	});
-
-	it('gives the backup summary a hover state', () => {
-		const css = styleBlock(siteFooter);
-		const hover = css.match(/\.backup-fold summary:hover\s*\{[^}]*\}/)?.[0] ?? '';
-		const active = css.match(/\.backup-fold summary:active\s*\{[^}]*\}/)?.[0] ?? '';
-		const focus = css.match(/\.backup-fold summary:focus-visible\s*\{[^}]*\}/)?.[0] ?? '';
-		expect(hover).toMatch(/background:\s*var\(--accent-soft\)/);
-		expect(hover).not.toMatch(/box-shadow:\s*var\(--focus-ring\)/);
-		expect(hover).not.toMatch(/outline:/);
-		expect(hover).not.toMatch(/transform:/);
-		expect(active).toMatch(/transform:\s*translateY\(1px\)/);
-		expect(active).toMatch(/background:\s*var\(--paper-sunk\)/);
-		expect(focus).toMatch(/box-shadow:\s*var\(--focus-ring\)/);
 	});
 
 	it('does not paint the control focus ring on the skip-to-content landmark', () => {
@@ -179,7 +165,7 @@ describe('polish audit regressions', () => {
 			appCss,
 			labRunner,
 			progressBackup,
-			siteFooter,
+			settingsPage,
 			layout,
 			home,
 			review,
@@ -200,7 +186,7 @@ describe('polish audit regressions', () => {
 		expect(physicalLeftRight(styleBlock(layout))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(labRunner))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(progressBackup))).toEqual([]);
-		expect(physicalLeftRight(styleBlock(siteFooter))).toEqual([]);
+		expect(physicalLeftRight(styleBlock(settingsPage))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(home))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(review))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(reference))).toEqual([]);
@@ -359,15 +345,14 @@ describe('polish audit regressions', () => {
 		expect(labPreview).toMatch(/openLab/);
 	});
 
-	it('sizes popover actions, backup summary, pip, theme, brand, and lab-index hits to at least 44px', () => {
+	it('sizes popover actions, pip, settings, brand, and lab-index hits to at least 44px', () => {
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
 		expect(home).toMatch(/LockedLabPopover/);
-		expect(styleBlock(siteFooter)).toMatch(/\.backup-fold summary\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/min-height:\s*44px/);
-		expect(styleBlock(themeToggle)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
 	});
@@ -479,7 +464,8 @@ describe('polish audit regressions', () => {
 		expect(layout).not.toMatch(/>¶</);
 		expect(layout).not.toMatch(/Colophon/);
 		expect(layout).not.toMatch(/folio/);
-		expect(layout).toMatch(/ThemeToggle/);
+		expect(layout).toMatch(/SettingsLink/);
+		expect(layout).not.toMatch(/ThemeToggle/);
 		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(layout)).not.toMatch(/\.inner\s*\{[^}]*(?<!min-)height:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.name\s*\{[^}]*font-size:\s*1rem/s);
@@ -573,13 +559,15 @@ describe('polish audit regressions', () => {
 	});
 
 	it('does not ship fascicle journal words in UI chrome', () => {
-		const chrome = layout + home + labRunner + labPage + labIndexRail + labPreview + labSpread + review + siteFooter;
+		const chrome = layout + home + labRunner + labPage + labIndexRail + labPreview + labSpread + review + settingsPage;
 		expect(chrome).not.toMatch(/Colophon/);
 		expect(chrome).not.toMatch(/>ToC</);
 		expect(chrome).not.toMatch(/label: 'ToC'/);
 		expect(chrome).not.toMatch(/fascicle/i);
 		expect(chrome).not.toMatch(/folio/i);
-		expect(siteFooter).toMatch(/Back up or restore your progress/);
+		expect(settingsPage).toMatch(/<h2[^>]*>Backup<\/h2>/);
+		expect(settingsPage).toMatch(/Your progress lives only in this browser/);
+		expect(settingsPage).not.toMatch(/Back up or restore your progress/);
 		expect(review).toMatch(/Loading Review/);
 		expect(review).toMatch(/Nothing in Review yet/);
 		expect(review).toMatch(/Review is clear/);
@@ -683,9 +671,11 @@ describe('polish audit regressions', () => {
 		expect(appHtml).toMatch(/manifest-dark\.webmanifest/);
 		expect(appHtml).toMatch(/prefers-color-scheme:\s*dark/);
 		expect(appHtml).toContain('%%DESIGN_PAPER_LIGHT%%');
-		const resolvedHtml = applyDesignSystem(appHtml, activeSystem);
+		expect(appHtml).toContain(BOOT_PLACEHOLDER);
+		const resolvedHtml = applyDesignSystem(appHtml, LOOKS, activeSystem);
 		expect(resolvedHtml).toContain(activeSystem.light.paper);
 		expect(resolvedHtml).toContain(activeSystem.dark.paper);
+		expect(resolvedHtml).not.toContain(BOOT_PLACEHOLDER);
 		expect(manifest).toContain(`"theme_color": "${activeSystem.light.paper}"`);
 		const darkPath = new URL('../../static/manifest-dark.webmanifest', import.meta.url);
 		expect(existsSync(darkPath)).toBe(true);
@@ -700,7 +690,8 @@ describe('polish audit regressions', () => {
 		expect(tags[0]).toMatch(/\bdata-resolved\b/);
 		expect(tags[0]).not.toMatch(/\bmedia=/);
 		expect(appHtml).not.toMatch(/name="theme-color"[^>]*\bmedia=/);
-		expect(appHtml).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
+		const stamped = applyDesignSystem(appHtml, LOOKS, activeSystem);
+		expect(stamped).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
 	});
 
 	it('sizes eyebrow chrome at 0.75rem so small uppercase type clears APCA', () => {

@@ -2,8 +2,12 @@ export type ThemePref = 'light' | 'dark' | 'system';
 
 export { activeSystem } from './active';
 export type { ContrastOverrides, DesignSystem, Palette, TypeStacks } from './types';
+export { DEFAULT_LOOK_ID, isLookId, LOOKS, type LookId } from './catalog';
+export { LOOK_KEY, paperFor, readLookId, writeLookId } from './look';
 
 import { activeSystem } from './active';
+import type { LookId } from './catalog';
+import { paperFor, readLookId } from './look';
 
 export const THEME_KEY = 'korean-theme';
 export const PAPER_LIGHT = activeSystem.light.paper;
@@ -23,12 +27,13 @@ export function readThemePref(): ThemePref {
 	return 'system';
 }
 
-export function writeThemePref(pref: ThemePref): void {
+export function writeThemePref(pref: ThemePref): boolean {
 	try {
 		if (pref === 'system') localStorage.removeItem(THEME_KEY);
 		else localStorage.setItem(THEME_KEY, pref);
+		return true;
 	} catch {
-		/* ignore */
+		return false;
 	}
 }
 
@@ -39,14 +44,6 @@ export function systemPrefersDark(): boolean {
 export function resolvedTheme(pref: ThemePref, prefersDark = systemPrefersDark()): 'light' | 'dark' {
 	if (pref === 'system') return prefersDark ? 'dark' : 'light';
 	return pref;
-}
-
-/** Flip light ↔ dark. Unset (`system`) follows the OS until the first click. */
-export function nextThemePref(
-	pref: ThemePref,
-	prefersDark = systemPrefersDark()
-): 'light' | 'dark' {
-	return resolvedTheme(pref, prefersDark) === 'light' ? 'dark' : 'light';
 }
 
 export function themePrefLabel(pref: ThemePref): string {
@@ -64,19 +61,7 @@ export function themePrefLabel(pref: ThemePref): string {
 	}
 }
 
-/** Visible glyph: stored light/dark, or the system scheme when nothing is stored. */
-export function themeToggleGlyph(pref: ThemePref, prefersDark = systemPrefersDark()): 'sun' | 'moon' {
-	return resolvedTheme(pref, prefersDark) === 'dark' ? 'moon' : 'sun';
-}
-
-/** Accessible name for the binary light ↔ dark control. */
-export function themeToggleLabel(pref: ThemePref, prefersDark = systemPrefersDark()): string {
-	const current = resolvedTheme(pref, prefersDark);
-	const next = nextThemePref(pref, prefersDark);
-	return `Theme: ${themePrefLabel(current)}. Next: ${themePrefLabel(next)}`;
-}
-
-export function applyTheme(pref: ThemePref): void {
+export function applyTheme(pref: ThemePref, lookId: LookId = readLookId()): void {
 	const root = document.documentElement;
 	if (pref === 'light' || pref === 'dark') {
 		root.setAttribute('data-theme', pref);
@@ -86,9 +71,29 @@ export function applyTheme(pref: ThemePref): void {
 		root.style.colorScheme = '';
 	}
 
-	const color = resolvedTheme(pref) === 'dark' ? PAPER_DARK : PAPER_LIGHT;
+	const color = paperFor(lookId, resolvedTheme(pref));
 	const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"][data-resolved]');
 	if (themeColor) themeColor.content = color;
 	const scheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
 	if (scheme) scheme.content = pref === 'system' ? 'light dark' : pref;
+}
+
+/** Paint the selected look onto the DOM. Does not touch localStorage. */
+export function applyLook(id: LookId, pref: ThemePref = readThemePref()): void {
+	document.documentElement.setAttribute('data-look', id);
+	applyTheme(pref, id);
+}
+
+/**
+ * Keep `theme-color` in sync when the OS scheme flips under a stored `system`
+ * pref. Mount once from the root layout so routes without LookPicker still refresh.
+ */
+export function subscribeSystemTheme(): () => void {
+	if (typeof matchMedia !== 'function') return () => {};
+	const mq = matchMedia('(prefers-color-scheme: dark)');
+	const onChange = () => {
+		if (readThemePref() === 'system') applyTheme('system');
+	};
+	mq.addEventListener('change', onChange);
+	return () => mq.removeEventListener('change', onChange);
 }

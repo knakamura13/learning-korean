@@ -63,6 +63,7 @@ const dark: Palette = {
 export const taegeuk: DesignSystem = {
 	id: 'taegeuk',
 	name: 'Taegeuk',
+	summary: 'Ink on paper, 태극 red and blue.',
 	htmlSize: '106.25%',
 	leading: '1.6',
 	shape: {

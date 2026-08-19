@@ -74,6 +74,7 @@ const dark: Palette = {
 export const academia: DesignSystem = {
 	id: 'academia',
 	name: 'Academia',
+	summary: 'Library lamp, scholarly serif.',
 	htmlSize: '106.25%',
 	leading: '1.75',
 	shape: {
