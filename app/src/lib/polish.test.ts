@@ -484,7 +484,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
-		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.25rem/s);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.45rem/s);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
 		expect(layout).toMatch(/class="review-w"/);
 		expect(layout).toMatch(/class="badge" aria-hidden="true"/);
@@ -492,6 +492,12 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.review-w\s*\{[^}]*position:\s*relative/s);
 		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*position:\s*absolute/s);
 		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*inset-block-end:/s);
+		expect(layout).toMatch(/class="badge-n"/);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*padding-block:\s*0\.18rem/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*padding-inline:\s*0\.3rem/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*place-items:\s*center/s);
+		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*min-block-size:\s*1\.25rem/s);
+		expect(styleBlock(layout)).toMatch(/\.badge-n\s*\{[^}]*translate:\s*0 0\.12em/s);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);
 		expect(styleBlock(layout)).not.toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(/s);
 		expect(styleBlock(layout)).toMatch(/nav a\.active\s*\{[^}]*background:\s*var\(--paper\)/s);

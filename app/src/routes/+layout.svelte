@@ -92,7 +92,7 @@
 						: undefined}
 				>
 					{#if item.href === '/review'}
-						Revie<span class="review-w">w{#if queue > 0}<span class="badge" aria-hidden="true">{queue}</span>{/if}</span>
+						Revie<span class="review-w">w{#if queue > 0}<span class="badge" aria-hidden="true"><span class="badge-n">{queue}</span></span>{/if}</span>
 					{:else}
 						{item.label}
 					{/if}
@@ -218,7 +218,7 @@
 		align-items: stretch;
 		gap: 0.35rem;
 		margin-inline-start: auto;
-		padding-block-start: 0.25rem;
+		padding-block-start: 0.45rem;
 		padding-inline: var(--tab-r);
 		min-width: 0;
 		flex-shrink: 1;
@@ -291,18 +291,18 @@
 	.badge {
 		position: absolute;
 		inset-inline-start: 50%;
-		inset-block-end: calc(100% - 0.1rem);
-		margin-inline-start: -0.31rem;
+		inset-block-end: calc(100% - 0.28rem);
+		translate: -50% 0;
 		z-index: 2;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
+		display: grid;
+		place-items: center;
 		box-sizing: border-box;
-		min-inline-size: 0.62rem;
-		min-block-size: 0.62rem;
-		padding: 0 0.1rem;
+		min-inline-size: 1.25rem;
+		min-block-size: 1.25rem;
+		padding-block: 0.18rem;
+		padding-inline: 0.3rem;
 		font-family: var(--mono);
-		font-size: 0.45rem;
+		font-size: 0.625rem;
 		font-weight: 600;
 		line-height: 1;
 		background: var(--rose);
@@ -310,6 +310,11 @@
 		border-radius: var(--r-pill);
 		font-variant-numeric: tabular-nums;
 		pointer-events: none;
+	}
+	.badge-n {
+		/* Tabular digits sit high in the em box; shift ink to geometric center. */
+		translate: 0 0.12em;
+		line-height: 1;
 	}
 
 	@media (min-width: 72rem) {
@@ -324,13 +329,6 @@
 		nav a {
 			padding-inline: 0.4rem;
 			font-size: 0.76rem;
-		}
-		.badge {
-			min-inline-size: 0.5rem;
-			min-block-size: 0.5rem;
-			font-size: 0.4rem;
-			padding-inline: 0.08rem;
-			margin-inline-start: -0.25rem;
 		}
 	}
 
