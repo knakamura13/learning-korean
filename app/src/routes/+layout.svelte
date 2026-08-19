@@ -218,7 +218,7 @@
 		align-items: stretch;
 		gap: 0.35rem;
 		margin-inline-start: auto;
-		padding-block-start: 0.45rem;
+		padding-block-start: 0.6rem;
 		padding-inline: var(--tab-r);
 		min-width: 0;
 		flex-shrink: 1;
@@ -291,18 +291,19 @@
 	.badge {
 		position: absolute;
 		inset-inline-start: 50%;
-		inset-block-end: calc(100% - 0.28rem);
+		/* Overlap the w so a padded pip stays inside the bar. */
+		inset-block-end: calc(100% - 0.38rem);
 		translate: -50% 0;
 		z-index: 2;
 		display: grid;
 		place-items: center;
 		box-sizing: border-box;
-		min-inline-size: 1.25rem;
-		min-block-size: 1.25rem;
-		padding-block: 0.18rem;
-		padding-inline: 0.3rem;
+		min-inline-size: 1.35rem;
+		min-block-size: 1.35rem;
+		padding-block: 0.22rem;
+		padding-inline: 0.36rem;
 		font-family: var(--mono);
-		font-size: 0.625rem;
+		font-size: 0.6875rem;
 		font-weight: 600;
 		line-height: 1;
 		background: var(--rose);
@@ -312,9 +313,9 @@
 		pointer-events: none;
 	}
 	.badge-n {
-		/* Tabular digits sit high in the em box; shift ink to geometric center. */
-		translate: 0 0.12em;
 		line-height: 1;
+		/* Trim font leading so 10 centers on cap-height, not the em box. */
+		text-box: trim-both cap alphabetic;
 	}
 
 	@media (min-width: 72rem) {
