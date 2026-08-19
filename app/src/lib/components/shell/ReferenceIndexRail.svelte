@@ -152,9 +152,9 @@
 	}
 
 	.jump.current {
-		color: var(--accent);
-		background: var(--accent-soft);
-		border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+		color: var(--ink);
+		background: transparent;
+		box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--accent);
 	}
 
 	.jump:hover,
@@ -169,12 +169,12 @@
 	}
 	.jump.current:hover,
 	.jump.current:focus-visible {
-		background: var(--accent-soft);
-		color: var(--accent);
+		background: var(--paper-sunk);
+		color: var(--ink);
 	}
 	.jump.current:active {
-		background: var(--accent-soft);
-		color: var(--accent);
+		background: var(--paper-sunk);
+		color: var(--ink);
 		transform: translateY(1px);
 	}
 
@@ -222,6 +222,7 @@
 		.jump.current {
 			background: Highlight;
 			color: HighlightText;
+			box-shadow: none;
 		}
 	}
 </style>
