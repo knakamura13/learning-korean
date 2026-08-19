@@ -113,9 +113,13 @@
 
 	.actions {
 		display: flex;
-		flex-wrap: wrap;
+		flex-direction: column;
+		align-items: stretch;
 		gap: var(--s2);
-		align-items: center;
+	}
+	.actions :global(.btn) {
+		justify-content: center;
+		width: 100%;
 	}
 
 	@media (forced-colors: active) {
