@@ -21,12 +21,19 @@
 
 	const queue = $derived(progress.stats.queue);
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+	let skipLanded = $state(false);
 
 	function skipToMain(event: MouseEvent) {
 		event.preventDefault();
 		const main = document.getElementById('main');
 		if (!(main instanceof HTMLElement)) return;
-		main.focus();
+		skipLanded = true;
+		main.focus({ focusVisible: true });
+		main.scrollIntoView({ block: 'start' });
+	}
+
+	function clearSkipLanded() {
+		skipLanded = false;
 	}
 </script>
 
@@ -87,7 +94,7 @@
 	</div>
 </header>
 
-<main id="main" tabindex="-1">
+<main id="main" tabindex="-1" class:skip-landed={skipLanded} onblur={clearSkipLanded}>
 	{@render children()}
 </main>
 {#if !labRoute}
@@ -117,10 +124,12 @@
 		flex: 1 1 auto;
 	}
 
-	main:focus,
-	main:focus-visible {
-		outline: 2px solid var(--paper);
-		outline-offset: 4px;
+	/* Inset so the sticky bar does not cover the top edge of the ring. */
+	:global(#main:focus),
+	:global(#main:focus-visible),
+	main.skip-landed {
+		outline: 3px solid var(--blue);
+		outline-offset: -3px;
 		box-shadow: var(--focus-ring);
 		border-radius: 3px;
 	}
@@ -300,9 +309,10 @@
 	}
 
 	@media (forced-colors: active) {
-		main:focus,
-		main:focus-visible {
-			outline: 2px solid Highlight;
+		:global(#main:focus),
+		:global(#main:focus-visible),
+		main.skip-landed {
+			outline: 3px solid Highlight;
 			box-shadow: none;
 		}
 		.bar {
