@@ -502,6 +502,9 @@ describe('polish audit regressions', () => {
 			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inline-size:\s*0\.5rem/s
 		);
 		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.badge\s*\{[^}]*inset-inline-start:\s*100%/s
+		);
+		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.badge-n\s*\{[^}]*display:\s*none/s
 		);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);

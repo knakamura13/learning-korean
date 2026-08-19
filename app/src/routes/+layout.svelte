@@ -342,6 +342,7 @@
 			block-size: 0.5rem;
 			padding: 0;
 			font-size: 0;
+			inset-inline-start: 100%;
 			inset-block-end: calc(100% - 0.18rem);
 		}
 		.badge-n {
