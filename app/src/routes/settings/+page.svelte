@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import LookPicker from '$lib/components/LookPicker.svelte';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
+	import ProgressReset from '$lib/components/ProgressReset.svelte';
 	import { wrapExport, unwrapImport } from '$lib/domain/backup';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -41,7 +42,7 @@
 	<section id="backup" class="backup" aria-labelledby="backup-heading">
 		<h2 id="backup-heading">Backup</h2>
 		<p class="backup-note">
-			{#if progress.corrupt}
+			{#if progress.corrupt || labSession.corrupt}
 				Saved progress could not be read. Back it up now — reviews will not overwrite it
 				until you restore or reset.
 			{:else}
@@ -56,6 +57,14 @@
 			{/if}
 		</p>
 		<ProgressBackup {exportJson} {importJson} />
+		<div id="reset">
+			<ProgressReset
+				onReset={() => {
+					progress.reset();
+					labSession.reset();
+				}}
+			/>
+		</div>
 	</section>
 </div>
 
@@ -88,6 +97,10 @@
 
 	#backup {
 		margin-block-start: var(--s7);
+		scroll-margin-top: calc(44px + env(safe-area-inset-top) + 0.75rem);
+	}
+
+	#reset {
 		scroll-margin-top: calc(44px + env(safe-area-inset-top) + 0.75rem);
 	}
 

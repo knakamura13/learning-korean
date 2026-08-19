@@ -65,6 +65,14 @@ describe('state hygiene', () => {
 		expect(decodeStoredState(bad)).toEqual({ state: emptyState(), corrupt: bad });
 	});
 
+	it('quarantines parsed JSON that is not a v1 SRS document so a later persist cannot wipe it', () => {
+		const future = JSON.stringify({ version: 99, unlocked: ['lab01'], cards: { c0: { ease: 2.5, ivl: 3, reps: 2, lapses: 0, due: T0 } } });
+		expect(decodeStoredState(future)).toEqual({ state: emptyState(), corrupt: future });
+
+		const foreign = JSON.stringify({ nope: true });
+		expect(decodeStoredState(foreign)).toEqual({ state: emptyState(), corrupt: foreign });
+	});
+
 	it('adopts progress written by the pre-rewrite app, which used `v` not `version`', () => {
 		const legacy = {
 			v: 1,

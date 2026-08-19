@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	clearLab,
+	decodeStoredSessions,
 	emptySessions,
 	resumable,
 	reviveSessions,
@@ -18,6 +19,36 @@ const mid: LabProgress = {
 	finished: false,
 	outcomes: emptyOutcomes(17)
 };
+
+describe('decodeStoredSessions', () => {
+	it('treats missing storage as empty, not corrupt', () => {
+		expect(decodeStoredSessions(null, COUNTS)).toEqual({ sessions: emptySessions(), corrupt: null });
+		expect(decodeStoredSessions('', COUNTS)).toEqual({ sessions: emptySessions(), corrupt: null });
+	});
+
+	it('quarantines JSON that does not parse', () => {
+		const bad = '{not-json';
+		expect(decodeStoredSessions(bad, COUNTS)).toEqual({
+			sessions: emptySessions(),
+			corrupt: bad
+		});
+	});
+
+	it('quarantines a future version so a later save cannot wipe the blob', () => {
+		const raw = JSON.stringify({ version: 99, labs: { '0001': mid } });
+		expect(decodeStoredSessions(raw, COUNTS)).toEqual({
+			sessions: emptySessions(),
+			corrupt: raw
+		});
+	});
+
+	it('revives a current document', () => {
+		const raw = JSON.stringify({ version: 1, labs: { '0001': mid } });
+		const loaded = decodeStoredSessions(raw, COUNTS);
+		expect(loaded.corrupt).toBeNull();
+		expect(loaded.sessions.labs['0001']?.nextIndex).toBe(7);
+	});
+});
 
 describe('reviveSessions', () => {
 	it('starts empty', () => {

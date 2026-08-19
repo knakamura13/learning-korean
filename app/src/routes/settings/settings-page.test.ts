@@ -109,6 +109,10 @@ describe('Settings page — Backup', () => {
 		expect(src).toMatch(/id="backup"/);
 		expect(src).toMatch(/<h2[^>]*>Backup<\/h2>/);
 		expect(src).toMatch(/ProgressBackup/);
+		expect(src).toMatch(/ProgressReset/);
+		expect(src).toMatch(/progress\.reset\(\)/);
+		expect(src).toMatch(/labSession\.reset\(\)/);
+		expect(src).toMatch(/id="reset"/);
 		expect(src).toMatch(/wrapExport\(progress\.export\(\), labSession\.snapshot\)/);
 		expect(src).toMatch(/unwrapImport/);
 		expect(src).toMatch(/labSession\.replaceAll/);
@@ -160,8 +164,10 @@ describe('Settings backup deep link — layout and Review', () => {
 
 	it('Review storage warnings deep-link to Settings #backup', () => {
 		expect(review).toMatch(/href="\{resolve\('\/settings'\)\}#backup"/);
+		expect(review).toMatch(/href="\{resolve\('\/settings'\)\}#reset"/);
 		expect(review).not.toMatch(/#progress-backup/);
 		expect(review).toMatch(/Download a backup/);
+		expect(review).toMatch(/Reset progress/);
 		expect(review).not.toMatch(/ProgressBackup/);
 	});
 });

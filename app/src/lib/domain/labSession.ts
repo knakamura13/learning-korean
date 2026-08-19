@@ -80,6 +80,30 @@ export function reviveSessions(raw: unknown, stepCounts: Record<string, number>)
 	return { version: LAB_SESSION_VERSION, labs };
 }
 
+function isReadableSessionDocument(raw: unknown): boolean {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+	const rec = raw as Record<string, unknown>;
+	if (rec.version !== undefined && rec.version !== LAB_SESSION_VERSION) return false;
+	return true;
+}
+
+/** Same quarantine rule as SRS: unreadable blobs must not be overwritten. */
+export function decodeStoredSessions(
+	raw: string | null,
+	stepCounts: Record<string, number>
+): { sessions: LabSessions; corrupt: string | null } {
+	if (raw == null || raw === '') return { sessions: emptySessions(), corrupt: null };
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		if (!isReadableSessionDocument(parsed)) {
+			return { sessions: emptySessions(), corrupt: raw };
+		}
+		return { sessions: reviveSessions(parsed, stepCounts), corrupt: null };
+	} catch {
+		return { sessions: emptySessions(), corrupt: raw };
+	}
+}
+
 export function upsertLab(
 	sessions: LabSessions,
 	labId: string,

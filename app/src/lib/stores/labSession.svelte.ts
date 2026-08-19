@@ -9,37 +9,40 @@ import { browser } from '$app/environment';
 import { LABS } from '$lib/content';
 import {
 	clearLab,
+	decodeStoredSessions,
 	emptySessions,
 	reviveSessions,
 	upsertLab,
 	type LabProgress,
 	type LabSessions
 } from '$lib/domain/labSession';
-import { browserStorage, memoryStorage, type Storage } from '$lib/domain/storage';
+import { browserStorage, memoryStorage, onStorageKey, type Storage } from '$lib/domain/storage';
 
-const STORAGE_KEY = 'korean-lab-session-v1';
+export const LAB_SESSION_STORAGE_KEY = 'korean-lab-session-v1';
 
 const STEP_COUNTS: Record<string, number> = Object.fromEntries(
 	LABS.map((lab) => [lab.id, lab.steps.length])
 );
 
-function load(store: Storage): LabSessions {
-	const raw = store.read();
-	if (!raw) return emptySessions();
-	try {
-		return reviveSessions(JSON.parse(raw), STEP_COUNTS);
-	} catch {
-		return emptySessions();
-	}
-}
-
 export function createLabSession(
-	store: Storage = browser ? browserStorage(STORAGE_KEY) : memoryStorage()
+	store: Storage = browser ? browserStorage(LAB_SESSION_STORAGE_KEY) : memoryStorage()
 ) {
-	let state = $state<LabSessions>(load(store));
+	const loaded = decodeStoredSessions(store.read(), STEP_COUNTS);
+	let state = $state<LabSessions>(loaded.sessions);
 	let durable = $state(store.durable);
+	let corruptRaw = $state<string | null>(loaded.corrupt);
+
+	function applyStored() {
+		const next = decodeStoredSessions(store.read(), STEP_COUNTS);
+		state = next.sessions;
+		corruptRaw = next.corrupt;
+		durable = store.durable;
+	}
+
+	onStorageKey(LAB_SESSION_STORAGE_KEY, applyStored);
 
 	function commit(next: LabSessions) {
+		if (corruptRaw) return;
 		if (next === state) return;
 		state = next;
 		if (!store.write(JSON.stringify(next))) durable = false;
@@ -58,6 +61,10 @@ export function createLabSession(
 			return durable;
 		},
 
+		get corrupt() {
+			return corruptRaw !== null;
+		},
+
 		forLab(labId: string): LabProgress | undefined {
 			return state.labs[labId];
 		},
@@ -73,11 +80,18 @@ export function createLabSession(
 		},
 
 		replaceAll(raw: unknown) {
-			commit(reviveSessions(raw, STEP_COUNTS));
+			const next = reviveSessions(raw, STEP_COUNTS);
+			if (!store.write(JSON.stringify(next))) {
+				durable = false;
+				return;
+			}
+			corruptRaw = null;
+			state = next;
 		},
 
 		reset() {
 			store.clear();
+			corruptRaw = null;
 			durable = store.durable;
 			state = emptySessions();
 		}
