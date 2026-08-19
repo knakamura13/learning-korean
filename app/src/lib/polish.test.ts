@@ -130,6 +130,15 @@ describe('polish audit regressions', () => {
 		expect(focus).toMatch(/box-shadow:\s*var\(--focus-ring\)/);
 	});
 
+	it('does not paint the control focus ring on the skip-to-content landmark', () => {
+		expect(appCss).toMatch(/#main:focus\s*,\s*#main:focus-visible/);
+		expect(appCss).toMatch(/#main:focus[\s\S]*?outline:\s*none/s);
+		expect(appCss).toMatch(/#main:focus[\s\S]*?box-shadow:\s*none/s);
+		expect(appCss).toMatch(/#main\[data-skip-landed\]::after/);
+		expect(appCss).toMatch(/#main\[data-skip-landed\]::after\s*\{[^}]*inset:\s*1\.5rem/s);
+		expect(appCss).toMatch(/#main\[data-skip-landed\]::after\s*\{[^}]*border:\s*4px solid var\(--blue\)/s);
+	});
+
 	it('keeps filled button labels visible when a .btn link is hovered', () => {
 		expect(appCss).toMatch(/a:hover:not\(\.btn\)\s*\{[^}]*color:\s*var\(--accent\)/s);
 		expect(appCss).toMatch(/\.btn:hover\s*\{[^}]*color:\s*var\(--accent-ink\)/s);
