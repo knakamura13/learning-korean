@@ -54,4 +54,13 @@ describe('review answer field', () => {
 		expect(src).toMatch(/\.ans em\s*\{[^}]*color:\s*var\(--ink-soft\)/);
 		expect(src).not.toMatch(/\.ans em\s*\{[^}]*opacity\s*:/);
 	});
+
+	it('answers block cards with SprintChoices, not the typed field', () => {
+		expect(src).toMatch(/from '\$lib\/components\/SprintChoices\.svelte'/);
+		expect(src).toMatch(/trialForBlock/);
+		expect(src).toMatch(/blockInventory/);
+		expect(src).toMatch(/card\.kind === 'block'/);
+		expect(src).toMatch(/progress\.answer\(card\.id/);
+		expect(src).not.toMatch(/answerRound/);
+	});
 });
