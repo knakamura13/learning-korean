@@ -178,7 +178,7 @@
 		border-radius: 2px;
 	}
 
-	.rail li { display: flex; flex: 0 0 auto; padding-inline: 0.2rem; }
+	.rail li { display: flex; flex: 0 0 auto; padding-inline: 0.5rem; }
 
 	.pip {
 		appearance: none;

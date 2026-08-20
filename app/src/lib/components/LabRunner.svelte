@@ -596,7 +596,7 @@
 		font-family: var(--display);
 		font-style: italic;
 		font-weight: 400;
-		font-size: clamp(1.35rem, 3vw, 1.6rem);
+		font-size: clamp(1.35rem, 1.35rem + 1.2vw, 1.6rem);
 		margin: 0 0 var(--s3);
 	}
 

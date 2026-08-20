@@ -364,7 +364,7 @@
 		.callout {
 			max-width: 6.75rem;
 			padding-inline: 0.45rem;
-			font-size: 0.68rem;
+			font-size: 0.75rem;
 		}
 	}
 </style>

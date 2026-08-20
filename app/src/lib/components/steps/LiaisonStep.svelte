@@ -173,7 +173,7 @@
 	.pron .hg { font-family: var(--hangul); font-size: 1.9rem; font-weight: 500; }
 	.pron .said { color: var(--good); }
 	.arr {
-		font-size: 0.66rem;
+		font-size: 0.75rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-faint);

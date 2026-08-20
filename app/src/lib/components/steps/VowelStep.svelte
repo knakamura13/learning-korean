@@ -659,7 +659,7 @@
 
 	.palette { margin-bottom: var(--s3); }
 	.label {
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		letter-spacing: 0.11em;
 		text-transform: uppercase;
 		color: var(--ink-faint);

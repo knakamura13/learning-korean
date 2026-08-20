@@ -9,6 +9,10 @@ import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
+import liaisonStep from './components/steps/LiaisonStep.svelte?raw';
+import clusterStep from './components/steps/ClusterStep.svelte?raw';
+import buildStep from './components/steps/BuildStep.svelte?raw';
+import stage from './components/Stage.svelte?raw';
 import options from './components/Options.svelte?raw';
 import tray from './components/Tray.svelte?raw';
 import settingsLink from './components/SettingsLink.svelte?raw';
@@ -232,6 +236,8 @@ describe('polish audit regressions', () => {
 		expect(physicalLeftRight(sittingCss)).toEqual([]);
 		expect(physicalLeftRight(styleBlock(progressBackup))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(settingsPage))).toEqual([]);
+		expect(styleBlock(settingsPage)).toMatch(/scroll-margin-block-start:/);
+		expect(styleBlock(settingsPage)).not.toMatch(/scroll-margin-top:/);
 		expect(physicalLeftRight(styleBlock(home))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(review))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(reference))).toEqual([]);
@@ -394,7 +400,8 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
 		expect(home).toMatch(/LockedLabPopover/);
 		expect(sittingCss).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
-		expect(sittingCss).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
+		expect(sittingCss).toMatch(/\.rail li\s*\{[^}]*padding-inline:\s*0\.5rem/s);
+		expect(sittingCss).not.toMatch(/\.rail li\s*\{[^}]*padding-inline:\s*0\.2rem/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(referenceIndexRail)).toMatch(
@@ -770,14 +777,39 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(options)).toMatch(/\.key\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(slots)).toMatch(/\.slot-name\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(tray)).toMatch(/\.mark\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(home)).toMatch(/\.chip-status\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(home)).toMatch(/\.legend\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(labPreview)).toMatch(/\.chip\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(stage)).toMatch(/\.cap\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(vowelStep)).toMatch(/\.label\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(tray)).toMatch(/\.label\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(liaisonStep)).toMatch(/\.arr\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(clusterStep)).toMatch(/\.arr\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(buildStep)).toMatch(/\.op\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(reference)).toMatch(/\.sec\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(reference)).toMatch(/\.rule\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(reference)).toMatch(/\.cell \.nm,\s*\.cell \.fin\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(referenceIndexRail)).toMatch(/\.rail-label\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(mouthStep)).not.toMatch(/font-size:\s*0\.68rem/);
+		expect(styleBlock(slots)).not.toMatch(/\.slot-reading\s*\{[^}]*font-size:\s*0\.62rem/s);
+		expect(styleBlock(home)).not.toMatch(/font-size:\s*0\.6[0-8]rem/);
+		expect(styleBlock(labPreview)).not.toMatch(/font-size:\s*0\.6[0-8]rem/);
+		expect(styleBlock(stage)).not.toMatch(/font-size:\s*0\.6[0-8]rem/);
+		expect(styleBlock(vowelStep)).not.toMatch(/\.label\s*\{[^}]*font-size:\s*0\.62rem/s);
 	});
 
 	it('keeps phone header tab hit boxes from sharing a 0.1rem gutter', () => {
 		expect(styleBlock(layout)).toMatch(
-			/@media \(max-width: 30rem\)[\s\S]*?nav\s*\{[^}]*gap:\s*0\.35rem/s
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*\}\s*nav \{\s*gap:\s*0\.35rem/s
 		);
 		expect(styleBlock(layout)).not.toMatch(
-			/@media \(max-width: 30rem\)[\s\S]*?nav\s*\{[^}]*gap:\s*0\.1rem/s
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*\}\s*nav \{\s*gap:\s*0\.2rem/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 30rem\)[\s\S]*?nav \{\s*gap:\s*0\.35rem/s
+		);
+		expect(styleBlock(layout)).not.toMatch(
+			/@media \(max-width: 30rem\)[\s\S]*?nav \{\s*gap:\s*0\.1rem/s
 		);
 	});
 
@@ -791,6 +823,19 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(lookPicker)).toMatch(/\.look-name\s*\{[^}]*font-weight:\s*400/s);
 		expect(styleBlock(lookPicker)).toMatch(/legend\s*\{[^}]*font-style:\s*italic/s);
 		expect(styleBlock(lookPicker)).toMatch(/\.look-name\s*\{[^}]*font-style:\s*italic/s);
+	});
+
+	it('keeps heading clamp preferred terms in rem so text zoom can scale', () => {
+		expect(appCss).toMatch(/h1 \{ font-size: clamp\(1\.9rem, 1\.9rem \+ [^,]+, 2\.6rem\); \}/);
+		expect(appCss).toMatch(/h2 \{ font-size: clamp\(1\.35rem, 1\.35rem \+ [^,]+, 1\.6rem\); \}/);
+		expect(appCss).not.toMatch(/h1 \{ font-size: clamp\(1\.9rem, 4\.5vw, 2\.6rem\); \}/);
+		expect(appCss).not.toMatch(/h2 \{ font-size: clamp\(1\.35rem, 3vw, 1\.6rem\); \}/);
+		expect(styleBlock(errorPage)).toMatch(
+			/\.empty h1\s*\{[^}]*font-size:\s*clamp\(1\.35rem, 1\.35rem \+ [^,]+, 1\.6rem\)/s
+		);
+		expect(sittingCss).toMatch(
+			/\.finish h1\s*\{[^}]*font-size:\s*clamp\(1\.35rem, 1\.35rem \+ [^,]+, 1\.6rem\)/s
+		);
 	});
 
 	it('gives generic links a real pressed translate, not a no-op', () => {

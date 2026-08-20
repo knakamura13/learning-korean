@@ -308,7 +308,7 @@
 	@media (max-width: 40rem) {
 		.inner { gap: var(--s2); }
 		nav {
-			gap: 0.2rem;
+			gap: 0.35rem;
 			padding-block-start: 0.35rem;
 		}
 		nav a {

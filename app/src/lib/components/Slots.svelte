@@ -226,7 +226,7 @@
 	@media (max-width: 34rem) {
 		.slot { min-width: 3.8rem; min-height: 4.82rem; padding: 0.3rem 0.6rem; }
 		.slot-value { font-size: 1.8rem; }
-		.slot-reading { font-size: 0.62rem; min-height: 0.64rem; }
+		.slot-reading { font-size: 0.75rem; min-height: 0.75rem; }
 		.out { width: 4.4rem; height: 4.4rem; font-size: 2.6rem; }
 		.asm { gap: var(--s2); }
 	}
