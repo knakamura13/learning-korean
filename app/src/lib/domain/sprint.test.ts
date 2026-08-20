@@ -121,6 +121,7 @@ describe('trialForBlock', () => {
 	it('returns null when the pool cannot supply three same-length distractors', () => {
 		expect(trialForBlock('가', ['가'], () => 0)).toBeNull();
 		expect(trialForBlock('가', ['가', '나', '다'], () => 0)).toBeNull();
+		expect(trialForBlock('가', ['나', '다', '라', '마'], () => 0)).toBeNull();
 	});
 });
 

@@ -80,19 +80,17 @@
 		reset();
 	}
 
-	function poolForBlock(tier: string): string[] {
-		const exclusive = blockInventory(tier);
+	function cumulativeInventory(tier: string): string[] {
 		const order = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'];
 		const idx = order.indexOf(tier);
-		const fallback = sprintInventory(order.slice(0, Math.max(idx + 1, 2)));
-		return exclusive.length ? exclusive : fallback;
+		return sprintInventory(order.slice(0, Math.max(idx + 1, 2)));
 	}
 
 	function makeBlockTrial(front: string, tier: string): SprintTrial | null {
 		const rng = Math.random;
 		return (
 			trialForBlock(front, blockInventory(tier), rng) ??
-			trialForBlock(front, poolForBlock(tier), rng)
+			trialForBlock(front, cumulativeInventory(tier), rng)
 		);
 	}
 
