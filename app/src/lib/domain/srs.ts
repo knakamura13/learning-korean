@@ -33,6 +33,14 @@ export const MAX_BACKUP_CHARS = 100_000;
 /** A missed card comes back inside the same sitting. */
 export const RELEARN_MS = 600_000;
 
+/** Correct answers faster than this are easy (new cards stay GOOD). */
+export const FAST_MS = 3500;
+
+/** Correct answers at or above this are slow / HARD. */
+export const STEADY_MS = 9000;
+
+export type AttemptSpeed = 'fast' | 'steady' | 'slow';
+
 const EASE_FLOOR = 1.3;
 const EASE_CEILING = 2.8;
 const EASE_START = 2.5;
@@ -279,15 +287,31 @@ function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
  * Grading
  * ------------------------------------------------------------------ */
 
+export function attemptSpeed(ms: number): AttemptSpeed {
+	if (ms < FAST_MS) return 'fast';
+	if (ms < STEADY_MS) return 'steady';
+	return 'slow';
+}
+
 /**
  * Turn an attempt into a grade. A correct-but-slow answer is scheduled sooner
  * than a correct-and-fast one; a brand new card never earns EASY on sight.
  */
 export function gradeFromAttempt(correct: boolean, ms: number, isNew: boolean): Grade {
 	if (!correct) return AGAIN;
-	if (ms < 3500) return isNew ? GOOD : EASY;
-	if (ms < 9000) return GOOD;
-	return HARD;
+	const speed = attemptSpeed(ms);
+	switch (speed) {
+		case 'fast':
+			return isNew ? GOOD : EASY;
+		case 'steady':
+			return GOOD;
+		case 'slow':
+			return HARD;
+		default: {
+			const _exhaustive: never = speed;
+			return _exhaustive;
+		}
+	}
 }
 
 function nextCard(prev: CardState | undefined, g: Grade, now: number): CardState {

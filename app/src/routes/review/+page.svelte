@@ -8,13 +8,15 @@
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import { isConsonantLead } from '$lib/audio/consonants';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
-	import { DEFAULT_NEW_PER_DAY } from '$lib/domain/srs';
+	import { DEFAULT_NEW_PER_DAY, attemptSpeed } from '$lib/domain/srs';
 	import { LABS } from '$lib/content';
 	import {
 		REVIEW_ANSWER_MAX_LENGTH,
 		reviewAnswerPlaceholder,
 		reviewBody,
-		reviewChrome
+		reviewChrome,
+		reviewIntervalCopy,
+		sittingQueueAfterGrade
 	} from '$lib/domain/reviewChrome';
 
 	let queue = $state<Card[]>([]);
@@ -95,24 +97,16 @@
 		shown += 1;
 		if (ok) right += 1;
 
-		const ivl = result.card.ivl;
 		verdict = {
 			ok,
-			speed: ok ? (ms < 3500 ? 'fast' : ms < 9000 ? 'steady' : 'slow') : '',
-			when:
-				ivl === 0
-					? 'again in 10 minutes'
-					: ivl < 2
-						? 'again in 1 day'
-						: `again in ${Math.round(ivl)} days`
+			speed: ok ? attemptSpeed(ms) : '',
+			when: reviewIntervalCopy(result.card.ivl)
 		};
 	}
 
 	function next() {
 		// A missed card returns at the end of this sitting, not only in 10 minutes.
-		if (verdict && !verdict.ok && queue.length < 60 && queue.lastIndexOf(card) === index) {
-			queue = [...queue, card];
-		}
+		queue = sittingQueueAfterGrade(queue, index, Boolean(verdict && !verdict.ok));
 		index += 1;
 		if (index >= queue.length) progress.tick();
 		reset();

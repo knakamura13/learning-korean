@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { DECK } from './deck';
+import { RELEARN_MS } from './srs';
 import {
+	MAX_SITTING_LENGTH,
 	REVIEW_ANSWER_MAX_LENGTH,
 	reviewAnswerPlaceholder,
 	reviewBody,
-	reviewChrome
+	reviewChrome,
+	reviewIntervalCopy,
+	sittingQueueAfterGrade
 } from './reviewChrome';
 
 describe('reviewChrome', () => {
@@ -93,6 +97,43 @@ describe('reviewAnswerPlaceholder', () => {
 	it('hints letter answers without the word romanization', () => {
 		expect(reviewAnswerPlaceholder('consonant')).toBe('g, eo, silent');
 		expect(reviewAnswerPlaceholder('vowel')).toBe('g, eo, silent');
+	});
+});
+
+describe('reviewIntervalCopy', () => {
+	it('names the relearn window from RELEARN_MS, not a handwritten 10 minutes', () => {
+		const minutes = Math.round(RELEARN_MS / 60_000);
+		expect(reviewIntervalCopy(0)).toBe(`again in ${minutes} minutes`);
+	});
+
+	it('uses day language once the card has left the sitting', () => {
+		expect(reviewIntervalCopy(1)).toBe('again in 1 day');
+		expect(reviewIntervalCopy(1.9)).toBe('again in 1 day');
+		expect(reviewIntervalCopy(2)).toBe('again in 2 days');
+		expect(reviewIntervalCopy(3.4)).toBe('again in 3 days');
+	});
+});
+
+describe('sittingQueueAfterGrade', () => {
+	const a = { id: 'a' };
+	const b = { id: 'b' };
+
+	it('appends a miss to the end of this sitting once', () => {
+		expect(sittingQueueAfterGrade([a, b], 0, true)).toEqual([a, b, a]);
+	});
+
+	it('does not append a second copy if that card is already at the end', () => {
+		expect(sittingQueueAfterGrade([a, b, a], 2, true)).toEqual([a, b, a]);
+	});
+
+	it('leaves the queue alone on a correct answer', () => {
+		const queue = [a, b];
+		expect(sittingQueueAfterGrade(queue, 0, false)).toBe(queue);
+	});
+
+	it('stops growing once the sitting hits the cap', () => {
+		const queue = Array.from({ length: MAX_SITTING_LENGTH }, (_, i) => ({ id: String(i) }));
+		expect(sittingQueueAfterGrade(queue, 0, true)).toBe(queue);
 	});
 });
 
