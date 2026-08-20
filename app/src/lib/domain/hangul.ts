@@ -329,6 +329,91 @@ export function liaisonAction(word: string): LiaisonAction {
 	return { type: 'stay' };
 }
 
+/* ------------------------------------------------------------------ *
+ * Tensification / nasalization — Articles 23 and 18
+ * ------------------------------------------------------------------ */
+
+const STOP_BATCHIM = new Set(['ㄱ', 'ㄷ', 'ㅂ']);
+const TENSEABLE_LEAD = new Set(['ㄱ', 'ㄷ', 'ㅂ', 'ㅅ', 'ㅈ']);
+const TENSE_LEAD: Record<string, string> = {
+	'ㄱ': 'ㄲ', 'ㄷ': 'ㄸ', 'ㅂ': 'ㅃ', 'ㅅ': 'ㅆ', 'ㅈ': 'ㅉ'
+};
+const NASAL_LEAD = new Set(['ㄴ', 'ㅁ']);
+const NASAL_FROM_STOP: Record<string, string> = {
+	'ㄱ': 'ㅇ', 'ㄷ': 'ㄴ', 'ㅂ': 'ㅁ'
+};
+
+function skipContactJunction(cur: { lead: string; vowel: string; final: string }, next: { lead: string; vowel: string; final: string }): boolean {
+	if (!cur.final) return true;
+	if (isCluster(cur.final)) return true;
+	if (cur.final === 'ㅎ') return true;
+	if (next.lead === 'ㅇ' || next.lead === 'ㅎ') return true;
+	return false;
+}
+
+function mapSyllables(word: string, fn: (out: { lead: string; vowel: string; final: string }[]) => void): string {
+	const chars = [...word];
+	if (chars.length === 0) return word;
+	const parts = chars.map((ch) => decompose(ch));
+	if (parts.some((p) => p === null)) return word;
+	const out = parts.map((p) => ({ ...p! }));
+	fn(out);
+	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+}
+
+/**
+ * Tense a following plain ㄱ/ㄷ/ㅂ/ㅅ/ㅈ after a stop batchim.
+ * Article 23 only. Clusters, ㅎ, liaison, and nasalization are out of scope.
+ */
+export function applyTensification(word: string): string {
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (skipContactJunction(cur, next)) continue;
+			const stop = batchimSound(cur.final);
+			if (!STOP_BATCHIM.has(stop) || !TENSEABLE_LEAD.has(next.lead)) continue;
+			const tensed = TENSE_LEAD[next.lead];
+			if (!tensed) continue;
+			cur.final = stop;
+			next.lead = tensed;
+		}
+	});
+}
+
+/**
+ * ㄱ/ㄷ/ㅂ become ㅇ/ㄴ/ㅁ before ㄴ or ㅁ.
+ * Article 18 only. Article 19 (stop + ㄹ) is out of scope.
+ */
+export function applyNasalization(word: string): string {
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (skipContactJunction(cur, next)) continue;
+			const stop = batchimSound(cur.final);
+			if (!STOP_BATCHIM.has(stop) || !NASAL_LEAD.has(next.lead)) continue;
+			const nasal = NASAL_FROM_STOP[stop];
+			if (!nasal) continue;
+			cur.final = nasal;
+		}
+	});
+}
+
+export function applyContact(word: string): string {
+	const tensed = applyTensification(word);
+	if (tensed !== word) return tensed;
+	return applyNasalization(word);
+}
+
+export type ContactAction = { type: 'stay' } | { type: 'tense' } | { type: 'nasal' };
+
+export function contactAction(word: string): ContactAction {
+	if (applyTensification(word) !== word) return { type: 'tense' };
+	if (applyNasalization(word) !== word) return { type: 'nasal' };
+	return { type: 'stay' };
+}
+
 const LEAD_RR: Record<string, string> = {
 	'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
 	'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '', 'ㅈ': 'j', 'ㅉ': 'jj',
@@ -395,11 +480,12 @@ export function romanizeWord(word: string): string {
  * The eight changes that stand between spelling and speech.
  *
  * Korean spelling is morphophonemic: it preserves the identity of a word part
- * rather than transcribing what you hear. These rules are that gap. They are
- * data rather than functions for now — labs 06+ will implement them — but they
- * live here so the reference and any future lab share one source.
+ * rather than transcribing what you hear. These rules are that gap. Liaison,
+ * tensification, and nasalization have functions (`applyLiaison`,
+ * `applyTensification`, `applyNasalization`); the rest are still reference data.
+ * `scored` marks which ones the course already drills.
  *
- * Source: 표준 발음법 (Standard Pronunciation Rules, 1988), Articles 12–22.
+ * Source: 표준 발음법 (Standard Pronunciation Rules, 1988), Articles 12–23.
  */
 export interface SoundChange {
 	id: string;
@@ -407,7 +493,7 @@ export interface SoundChange {
 	korean: string;
 	trigger: string;
 	examples: { written: string; spoken: string; gloss?: string }[];
-	/** Only liaison is implemented as a scored lab step. */
+	/** Liaison, tensification, and nasalization are scored lab steps. */
 	scored: boolean;
 }
 
@@ -427,7 +513,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'tensification',
 		name: 'Tensification',
 		korean: '경음화',
-		scored: false,
+		scored: true,
 		trigger: 'a plain consonant after a ㄱ/ㄷ/ㅂ stop becomes tense',
 		examples: [
 			{ written: '학교', spoken: '학꾜', gloss: 'school' },
@@ -438,7 +524,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'nasalization',
 		name: 'Nasalization',
 		korean: '비음화',
-		scored: false,
+		scored: true,
 		trigger: 'ㄱ/ㄷ/ㅂ before ㄴ/ㅁ become ㅇ/ㄴ/ㅁ',
 		examples: [
 			{ written: '국물', spoken: '궁물', gloss: 'broth' },

@@ -41,7 +41,7 @@
 	const sessions = $derived(labSession.all);
 	const course = LABS.map(toCourseLab);
 	const unlockedTiers = $derived(
-		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'] as const).filter((tier) =>
+		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'] as const).filter((tier) =>
 			progress.isUnlocked(tier)
 		)
 	);

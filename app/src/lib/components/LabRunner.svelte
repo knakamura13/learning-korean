@@ -35,6 +35,7 @@
 	import FusionStep from './steps/FusionStep.svelte';
 	import ClusterStep from './steps/ClusterStep.svelte';
 	import LiaisonStep from './steps/LiaisonStep.svelte';
+	import ContactStep from './steps/ContactStep.svelte';
 	import ReadStep from './steps/ReadStep.svelte';
 	import LabSpread from './shell/LabSpread.svelte';
 	import LabPipRail from './LabPipRail.svelte';
@@ -146,7 +147,7 @@
 	});
 
 	/**
-	 * Resolve the step. Choice, read, cluster, and liaison retry until
+	 * Resolve the step. Choice, read, cluster, liaison, and contact retry until
 	 * correct — a miss nudges without advancing. An earlier miss dents the
 	 * first-try tally but must not turn a correct final answer into a
 	 * "not quite" — the learner did get there, and saying otherwise is just
@@ -389,6 +390,8 @@
 							<ClusterStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'liaison'}
 							<LiaisonStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'contact'}
+							<ContactStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'read'}
 							<ReadStep {step} {onSettle} {onNudge} />
 						{:else}

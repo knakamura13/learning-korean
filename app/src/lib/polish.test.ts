@@ -10,6 +10,7 @@ import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
 import liaisonStep from './components/steps/LiaisonStep.svelte?raw';
+import contactStep from './components/steps/ContactStep.svelte?raw';
 import clusterStep from './components/steps/ClusterStep.svelte?raw';
 import buildStep from './components/steps/BuildStep.svelte?raw';
 import stage from './components/Stage.svelte?raw';
@@ -809,6 +810,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(vowelStep)).toMatch(/\.label\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(tray)).toMatch(/\.label\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(liaisonStep)).toMatch(/\.arr\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(contactStep)).toMatch(/\.arr\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(clusterStep)).toMatch(/\.arr\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(buildStep)).toMatch(/\.op\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(reference)).toMatch(/\.sec\s*\{[^}]*font-size:\s*0\.75rem/s);

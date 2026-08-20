@@ -148,11 +148,11 @@ of that session only — treat it as gone. Everything below is in `app/`.
   `hangul.ts` (phonology, orthography, derivation, sound changes), `srs.ts` (SM-2
   with an injected clock), `deck.ts` (the 72 cards), `storage.ts` (persistence port).
 - `src/lib/content/` — lessons as typed data. `types.ts` defines the step union;
-  `lab01..lab06.ts` are the course. `content.test.ts` validates the whole course
+  `lab01..lab07.ts` are the course. `content.test.ts` validates the whole course
   against the domain.
 - `src/lib/components/` — `LabRunner.svelte` plus one component per step type:
   `mouth`, `choice`, `build`, `assemble`, `vowel`, `fusion`, `cluster`, `liaison`,
-  `read`. Wrong answers do *not* advance on any step type; `choice` and `read`
+  `contact`, `read`. Wrong answers do *not* advance on any step type; `choice` and `read`
   mark the missed option and ask the learner to try again, revealing the
   teaching only after a correct pick.
 - `src/routes/` — `/` dashboard, `/lab/[id]`, `/review`, `/reference`.
@@ -178,8 +178,9 @@ seven-word option among five- and six-word distractors).
 
 **Built:** Lab 01 (consonants, `lab01`) · Lab 02 (basic vowels, `lab02`) ·
 Lab 03 (compound vowels, `lab03`) · Lab 04 (batchim, `lab04`) · Lab 05 (clusters,
-`lab05`) · Lab 06 (liaison, `lab06`). **All 72 letter cards are reachable — the
-writing system is fully covered.** Lab 06 adds ten `lab06` pronunciation cards.
+`lab05`) · Lab 06 (liaison, `lab06`) · Lab 07 (tensification + nasalization, `lab07`).
+**All 72 letter cards are reachable — the writing system is fully covered.** Lab 06
+adds ten `lab06` pronunciation cards. Lab 07 adds ten `lab07` pronunciation cards.
 
 Lab 02 scope note: it teaches the **10 basic vowels only**, deliberately matching deck
 tier `lab02`. Compound vowels and the mergers were split out into Lab 03 rather than
@@ -221,12 +222,14 @@ liaison so it does not get crammed into this rule. Keep that boundary in later l
 
 ### Beyond the writing system — sound changes
 
-The page is now fully covered. Lab 06 (liaison) is built. What remains is how the
-page *sounds* when letters meet beyond that first rule. Suggested order:
+The page is now fully covered. Lab 06 (liaison) is built. Lab 07 (tensification +
+nasalization) is built. What remains is how the page *sounds* when letters meet
+beyond those rules. Suggested order:
 
 1. **Tensification + nasalization** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
-   that most often make a known word unrecognizable by ear. **Next to implement.**
-2. **Aspiration, ㅎ-deletion, palatalization, ㄹ assimilation** — the remaining four.
+   that most often make a known word unrecognizable by ear. **Built as Lab 07.**
+2. **Aspiration + ㅎ-deletion** — **Next to implement.** Palatalization and ㄹ
+   assimilation remain after that.
 3. **Names, part 2** — full names, honorific suffixes, and how Korean addresses people.
    Ties off the "people in my life" half of the mission.
 4. **Handwriting** — stroke order, one session.
