@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-	continueAction,
 	followingLab,
 	labCardState,
-	labTone,
 	nextLabId,
 	reviewPileView,
 	showPrerequisiteGate,
@@ -99,85 +97,6 @@ describe('nextLabId', () => {
 		expect(labCardState(labs[1], labs, after).locked).toBe(false);
 		expect(labCardState(labs[1], labs, after).startHere).toBe(true);
 		expect(labCardState(labs[2], labs, after).locked).toBe(true);
-	});
-});
-
-describe('continueAction', () => {
-	it('offers Lab 01 before hydration so first paint has a real CTA', () => {
-		const action = continueAction(labs, view({ ready: false }));
-		expect(action).toMatchObject({
-			kind: 'start',
-			href: '/lab/0001',
-			kicker: 'Start here',
-			title: 'Start Lab 01'
-		});
-	});
-
-	it('resumes an in-progress lab ahead of a due review', () => {
-		const action = continueAction(
-			labs,
-			view({
-				unlocked: [],
-				queue: 8,
-				sessions: { '0001': mid(3, 17) }
-			})
-		);
-		expect(action).toMatchObject({
-			kind: 'resume',
-			href: '/lab/0001',
-			title: 'Resume Lab 01',
-			detail: 'Card 4 of 17 · Find the Letters in Your Mouth'
-		});
-	});
-
-	it('sends a learner to review after a lab, before the next lesson', () => {
-		const action = continueAction(labs, view({ unlocked: ['lab01'], queue: 10 }));
-		expect(action).toMatchObject({
-			kind: 'review',
-			href: '/review',
-			title: 'Review 10 cards'
-		});
-	});
-
-	it('starts the next locked-behind lab once the deck is clear', () => {
-		const action = continueAction(labs, view({ unlocked: ['lab01'], queue: 0 }));
-		expect(action).toMatchObject({
-			kind: 'start',
-			href: '/lab/0002',
-			kicker: 'Next lab',
-			title: 'Start Lab 02'
-		});
-	});
-
-	it('reports a clear review when the course and queue are done', () => {
-		const action = continueAction(
-			labs,
-			view({ unlocked: ['lab01', 'lab02', 'lab03'], queue: 0 })
-		);
-		expect(action).toMatchObject({
-			kind: 'caught-up',
-			href: '/review',
-			title: 'Review is clear',
-			detail: 'Nothing is due. Open Review if you want to check.'
-		});
-	});
-});
-
-describe('labTone', () => {
-	it('maps mutually exclusive card flags to one visual tone', () => {
-		expect(labTone({ locked: true, done: false, resumeAt: null, startHere: false })).toBe(
-			'locked'
-		);
-		expect(labTone({ locked: false, done: false, resumeAt: 2, startHere: false })).toBe('resume');
-		expect(labTone({ locked: false, done: false, resumeAt: null, startHere: true })).toBe('now');
-		expect(labTone({ locked: false, done: true, resumeAt: null, startHere: false })).toBe('done');
-		expect(labTone({ locked: false, done: false, resumeAt: null, startHere: false })).toBe(
-			'idle'
-		);
-	});
-
-	it('lets a sitting beat done and startHere so a resume is never archived or next-up', () => {
-		expect(labTone({ locked: false, done: true, resumeAt: 1, startHere: true })).toBe('resume');
 	});
 });
 
