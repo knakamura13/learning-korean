@@ -6,10 +6,12 @@
 	import { progress } from '$lib/stores/progress.svelte';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
+	import SprintChoices from '$lib/components/SprintChoices.svelte';
 	import { isConsonantLead } from '$lib/audio/consonants';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY, attemptSpeed } from '$lib/domain/srs';
-	import { sprintEligible } from '$lib/domain/sprint';
+	import { sprintEligible, sprintInventory, trialForBlock, type SprintTrial } from '$lib/domain/sprint';
+	import { blockInventory } from '$lib/domain/blockDeck';
 	import { LABS } from '$lib/content';
 	import {
 		REVIEW_ANSWER_MAX_LENGTH,
@@ -32,9 +34,12 @@
 	let input = $state<HTMLInputElement | undefined>();
 	let ready = $state(false);
 	let emptyHint = $state(false);
+	let blockTrial = $state<SprintTrial | null>(null);
+	let choices = $state<SprintChoices | undefined>();
 
 	const card = $derived(queue[index]);
 	const pronCard = $derived(card?.kind === 'pron');
+	const blockCard = $derived(card?.kind === 'block');
 	const stats = $derived(progress.stats);
 	const unlockedTiers = $derived(
 		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'] as const).filter((tier) =>
@@ -75,16 +80,38 @@
 		reset();
 	}
 
+	function cumulativeInventory(tier: string): string[] {
+		const order = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'];
+		const idx = order.indexOf(tier);
+		return sprintInventory(order.slice(0, Math.max(idx + 1, 2)));
+	}
+
+	function makeBlockTrial(front: string, tier: string): SprintTrial | null {
+		const rng = Math.random;
+		return (
+			trialForBlock(front, blockInventory(tier), rng) ??
+			trialForBlock(front, cumulativeInventory(tier), rng)
+		);
+	}
+
 	async function reset() {
 		typed = '';
 		answered = false;
 		verdict = null;
 		emptyHint = false;
 		startedAt = Date.now();
+		blockTrial = null;
 		const current = queue[index];
+		if (current?.kind === 'block') {
+			blockTrial = makeBlockTrial(current.front, current.tier);
+		}
 		sittingNew = Boolean(current && !progress.state.cards[current.id]);
 		await tick();
-		input?.focus({ preventScroll: true });
+		if (!current || current.kind === 'block') {
+			/* do not focus the missing input */
+		} else {
+			input?.focus({ preventScroll: true });
+		}
 	}
 
 	function submit() {
@@ -119,11 +146,35 @@
 		reset();
 	}
 
+	function pickBlock(index: number) {
+		if (answered || !blockTrial || !card) return;
+		if (card.kind === 'block') {
+			const value = blockTrial.options[index];
+			if (!value) return;
+			const ms = Date.now() - startedAt;
+			const ok = checkAnswer(card, value);
+			const result = progress.answer(card.id, ok, ms);
+			answered = true;
+			shown += 1;
+			if (ok) right += 1;
+			verdict = {
+				ok,
+				speed: ok ? attemptSpeed(ms) : '',
+				when: reviewIntervalCopy(result.card.ivl)
+			};
+		}
+	}
+
 	function onKey(e: KeyboardEvent) {
 		if (shouldIgnoreShortcut(e.target)) return;
 		if (e.key === 'Enter' && answered) {
 			e.preventDefault();
 			next();
+			return;
+		}
+		if (blockCard && !answered) {
+			choices?.keyPick(e.key);
+			return;
 		}
 	}
 
@@ -257,53 +308,70 @@
 				</div>
 				<p class="ask">{card.ask}</p>
 
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						submit();
-					}}
-				>
-					<label class="answer-label" for="review-answer">Your answer</label>
-					<div class="answer-controls">
-						<input
-							id="review-answer"
-							bind:this={input}
-							bind:value={typed}
-							class="in"
-							class:right={verdict?.ok}
-							class:wrong={verdict && !verdict.ok}
-							disabled={answered}
-							required
-							type="text"
-							inputmode="text"
-							autocapitalize="off"
-							autocorrect="off"
-							spellcheck="false"
-							maxlength={REVIEW_ANSWER_MAX_LENGTH}
-							placeholder={reviewAnswerPlaceholder(card.kind)}
-							aria-describedby={emptyHint ? 'empty-hint' : undefined}
-							aria-invalid={emptyHint ? true : undefined}
-							oninvalid={(e) => {
-								e.preventDefault();
-								emptyHint = true;
-							}}
-							oninput={() => {
-								emptyHint = false;
-							}}
-						/>
-						<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
+				{#if !blockCard || !blockTrial}
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							submit();
+						}}
+					>
+						<label class="answer-label" for="review-answer">Your answer</label>
+						<div class="answer-controls">
+							<input
+								id="review-answer"
+								bind:this={input}
+								bind:value={typed}
+								class="in"
+								class:right={verdict?.ok}
+								class:wrong={verdict && !verdict.ok}
+								disabled={answered}
+								required
+								type="text"
+								inputmode="text"
+								autocapitalize="off"
+								autocorrect="off"
+								spellcheck="false"
+								maxlength={REVIEW_ANSWER_MAX_LENGTH}
+								placeholder={reviewAnswerPlaceholder(card.kind)}
+								aria-describedby={emptyHint ? 'empty-hint' : undefined}
+								aria-invalid={emptyHint ? true : undefined}
+								oninvalid={(e) => {
+									e.preventDefault();
+									emptyHint = true;
+								}}
+								oninput={() => {
+									emptyHint = false;
+								}}
+							/>
+							<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
+							{#if answered}
+								<span class="kb">or press Enter</span>
+							{/if}
+						</div>
+						{#if emptyHint}
+							<p id="empty-hint" class="empty-hint" role="status">
+								{pronCard
+									? 'Type hyphenated cuts, or Hangul, then Check.'
+									: 'Type a romanization, then Check.'}
+							</p>
+						{/if}
+					</form>
+				{:else if blockTrial}
+					<div class="block-answer">
+						{#key index}
+							<SprintChoices
+								bind:this={choices}
+								options={blockTrial.options}
+								onPick={pickBlock}
+								disabled={answered}
+							/>
+						{/key}
 						{#if answered}
+							<button class="btn" type="button" use:focusWhen={answered} onclick={next}>Next</button>
 							<span class="kb">or press Enter</span>
 						{/if}
 					</div>
-					{#if emptyHint}
-						<p id="empty-hint" class="empty-hint" role="status">
-							{pronCard
-								? 'Type hyphenated cuts, or Hangul, then Check.'
-								: 'Type a romanization, then Check.'}
-						</p>
-					{/if}
-				</form>
+				{/if}
 
 				{#if verdict}
 					<div
@@ -433,6 +501,17 @@
 		flex-direction: column;
 		align-items: stretch;
 		gap: var(--s1);
+	}
+
+	.block-answer {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--s1);
+	}
+
+	.block-answer .btn {
+		min-height: 44px;
 	}
 
 	.answer-controls {

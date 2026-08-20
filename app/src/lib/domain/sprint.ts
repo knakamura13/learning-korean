@@ -104,6 +104,33 @@ function shuffled<T>(items: readonly T[], rng: Rng): T[] {
 
 const MAX_TRIAL_ATTEMPTS = 40;
 
+function optionsForBlock(
+	block: string,
+	pool: readonly string[],
+	rng: Rng
+): { options: string[]; answerIndex: number } | null {
+	const answer = romanizeSyllable(block);
+	if (!answer) return null;
+	const distractors = new Set<string>();
+	for (const other of pool) {
+		if (other === block) continue;
+		const reading = romanizeSyllable(other);
+		if (reading && reading !== answer && reading.length === answer.length) {
+			distractors.add(reading);
+		}
+	}
+	if (distractors.size < OPTION_COUNT - 1) return null;
+	const picked: string[] = [];
+	const available = [...distractors];
+	while (picked.length < OPTION_COUNT - 1 && available.length > 0) {
+		const index = pickIndex(available.length, rng);
+		picked.push(available.splice(index, 1)[0]);
+	}
+	if (picked.length < OPTION_COUNT - 1) return null;
+	const options = shuffled([answer, ...picked], rng);
+	return { options, answerIndex: options.indexOf(answer) };
+}
+
 export function nextTrial(
 	blocks: readonly string[],
 	rng: Rng,
@@ -116,28 +143,22 @@ export function nextTrial(
 	for (let attempt = 0; attempt < MAX_TRIAL_ATTEMPTS; attempt++) {
 		const block = pool[pickIndex(pool.length, rng)];
 		if (!block) continue;
-		const answer = romanizeSyllable(block);
-		if (!answer) continue;
-		const distractors = new Set<string>();
-		for (const other of blocks) {
-			if (other === block) continue;
-			const reading = romanizeSyllable(other);
-			if (reading && reading !== answer && reading.length === answer.length) {
-				distractors.add(reading);
-			}
-		}
-		if (distractors.size < OPTION_COUNT - 1) continue;
-		const picked: string[] = [];
-		const available = [...distractors];
-		while (picked.length < OPTION_COUNT - 1 && available.length > 0) {
-			const index = pickIndex(available.length, rng);
-			picked.push(available.splice(index, 1)[0]);
-		}
-		if (picked.length < OPTION_COUNT - 1) continue;
-		const options = shuffled([answer, ...picked], rng);
-		return { block, options, answerIndex: options.indexOf(answer) };
+		const built = optionsForBlock(block, blocks, rng);
+		if (!built) continue;
+		return { block, options: built.options, answerIndex: built.answerIndex };
 	}
 	return null;
+}
+
+export function trialForBlock(
+	block: string,
+	pool: readonly string[],
+	rng: Rng
+): SprintTrial | null {
+	if (!pool.includes(block)) return null;
+	const built = optionsForBlock(block, pool, rng);
+	if (!built) return null;
+	return { block, options: built.options, answerIndex: built.answerIndex };
 }
 
 export function medianMs(samples: readonly number[]): number | null {

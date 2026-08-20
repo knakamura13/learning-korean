@@ -54,4 +54,29 @@ describe('review answer field', () => {
 		expect(src).toMatch(/\.ans em\s*\{[^}]*color:\s*var\(--ink-soft\)/);
 		expect(src).not.toMatch(/\.ans em\s*\{[^}]*opacity\s*:/);
 	});
+
+	it('answers block cards with SprintChoices, not the typed field', () => {
+		expect(src).toMatch(/from '\$lib\/components\/SprintChoices\.svelte'/);
+		expect(src).toMatch(/trialForBlock/);
+		expect(src).toMatch(/blockInventory/);
+		expect(src).toMatch(/card\.kind === 'block'/);
+		expect(src).toMatch(/progress\.answer\(card\.id/);
+		expect(src).not.toMatch(/answerRound/);
+	});
+
+	it('retries makeBlockTrial against sprintInventory when exclusive inventory fails', () => {
+		const make = src.match(/function makeBlockTrial[\s\S]*?\n\t\}/)?.[0] ?? '';
+		const args = [...make.matchAll(/trialForBlock\(([^)]*)\)/g)].map((m) => m[1]);
+		expect(args).toHaveLength(2);
+		expect(args[0]).toMatch(/blockInventory\(/);
+		const secondPool = args[1].split(',')[1]?.trim() ?? '';
+		const helperName = secondPool.match(/^(\w+)\(/)?.[1];
+		expect(helperName).toBeTruthy();
+		const retrySrc =
+			helperName === 'sprintInventory'
+				? args[1]
+				: (src.match(new RegExp(`function ${helperName}[\\s\\S]*?\\n\\t\\}`))?.[0] ?? '');
+		expect(retrySrc).toMatch(/sprintInventory\(/);
+		expect(retrySrc).not.toMatch(/blockInventory\(/);
+	});
 });

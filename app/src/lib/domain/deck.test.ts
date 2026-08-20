@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DECK, CARDS_BY_ID, TIERS, cardsOfTier, checkAnswer, normalize } from './deck';
+import { BLOCK_COUNTS } from './blockDeck';
 import { applyLiaison, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
 
 describe('deck integrity', () => {
@@ -79,13 +80,13 @@ describe('answers derived from the phonology module', () => {
 	};
 
 	it('gives every batchim card the sound the rules predict', () => {
-		for (const c of cardsOfTier('lab04')) {
+		for (const c of cardsOfTier('lab04').filter((c) => c.kind === 'batchim')) {
 			expect(c.answers[0], `${c.front} as a batchim`).toBe(ROMAN[batchimSound(c.front)]);
 		}
 	});
 
 	it('gives every cluster card the surviving sound', () => {
-		const cards = cardsOfTier('lab05');
+		const cards = cardsOfTier('lab05').filter((c) => c.kind === 'cluster');
 		expect(cards).toHaveLength(CLUSTERS.length);
 		for (const c of cards) {
 			expect(c.answers[0], `${c.front}`).toBe(ROMAN[batchimSound(c.front)]);
@@ -134,5 +135,31 @@ describe('liaison / pron cards', () => {
 	it('leaves existing letter-card grading alone', () => {
 		expect(checkAnswer(CARDS_BY_ID['c-g'], 'g')).toBe(true);
 		expect(checkAnswer(CARDS_BY_ID['v-eu'], 'eu')).toBe(true);
+	});
+});
+
+describe('block cards', () => {
+	it('schedules generated blocks inside lab02–lab05', () => {
+		const blocks = DECK.filter((c) => c.kind === 'block');
+		expect(blocks).toHaveLength(
+			BLOCK_COUNTS.lab02 + BLOCK_COUNTS.lab03 + BLOCK_COUNTS.lab04 + BLOCK_COUNTS.lab05
+		);
+		expect(cardsOfTier('lab02').filter((c) => c.kind === 'block')).toHaveLength(BLOCK_COUNTS.lab02);
+		expect(TIERS.find((t) => t.id === 'lab02')).toMatchObject({
+			label: 'Vowels · blocks',
+			size: cardsOfTier('lab02').length
+		});
+		expect(TIERS.find((t) => t.id === 'lab03')?.label).toBe('Compounds · blocks');
+		expect(TIERS.find((t) => t.id === 'lab04')?.label).toBe('Batchim · blocks');
+		expect(TIERS.find((t) => t.id === 'lab05')?.label).toBe('Clusters · blocks');
+	});
+
+	it('grades the derived reading and rejects the glyph', () => {
+		const card = DECK.find((c) => c.kind === 'block');
+		expect(card).toBeDefined();
+		if (!card) return;
+		expect(checkAnswer(card, card.answers[0])).toBe(true);
+		expect(checkAnswer(card, card.front)).toBe(false);
+		expect(checkAnswer(card, '')).toBe(false);
 	});
 });
