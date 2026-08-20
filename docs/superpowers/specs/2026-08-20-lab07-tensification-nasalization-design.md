@@ -222,7 +222,8 @@ Option-length rule still applies.
 - Options: ㄱ then ㄱ tenses; ㄱ then ㅁ nasalizes / ㄱ then ㄱ nasalizes; ㄱ then ㅁ tenses / Both of these words tense the second block / Both of these words nasalize the first batchim
 - Teach: The first letter is the same job (a stop). The *next* letter picks the rule. That is the whole sitting.
 
-**15. 학교** (read) → a school / a student / a classroom / a lesson
+**15. 학교** (read) → a school / a student / a college / a lesson
+(Uses `a college` not `a classroom`: read options must sit within 2 characters.)
 - Teach: hak-gyo, said [학꾜]. You derived the ㄲ. The deck will keep it.
 
 **16. 입니다** (read) → it is / it was / you are / we are

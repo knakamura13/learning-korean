@@ -152,7 +152,7 @@ of that session only — treat it as gone. Everything below is in `app/`.
   against the domain.
 - `src/lib/components/` — `LabRunner.svelte` plus one component per step type:
   `mouth`, `choice`, `build`, `assemble`, `vowel`, `fusion`, `cluster`, `liaison`,
-  `read`. Wrong answers do *not* advance on any step type; `choice` and `read`
+  `contact`, `read`. Wrong answers do *not* advance on any step type; `choice` and `read`
   mark the missed option and ask the learner to try again, revealing the
   teaching only after a correct pick.
 - `src/routes/` — `/` dashboard, `/lab/[id]`, `/review`, `/reference`.

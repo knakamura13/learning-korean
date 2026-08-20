@@ -147,7 +147,7 @@
 	});
 
 	/**
-	 * Resolve the step. Choice, read, cluster, and liaison retry until
+	 * Resolve the step. Choice, read, cluster, liaison, and contact retry until
 	 * correct — a miss nudges without advancing. An earlier miss dents the
 	 * first-try tally but must not turn a correct final answer into a
 	 * "not quite" — the learner did get there, and saying otherwise is just

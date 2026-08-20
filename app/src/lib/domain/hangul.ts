@@ -480,11 +480,12 @@ export function romanizeWord(word: string): string {
  * The eight changes that stand between spelling and speech.
  *
  * Korean spelling is morphophonemic: it preserves the identity of a word part
- * rather than transcribing what you hear. These rules are that gap. They are
- * data rather than functions for now — labs 06+ will implement them — but they
- * live here so the reference and any future lab share one source.
+ * rather than transcribing what you hear. These rules are that gap. Liaison,
+ * tensification, and nasalization have functions (`applyLiaison`,
+ * `applyTensification`, `applyNasalization`); the rest are still reference data.
+ * `scored` marks which ones the course already drills.
  *
- * Source: 표준 발음법 (Standard Pronunciation Rules, 1988), Articles 12–22.
+ * Source: 표준 발음법 (Standard Pronunciation Rules, 1988), Articles 12–23.
  */
 export interface SoundChange {
 	id: string;
