@@ -397,7 +397,7 @@
 
 	@media (min-width: 72rem) {
 		section {
-			scroll-margin-block-start: calc(44px + env(safe-area-inset-top) + var(--s3));
+			scroll-margin-block-start: calc(48px + env(safe-area-inset-top) + var(--s3));
 		}
 		.with-rail {
 			grid-template-areas:
@@ -415,7 +415,7 @@
 
 	section {
 		margin-bottom: var(--s7);
-		scroll-margin-block-start: calc(44px + env(safe-area-inset-top) + 12.5rem);
+		scroll-margin-block-start: calc(48px + env(safe-area-inset-top) + 12.5rem);
 	}
 
 	/* Last block is short; without leftover viewport, #dictionary-order cannot

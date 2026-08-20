@@ -6,6 +6,9 @@
  * Escape restore-focus (keyboard/press), hover Escape without claiming the key,
  * and the DOM selectors each rail passes in.
  * Click semantics and preview cards stay on the rails.
+ *
+ * The card is a positioned <div>, not <dialog> or the Popover API: dialog
+ * traps focus, and popover cannot cursor-follow or keep the hover-bridge.
  */
 
 import {

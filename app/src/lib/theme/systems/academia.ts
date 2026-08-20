@@ -1,8 +1,16 @@
 import type { DesignSystem, Palette } from '../types.ts';
+import {
+	CORMORANT_FALLBACKS,
+	LIBRE_BASKERVILLE_FALLBACKS,
+	LORA_FALLBACKS,
+	optionalLatinFace
+} from './latinFallbacks.ts';
 
-const DISPLAY = "'Cormorant Garamond', Georgia, 'Palatino Linotype', Palatino, serif";
-const SERIF = "'Libre Baskerville', 'Noto Serif KR', Georgia, 'Palatino Linotype', Palatino, serif";
-const SANS = "'Lora', Georgia, 'Palatino Linotype', Palatino, serif";
+const DISPLAY =
+	"'Cormorant Garamond', 'Cormorant Garamond Fallback', Georgia, 'Palatino Linotype', Palatino, serif";
+const SERIF =
+	"'Libre Baskerville', 'Libre Baskerville Fallback', 'Noto Serif KR', Georgia, 'Palatino Linotype', Palatino, serif";
+const SANS = "'Lora', 'Lora Fallback', Georgia, 'Palatino Linotype', Palatino, serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
 const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
 
@@ -92,48 +100,45 @@ export const academia: DesignSystem = {
 		hangul: HANGUL
 	},
 	fonts: [
-		{
+		optionalLatinFace({
 			family: 'Cormorant Garamond',
 			file: 'CormorantGaramond-Regular.woff2',
 			style: 'normal',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Cormorant Garamond',
 			file: 'CormorantGaramond-Italic.woff2',
 			style: 'italic',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Libre Baskerville',
 			file: 'LibreBaskerville-Regular.woff2',
 			style: 'normal',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Libre Baskerville',
 			file: 'LibreBaskerville-Italic.woff2',
 			style: 'italic',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Lora',
 			file: 'Lora-Regular.woff2',
 			style: 'normal',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Lora',
 			file: 'Lora-Italic.woff2',
 			style: 'italic',
-			weight: '400',
-			display: 'swap'
-		},
+			weight: '400'
+		}),
+		...CORMORANT_FALLBACKS,
+		...LIBRE_BASKERVILLE_FALLBACKS,
+		...LORA_FALLBACKS,
 		{
 			family: 'Noto Sans KR',
 			file: 'NotoSansKR-subset.woff2',

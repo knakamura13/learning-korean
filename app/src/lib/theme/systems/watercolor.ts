@@ -1,8 +1,13 @@
 import type { DesignSystem, Palette } from '../types.ts';
+import {
+	CORMORANT_FALLBACKS,
+	LORA_FALLBACKS,
+	optionalLatinFace
+} from './latinFallbacks.ts';
 
 const SERIF =
-	"'Cormorant Garamond', 'Noto Serif KR', Georgia, 'Palatino Linotype', Palatino, serif";
-const SANS = "'Lora', 'Noto Sans KR', Georgia, 'Iowan Old Style', serif";
+	"'Cormorant Garamond', 'Cormorant Garamond Fallback', 'Noto Serif KR', Georgia, 'Palatino Linotype', Palatino, serif";
+const SANS = "'Lora', 'Lora Fallback', 'Noto Sans KR', Georgia, 'Iowan Old Style', serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
 const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
 
@@ -86,34 +91,32 @@ export const watercolor: DesignSystem = {
 		hangul: HANGUL
 	},
 	fonts: [
-		{
+		optionalLatinFace({
 			family: 'Cormorant Garamond',
 			file: 'CormorantGaramond-Regular.woff2',
 			style: 'normal',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Cormorant Garamond',
 			file: 'CormorantGaramond-Italic.woff2',
 			style: 'italic',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Lora',
 			file: 'Lora-Regular.woff2',
 			style: 'normal',
-			weight: '400',
-			display: 'swap'
-		},
-		{
+			weight: '400'
+		}),
+		optionalLatinFace({
 			family: 'Lora',
 			file: 'Lora-Italic.woff2',
 			style: 'italic',
-			weight: '400',
-			display: 'swap'
-		},
+			weight: '400'
+		}),
+		...CORMORANT_FALLBACKS,
+		...LORA_FALLBACKS,
 		{
 			family: 'Noto Sans KR',
 			file: 'NotoSansKR-subset.woff2',

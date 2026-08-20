@@ -97,11 +97,11 @@
 
 	#backup {
 		margin-block-start: var(--s7);
-		scroll-margin-top: calc(44px + env(safe-area-inset-top) + 0.75rem);
+		scroll-margin-top: calc(48px + env(safe-area-inset-top) + 0.75rem);
 	}
 
 	#reset {
-		scroll-margin-top: calc(44px + env(safe-area-inset-top) + 0.75rem);
+		scroll-margin-top: calc(48px + env(safe-area-inset-top) + 0.75rem);
 	}
 
 	.backup-note {

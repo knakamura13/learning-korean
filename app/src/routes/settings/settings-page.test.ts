@@ -125,7 +125,7 @@ describe('Settings page — Backup', () => {
 		expect(src).not.toMatch(/backup-fold/);
 		expect(src).not.toMatch(/progress-backup/);
 		expect(src).toMatch(
-			/#backup\s*\{[^}]*scroll-margin-top:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ 0\.75rem\)/s
+			/#backup\s*\{[^}]*scroll-margin-top:\s*calc\(48px \+ env\(safe-area-inset-top\) \+ 0\.75rem\)/s
 		);
 
 		const root = render();
