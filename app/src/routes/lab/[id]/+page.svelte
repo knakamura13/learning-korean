@@ -4,7 +4,7 @@
 	import LabRunner from '$lib/components/LabRunner.svelte';
 	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
 	import { LABS } from '$lib/content';
-	import { requiredLab, showPrerequisiteGate, toCourseLab } from '$lib/domain/courseNav';
+	import { courseNavView, requiredLab, showPrerequisiteGate, toCourseLab } from '$lib/domain/courseNav';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	let { data } = $props();
@@ -18,14 +18,13 @@
 
 	const item = $derived(toCourseLab(lab));
 	const gated = $derived.by(() => {
-		const unlocked = new Set(
-			course.filter((entry) => progress.isUnlocked(entry.unlocks)).map((entry) => entry.unlocks)
-		);
-		return showPrerequisiteGate(item, course, {
+		const nav = courseNavView({
 			ready,
-			isUnlocked: (tier) => unlocked.has(tier),
+			labs: course,
+			isUnlocked: (tier) => progress.isUnlocked(tier),
 			isOpened: (id) => progress.isOpened(id)
 		});
+		return showPrerequisiteGate(item, course, nav);
 	});
 	const prior = $derived(requiredLab(course, lab.requires));
 </script>

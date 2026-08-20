@@ -3,9 +3,9 @@
 	import { resolve } from '$app/paths';
 	import { LABS } from '$lib/content';
 	import {
+		courseNavView,
 		requiredLab,
-		toCourseLab,
-		type CourseNavView
+		toCourseLab
 	} from '$lib/domain/courseNav';
 	import {
 		decideUnlockedPress,
@@ -40,18 +40,16 @@
 		hover.syncViewport();
 	});
 
-	const navView = $derived.by((): CourseNavView => {
-		const unlocked = new Set(
-			course.filter((lab) => progress.isUnlocked(lab.unlocks)).map((lab) => lab.unlocks)
-		);
-		return {
+	const navView = $derived.by(() =>
+		courseNavView({
 			ready,
-			isUnlocked: (tier) => unlocked.has(tier),
+			labs: course,
+			isUnlocked: (tier) => progress.isUnlocked(tier),
 			isOpened: (id) => progress.isOpened(id),
 			sessionFor: (id) => labSession.all[id],
 			queue: progress.stats.queue
-		};
-	});
+		})
+	);
 
 	const items = $derived(
 		labPreviewModels(course, standfirsts, navView, (requires) => requiredLab(course, requires))
