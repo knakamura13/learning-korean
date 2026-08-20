@@ -22,7 +22,7 @@
 	let choices = $state<SprintChoices | undefined>();
 
 	const unlocked = $derived(
-		['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'].filter((tier) =>
+		['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'].filter((tier) =>
 			progress.isUnlocked(tier)
 		)
 	);
@@ -51,7 +51,7 @@
 
 	function start() {
 		progress.tick();
-		const unlocked = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'].filter((tier) =>
+		const unlocked = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'].filter((tier) =>
 			progress.isUnlocked(tier)
 		);
 		const blocks = sprintInventory(unlocked);

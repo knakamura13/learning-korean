@@ -42,7 +42,7 @@
 	const blockCard = $derived(card?.kind === 'block');
 	const stats = $derived(progress.stats);
 	const unlockedTiers = $derived(
-		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'] as const).filter((tier) =>
+		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'] as const).filter((tier) =>
 			progress.isUnlocked(tier)
 		)
 	);
@@ -81,7 +81,7 @@
 	}
 
 	function cumulativeInventory(tier: string): string[] {
-		const order = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'];
+		const order = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'];
 		const idx = order.indexOf(tier);
 		return sprintInventory(order.slice(0, Math.max(idx + 1, 2)));
 	}

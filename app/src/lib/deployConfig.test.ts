@@ -22,8 +22,8 @@ describe('adapter and runtime env', () => {
 		expect(packageJson.devDependencies).not.toHaveProperty('@sveltejs/adapter-auto');
 	});
 
-	it('documents the six-lab course', () => {
-		expect(appReadme).toMatch(/lab01\.\.lab06/);
+	it('documents the seven-lab course', () => {
+		expect(appReadme).toMatch(/lab01\.\.lab07/);
 	});
 
 	it('pins svelte, kit, and vite to exact versions', () => {
