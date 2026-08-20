@@ -12,7 +12,7 @@ export const lab06: Lab = {
 	finish: {
 		title: 'Spoken Korean just became readable',
 		summary:
-			'A batchim plus a placeholder ㅇ is not a mystery any more: the letter jumps, unless it is already ng. Clusters split instead of sacrificing a letter. Isolation flattening reverses. Next: tensification — why 학교 is [학꾜], the other reason a word you can read still surprises your ear.'
+			'A batchim plus a placeholder ㅇ is not a mystery any more: the letter jumps, unless it is already ng. Clusters split instead of sacrificing a letter. Isolation flattening reverses. Lab 07 takes the other neighbor: a stop that tenses, or a stop that becomes a nasal.'
 	},
 	steps: [
 		{

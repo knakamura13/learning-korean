@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { DECK, CARDS_BY_ID, TIERS, cardsOfTier, checkAnswer, normalize } from './deck';
 import { BLOCK_COUNTS } from './blockDeck';
-import { applyLiaison, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
+import { applyLiaison, applyTensification, applyNasalization, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
 
 describe('deck integrity', () => {
 	it('has no duplicate ids', () => {
@@ -135,6 +135,31 @@ describe('liaison / pron cards', () => {
 	it('leaves existing letter-card grading alone', () => {
 		expect(checkAnswer(CARDS_BY_ID['c-g'], 'g')).toBe(true);
 		expect(checkAnswer(CARDS_BY_ID['v-eu'], 'eu')).toBe(true);
+	});
+});
+
+describe('lab07 / pron cards', () => {
+	it('unlocks ten lab07 cards derived from tensification or nasalization', () => {
+		const cards = cardsOfTier('lab07');
+		expect(cards).toHaveLength(10);
+		expect(TIERS.find((t) => t.id === 'lab07')).toMatchObject({ lab: '0007', size: 10 });
+		for (const c of cards) {
+			expect(c.kind).toBe('pron');
+			const spoken =
+				applyTensification(c.front) !== c.front
+					? applyTensification(c.front)
+					: applyNasalization(c.front);
+			expect(c.answers).toContain(spoken);
+			expect(c.answers).toContain(romanizeWord(spoken));
+		}
+	});
+
+	it('requires hyphenated ASCII for 학교', () => {
+		const card = CARDS_BY_ID['p-학교'];
+		expect(checkAnswer(card, 'hak-kkyo')).toBe(true);
+		expect(checkAnswer(card, '학꾜')).toBe(true);
+		expect(checkAnswer(card, 'hakgyo')).toBe(false);
+		expect(checkAnswer(card, 'hak-gyo')).toBe(false);
 	});
 });
 

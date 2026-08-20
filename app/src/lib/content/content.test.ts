@@ -13,7 +13,7 @@ import type { Lab, Step, ZoneId } from './types';
 import { TIERS, cardsOfTier } from '$lib/domain/deck';
 import {
 	compose, decompose, derive, derivations, buildVowel, sidesFor, fuse,
-	batchimSound, clusterParts, applyLiaison, liaisonAction, type TickSide
+	batchimSound, clusterParts, applyLiaison, liaisonAction, applyContact, contactAction, type TickSide
 } from '$lib/domain/hangul';
 
 const ALL_STEPS: { lab: Lab; step: Step; i: number }[] = LABS.flatMap((lab) =>
@@ -327,5 +327,44 @@ describe('deck alignment', () => {
 		for (const lab of LABS) {
 			expect(cardsOfTier(lab.unlocks).length, lab.id).toBeGreaterThan(0);
 		}
+	});
+});
+
+describe('contact steps agree with the phonology', () => {
+	it('uses real syllables and derives speech from applyContact', () => {
+		for (const { lab, step, i } of ALL_STEPS) {
+			if (step.type !== 'contact') continue;
+			for (const ch of [...step.word]) {
+				expect(decompose(ch), `${where(lab, i)}: ${ch}`).not.toBeNull();
+			}
+			const spoken = applyContact(step.word);
+			expect(spoken.length, `${where(lab, i)}: applyContact returned empty`).toBeGreaterThan(0);
+			const action = contactAction(step.word);
+			if (action.type === 'stay') {
+				expect(spoken, `${where(lab, i)}: ${step.word} should stay`).toBe(step.word);
+			} else {
+				expect(spoken, `${where(lab, i)}: ${step.word} should change`).not.toBe(step.word);
+			}
+		}
+	});
+
+	it('never uses liaison, cluster, ㅎ, or Article 19 words as a contact widget', () => {
+		const banned = ['음악', '좋아요', '없다', '독립', '학원', '밭이'];
+		for (const { step } of ALL_STEPS) {
+			if (step.type !== 'contact') continue;
+			expect(banned).not.toContain(step.word);
+		}
+	});
+
+	it('includes Stay-correct 한국 and both rule families', () => {
+		const words = ALL_STEPS.filter((s) => s.step.type === 'contact').map((s) =>
+			s.step.type === 'contact' ? s.step.word : ''
+		);
+		expect(words).toContain('한국');
+		expect(words).toContain('학교');
+		expect(words).toContain('국물');
+		expect(contactAction('한국')).toEqual({ type: 'stay' });
+		expect(contactAction('학교')).toEqual({ type: 'tense' });
+		expect(contactAction('국물')).toEqual({ type: 'nasal' });
 	});
 });

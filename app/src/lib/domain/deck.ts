@@ -12,7 +12,7 @@
  */
 
 import { blockEntries } from './blockDeck';
-import { applyLiaison, batchimSound, fusionParts, romanizeWord } from './hangul';
+import { applyLiaison, applyTensification, applyNasalization, batchimSound, fusionParts, romanizeWord } from './hangul';
 
 export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster' | 'pron' | 'block';
 
@@ -193,13 +193,43 @@ const liaison: Card[] = Object.keys(LIAISON_NOTES).map((written) => {
 	);
 });
 
+/* ---------- tier lab07: tensification and nasalization ---------- */
+
+const CONTACT_NOTES: Record<string, string> = {
+	'학교': 'A stop then ㄱ tenses the next letter: [학꾜].',
+	'먹다': 'A stop then ㄷ tenses: [먹따].',
+	'잡지': 'A stop then ㅈ tenses: [잡찌].',
+	'식당': 'A stop then ㄷ tenses: [식땅].',
+	'국밥': 'A stop then ㅂ tenses: [국빱].',
+	'국물': 'ㄱ before ㅁ becomes ㅇ: [궁물].',
+	'입니다': 'ㅂ before ㄴ becomes ㅁ: [임니다].',
+	'학년': 'ㄱ before ㄴ becomes ㅇ: [항년].',
+	'닫는': 'ㄷ before ㄴ becomes ㄴ: [단는].',
+	'밥물': 'ㅂ before ㅁ becomes ㅁ: [밤물].'
+};
+
+const contact: Card[] = Object.keys(CONTACT_NOTES).map((written) => {
+	const spoken = applyTensification(written) !== written
+		? applyTensification(written)
+		: applyNasalization(written);
+	return card(
+		`p-${written}`,
+		written,
+		'how is this said? (hyphenated cuts, or Hangul)',
+		[romanizeWord(spoken), spoken],
+		CONTACT_NOTES[written],
+		'lab07',
+		'pron'
+	);
+});
+
 /* ---------- assembly ---------- */
 
 const blockCatalog: Card[] = blockEntries();
 
 export const DECK: Card[] = [
 	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters,
-	...liaison, ...blockCatalog
+	...liaison, ...contact, ...blockCatalog
 ];
 
 export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
@@ -219,7 +249,8 @@ export const TIERS: Tier[] = [
 	{ id: 'lab03', label: 'Compounds · blocks', lab: '0003', size: compounds.length + construction.length + blockCatalog.filter((c) => c.tier === 'lab03').length },
 	{ id: 'lab04', label: 'Batchim · blocks', lab: '0004', size: batchim.length + blockCatalog.filter((c) => c.tier === 'lab04').length },
 	{ id: 'lab05', label: 'Clusters · blocks', lab: '0005', size: clusters.length + blockCatalog.filter((c) => c.tier === 'lab05').length },
-	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length }
+	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length },
+	{ id: 'lab07', label: 'Stops', lab: '0007', size: contact.length }
 ];
 
 export function cardsOfTier(tier: string): Card[] {
