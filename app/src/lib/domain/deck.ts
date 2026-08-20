@@ -11,9 +11,10 @@
  * teaches it is finished — the deck never quizzes unmet material.
  */
 
+import { blockEntries } from './blockDeck';
 import { applyLiaison, batchimSound, fusionParts, romanizeWord } from './hangul';
 
-export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster' | 'pron';
+export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster' | 'pron' | 'block';
 
 export interface Card {
 	id: string;
@@ -194,9 +195,11 @@ const liaison: Card[] = Object.keys(LIAISON_NOTES).map((written) => {
 
 /* ---------- assembly ---------- */
 
+const blockCatalog: Card[] = blockEntries();
+
 export const DECK: Card[] = [
 	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters,
-	...liaison
+	...liaison, ...blockCatalog
 ];
 
 export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
@@ -212,10 +215,10 @@ export interface Tier {
 
 export const TIERS: Tier[] = [
 	{ id: 'lab01', label: 'Consonants', lab: '0001', size: consonants.length },
-	{ id: 'lab02', label: 'Basic vowels', lab: '0002', size: vowels.length },
-	{ id: 'lab03', label: 'Compound vowels', lab: '0003', size: compounds.length + construction.length },
-	{ id: 'lab04', label: 'Batchim', lab: '0004', size: batchim.length },
-	{ id: 'lab05', label: 'Clusters', lab: '0005', size: clusters.length },
+	{ id: 'lab02', label: 'Vowels · blocks', lab: '0002', size: vowels.length + blockCatalog.filter((c) => c.tier === 'lab02').length },
+	{ id: 'lab03', label: 'Compounds · blocks', lab: '0003', size: compounds.length + construction.length + blockCatalog.filter((c) => c.tier === 'lab03').length },
+	{ id: 'lab04', label: 'Batchim · blocks', lab: '0004', size: batchim.length + blockCatalog.filter((c) => c.tier === 'lab04').length },
+	{ id: 'lab05', label: 'Clusters · blocks', lab: '0005', size: clusters.length + blockCatalog.filter((c) => c.tier === 'lab05').length },
 	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length }
 ];
 
