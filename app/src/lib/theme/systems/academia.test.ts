@@ -64,6 +64,41 @@ describe('academia', () => {
 		expect(academia.fonts.some((face) => face.style === 'italic')).toBe(true);
 	});
 
+	it('loads Latin faces as optional with metric-matched local fallbacks', () => {
+		const latin = academia.fonts.filter(
+			(face) => face.file && face.family !== 'Noto Sans KR' && face.family !== 'Noto Serif KR'
+		);
+		expect(latin.length).toBeGreaterThan(0);
+		for (const face of latin) {
+			expect(face.display, face.file).toBe('optional');
+		}
+
+		const cormorant = academia.fonts.filter((face) => face.family === 'Cormorant Garamond Fallback');
+		const baskerville = academia.fonts.filter((face) => face.family === 'Libre Baskerville Fallback');
+		const lora = academia.fonts.filter((face) => face.family === 'Lora Fallback');
+		expect(cormorant.map((face) => face.style).sort()).toEqual(['italic', 'normal']);
+		expect(baskerville.map((face) => face.style).sort()).toEqual(['italic', 'normal']);
+		expect(lora.map((face) => face.style).sort()).toEqual(['italic', 'normal']);
+		for (const face of baskerville) {
+			expect(face).toMatchObject({
+				ascentOverride: '97%',
+				descentOverride: '27%',
+				lineGapOverride: '0%'
+			});
+			expect(face.file).toBeUndefined();
+			expect(face.local).toEqual(['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Georgia']);
+		}
+		expect(academia.type.display).toMatch(/'Cormorant Garamond Fallback'/);
+		expect(academia.type.serif).toMatch(/'Libre Baskerville Fallback'/);
+		expect(academia.type.sans).toMatch(/'Lora Fallback'/);
+
+		const css = designSystemCss(academia);
+		expect(css).not.toMatch(/font-display:\s*swap/);
+		expect(css).toContain('ascent-override: 92.4%');
+		expect(css).toContain('ascent-override: 97%');
+		expect(css).toContain('ascent-override: 100.6%');
+	});
+
 	it('puts walnut and bronze contrast-more deltas on the system, not a full palette dump', () => {
 		expect(academia.contrastMoreLight).toMatchObject({
 			accent: '#3e2518',

@@ -51,6 +51,46 @@ describe('watercolor', () => {
 		expect(watercolor.fonts.some((face) => face.style === 'italic')).toBe(true);
 	});
 
+	it('loads Latin faces as optional with metric-matched local fallbacks', () => {
+		const latin = watercolor.fonts.filter(
+			(face) => face.file && face.family !== 'Noto Sans KR' && face.family !== 'Noto Serif KR'
+		);
+		expect(latin.length).toBeGreaterThan(0);
+		for (const face of latin) {
+			expect(face.display, face.file).toBe('optional');
+		}
+
+		const cormorant = watercolor.fonts.filter((face) => face.family === 'Cormorant Garamond Fallback');
+		const lora = watercolor.fonts.filter((face) => face.family === 'Lora Fallback');
+		expect(cormorant.map((face) => face.style).sort()).toEqual(['italic', 'normal']);
+		expect(lora.map((face) => face.style).sort()).toEqual(['italic', 'normal']);
+		for (const face of cormorant) {
+			expect(face).toMatchObject({
+				ascentOverride: '92.4%',
+				descentOverride: '28.7%',
+				lineGapOverride: '0%'
+			});
+			expect(face.file).toBeUndefined();
+			expect(face.local).toEqual(['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Georgia']);
+		}
+		for (const face of lora) {
+			expect(face).toMatchObject({
+				ascentOverride: '100.6%',
+				descentOverride: '27.4%',
+				lineGapOverride: '0%'
+			});
+			expect(face.file).toBeUndefined();
+		}
+		expect(watercolor.type.serif).toMatch(/'Cormorant Garamond Fallback'/);
+		expect(watercolor.type.sans).toMatch(/'Lora Fallback'/);
+
+		const css = designSystemCss(watercolor);
+		expect(css).toContain('font-display: optional');
+		expect(css).not.toMatch(/font-display:\s*swap/);
+		expect(css).toContain('ascent-override: 92.4%');
+		expect(css).toContain('ascent-override: 100.6%');
+	});
+
 	it('puts indigo and coral contrast-more deltas on the system, not a full palette dump', () => {
 		expect(watercolor.contrastMoreLight).toMatchObject({
 			accent: '#2d3748',
