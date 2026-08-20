@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
+import labRunnerPipRail from './components/labRunnerPipRail.svelte.ts?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
 import consonantClip from './components/ConsonantClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
@@ -52,20 +53,33 @@ function physicalLeftRight(src: string): string[] {
 	return src.match(/(?:^|[^\w-])(?:left|right)\s*:/gm) ?? [];
 }
 
+/**
+ * Sitting chrome Phase 3 may split. Assert against this bundle, not
+ * LabRunner.svelte identifiers, import paths, or which file owns CSS.
+ */
+const sittingSources = [labRunner, labSpread, labRunnerPipRail];
+const sitting = sittingSources.join('\n');
+
+function sittingStyles(): string {
+	return sittingSources
+		.map((src) => src.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '')
+		.join('\n');
+}
+
+const sittingCss = sittingStyles();
+
 describe('polish audit regressions', () => {
 	it('requires confirmation before clearing a completed lab session', () => {
-		expect(labRunner).toMatch(/let confirmingRestart = \$state\(false\)/);
-		expect(labRunner).toMatch(/function requestRestart\(\)[\s\S]*confirmingRestart = true/);
-		expect(labRunner).toMatch(/onclick=\{requestRestart\}/);
-		expect(labRunner).toMatch(/Start over\? Your completed lab summary will be cleared\./);
-		expect(labRunner).toMatch(/onclick=\{confirmRestart\}/);
+		expect(sitting).toMatch(/Start over\? Your completed lab summary will be cleared\./);
+		expect(sitting).toMatch(/<dialog\b[^>]*class="restart-confirm"/);
+		expect(sitting).toMatch(/>Start over</);
 	});
 
 	it('opens restore and restart confirmations as native modal dialogs', () => {
 		expect(progressBackup).toMatch(/<dialog\b[^>]*class="confirm"/);
 		expect(progressBackup).toMatch(/attachModalDialog/);
-		expect(labRunner).toMatch(/<dialog\b[^>]*class="restart-confirm"/);
-		expect(labRunner).toMatch(/attachModalDialog/);
+		expect(sitting).toMatch(/<dialog\b[^>]*class="restart-confirm"/);
+		expect(sitting).toMatch(/attachModalDialog/);
 	});
 
 	it('opens the locked-lab overlay as a native modal dialog', () => {
@@ -79,18 +93,17 @@ describe('polish audit regressions', () => {
 	});
 
 	it('moves card-change focus to the first well control, not the instruction heading', () => {
-		expect(labRunner).not.toMatch(/querySelector\('h2'\)\?\.focus/);
-		expect(labRunner).not.toMatch(/<h2 class="do" tabindex="-1"/);
-		expect(labRunner).toMatch(/from '\$lib\/a11y\/firstWellControl'/);
-		expect(labRunner).toMatch(/firstWellControl\(/);
-		expect(styleBlock(labRunner)).not.toMatch(/\.do:focus-visible/);
-		expect(styleBlock(labRunner)).not.toMatch(/\.do:focus\b/);
+		expect(sitting).not.toMatch(/querySelector\('h2'\)\?\.focus/);
+		expect(sitting).not.toMatch(/<h2 class="do" tabindex="-1"/);
+		expect(sitting).toMatch(/firstWellControl\(/);
+		expect(sittingCss).not.toMatch(/\.do:focus-visible/);
+		expect(sittingCss).not.toMatch(/\.do:focus\b/);
 	});
 
 	it('announces the new instruction from a persistent live region outside the card key', () => {
-		expect(labRunner).toMatch(/data-prompt-live/);
-		expect(labRunner).toMatch(/data-prompt-live[^>]*aria-live="polite"/);
-		const promptOpen = labRunner.match(/class="prompt"[\s\S]{0,400}<h2 class="do"/)?.[0] ?? '';
+		expect(sitting).toMatch(/data-prompt-live/);
+		expect(sitting).toMatch(/data-prompt-live[^>]*aria-live="polite"/);
+		const promptOpen = sitting.match(/class="prompt"[\s\S]{0,400}<h2 class="do"/)?.[0] ?? '';
 		expect(promptOpen).not.toMatch(/data-prompt-live/);
 	});
 
@@ -101,7 +114,7 @@ describe('polish audit regressions', () => {
 	it('gives remaining interactive chrome a pressed state', () => {
 		expect(styleBlock(consonantClip)).toMatch(/\.play:active\s*\{/);
 		expect(styleBlock(vowelStep)).toMatch(/\.stamp:active:not\(:disabled\)\s*\{/);
-		expect(styleBlock(labRunner)).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
+		expect(sittingCss).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
 		expect(styleBlock(home)).toMatch(/a\.lab:active/);
 		expect(styleBlock(home)).toMatch(/button\.lab:active/);
@@ -127,12 +140,12 @@ describe('polish audit regressions', () => {
 	});
 
 	it('reserves the lab well with a mouth-sized skeleton until widgets can mount', () => {
-		const well = labRunner.match(/\{#snippet well\(\)\}([\s\S]*?)\{\/snippet\}/)?.[1] ?? '';
+		const well = sitting.match(/\{#snippet well\(\)\}([\s\S]*?)\{\/snippet\}/)?.[1] ?? '';
 		expect(well).toMatch(/\{#if ready\}/);
 		expect(well).toMatch(/class="[^"]*(?:work-skel|mouth-ph)/);
 		expect(well).toMatch(/aria-hidden="true"/);
 		expect(well).toMatch(/<MouthStep/);
-		expect(styleBlock(labRunner)).toMatch(/aspect-ratio:\s*440\s*\/\s*300/);
+		expect(sittingCss).toMatch(/aspect-ratio:\s*440\s*\/\s*300/);
 	});
 
 	it('dims locked home chrome without opacity on live text', () => {
@@ -157,8 +170,8 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps physical gradient sides because logical gradient keywords are not Baseline', () => {
-		expect(styleBlock(labRunner)).toMatch(/to right/);
-		expect(styleBlock(labRunner)).not.toMatch(/to inline-end/);
+		expect(sittingCss).toMatch(/to right/);
+		expect(sittingCss).not.toMatch(/to inline-end/);
 		expect(styleBlock(reference)).not.toMatch(/to inline-end/);
 	});
 
@@ -178,10 +191,11 @@ describe('polish audit regressions', () => {
 
 	it('uses logical properties in shared directional layout', () => {
 		expect(appCss).not.toMatch(/\bmargin-left\s*:/);
-		expect(labRunner).not.toMatch(/\bleft\s*:\s*0/);
+		expect(sitting).not.toMatch(/\bleft\s*:\s*0/);
 		const chrome = [
 			appCss,
 			labRunner,
+			labRunnerPipRail,
 			progressBackup,
 			settingsPage,
 			layout,
@@ -202,7 +216,7 @@ describe('polish audit regressions', () => {
 			expect(src).not.toMatch(/text-align:\s*(?:left|right)/);
 		}
 		expect(physicalLeftRight(styleBlock(layout))).toEqual([]);
-		expect(physicalLeftRight(styleBlock(labRunner))).toEqual([]);
+		expect(physicalLeftRight(sittingCss)).toEqual([]);
 		expect(physicalLeftRight(styleBlock(progressBackup))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(settingsPage))).toEqual([]);
 		expect(physicalLeftRight(styleBlock(home))).toEqual([]);
@@ -265,7 +279,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('sets lab card .do in sans, not display italic', () => {
-		const runnerCss = styleBlock(labRunner);
+		const runnerCss = sittingCss;
 		const doBlock = runnerCss.match(/\.do\s*\{[^}]*\}/)?.[0];
 		expect(doBlock).toBeTruthy();
 		expect(doBlock).toMatch(/font-family:\s*var\(--sans\)/);
@@ -366,8 +380,8 @@ describe('polish audit regressions', () => {
 	it('sizes popover actions, pip, settings, brand, and lab-index hits to at least 44px', () => {
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
 		expect(home).toMatch(/LockedLabPopover/);
-		expect(styleBlock(labRunner)).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
-		expect(styleBlock(labRunner)).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
+		expect(sittingCss).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
+		expect(sittingCss).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
@@ -421,7 +435,7 @@ describe('polish audit regressions', () => {
 		expect(errorPage).not.toMatch(/<h2>/);
 		expect(styleBlock(errorPage)).toMatch(/@media \(forced-colors:\s*active\)/);
 		expect(styleBlock(readStep)).toMatch(/@media \(forced-colors:\s*active\)/);
-		const finish = labRunner.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
+		const finish = sitting.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
 		expect(finish).toMatch(/<h1>/);
 		expect(finish).not.toMatch(/<h2>/);
 	});
@@ -443,12 +457,12 @@ describe('polish audit regressions', () => {
 		expect(labSpread).toMatch(/class="well"/);
 		expect(labSpread).not.toMatch(/\.well::before/);
 		expect(labSpread).not.toMatch(/\.well::after/);
-		expect(labRunner).not.toMatch(/class="card step"/);
+		expect(sitting).not.toMatch(/class="card step"/);
 	});
 
 	it('lets spatial lab widgets occupy the well instead of old card figures', () => {
 		const wellCss = styleBlock(labSpread);
-		const workCss = styleBlock(labRunner);
+		const workCss = sittingCss;
 		const mouthCss = styleBlock(mouthStep);
 		const vowelCss = styleBlock(vowelStep);
 		const zoneBoard = vowelCss.match(/\.zone\s*\{[^}]+\}/)?.[0] ?? '';
@@ -577,7 +591,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('does not ship fascicle journal words in UI chrome', () => {
-		const chrome = layout + home + labRunner + labPage + labIndexRail + labPreview + labSpread + review + settingsPage;
+		const chrome = layout + home + sitting + labPage + labIndexRail + labPreview + review + settingsPage;
 		expect(chrome).not.toMatch(/Colophon/);
 		expect(chrome).not.toMatch(/>ToC</);
 		expect(chrome).not.toMatch(/label: 'ToC'/);
@@ -595,8 +609,8 @@ describe('polish audit regressions', () => {
 		expect(labPage).not.toMatch(/Look up any letter in/);
 		expect(labPage).not.toMatch(/jamo/);
 		expect(labPage).not.toMatch(/same\s+module these cards use/);
-		expect(styleBlock(labRunner)).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);
-		const finish = labRunner.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
+		expect(sittingCss).toMatch(/\.finish\s*\{[^}]*max-width:\s*var\(--measure\)/s);
+		const finish = sitting.match(/\{#if finished\}([\s\S]*?)\{:else\}/)?.[1] ?? '';
 		expect(finish).toMatch(/<LabSpread>/);
 		expect(finish).toMatch(/\{#snippet article\(\)\}/);
 		expect(finish).toMatch(/class="finish card"/);
@@ -607,7 +621,7 @@ describe('polish audit regressions', () => {
 		expect(review).toMatch(/reviewChrome\(/);
 		expect(review).not.toMatch(/backupPanel/);
 		expect(review).not.toMatch(/ProgressBackup/);
-		expect(labRunner).toMatch(/\{:else if alreadyDone\}/);
+		expect(sitting).toMatch(/\{:else if alreadyDone\}/);
 		expect(review).not.toMatch(/type the romanization/);
 	});
 
@@ -724,7 +738,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(review)).toMatch(/\.answer-label\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).toMatch(/\.tag\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).toMatch(/\.v\s*\{[^}]*font-size:\s*0\.75rem/s);
-		expect(styleBlock(labRunner)).toMatch(/\.verdict\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(sittingCss).toMatch(/\.verdict\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(options)).toMatch(/\.key\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(slots)).toMatch(/\.slot-name\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(tray)).toMatch(/\.mark\s*\{[^}]*font-size:\s*0\.75rem/s);
@@ -760,7 +774,7 @@ describe('polish audit regressions', () => {
 
 	it('contains overscroll on confirm dialogs and the locked-lab popover', () => {
 		expect(styleBlock(progressBackup)).toMatch(/\.confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
-		expect(styleBlock(labRunner)).toMatch(/\.restart-confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
+		expect(sittingCss).toMatch(/\.restart-confirm\s*\{[^}]*overscroll-behavior:\s*contain/s);
 		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop\s*\{[^}]*overscroll-behavior:\s*contain/s);
 	});
 
@@ -771,10 +785,8 @@ describe('polish audit regressions', () => {
 		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
 	});
 
-	it('extracts pip-rail attach and dialog open from LabRunner', () => {
-		expect(labRunner).toMatch(/from '\$lib\/domain\/labRunnerSession'/);
-		expect(labRunner).toMatch(/from '\$lib\/components\/labRunnerPipRail\.svelte'/);
-		expect(labRunner).not.toMatch(/function keepSelectedVisible/);
-		expect(labRunner).not.toMatch(/function openRestartDialog/);
+	it('keeps pip-rail attach in sitting chrome without freezing LabRunner import paths', () => {
+		expect(sitting).toMatch(/attachPipRail/);
+		expect(sitting).toMatch(/attachModalDialog/);
 	});
 });
