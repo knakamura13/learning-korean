@@ -239,7 +239,7 @@
 		.lab-index {
 			display: block;
 			position: sticky;
-			inset-block-start: calc(2.75rem + env(safe-area-inset-top) + var(--s3));
+			inset-block-start: calc(2.75rem + 4px + env(safe-area-inset-top) + var(--s3));
 			align-self: start;
 			z-index: 4;
 			width: 56px;

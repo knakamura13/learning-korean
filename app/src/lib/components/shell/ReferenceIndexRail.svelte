@@ -105,7 +105,7 @@
 <style>
 	.ref-index {
 		position: sticky;
-		inset-block-start: calc(44px + env(safe-area-inset-top));
+		inset-block-start: calc(48px + env(safe-area-inset-top));
 		z-index: 4;
 		margin: 0 0 var(--s6);
 		padding: var(--s2) 0 var(--s3);
@@ -185,7 +185,7 @@
 			gap: var(--s1);
 		}
 		.ref-index {
-			inset-block-start: calc(2.75rem + env(safe-area-inset-top) + var(--s3));
+			inset-block-start: calc(2.75rem + 4px + env(safe-area-inset-top) + var(--s3));
 			align-self: start;
 			margin: 0;
 			padding: 0;

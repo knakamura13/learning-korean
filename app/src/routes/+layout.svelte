@@ -147,7 +147,7 @@
 	}
 
 	.inner {
-		min-height: 44px;
+		min-height: 48px;
 		height: auto;
 		max-width: var(--shell);
 		margin: 0 auto;
@@ -208,8 +208,8 @@
 		position: relative;
 		display: inline-flex;
 		align-items: center;
-		/* 40px keeps a 0.25rem gap under the bar’s top edge. 44px would kiss that edge. */
-		min-height: 40px;
+		/* 44px hit target. 48px .inner keeps a 4px gap under the bar’s top edge. */
+		min-height: 44px;
 		padding: 0 0.75rem;
 		border-radius: 0;
 		font-size: 0.84rem;
@@ -364,7 +364,7 @@
 	@media (max-width: 20rem) {
 		.inner {
 			height: auto;
-			min-height: 44px;
+			min-height: 48px;
 			flex-wrap: wrap;
 			row-gap: 0;
 		}

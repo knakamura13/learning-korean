@@ -386,6 +386,12 @@ describe('polish audit regressions', () => {
 		expect(sittingCss).toMatch(/\.rail li\s*\{[^}]*padding-inline:/s);
 		expect(styleBlock(labIndexRail)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/min-height:\s*44px/);
+		expect(styleBlock(referenceIndexRail)).toMatch(
+			/\.ref-index\s*\{[^}]*inset-block-start:\s*calc\(48px \+ env\(safe-area-inset-top\)\)/s
+		);
+		expect(styleBlock(referenceIndexRail)).toMatch(
+			/inset-block-start:\s*calc\(2\.75rem \+ 4px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/
+		);
 		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
@@ -394,10 +400,10 @@ describe('polish audit regressions', () => {
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
 		const css = styleBlock(reference);
 		expect(css).toMatch(
-			/section\s*\{[^}]*scroll-margin-block-start:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ 12\.5rem\)/s
+			/section\s*\{[^}]*scroll-margin-block-start:\s*calc\(48px \+ env\(safe-area-inset-top\) \+ 12\.5rem\)/s
 		);
 		expect(css).toMatch(
-			/min-width:\s*72rem[^}]*scroll-margin-block-start:\s*calc\(44px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/s
+			/min-width:\s*72rem[^}]*scroll-margin-block-start:\s*calc\(48px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/s
 		);
 		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100dvh/s);
 	});
@@ -500,17 +506,26 @@ describe('polish audit regressions', () => {
 		expect(layout).not.toMatch(/folio/);
 		expect(layout).toMatch(/SettingsLink/);
 		expect(layout).not.toMatch(/ThemeToggle/);
-		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*min-height:\s*44px/s);
-		expect(styleBlock(layout)).not.toMatch(/\.inner\s*\{[^}]*(?<!min-)height:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/\.inner\s*\{[^}]*min-height:\s*48px/s);
+		expect(styleBlock(layout)).not.toMatch(/\.inner\s*\{[^}]*(?<!min-)height:\s*48px/s);
 		expect(styleBlock(layout)).toMatch(/\.name\s*\{[^}]*font-size:\s*1rem/s);
-		expect(styleBlock(labSpread)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
-		expect(styleBlock(labSpread)).toMatch(/max-height:\s*calc\(100dvh - 2\.75rem/);
+		expect(styleBlock(labSpread)).toMatch(
+			/inset-block-start:\s*calc\(2\.75rem \+ 4px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/
+		);
+		expect(styleBlock(labSpread)).toMatch(
+			/max-height:\s*calc\(100dvh - 2\.75rem - 4px - env\(safe-area-inset-top\)/
+		);
 		// Sticky column is a flex container with a viewport max-height. If .well
 		// (or .after) shrinks, stacked choice buttons paint past the well border.
 		expect(styleBlock(labSpread)).toMatch(/\.well\s*\{[^}]*flex-shrink:\s*0/s);
 		expect(styleBlock(labSpread)).toMatch(/\.after\s*\{[^}]*flex-shrink:\s*0/s);
-		expect(styleBlock(labIndexRail)).toMatch(/inset-block-start:\s*calc\(2\.75rem/);
+		expect(styleBlock(labIndexRail)).toMatch(
+			/inset-block-start:\s*calc\(2\.75rem \+ 4px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/
+		);
 		expect(styleBlock(layout)).toMatch(/\.bar\.lab-route \.inner\s*\{[^}]*max-width:\s*var\(--sitting\)/s);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 20rem\)[\s\S]*\.inner\s*\{[^}]*min-height:\s*48px/s
+		);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.6rem/s);
@@ -548,7 +563,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.badge-n\s*\{[^}]*display:\s*none/s
 		);
-		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*40px/s);
+		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(layout)).not.toMatch(/nav a\s*\{[^}]*min-height:\s*calc\(/s);
 		expect(styleBlock(layout)).toMatch(/nav a\.active\s*\{[^}]*background:\s*var\(--paper\)/s);
 		expect(styleBlock(layout)).toMatch(/border-start-start-radius:\s*var\(--tab-r\)/);
@@ -772,6 +787,15 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(
 			/@media \(prefers-reduced-motion: reduce\)[\s\S]*?a:active:not\(\.btn\)\s*\{[^}]*transform:\s*none/s
 		);
+	});
+
+	it('styles the sitting sticky-column scrollbar like the document', () => {
+		const stickyCol = styleBlock(labSpread).match(
+			/@media \(min-width: 72rem\)[\s\S]*?\.spread-col\s*\{[^}]*\}/
+		)?.[0];
+		expect(stickyCol).toMatch(/scrollbar-color:\s*var\(--ink-faint\) var\(--paper-sunk\)/);
+		expect(stickyCol).toMatch(/scrollbar-gutter:\s*stable/);
+		expect(stickyCol).toMatch(/scrollbar-width:\s*thin/);
 	});
 
 	it('contains overscroll on confirm dialogs and the locked-lab popover', () => {

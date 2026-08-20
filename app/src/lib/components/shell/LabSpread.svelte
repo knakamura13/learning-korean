@@ -83,11 +83,13 @@
 
 		.spread-col {
 			position: sticky;
-			inset-block-start: calc(2.75rem + env(safe-area-inset-top) + var(--s3));
-			max-height: calc(100dvh - 2.75rem - env(safe-area-inset-top) - var(--s3) - var(--s4));
+			inset-block-start: calc(2.75rem + 4px + env(safe-area-inset-top) + var(--s3));
+			max-height: calc(100dvh - 2.75rem - 4px - env(safe-area-inset-top) - var(--s3) - var(--s4));
 			overflow-y: auto;
 			overscroll-behavior: contain;
 			scrollbar-width: thin;
+			scrollbar-color: var(--ink-faint) var(--paper-sunk);
+			scrollbar-gutter: stable;
 		}
 
 		.well {
