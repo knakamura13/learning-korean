@@ -1,5 +1,11 @@
-import * as shopify from '@shopify/draggable';
-import type { Draggable, DraggableOptions, SensorEvent } from '@shopify/draggable';
+import {
+	Draggable,
+	MouseSensor,
+	Sensors,
+	TouchSensor,
+	type DraggableOptions,
+	type SensorEvent
+} from '@shopify/draggable';
 
 export type SensorEventData = {
 	clientX: number;
@@ -12,8 +18,6 @@ export type SensorEventData = {
 
 export type SensorEventLike = SensorEvent & { canceled(): boolean };
 
-type EventCtor = new (data: SensorEventData) => SensorEventLike;
-
 type SensorCtor = new (
 	containers: HTMLElement[],
 	options?: Record<string, unknown>
@@ -22,39 +26,16 @@ type SensorCtor = new (
 	detach(): unknown;
 };
 
-type DraggableCtor = typeof Draggable & {
-	Sensors: { MouseSensor: SensorCtor; TouchSensor: SensorCtor };
-	Plugins: {
-		Focusable: unknown;
-		Announcement: unknown;
-		Scrollable: unknown;
-	};
+type DraggableRuntime = typeof Draggable & {
+	Sensors: { MouseSensor: typeof MouseSensor; TouchSensor: typeof TouchSensor };
 };
 
-/**
- * `@shopify/draggable`'s published types omit the runtime `Sensors` export
- * and the static `Draggable.Sensors` / `exclude` options. This wrapper is
- * the typed seam for those.
- */
-const runtime = shopify as unknown as {
-	Draggable: DraggableCtor;
-	Sensors: {
-		DragStartSensorEvent: EventCtor;
-		DragMoveSensorEvent: EventCtor;
-		DragStopSensorEvent: EventCtor;
-	};
-};
-
-export const ShopifyDraggable = runtime.Draggable;
-export const DragStartSensorEvent = runtime.Sensors.DragStartSensorEvent;
-export const DragMoveSensorEvent = runtime.Sensors.DragMoveSensorEvent;
-export const DragStopSensorEvent = runtime.Sensors.DragStopSensorEvent;
+export const ShopifyDraggable = Draggable as DraggableRuntime;
+export const DragStartSensorEvent = Sensors.DragStartSensorEvent;
+export const DragMoveSensorEvent = Sensors.DragMoveSensorEvent;
+export const DragStopSensorEvent = Sensors.DragStopSensorEvent;
 
 export type LabDraggableOptions = Omit<DraggableOptions, 'sensors' | 'classes'> & {
-	exclude?: {
-		plugins?: unknown[];
-		sensors?: unknown[];
-	};
 	sensors?: SensorCtor[];
 	classes?: Partial<NonNullable<DraggableOptions['classes']>>;
 };

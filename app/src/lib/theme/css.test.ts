@@ -303,6 +303,7 @@ describe('delivery', () => {
 		expect(hooksSrc).toMatch(/applyDesignSystem/);
 		expect(pluginSrc).toMatch(/writeManifests/);
 		expect(manifestSrc).toMatch(/writeIfChanged/);
+		expect(manifestSrc).toMatch(/theme-boot\.js/);
 		expect(pluginSrc).not.toMatch(/transformIndexHtml/);
 		expect(pluginSrc).not.toMatch(/virtual:design-system/);
 	});

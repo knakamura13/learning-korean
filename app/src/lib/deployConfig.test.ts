@@ -55,19 +55,18 @@ describe('adapter and runtime env', () => {
 });
 
 describe('csp', () => {
-	it('declares a CSP; theme boot script runs before %sveltekit.head% injects CSP', () => {
+	it('loads theme boot as a same-origin file after %sveltekit.head% injects CSP', () => {
 		expect(svelteConfig).toMatch(/csp:\s*\{/);
 		expect(svelteConfig).toMatch(/['"]script-src['"]/);
 		expect(svelteConfig).toMatch(/unsafe-inline/);
-		expect(appHtml).toMatch(/<script>/);
 		expect(appHtml).not.toMatch(/%sveltekit\.nonce%/);
+		expect(appHtml).not.toMatch(/%%THEME_BOOT%%/);
+		expect(appHtml).not.toMatch(/not script-src-hashed/i);
 
-		const bootScript = appHtml.search(/<script>\s*%%THEME_BOOT%%/);
 		const kitHead = appHtml.indexOf('%sveltekit.head%');
-		expect(bootScript).toBeGreaterThan(-1);
-		expect(kitHead).toBeGreaterThan(bootScript);
-		expect(appHtml).toMatch(/not script-src-hashed/i);
-		expect(appHtml).not.toMatch(/Prerender hashes this inline script/i);
+		const bootSrc = appHtml.search(/theme-boot\.js/);
+		expect(kitHead).toBeGreaterThan(-1);
+		expect(bootSrc).toBeGreaterThan(kitHead);
 	});
 });
 
@@ -112,6 +111,27 @@ describe('license, health, and manifests', () => {
 	it('does not depend on isomorphic-dompurify', () => {
 		expect(packageJson.dependencies).not.toHaveProperty('isomorphic-dompurify');
 		expect(packageJson.dependencies).toHaveProperty('dompurify');
+	});
+
+	it('does not keep the unused $lib barrel scaffold', () => {
+		expect(existsSync(new URL('./index.ts', import.meta.url))).toBe(false);
+	});
+
+	it('types Shopify runtime extras via module augmentation, not an unknown cast', () => {
+		const runtime = readFileSync(new URL('./components/shopifyRuntime.ts', import.meta.url), 'utf8');
+		expect(runtime).not.toMatch(/as unknown as/);
+		expect(runtime).toMatch(/from '@shopify\/draggable'/);
+		expect(existsSync(new URL('./components/shopify-draggable.d.ts', import.meta.url))).toBe(true);
+	});
+
+	it('points app README at the root runbook and guards pnpm start', () => {
+		expect(appReadme).not.toMatch(/pnpm start/);
+		expect(appReadme).toMatch(/repository README/);
+		expect(rootReadme).toMatch(/ADAPTER=node pnpm build/);
+		expect(packageJson.scripts.start).toMatch(/scripts\/start\.mjs/);
+		const start = readFileSync(new URL('../../scripts/start.mjs', import.meta.url), 'utf8');
+		expect(start).toMatch(/ADAPTER=node/);
+		expect(start).toMatch(/build\/index\.js/);
 	});
 });
 
