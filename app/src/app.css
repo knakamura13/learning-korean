@@ -1,9 +1,10 @@
 /* ============================================================
    app.css — base styles on top of the active design system.
    Look tokens (--ink, --paper, --serif, --html-size, --leading, …)
-   are stamped into app.html from src/lib/theme. Swap systems in
-   src/lib/theme/active.ts. Space, motion, measure, and focus-ring
-   are app chrome and stay here.
+   are stamped into app.html from src/lib/theme. The no-JS default
+   look is src/lib/theme/active.ts; every look is generated from
+   catalog.ts / css.ts and selected at runtime with data-look.
+   Space, motion, measure, and focus-ring are app chrome and stay here.
    ============================================================ */
 
 :root {
