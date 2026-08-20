@@ -18,6 +18,7 @@
 	const nav = [
 		{ href: '/', label: 'Labs' },
 		{ href: '/review', label: 'Review' },
+		{ href: '/drill', label: 'Drill' },
 		{ href: '/reference', label: 'Reference' }
 	] as const;
 
@@ -306,11 +307,22 @@
 	}
 
 	@media (max-width: 40rem) {
-		.inner { gap: var(--s2); }
+		.inner {
+			gap: var(--s2);
+			height: auto;
+			min-height: 48px;
+			flex-wrap: wrap;
+			row-gap: 0;
+		}
 		nav {
 			gap: 0.35rem;
 			padding-block-start: 0.35rem;
+			order: 3;
+			flex: 1 0 100%;
+			justify-content: flex-start;
+			margin-inline-start: 0;
 		}
+		.inner :global(.settings) { order: 2; }
 		nav a {
 			padding-inline: 0.4rem;
 			font-size: 0.76rem;

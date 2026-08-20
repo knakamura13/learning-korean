@@ -9,6 +9,7 @@
 	import { isConsonantLead } from '$lib/audio/consonants';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY, attemptSpeed } from '$lib/domain/srs';
+	import { sprintEligible } from '$lib/domain/sprint';
 	import { LABS } from '$lib/content';
 	import {
 		REVIEW_ANSWER_MAX_LENGTH,
@@ -35,6 +36,12 @@
 	const card = $derived(queue[index]);
 	const pronCard = $derived(card?.kind === 'pron');
 	const stats = $derived(progress.stats);
+	const unlockedTiers = $derived(
+		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'] as const).filter((tier) =>
+			progress.isUnlocked(tier)
+		)
+	);
+	const drillOpen = $derived(sprintEligible(unlockedTiers));
 	const body = $derived(
 		reviewBody({
 			ready,
@@ -218,6 +225,12 @@
 					You have also hit today’s cap of {DEFAULT_NEW_PER_DAY} new cards, which keeps sessions short.
 				{/if}
 			</p>
+			{#if drillOpen}
+				<p>
+					<a class="btn" href={resolve('/drill')}>Read blocks against the clock</a>
+				</p>
+				<p class="muted tiny">The sprint is not review — it does not write the Review schedule.</p>
+			{/if}
 		</div>
 	{:else if body === 'sitting'}
 		{#key index}

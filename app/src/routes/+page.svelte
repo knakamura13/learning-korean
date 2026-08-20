@@ -10,6 +10,7 @@
 		toCourseLab
 	} from '$lib/domain/courseNav';
 	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
+	import { sprintMissingLab } from '$lib/domain/sprint';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { tierCountLabel } from '$lib/domain/srs';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -39,6 +40,12 @@
 	const tiers = $derived(progress.tierProgress);
 	const sessions = $derived(labSession.all);
 	const course = LABS.map(toCourseLab);
+	const unlockedTiers = $derived(
+		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06'] as const).filter((tier) =>
+			progress.isUnlocked(tier)
+		)
+	);
+	const sprintMissing = $derived(sprintMissingLab(unlockedTiers));
 
 	const navView = $derived.by(() =>
 		courseNavView({
@@ -290,6 +297,26 @@
 			{/if}
 		</div>
 	</section>
+
+	<section class="sprint" aria-labelledby="sec-sprint-heading">
+		<h2 id="sec-sprint-heading" class="sec">Block sprint</h2>
+		{#if !ready}
+			<p class="pile-empty">Loading drill…</p>
+		{:else if sprintMissing}
+			<p class="pile-empty">
+				Finish Lab {String(sprintMissing.number).padStart(2, '0')} to unlock the sprint.
+				It only uses letters you have already derived.
+			</p>
+			<a class="btn" href={resolve('/lab/[id]', { id: sprintMissing.id })}>
+				Go to Lab {String(sprintMissing.number).padStart(2, '0')}
+			</a>
+		{:else}
+			<p class="pile-empty">
+				One minute of unfamiliar syllable blocks. The number is your median time.
+			</p>
+			<a class="btn" href={resolve('/drill')}>Start a round</a>
+		{/if}
+	</section>
 	</div>
 	<LabIndexRail />
 	{#if lockedOpen && lockedCopy && lockedPlacement && lockedLab}
@@ -499,6 +526,10 @@
 		color: var(--ink-soft);
 		max-width: 32rem;
 		min-height: 16rem;
+	}
+	.sprint .pile-empty {
+		min-height: unset;
+		margin-block-end: var(--s3);
 	}
 	.pile-skel .line-ph {
 		width: 7rem;

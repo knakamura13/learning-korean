@@ -27,6 +27,7 @@ import viteConfig from '../../vite.config.ts?raw';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import review from '../routes/review/+page.svelte?raw';
+import drill from '../routes/drill/+page.svelte?raw';
 import settingsPage from '../routes/settings/+page.svelte?raw';
 import reference from '../routes/reference/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
@@ -517,6 +518,7 @@ describe('polish audit regressions', () => {
 	it('keeps a labeled Labs / Review / Reference header without journal chrome', () => {
 		expect(layout).toMatch(/label: 'Labs'/);
 		expect(layout).toMatch(/label: 'Review'/);
+		expect(layout).toMatch(/label: 'Drill'/);
 		expect(layout).toMatch(/label: 'Reference'/);
 		expect(layout).not.toMatch(/>ToC</);
 		expect(layout).not.toMatch(/>¶</);
@@ -545,6 +547,12 @@ describe('polish audit regressions', () => {
 			/@media \(max-width: 20rem\)[\s\S]*\.inner\s*\{[^}]*min-height:\s*48px/s
 		);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*flex-wrap:\s*wrap/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*\}\s*nav \{[^}]*flex:\s*1 0 100%/s
+		);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.6rem/s);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
@@ -592,6 +600,22 @@ describe('polish audit regressions', () => {
 		expect(labIndexRail).toMatch(/aria-label="Labs"/);
 	});
 
+	it('gives Home a Block sprint section', () => {
+		expect(home).toMatch(/sec-sprint-heading/);
+		expect(home).toMatch(/Block sprint/);
+	});
+
+	it('offers a Review-clear sprint CTA that does not write the Review schedule', () => {
+		expect(review).toMatch(/Read blocks against the clock/);
+		expect(review).toMatch(/does not write the Review schedule/);
+	});
+
+	it('treats /drill as an active nav href', () => {
+		expect(layout).toMatch(/href: '\/drill'/);
+		expect(layout).toMatch(/item\.href === '\/drill'|pathname\.startsWith\(item\.href\)/);
+		expect(drill).toMatch(/Block sprint/);
+	});
+
 	it('paints vertical overscroll with the header chrome color', () => {
 		expect(appCss).toMatch(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) 82%, black\)/);
 		expect(appCss).toMatch(/html\s*\{[^}]*background-color:\s*var\(--chrome\)/s);
@@ -622,6 +646,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(home)).toMatch(/\.flag\s*\{[^}]*min-height:\s*1\.6rem/s);
 		expect(styleBlock(home)).toMatch(/\.sec-row\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(home)).toMatch(/\.pile-empty\s*\{[^}]*min-height:\s*16rem/s);
+		expect(styleBlock(home)).toMatch(/\.sprint \.pile-empty\s*\{[^}]*min-height:\s*unset/s);
 		expect(home).not.toMatch(/pile-empty loading-copy/);
 	});
 
