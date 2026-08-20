@@ -50,6 +50,10 @@
 	}
 </script>
 
+<!--
+	Positioned <div>, not <dialog> or popover. Dialog traps focus. Popover
+	cannot cursor-follow or keep the hover-bridge from rail chip to card.
+-->
 <div
 	id={panelId}
 	class="preview"

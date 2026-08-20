@@ -93,6 +93,17 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop::backdrop/);
 	});
 
+	it('keeps rail hover cards as positioned divs so cursor-follow can stay', () => {
+		expect(labPreview).toMatch(/<div\s+id=\{panelId\}/);
+		expect(labPreview).toMatch(/not <dialog>/);
+		expect(labPreview).toMatch(/cursor-follow/);
+		expect(labPreview).not.toMatch(/<dialog\b[^>]*class=/);
+		expect(referencePreview).toMatch(/<div\s+id=\{panelId\}/);
+		expect(referencePreview).toMatch(/not <dialog>/);
+		expect(referencePreview).toMatch(/cursor-follow/);
+		expect(referencePreview).not.toMatch(/<dialog\b[^>]*class=/);
+	});
+
 	it('moves card-change focus to the first well control, not the instruction heading', () => {
 		expect(sitting).not.toMatch(/querySelector\('h2'\)\?\.focus/);
 		expect(sitting).not.toMatch(/<h2 class="do" tabindex="-1"/);
