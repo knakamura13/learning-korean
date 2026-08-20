@@ -3,7 +3,8 @@
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import { browserStorage, memoryStorage, type Storage } from '$lib/domain/storage';
-import { createLabSession } from './labSession.svelte';
+import { LABS } from '$lib/content';
+import { createLabSession, LAB_STEP_COUNTS } from './labSession.svelte';
 
 const mid = {
 	nextIndex: 2,
@@ -16,6 +17,15 @@ const mid = {
 afterEach(() => {
 	localStorage.clear();
 	window.dispatchEvent(new StorageEvent('storage', { key: null, storageArea: localStorage }));
+});
+
+describe('LAB_STEP_COUNTS', () => {
+	it('is the sitting length map restore uses, one entry per lab', () => {
+		expect(Object.keys(LAB_STEP_COUNTS).sort()).toEqual(LABS.map((lab) => lab.id).sort());
+		for (const lab of LABS) {
+			expect(LAB_STEP_COUNTS[lab.id]).toBe(lab.steps.length);
+		}
+	});
 });
 
 describe('createLabSession persistence', () => {

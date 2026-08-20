@@ -20,20 +20,20 @@ import { browserStorage, memoryStorage, onStorageKey, type Storage } from '$lib/
 
 export const LAB_SESSION_STORAGE_KEY = 'korean-lab-session-v1';
 
-const STEP_COUNTS: Record<string, number> = Object.fromEntries(
+export const LAB_STEP_COUNTS: Record<string, number> = Object.fromEntries(
 	LABS.map((lab) => [lab.id, lab.steps.length])
 );
 
 export function createLabSession(
 	store: Storage = browser ? browserStorage(LAB_SESSION_STORAGE_KEY) : memoryStorage()
 ) {
-	const loaded = decodeStoredSessions(store.read(), STEP_COUNTS);
+	const loaded = decodeStoredSessions(store.read(), LAB_STEP_COUNTS);
 	let state = $state<LabSessions>(loaded.sessions);
 	let durable = $state(store.durable);
 	let corruptRaw = $state<string | null>(loaded.corrupt);
 
 	function applyStored() {
-		const next = decodeStoredSessions(store.read(), STEP_COUNTS);
+		const next = decodeStoredSessions(store.read(), LAB_STEP_COUNTS);
 		state = next.sessions;
 		corruptRaw = next.corrupt;
 		durable = store.durable;
@@ -70,7 +70,7 @@ export function createLabSession(
 		},
 
 		save(labId: string, progress: LabProgress) {
-			const count = STEP_COUNTS[labId];
+			const count = LAB_STEP_COUNTS[labId];
 			if (count === undefined) return;
 			commit(upsertLab(state, labId, progress, count));
 		},
@@ -80,7 +80,7 @@ export function createLabSession(
 		},
 
 		replaceAll(raw: unknown) {
-			const next = reviveSessions(raw, STEP_COUNTS);
+			const next = reviveSessions(raw, LAB_STEP_COUNTS);
 			if (!store.write(JSON.stringify(next))) {
 				durable = false;
 				return;

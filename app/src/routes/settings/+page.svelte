@@ -4,8 +4,7 @@
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import ProgressReset from '$lib/components/ProgressReset.svelte';
 	import { applyImportedBackup, wrapExport } from '$lib/domain/backup';
-	import { LABS } from '$lib/content';
-	import { labSession } from '$lib/stores/labSession.svelte';
+	import { labSession, LAB_STEP_COUNTS } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	/** Cleared when look/color localStorage writes fail this visit (Backup note). */
@@ -15,16 +14,12 @@
 		progress.tick();
 	});
 
-	const STEP_COUNTS: Record<string, number> = Object.fromEntries(
-		LABS.map((lab) => [lab.id, lab.steps.length])
-	);
-
 	function exportJson(): string {
 		return wrapExport(progress.export(), labSession.snapshot);
 	}
 
 	function importJson(json: string): boolean {
-		const plan = applyImportedBackup(json, STEP_COUNTS);
+		const plan = applyImportedBackup(json, LAB_STEP_COUNTS);
 		if (!plan) return false;
 		if (!progress.import(plan.srsText)) return false;
 		labSession.replaceAll(plan.sessions);
