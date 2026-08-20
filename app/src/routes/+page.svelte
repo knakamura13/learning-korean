@@ -298,7 +298,7 @@
 		</div>
 	</section>
 
-	<section aria-labelledby="sec-sprint-heading">
+	<section class="sprint" aria-labelledby="sec-sprint-heading">
 		<h2 id="sec-sprint-heading" class="sec">Block sprint</h2>
 		{#if !ready}
 			<p class="pile-empty">Loading drill…</p>
@@ -526,6 +526,10 @@
 		color: var(--ink-soft);
 		max-width: 32rem;
 		min-height: 16rem;
+	}
+	.sprint .pile-empty {
+		min-height: unset;
+		margin-block-end: var(--s3);
 	}
 	.pile-skel .line-ph {
 		width: 7rem;

@@ -547,6 +547,12 @@ describe('polish audit regressions', () => {
 			/@media \(max-width: 20rem\)[\s\S]*\.inner\s*\{[^}]*min-height:\s*48px/s
 		);
 		expect(styleBlock(layout)).toMatch(/@media \(max-width: 20rem\)/);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*flex-wrap:\s*wrap/s
+		);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*\}\s*nav \{[^}]*flex:\s*1 0 100%/s
+		);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.6rem/s);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
@@ -640,6 +646,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(home)).toMatch(/\.flag\s*\{[^}]*min-height:\s*1\.6rem/s);
 		expect(styleBlock(home)).toMatch(/\.sec-row\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(home)).toMatch(/\.pile-empty\s*\{[^}]*min-height:\s*16rem/s);
+		expect(styleBlock(home)).toMatch(/\.sprint \.pile-empty\s*\{[^}]*min-height:\s*unset/s);
 		expect(home).not.toMatch(/pile-empty loading-copy/);
 	});
 
