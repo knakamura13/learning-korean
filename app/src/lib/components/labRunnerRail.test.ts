@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import labPipRail from './LabPipRail.svelte?raw';
 import labRunner from './LabRunner.svelte?raw';
 
 function styleBlock(markup: string): string {
@@ -13,9 +14,9 @@ function railBlock(css: string): string {
 	return match[0];
 }
 
-describe('LabRunner rail scrollbar', () => {
+describe('LabPipRail', () => {
 	it('exposes a thin scrollbar at all widths and keeps 44px pip hits', () => {
-		const css = styleBlock(labRunner);
+		const css = styleBlock(labPipRail);
 		const rail = railBlock(css);
 
 		expect(rail).toMatch(/scrollbar-width:\s*thin/);
@@ -23,5 +24,12 @@ describe('LabRunner rail scrollbar', () => {
 		expect(css).not.toMatch(/\.rail::-webkit-scrollbar\s*\{[^}]*display:\s*none/s);
 		expect(css).toMatch(/\.rail::-webkit-scrollbar\s*\{[^}]*height:\s*4px/s);
 		expect(css).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
+	});
+
+	it('owns the numbered rail so LabRunner does not', () => {
+		expect(labPipRail).toMatch(/aria-label="Lab card navigation"/);
+		expect(labPipRail).toMatch(/attachPipRail/);
+		expect(styleBlock(labRunner)).not.toMatch(/\.pip\s*\{/);
+		expect(styleBlock(labRunner)).not.toMatch(/\.rail\s*\{/);
 	});
 });

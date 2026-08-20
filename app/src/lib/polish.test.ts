@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import labRunner from './components/LabRunner.svelte?raw';
+import labPipRail from './components/LabPipRail.svelte?raw';
 import labRunnerPipRail from './components/labRunnerPipRail.svelte.ts?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
 import consonantClip from './components/ConsonantClip.svelte?raw';
@@ -54,10 +55,10 @@ function physicalLeftRight(src: string): string[] {
 }
 
 /**
- * Sitting chrome Phase 3 may split. Assert against this bundle, not
- * LabRunner.svelte identifiers, import paths, or which file owns CSS.
+ * Sitting chrome. Assert against this bundle, not LabRunner.svelte
+ * identifiers, import paths, or which file owns CSS.
  */
-const sittingSources = [labRunner, labSpread, labRunnerPipRail];
+const sittingSources = [labRunner, labSpread, labPipRail, labRunnerPipRail];
 const sitting = sittingSources.join('\n');
 
 function sittingStyles(): string {
@@ -195,6 +196,7 @@ describe('polish audit regressions', () => {
 		const chrome = [
 			appCss,
 			labRunner,
+			labPipRail,
 			labRunnerPipRail,
 			progressBackup,
 			settingsPage,
@@ -788,5 +790,7 @@ describe('polish audit regressions', () => {
 	it('keeps pip-rail attach in sitting chrome without freezing LabRunner import paths', () => {
 		expect(sitting).toMatch(/attachPipRail/);
 		expect(sitting).toMatch(/attachModalDialog/);
+		expect(labPipRail).toMatch(/aria-label="Lab card navigation"/);
+		expect(styleBlock(labRunner)).not.toMatch(/\.pip\s*\{/);
 	});
 });
