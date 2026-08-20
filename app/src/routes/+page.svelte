@@ -449,7 +449,7 @@
 		align-items: center;
 		padding: 0.12rem 0.5rem;
 		border-radius: var(--r-pill);
-		font-size: 0.66rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		line-height: 1.2;
 		border: 1px solid transparent;
@@ -547,7 +547,7 @@
 
 	.legend {
 		margin: var(--s3) 0 0;
-		font-size: 0.68rem;
+		font-size: 0.75rem;
 		color: var(--ink-faint);
 		display: flex;
 		gap: var(--s4);

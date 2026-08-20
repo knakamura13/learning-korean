@@ -426,7 +426,7 @@
 
 	.sec {
 		font-family: var(--sans);
-		font-size: 0.66rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
@@ -462,7 +462,7 @@
 		margin-top: var(--s1);
 	}
 	.cell .nm, .cell .fin {
-		font-size: 0.6rem;
+		font-size: 0.75rem;
 		color: var(--ink-faint);
 		display: block;
 	}
@@ -492,7 +492,7 @@
 	.vals .win { color: var(--good); font-weight: 600; }
 	.arrow { color: var(--ink-faint); font-size: 0.8rem; }
 	.rule {
-		font-size: 0.68rem;
+		font-size: 0.75rem;
 		color: var(--ink-faint);
 		font-family: var(--sans);
 		margin-inline-start: var(--s2);
@@ -529,7 +529,7 @@
 
 	.ganada { padding: var(--s4); }
 	.glabel {
-		font-size: 0.6rem;
+		font-size: 0.75rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-faint);

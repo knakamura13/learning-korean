@@ -57,7 +57,7 @@
 
 	.cap {
 		display: block;
-		font-size: 0.66rem;
+		font-size: 0.75rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-faint);

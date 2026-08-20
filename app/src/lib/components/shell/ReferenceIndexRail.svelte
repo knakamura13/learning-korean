@@ -117,7 +117,7 @@
 	.rail-label {
 		margin: 0 0 var(--s2);
 		color: var(--ink-faint);
-		font-size: 0.66rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;

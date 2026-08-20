@@ -99,7 +99,7 @@
 
 	.op {
 		font-family: var(--mono);
-		font-size: 0.68rem;
+		font-size: 0.75rem;
 		color: var(--accent);
 		padding-bottom: 0.9rem;
 	}
