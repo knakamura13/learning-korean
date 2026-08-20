@@ -2,7 +2,7 @@
  * Shared hover/focus preview controller for the Labs and Reference rails.
  *
  * Placement, hover-bridge geometry, and pointer-type gating stay in
- * `labPreview.ts`. This class owns the open/close timer, cursor follow,
+ * `hoverPlacement.ts`. This class owns the open/close timer, cursor follow,
  * Escape restore-focus (keyboard/press), hover Escape without claiming the key,
  * and the DOM selectors each rail passes in.
  * Click semantics and preview cards stay on the rails.
@@ -19,7 +19,7 @@ import {
 	isPointInHoverBridge,
 	type PopoverAnchor,
 	type PreviewOpenMode
-} from '$lib/domain/labPreview';
+} from '$lib/domain/hoverPlacement';
 
 export interface HoverPreviewOptions {
 	panelId: string;

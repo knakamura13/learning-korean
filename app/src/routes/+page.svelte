@@ -3,11 +3,11 @@
 	import { resolve } from '$app/paths';
 	import { LABS } from '$lib/content';
 	import {
+		courseNavView,
 		labCardState,
 		requiredLab,
 		reviewPileView,
-		toCourseLab,
-		type CourseNavView
+		toCourseLab
 	} from '$lib/domain/courseNav';
 	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
 	import { labSession } from '$lib/stores/labSession.svelte';
@@ -40,16 +40,16 @@
 	const sessions = $derived(labSession.all);
 	const course = LABS.map(toCourseLab);
 
-	const navView = $derived.by((): CourseNavView => {
-		const unlocked = new Set(course.filter((lab) => progress.isUnlocked(lab.unlocks)).map((lab) => lab.unlocks));
-		return {
+	const navView = $derived.by(() =>
+		courseNavView({
 			ready,
-			isUnlocked: (tier) => unlocked.has(tier),
+			labs: course,
+			isUnlocked: (tier) => progress.isUnlocked(tier),
 			isOpened: (id) => progress.isOpened(id),
 			sessionFor: (id) => sessions[id],
 			queue: stats.queue
-		};
-	});
+		})
+	);
 
 	const pile = $derived(
 		reviewPileView(navView.ready, tiers.filter((tier) => tier.unlocked).length, navView.queue)

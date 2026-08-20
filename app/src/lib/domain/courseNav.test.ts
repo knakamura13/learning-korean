@@ -5,6 +5,7 @@ import {
 	nextLabId,
 	reviewPileView,
 	showPrerequisiteGate,
+	courseNavView,
 	type CourseLab,
 	type CourseNavView
 } from './courseNav';
@@ -177,5 +178,37 @@ describe('showPrerequisiteGate', () => {
 				view({ sessions: { '0002': mid(2, 16) } })
 			)
 		).toBe(true);
+	});
+});
+
+describe('courseNavView', () => {
+	it('snapshots unlocked course tiers and passes session, queue, and skip-ahead', () => {
+		const session = mid(2, 16);
+		const nav = courseNavView({
+			ready: true,
+			labs,
+			isUnlocked: (tier) => tier === 'lab01',
+			isOpened: (id) => id === '0002',
+			sessionFor: (id) => (id === '0001' ? session : undefined),
+			queue: 7
+		});
+		expect(nav.ready).toBe(true);
+		expect(nav.isUnlocked('lab01')).toBe(true);
+		expect(nav.isUnlocked('lab02')).toBe(false);
+		expect(nav.isOpened?.('0002')).toBe(true);
+		expect(nav.sessionFor('0001')).toBe(session);
+		expect(nav.queue).toBe(7);
+	});
+
+	it('keeps later labs gated before hydration even when unlocks would pass', () => {
+		const nav = courseNavView({
+			ready: false,
+			labs,
+			isUnlocked: () => true,
+			sessionFor: () => undefined,
+			queue: 0
+		});
+		expect(showPrerequisiteGate(labs[1], labs, nav)).toBe(true);
+		expect(nextLabId(labs, nav)).toBe('0001');
 	});
 });

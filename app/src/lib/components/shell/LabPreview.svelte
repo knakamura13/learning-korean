@@ -2,10 +2,10 @@
 	import { resolve } from '$app/paths';
 	import {
 		PREVIEW_HOVER_BUFFER_PX,
-		type LabPreviewModel,
 		type PopoverPlacement,
 		type PreviewOpenMode
-	} from '$lib/domain/labPreview';
+	} from '$lib/domain/hoverPlacement';
+	import type { LabPreviewModel } from '$lib/domain/labPreview';
 	import { progress } from '$lib/stores/progress.svelte';
 
 	let {

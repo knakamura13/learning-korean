@@ -57,6 +57,26 @@ export interface CourseNavView {
 	queue: number;
 }
 
+export function courseNavView(input: {
+	ready: boolean;
+	labs: CourseLab[];
+	isUnlocked: (tier: string) => boolean;
+	isOpened?: (labId: string) => boolean;
+	sessionFor?: (labId: string) => LabProgress | undefined;
+	queue?: number;
+}): CourseNavView {
+	const unlocked = new Set(
+		input.labs.filter((lab) => input.isUnlocked(lab.unlocks)).map((lab) => lab.unlocks)
+	);
+	return {
+		ready: input.ready,
+		isUnlocked: (tier) => unlocked.has(tier),
+		isOpened: input.isOpened,
+		sessionFor: input.sessionFor ?? (() => undefined),
+		queue: input.queue ?? 0
+	};
+}
+
 function isDone(lab: CourseLab, view: Pick<CourseNavView, 'ready' | 'isUnlocked'>): boolean {
 	return view.ready && view.isUnlocked(lab.unlocks);
 }

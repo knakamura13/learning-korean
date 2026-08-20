@@ -5,7 +5,7 @@ import {
 	decideWindowEscape,
 	type PreviewOpenMode,
 	type RailPressState
-} from '$lib/domain/labPreview';
+} from '$lib/domain/hoverPlacement';
 import src from './LabIndexRail.svelte?raw';
 import preview from './LabPreview.svelte?raw';
 import spread from './LabSpread.svelte?raw';
