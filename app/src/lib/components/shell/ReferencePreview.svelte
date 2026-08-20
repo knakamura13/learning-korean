@@ -3,7 +3,7 @@
 		PREVIEW_HOVER_BUFFER_PX,
 		type PopoverPlacement,
 		type PreviewOpenMode
-	} from '$lib/domain/labPreview';
+	} from '$lib/domain/hoverPlacement';
 	import type { ReferencePreviewModel } from '$lib/domain/referenceNav';
 
 	let {

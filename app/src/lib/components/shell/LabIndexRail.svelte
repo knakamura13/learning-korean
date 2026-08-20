@@ -9,7 +9,9 @@
 	} from '$lib/domain/courseNav';
 	import {
 		decideUnlockedPress,
-		isPressPointerType,
+		isPressPointerType
+	} from '$lib/domain/hoverPlacement';
+	import {
 		labPreviewModels,
 		type LabPreviewModel,
 		type PreviewChipKind

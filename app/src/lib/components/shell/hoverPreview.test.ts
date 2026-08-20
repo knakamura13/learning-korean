@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { HOVER_CLOSE_MS } from '$lib/domain/labPreview';
+import { HOVER_CLOSE_MS } from '$lib/domain/hoverPlacement';
 import { HoverPreview } from './hoverPreview.svelte';
 
 if (typeof PointerEvent === 'undefined') {
