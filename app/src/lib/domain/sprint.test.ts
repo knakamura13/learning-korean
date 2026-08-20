@@ -10,6 +10,7 @@ import {
 	medianMs,
 	nextTrial,
 	sprintEligible,
+	trialForBlock,
 	sprintInventory,
 	sprintMissingLab,
 	sprintScore,
@@ -100,6 +101,26 @@ describe('nextTrial', () => {
 		const second = nextTrial(blocks, () => 0.99, first?.block);
 		expect(second).not.toBeNull();
 		expect(second?.block).not.toBe(first?.block);
+	});
+});
+
+describe('trialForBlock', () => {
+	it('uses the given block as the target with four unique same-length readings', () => {
+		const pool = sprintInventory(['lab01', 'lab02']);
+		const trial = trialForBlock('가', pool, seq([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+		expect(trial).not.toBeNull();
+		if (!trial) return;
+		expect(trial.block).toBe('가');
+		expect(trial.options).toHaveLength(OPTION_COUNT);
+		expect(new Set(trial.options).size).toBe(OPTION_COUNT);
+		const len = trial.options[0].length;
+		for (const option of trial.options) expect(option.length).toBe(len);
+		expect(trial.options[trial.answerIndex]).toBe(romanizeSyllable('가'));
+	});
+
+	it('returns null when the pool cannot supply three same-length distractors', () => {
+		expect(trialForBlock('가', ['가'], () => 0)).toBeNull();
+		expect(trialForBlock('가', ['가', '나', '다'], () => 0)).toBeNull();
 	});
 });
 
