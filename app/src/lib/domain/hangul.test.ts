@@ -5,6 +5,7 @@ import {
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
+	applyTensification, applyNasalization, applyContact, contactAction,
 	romanizeSyllable, romanizeWord, jamoReading
 } from './hangul';
 
@@ -268,8 +269,10 @@ describe('liaison (Articles 13–14)', () => {
 	});
 
 	it('marks unimplemented sound changes so reference copy cannot claim they are scored', () => {
-		const unimplemented = SOUND_CHANGES.filter((s) => s.id !== 'liaison');
-		expect(unimplemented.length).toBe(7);
+		const unimplemented = SOUND_CHANGES.filter(
+			(s) => s.id !== 'liaison' && s.id !== 'tensification' && s.id !== 'nasalization'
+		);
+		expect(unimplemented.length).toBe(5);
 		for (const change of unimplemented) {
 			expect(change.scored, change.id).toBe(false);
 		}
@@ -350,5 +353,93 @@ describe('ganada order', () => {
 	it('is the Unicode lead and vowel tables, not a second copy', () => {
 		expect(GANADA_CONSONANTS).toBe(LEADS);
 		expect(GANADA_VOWELS).toBe(VOWELS);
+	});
+});
+
+describe('tensification (Article 23)', () => {
+	it('tenses a plain ㄱ/ㄷ/ㅂ/ㅅ/ㅈ after a stop batchim', () => {
+		expect(applyTensification('학교')).toBe('학꾜');
+		expect(applyTensification('먹다')).toBe('먹따');
+		expect(applyTensification('잡지')).toBe('잡찌');
+		expect(applyTensification('식당')).toBe('식땅');
+		expect(applyTensification('국밥')).toBe('국빱');
+		expect(applyTensification('옆집')).toBe('엽찝');
+	});
+
+	it('does not tense nasals, liaison, clusters, or ㅎ', () => {
+		expect(applyTensification('입니다')).toBe('입니다');
+		expect(applyTensification('국물')).toBe('국물');
+		expect(applyTensification('한국')).toBe('한국');
+		expect(applyTensification('음악')).toBe('음악');
+		expect(applyTensification('좋아요')).toBe('좋아요');
+		expect(applyTensification('없다')).toBe('없다');
+	});
+
+	it('agrees with the reference-page tensification examples', () => {
+		const row = SOUND_CHANGES.find((s) => s.id === 'tensification');
+		expect(row).toBeDefined();
+		expect(row!.scored).toBe(true);
+		for (const ex of row!.examples) {
+			expect(applyTensification(ex.written), ex.written).toBe(ex.spoken);
+		}
+	});
+
+	it('returns the input unchanged when any character is not a syllable', () => {
+		expect(applyTensification('학교!')).toBe('학교!');
+		expect(applyTensification('')).toBe('');
+	});
+});
+
+describe('nasalization (Article 18)', () => {
+	it('turns ㄱ/ㄷ/ㅂ into ㅇ/ㄴ/ㅁ before ㄴ or ㅁ', () => {
+		expect(applyNasalization('국물')).toBe('궁물');
+		expect(applyNasalization('입니다')).toBe('임니다');
+		expect(applyNasalization('학년')).toBe('항년');
+		expect(applyNasalization('닫는')).toBe('단는');
+		expect(applyNasalization('밥물')).toBe('밤물');
+		expect(applyNasalization('앞문')).toBe('암문');
+	});
+
+	it('does not nasalize tensification, liaison, clusters, ㅎ, or Article 19', () => {
+		expect(applyNasalization('학교')).toBe('학교');
+		expect(applyNasalization('한국')).toBe('한국');
+		expect(applyNasalization('음악')).toBe('음악');
+		expect(applyNasalization('좋아요')).toBe('좋아요');
+		expect(applyNasalization('없다')).toBe('없다');
+		expect(applyNasalization('독립')).toBe('독립');
+	});
+
+	it('agrees with the reference-page nasalization examples', () => {
+		const row = SOUND_CHANGES.find((s) => s.id === 'nasalization');
+		expect(row).toBeDefined();
+		expect(row!.scored).toBe(true);
+		for (const ex of row!.examples) {
+			expect(applyNasalization(ex.written), ex.written).toBe(ex.spoken);
+		}
+	});
+
+	it('returns the input unchanged when any character is not a syllable', () => {
+		expect(applyNasalization('국물!')).toBe('국물!');
+		expect(applyNasalization('')).toBe('');
+	});
+});
+
+describe('contactAction', () => {
+	it('derives tense, nasal, or stay', () => {
+		expect(contactAction('학교')).toEqual({ type: 'tense' });
+		expect(contactAction('먹다')).toEqual({ type: 'tense' });
+		expect(contactAction('국물')).toEqual({ type: 'nasal' });
+		expect(contactAction('입니다')).toEqual({ type: 'nasal' });
+		expect(contactAction('한국')).toEqual({ type: 'stay' });
+		expect(contactAction('음악')).toEqual({ type: 'stay' });
+	});
+
+	it('applyContact uses tensification when it fires, otherwise nasalization', () => {
+		expect(applyContact('학교')).toBe('학꾜');
+		expect(applyContact('국물')).toBe('궁물');
+		expect(applyContact('한국')).toBe('한국');
+		expect(romanizeWord(applyContact('학교'))).toBe('hak-kkyo');
+		expect(romanizeWord(applyContact('입니다'))).toBe('im-ni-da');
+		expect(romanizeWord(applyContact('국밥'))).toBe('guk-ppap');
 	});
 });
