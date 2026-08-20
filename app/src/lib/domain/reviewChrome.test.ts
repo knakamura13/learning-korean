@@ -122,8 +122,12 @@ describe('sittingQueueAfterGrade', () => {
 		expect(sittingQueueAfterGrade([a, b], 0, true)).toEqual([a, b, a]);
 	});
 
-	it('does not append a second copy if that card is already at the end', () => {
-		expect(sittingQueueAfterGrade([a, b, a], 2, true)).toEqual([a, b, a]);
+	it('does not append an earlier miss that already has a later copy', () => {
+		expect(sittingQueueAfterGrade([a, b, a], 0, true)).toEqual([a, b, a]);
+	});
+
+	it('appends again when the miss is the last copy in the sitting', () => {
+		expect(sittingQueueAfterGrade([a, b, a], 2, true)).toEqual([a, b, a, a]);
 	});
 
 	it('leaves the queue alone on a correct answer', () => {

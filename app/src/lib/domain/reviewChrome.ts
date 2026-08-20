@@ -63,8 +63,8 @@ export function reviewIntervalCopy(ivl: number, relearnMs: number = RELEARN_MS):
 }
 
 /**
- * A missed card returns at the end of this sitting, once, until the cap.
- * Identity matches `lastIndexOf`: already-queued copies do not grow the pile.
+ * A missed card returns at the end of this sitting when this occurrence is
+ * the last copy (`lastIndexOf`). The sitting stops growing at the cap.
  */
 export function sittingQueueAfterGrade<T>(queue: T[], index: number, missed: boolean): T[] {
 	if (!missed) return queue;
