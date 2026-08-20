@@ -18,6 +18,7 @@
 	const nav = [
 		{ href: '/', label: 'Labs' },
 		{ href: '/review', label: 'Review' },
+		{ href: '/drill', label: 'Drill' },
 		{ href: '/reference', label: 'Reference' }
 	] as const;
 

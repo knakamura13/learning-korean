@@ -27,6 +27,7 @@ import viteConfig from '../../vite.config.ts?raw';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import review from '../routes/review/+page.svelte?raw';
+import drill from '../routes/drill/+page.svelte?raw';
 import settingsPage from '../routes/settings/+page.svelte?raw';
 import reference from '../routes/reference/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
@@ -517,6 +518,7 @@ describe('polish audit regressions', () => {
 	it('keeps a labeled Labs / Review / Reference header without journal chrome', () => {
 		expect(layout).toMatch(/label: 'Labs'/);
 		expect(layout).toMatch(/label: 'Review'/);
+		expect(layout).toMatch(/label: 'Drill'/);
 		expect(layout).toMatch(/label: 'Reference'/);
 		expect(layout).not.toMatch(/>ToC</);
 		expect(layout).not.toMatch(/>¶</);
@@ -590,6 +592,22 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/radial-gradient\(\s*circle at 0 0/);
 		expect(styleBlock(layout)).toMatch(/margin-block-end:\s*-1px/);
 		expect(labIndexRail).toMatch(/aria-label="Labs"/);
+	});
+
+	it('gives Home a Block sprint section', () => {
+		expect(home).toMatch(/sec-sprint-heading/);
+		expect(home).toMatch(/Block sprint/);
+	});
+
+	it('offers a Review-clear sprint CTA that does not write the Review schedule', () => {
+		expect(review).toMatch(/Read blocks against the clock/);
+		expect(review).toMatch(/does not write the Review schedule/);
+	});
+
+	it('treats /drill as an active nav href', () => {
+		expect(layout).toMatch(/href: '\/drill'/);
+		expect(layout).toMatch(/item\.href === '\/drill'|pathname\.startsWith\(item\.href\)/);
+		expect(drill).toMatch(/Block sprint/);
 	});
 
 	it('paints vertical overscroll with the header chrome color', () => {
