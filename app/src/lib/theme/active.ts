@@ -1,15 +1,14 @@
 import { botanicalKorea } from './systems/botanicalKorea.ts';
 
 /**
- * The design system currently painted onto the app.
+ * Build-time default look (Botanical Korea).
  *
- * To prototype a new look:
- * 1. Add `src/lib/theme/systems/<name>.ts` exporting a `DesignSystem`
- * 2. Point `activeSystem` at it
- * 3. Reload — CSS tokens, theme-color, font preloads, and PWA manifests
- *    all come from that object
+ * `activeSystem` stamps no-JS `:root`, PWA manifests, header font preloads,
+ * and the prerendered theme-color. Runtime look is `LOOKS` + `html[data-look]`
+ * via LookPicker / `korean-look`. Do not reassign `activeSystem` to paint a
+ * look — that would change the no-JS default and the manifests.
  *
  * Components keep using `var(--ink)` / `var(--paper)` / `var(--accent)` /
- * `var(--rose)`. Unused looks on disk: `taegeuk`, `watercolor`, `academia`.
+ * `var(--rose)`.
  */
 export const activeSystem = botanicalKorea;

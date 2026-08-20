@@ -69,7 +69,8 @@ const dark: Palette = {
  * shared `DesignSystem` contract. Honey gold is `--rose` only where it
  * meets 4.5:1 (dark); light rose is bronze so due/resume chrome stays
  * readable. Type is one stack (Cormorant / Baskerville / Lora) because
- * `TypeStacks` is not per-mode. Point `activeSystem` at `academia` to paint it.
+ * `TypeStacks` is not per-mode. Academia is selected at runtime
+ * (`data-look='academia'`), not by swapping `activeSystem`.
  */
 export const academia: DesignSystem = {
 	id: 'academia',

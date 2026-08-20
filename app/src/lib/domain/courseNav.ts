@@ -1,11 +1,9 @@
 /**
- * courseNav.ts — what the dashboard should offer next, as pure data.
+ * courseNav.ts — per-lab dashboard state, as pure data.
  *
- * The homepage used to paint every lab as an equally clickable card and only
- * decorate later ones with "finish Lab N first". That copy is a lie if the
- * card is still a link, and it is invisible in prerendered HTML because
- * status waited on hydration. These helpers pick one continue action and an
- * honest per-lab state so the UI can match the course order.
+ * Home paints each lab from `labCardState` flags (`startHere`, `resumeAt`,
+ * `done`, `locked`). The rail uses `previewChipKind`, not a continue banner.
+ * These helpers keep course order honest before and after hydration.
  */
 
 import { resumable, type LabProgress } from './labSession';
@@ -40,14 +38,6 @@ export function toCourseLab(lab: {
 	};
 }
 
-export interface ContinueAction {
-	kind: 'start' | 'resume' | 'review' | 'caught-up';
-	href: string;
-	kicker: string;
-	title: string;
-	detail: string;
-}
-
 export interface LabCardState {
 	/** Prerequisite not yet unlocked — not the primary action. */
 	locked: boolean;
@@ -55,17 +45,6 @@ export interface LabCardState {
 	/** 0-based index of the card to resume, when a sitting is in progress. */
 	resumeAt: number | null;
 	startHere: boolean;
-}
-
-/** Mutually exclusive visual role. Callers style from this, not from flag soup. */
-export type LabTone = 'now' | 'resume' | 'done' | 'locked' | 'idle';
-
-export function labTone(state: LabCardState): LabTone {
-	if (state.locked) return 'locked';
-	if (state.resumeAt !== null) return 'resume';
-	if (state.startHere) return 'now';
-	if (state.done) return 'done';
-	return 'idle';
 }
 
 export interface CourseNavView {
@@ -76,10 +55,6 @@ export interface CourseNavView {
 	isOpened?: (labId: string) => boolean;
 	sessionFor: (labId: string) => LabProgress | undefined;
 	queue: number;
-}
-
-function padLab(n: number): string {
-	return String(n).padStart(2, '0');
 }
 
 function isDone(lab: CourseLab, view: Pick<CourseNavView, 'ready' | 'isUnlocked'>): boolean {
@@ -133,59 +108,6 @@ export function labCardState(lab: CourseLab, labs: CourseLab[], view: CourseNavV
 		done: done && !resume,
 		resumeAt: resume ? resume.nextIndex : null,
 		startHere: nextLabId(labs, view) === lab.id
-	};
-}
-
-/**
- * The single next thing to do. Resume beats review so a 10-minute sitting is
- * not abandoned for the deck; review beats starting a new lab so newly
- * unlocked cards get their first look before the next lesson.
- */
-export function continueAction(labs: CourseLab[], view: CourseNavView): ContinueAction | null {
-	if (labs.length === 0) return null;
-
-	for (const lab of labs) {
-		const resume = sessionResume(lab, view);
-		if (!resume) continue;
-		return {
-			kind: 'resume',
-			href: `/lab/${lab.id}`,
-			kicker: 'Continue',
-			title: `Resume Lab ${padLab(lab.number)}`,
-			detail: `Card ${resume.nextIndex + 1} of ${lab.stepCount} · ${lab.title}`
-		};
-	}
-
-	if (view.ready && view.queue > 0) {
-		return {
-			kind: 'review',
-			href: '/review',
-			kicker: 'Due today',
-			title: `Review ${view.queue} card${view.queue === 1 ? '' : 's'}`,
-			detail: 'Type the sound. The clock grades hesitation, not just accuracy.'
-		};
-	}
-
-	const nextId = nextLabId(labs, view);
-	const next = labs.find((lab) => lab.id === nextId);
-	if (next) {
-		return {
-			kind: 'start',
-			href: `/lab/${next.id}`,
-			kicker: next.number === 1 ? 'Start here' : 'Next lab',
-			title: `Start Lab ${padLab(next.number)}`,
-			detail: `~${next.minutes} min · ${next.title}`
-		};
-	}
-
-	if (!view.ready) return null;
-
-	return {
-		kind: 'caught-up',
-		href: '/review',
-		kicker: 'Caught up',
-		title: 'Review is clear',
-		detail: 'Nothing is due. Open Review if you want to check.'
 	};
 }
 

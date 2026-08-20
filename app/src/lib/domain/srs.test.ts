@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
 	AGAIN, HARD, GOOD, EASY, DAY_MS, MATURE_DAYS, RELEARN_MS, DEFAULT_NEW_PER_DAY,
-	DEFAULT_REVIEW_PER_SITTING, MAX_BACKUP_CHARS,
+	DEFAULT_REVIEW_PER_SITTING, MAX_BACKUP_CHARS, FAST_MS, STEADY_MS,
 	emptyState, reviveState, decodeStoredState, isSrsBackup, parseImportedBackup,
-	unlock, isUnlocked, grade, gradeFromAttempt,
+	unlock, isUnlocked, grade, gradeFromAttempt, attemptSpeed,
 	due, pinNewForDay, nextDueAt, stats, streak, weakest, isoDay,
 	tierCountLabel, tierReviewProgress,
 	type SrsState, type SchedulableCard
@@ -300,6 +300,16 @@ describe('grading from an attempt', () => {
 
 	it('never awards EASY to a card seen for the first time', () => {
 		expect(gradeFromAttempt(true, 10, true)).toBe(GOOD);
+	});
+
+	it('shares latency bands with the Review speed labels', () => {
+		expect(attemptSpeed(FAST_MS - 1)).toBe('fast');
+		expect(attemptSpeed(FAST_MS)).toBe('steady');
+		expect(attemptSpeed(STEADY_MS - 1)).toBe('steady');
+		expect(attemptSpeed(STEADY_MS)).toBe('slow');
+		expect(gradeFromAttempt(true, FAST_MS - 1, false)).toBe(EASY);
+		expect(gradeFromAttempt(true, FAST_MS, false)).toBe(GOOD);
+		expect(gradeFromAttempt(true, STEADY_MS, false)).toBe(HARD);
 	});
 });
 

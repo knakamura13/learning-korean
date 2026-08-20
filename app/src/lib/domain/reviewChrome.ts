@@ -4,8 +4,10 @@
  * Daily sittings used to start with the standfirst and four stats — so the
  * card (the only thing that needs a keystroke) sat below the fold. Empty and
  * finished states still want that explanation; an active sitting does not.
- * Backup lives in the site footer, not here.
+ * Backup lives on Settings (`/settings#backup`), not here.
  */
+
+import { RELEARN_MS } from './srs';
 
 export type ReviewChrome = {
 	showStandfirst: boolean;
@@ -42,6 +44,35 @@ export function reviewBody(input: {
 	if (finished) return input.remainingDue > 0 ? 'check-for-more' : 'clear';
 	if (input.sittingLength === 0) return 'clear';
 	return 'sitting';
+}
+
+/** Caps how far a sitting-miss requeue can grow this session. */
+export const MAX_SITTING_LENGTH = 60;
+
+/**
+ * Interval copy after a grade. `ivl === 0` is the relearn window (`RELEARN_MS`),
+ * not a handwritten "10 minutes".
+ */
+export function reviewIntervalCopy(ivl: number, relearnMs: number = RELEARN_MS): string {
+	if (ivl === 0) {
+		const minutes = Math.max(1, Math.round(relearnMs / 60_000));
+		return `again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+	}
+	if (ivl < 2) return 'again in 1 day';
+	return `again in ${Math.round(ivl)} days`;
+}
+
+/**
+ * A missed card returns at the end of this sitting when this occurrence is
+ * the last copy (`lastIndexOf`). The sitting stops growing at the cap.
+ */
+export function sittingQueueAfterGrade<T>(queue: T[], index: number, missed: boolean): T[] {
+	if (!missed) return queue;
+	if (queue.length >= MAX_SITTING_LENGTH) return queue;
+	const card = queue[index];
+	if (card === undefined) return queue;
+	if (queue.lastIndexOf(card) !== index) return queue;
+	return [...queue, card];
 }
 
 /** Caps the Review field. Longer than every accepted deck answer, including Hangul. */
