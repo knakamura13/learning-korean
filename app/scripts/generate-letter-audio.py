@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib.util
 import shutil
 import subprocess
+import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
@@ -250,13 +251,48 @@ def render_final(jamo: str) -> list[float]:
         coda = C._mul(lat, C._env(n, 0.01, 0.05))
     else:
         raise KeyError(f"unknown final {jamo!r}")
-    return C._add(vowel, coda)
+    # Concatenate: short 아, then unreleased coda. Do not mix from t=0 with C._add.
+    return vowel + coda
+
+
+def _rms(xs: list[float]) -> float:
+    if not xs:
+        return 0.0
+    return (sum(v * v for v in xs) / len(xs)) ** 0.5
+
+
+def check_render_final() -> None:
+    """Batchim clips must be 아 then coda (concat), not mix-from-t=0."""
+    vowel_only = _steady(0.18, 0.18, 138.0, F_A)
+    samples = render_final("ㄱ")
+    if len(samples) <= len(vowel_only):
+        raise AssertionError(
+            f"render_final('ㄱ') must be longer than 아-only "
+            f"({len(samples)} <= {len(vowel_only)})"
+        )
+    n = int(0.12 * SR)
+    head = samples[:n]
+    voice = _rms(head)
+    if voice < 0.02:
+        raise AssertionError(f"first 0.12s should be voiced 아, rms={voice}")
+    delta = _rms([a - b for a, b in zip(head, vowel_only[:n])])
+    if delta > 1e-9:
+        raise AssertionError(
+            f"first 0.12s must match 아-only before the stop, rms-delta={delta}"
+        )
 
 
 def _write_clips(tmp: Path, out_dir: Path, slug: str, samples: list[float]) -> None:
     wav = tmp / f"{slug}.wav"
     C.write_wav(wav, C._peak_norm(samples))
     encode_pair(wav, out_dir / f"{slug}.opus", out_dir / f"{slug}.mp3")
+
+
+def write_finals(tmp: Path, finals: Path) -> None:
+    check_render_final()
+    for jamo, slug in FINAL_CLIPS:
+        _write_clips(tmp, finals, slug, render_final(jamo))
+        print(f"wrote finals/{slug}.opus + .mp3 ({jamo})")
 
 
 def convert_lead_mp3(consonants: Path) -> None:
@@ -291,10 +327,22 @@ def main() -> None:
             for jamo, slug in items:
                 _write_clips(tmp, vowels, slug, samples)
                 print(f"wrote vowels/{slug}.opus + .mp3 ({jamo})")
-        for jamo, slug in FINAL_CLIPS:
-            _write_clips(tmp, finals, slug, render_final(jamo))
-            print(f"wrote finals/{slug}.opus + .mp3 ({jamo})")
+        write_finals(tmp, finals)
+
+
+def generate_finals_only() -> None:
+    require_ffmpeg()
+    finals = Path(__file__).resolve().parents[1] / "static" / "audio" / "finals"
+    finals.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        write_finals(Path(tmp_dir), finals)
 
 
 if __name__ == "__main__":
-    main()
+    if "--check" in sys.argv:
+        check_render_final()
+        print("check_render_final: ok")
+    elif "--finals-only" in sys.argv:
+        generate_finals_only()
+    else:
+        main()
