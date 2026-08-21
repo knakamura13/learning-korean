@@ -7,7 +7,7 @@
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import SprintChoices from '$lib/components/SprintChoices.svelte';
-	import { isConsonantLead } from '$lib/audio/consonants';
+	import type { AudioSlot } from '$lib/audio/letters';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
 	import { DEFAULT_NEW_PER_DAY, attemptSpeed } from '$lib/domain/srs';
 	import { sprintEligible, sprintInventory, trialForBlock, type SprintTrial } from '$lib/domain/sprint';
@@ -37,9 +37,31 @@
 	let blockTrial = $state<SprintTrial | null>(null);
 	let choices = $state<SprintChoices | undefined>();
 
+	function reviewAudioSlot(kind: Card['kind']): AudioSlot | null {
+		switch (kind) {
+			case 'consonant':
+				return 'lead';
+			case 'vowel':
+			case 'compound':
+			case 'build':
+				return 'vowel';
+			case 'batchim':
+			case 'cluster':
+				return 'final';
+			case 'block':
+			case 'pron':
+				return null;
+			default: {
+				const _never: never = kind;
+				return _never;
+			}
+		}
+	}
+
 	const card = $derived(queue[index]);
 	const pronCard = $derived(card?.kind === 'pron');
 	const blockCard = $derived(card?.kind === 'block');
+	const reviewSlot = $derived(card ? reviewAudioSlot(card.kind) : null);
 	const stats = $derived(progress.stats);
 	const unlockedTiers = $derived(
 		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'] as const).filter((tier) =>
@@ -302,8 +324,8 @@
 
 				<div class="glyph-row">
 					<div class="glyph" lang="ko">{card.front}</div>
-					{#if card.kind === 'consonant' || isConsonantLead(card.front)}
-						<PlayButton jamo={card.front} audioSlot="lead" />
+					{#if reviewSlot}
+						<PlayButton jamo={card.front} audioSlot={reviewSlot} />
 					{/if}
 				</div>
 				<p class="ask">{card.ask}</p>

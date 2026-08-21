@@ -898,6 +898,24 @@ describe('polish audit regressions', () => {
 		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
 	});
 
+	it('attaches vowel and final PlayButtons on the reference grids', () => {
+		expect(reference).toMatch(/audioSlot="vowel"/);
+		expect(reference).toMatch(/audioSlot="final"/);
+		expect(reference).toMatch(/audioSlot="lead"/);
+	});
+
+	it('picks a stage audio slot from vowel, lead, or final rather than leads only', () => {
+		expect(stage).toMatch(/items\.length <= 2/);
+		expect(stage).not.toMatch(/isConsonantLead\(item\.glyph\)/);
+		expect(stage).toMatch(/VOWELS/);
+		expect(stage).toMatch(/batchimSound/);
+		expect(stage).toMatch(/audioSlot=\{/);
+	});
+
+	it('does not mount PlayButton on the drill page', () => {
+		expect(drill).not.toMatch(/PlayButton/);
+	});
+
 	it('keeps pip-rail attach in sitting chrome without freezing LabRunner import paths', () => {
 		expect(sitting).toMatch(/attachPipRail/);
 		expect(sitting).toMatch(/attachModalDialog/);

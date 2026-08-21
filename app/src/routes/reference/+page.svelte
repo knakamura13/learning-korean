@@ -168,6 +168,9 @@
 					<span class="big" lang="ko">{v}</span>
 					<span class="rom2">{SOUND[v]}</span>
 					<span class="nm">{harmony(v)}</span>
+					<div class="hear">
+						<PlayButton jamo={v} audioSlot="vowel" />
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -184,6 +187,9 @@
 					<span class="rom2">{SOUND[v]}</span>
 					<span class="nm"><KoText text={parts ? `${parts[0]} + ${parts[1]}` : ''} /></span>
 					{#if merged.length}<span class="fin">= <KoText text={merged.join(' ')} /></span>{/if}
+					<div class="hear">
+						<PlayButton jamo={v} audioSlot="vowel" />
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -195,6 +201,9 @@
 			{#each REPRESENTATIVE as r (r)}
 				<div class="row">
 					<span class="key hg" lang="ko">{r}</span>
+					<div class="hear">
+						<PlayButton jamo={r} audioSlot="final" />
+					</div>
 					<span class="vals hg" lang="ko">
 						{['ㄱ','ㄲ','ㅋ','ㄳ','ㄺ','ㄴ','ㄵ','ㄶ','ㄷ','ㅅ','ㅆ','ㅈ','ㅊ','ㅌ','ㅎ','ㄹ','ㄼ','ㄽ','ㄾ','ㅀ','ㅁ','ㄻ','ㅂ','ㅍ','ㄿ','ㅄ','ㅇ']
 							.filter((f) => batchimSound(f) === r)
@@ -212,6 +221,9 @@
 				{@const parts = clusterParts(c)}
 				<div class="row">
 					<span class="key hg" lang="ko">{c}</span>
+					<div class="hear">
+						<PlayButton jamo={c} audioSlot="final" />
+					</div>
 					<span class="vals">
 						<span class="hg"><KoText text={parts ? `${parts[0]} + ${parts[1]}` : ''} /></span>
 						<span class="arrow">→</span>
@@ -350,8 +362,8 @@
 			</li>
 			<li>
 				<a href="https://www.howtostudykorean.com/unit0/unit-0-lesson-1/">How To Study Korean, Unit 0</a>
-				— free, with native audio for every letter. This app now ships a first slice of
-				isolated consonant clips; vowel and batchim audio are still ahead.
+				— free, with native audio for every letter. This app ships isolated letter
+				clips (leads, vowels, neutralized finals); word-level audio is still ahead.
 			</li>
 		</ul>
 	</section>
@@ -470,6 +482,9 @@
 		display: flex;
 		justify-content: center;
 		margin-top: var(--s2);
+	}
+	.row .hear {
+		flex: 0 0 auto;
 	}
 
 	.rows { padding: var(--s2) var(--s4); }

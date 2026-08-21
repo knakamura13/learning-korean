@@ -23,7 +23,7 @@
 </script>
 
 {#if resolved}
-	{#key resolved.opus + resolved.mp3}
+	{#key jamo + resolved.opus + resolved.mp3}
 		<AudioClip {jamo} opus={resolved.opus} mp3={resolved.mp3} />
 	{/key}
 {/if}

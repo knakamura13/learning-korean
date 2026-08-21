@@ -4,6 +4,7 @@
 import { mount, unmount } from 'svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
 import PlayButton from './PlayButton.svelte';
+import playButtonSrc from './PlayButton.svelte?raw';
 
 beforeEach(() => {
 	HTMLMediaElement.prototype.pause = () => {};
@@ -33,6 +34,10 @@ describe('PlayButton', () => {
 		expect(host.querySelectorAll('source').length).toBe(2);
 		unmount(app);
 		host.remove();
+	});
+
+	it('keys the clip by jamo as well as codec URLs so shared finals remount', () => {
+		expect(playButtonSrc).toMatch(/\{#key [^}\n]*jamo/);
 	});
 
 	it('does not render when an explicit src is missing', () => {

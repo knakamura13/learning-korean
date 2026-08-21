@@ -72,10 +72,11 @@ Not yet raised with Kyle — these are candidates, not commitments.
 
 ## Gaps
 
-- **Audio is only the 19 Lab 01 consonant leads.** Isolated C+으 clips ship in
-  `app/static/audio/consonants/` (see LICENSE there). Vowels, compounds, batchim,
-  and native-speaker recordings are still the gap. How To Study Korean remains the
-  best external model for those.
+- **Letter inventory ships (leads, vowels, neutralized finals). Word-level /
+  sound-change clips are still missing.** Isolated clips live in
+  `app/static/audio/{consonants,vowels,finals}/` (see LICENSE there). Native-speaker
+  recordings and word audio remain the gap. How To Study Korean remains the best
+  external model for those.
 - **No handwriting/stroke-order source yet.** Kyle flagged handwriting as a
   secondary interest; nothing authoritative on stroke order is bookmarked.
 - **No corpus of real beginner-readable text.** Loanwords carried Lesson 01, but a
