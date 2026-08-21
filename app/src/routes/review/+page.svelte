@@ -303,7 +303,7 @@
 				<div class="glyph-row">
 					<div class="glyph" lang="ko">{card.front}</div>
 					{#if card.kind === 'consonant' || isConsonantLead(card.front)}
-						<PlayButton jamo={card.front} />
+						<PlayButton jamo={card.front} audioSlot="lead" />
 					{/if}
 				</div>
 				<p class="ask">{card.ask}</p>

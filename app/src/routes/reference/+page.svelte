@@ -153,7 +153,7 @@
 					<span class="nm" lang="ko">{NAMES[c]}</span>
 					<span class="fin">final: {batchimSound(c) || '—'}</span>
 					<div class="hear">
-						<PlayButton jamo={c} />
+						<PlayButton jamo={c} audioSlot="lead" />
 					</div>
 				</div>
 			{/each}

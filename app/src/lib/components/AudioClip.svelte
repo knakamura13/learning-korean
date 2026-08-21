@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { jamo, src }: { jamo: string; src: string } = $props();
+	let { jamo, opus, mp3 }: { jamo: string; opus: string; mp3: string } = $props();
 
 	let failed = $state(false);
 	let playing = $state(false);
@@ -30,39 +30,43 @@
 			playing = false;
 		}
 	}
+
+	function markFailed() {
+		failed = true;
+		playing = false;
+	}
 </script>
 
-{#if !failed}
-	<button
-		type="button"
-		class="play"
-		aria-label={playing ? `Pause ${jamo}` : `Play ${jamo}`}
-		aria-pressed={playing}
-		onclick={toggle}
-	>
-		{#if playing}
-			<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-				<rect x="6" y="5" width="4.5" height="14" rx="1" fill="currentColor" />
-				<rect x="13.5" y="5" width="4.5" height="14" rx="1" fill="currentColor" />
-			</svg>
-		{:else}
-			<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-				<path d="M8 5.5v13l11-6.5z" fill="currentColor" />
-			</svg>
-		{/if}
-	</button>
-	<audio
-		{@attach clip}
-		{src}
-		preload="none"
-		onended={() => (playing = false)}
-		onerror={() => {
-			failed = true;
-			playing = false;
-		}}
-		onpause={() => (playing = false)}
-	></audio>
-{/if}
+<button
+	type="button"
+	class="play"
+	class:failed
+	aria-disabled={failed}
+	aria-label={failed ? `Couldn't play ${jamo}` : playing ? `Pause ${jamo}` : `Play ${jamo}`}
+	aria-pressed={playing}
+	onclick={toggle}
+>
+	{#if playing}
+		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+			<rect x="6" y="5" width="4.5" height="14" rx="1" fill="currentColor" />
+			<rect x="13.5" y="5" width="4.5" height="14" rx="1" fill="currentColor" />
+		</svg>
+	{:else}
+		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+			<path d="M8 5.5v13l11-6.5z" fill="currentColor" />
+		</svg>
+	{/if}
+</button>
+<audio
+	{@attach clip}
+	preload="none"
+	onended={() => (playing = false)}
+	onerror={markFailed}
+	onpause={() => (playing = false)}
+>
+	<source src={opus} type="audio/opus" />
+	<source src={mp3} type="audio/mpeg" />
+</audio>
 
 <style>
 	.play {
@@ -101,6 +105,18 @@
 		border-color: var(--accent);
 		background: var(--accent-soft);
 	}
+	.play[aria-disabled='true'] {
+		cursor: not-allowed;
+		color: var(--ink-faint);
+		background: var(--paper-sunk);
+		border-color: var(--rule);
+	}
+	.play[aria-disabled='true']:hover,
+	.play[aria-disabled='true']:active {
+		background: var(--paper-sunk);
+		color: var(--ink-faint);
+		transform: none;
+	}
 
 	.ico {
 		width: 1.05rem;
@@ -117,6 +133,10 @@
 		.play:focus-visible {
 			outline: 2px solid Highlight;
 			box-shadow: none;
+		}
+		.play[aria-disabled='true'] {
+			color: GrayText;
+			border-color: GrayText;
 		}
 	}
 </style>

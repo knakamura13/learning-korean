@@ -26,7 +26,7 @@
 			{#if item.caption}<span class="cap">{item.caption}</span>{/if}
 			{#if playSubjects && isConsonantLead(item.glyph)}
 				<div class="hear">
-					<PlayButton jamo={item.glyph} />
+					<PlayButton jamo={item.glyph} audioSlot="lead" />
 				</div>
 			{/if}
 		</div>

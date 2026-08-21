@@ -149,7 +149,7 @@
 
 {#if solved}
 	<div class="hear">
-		<PlayButton jamo={step.jamo} />
+		<PlayButton jamo={step.jamo} audioSlot="lead" />
 	</div>
 {/if}
 

@@ -5,7 +5,7 @@ import labRunner from './components/LabRunner.svelte?raw';
 import labPipRail from './components/LabPipRail.svelte?raw';
 import labRunnerPipRail from './components/labRunnerPipRail.svelte.ts?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
-import consonantClip from './components/ConsonantClip.svelte?raw';
+import audioClip from './components/AudioClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
@@ -130,7 +130,11 @@ describe('polish audit regressions', () => {
 	});
 
 	it('gives remaining interactive chrome a pressed state', () => {
-		expect(styleBlock(consonantClip)).toMatch(/\.play:active\s*\{/);
+		expect(styleBlock(audioClip)).toMatch(/\.play:active\s*\{/);
+		expect(styleBlock(audioClip)).toMatch(/\.play\s*\{[^}]*width:\s*44px/s);
+		expect(styleBlock(audioClip)).toMatch(/\.play\s*\{[^}]*min-width:\s*44px/s);
+		expect(styleBlock(audioClip)).toMatch(/\.play\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(audioClip)).toMatch(/\.play\[aria-disabled='true'\]/);
 		expect(styleBlock(vowelStep)).toMatch(/\.stamp:active:not\(:disabled\)\s*\{/);
 		expect(sittingCss).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
