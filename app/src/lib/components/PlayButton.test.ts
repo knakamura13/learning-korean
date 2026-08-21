@@ -2,18 +2,42 @@
  * @vitest-environment jsdom
  */
 import { mount, unmount } from 'svelte';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import PlayButton from './PlayButton.svelte';
+import playButtonSrc from './PlayButton.svelte?raw';
+
+beforeEach(() => {
+	HTMLMediaElement.prototype.pause = () => {};
+});
 
 describe('PlayButton', () => {
-	it('does not render a control when the jamo has no clip', () => {
+	it('does not render a lead control for a vowel glyph', () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
-		const app = mount(PlayButton, { target: host, props: { jamo: 'ㅏ' } });
+		const app = mount(PlayButton, {
+			target: host,
+			props: { jamo: 'ㅏ', audioSlot: 'lead' }
+		});
 		expect(host.querySelector('button')).toBeNull();
-		expect(host.querySelector('audio')).toBeNull();
 		unmount(app);
 		host.remove();
+	});
+
+	it('renders a control for a vowel in the vowel slot', () => {
+		const host = document.createElement('div');
+		document.body.appendChild(host);
+		const app = mount(PlayButton, {
+			target: host,
+			props: { jamo: 'ㅏ', audioSlot: 'vowel' }
+		});
+		expect(host.querySelector('button')).not.toBeNull();
+		expect(host.querySelectorAll('source').length).toBe(2);
+		unmount(app);
+		host.remove();
+	});
+
+	it('keys the clip by jamo as well as codec URLs so shared finals remount', () => {
+		expect(playButtonSrc).toMatch(/\{#key [^}\n]*jamo/);
 	});
 
 	it('does not render when an explicit src is missing', () => {
@@ -21,7 +45,7 @@ describe('PlayButton', () => {
 		document.body.appendChild(host);
 		const app = mount(PlayButton, {
 			target: host,
-			props: { jamo: 'ㄱ', src: null }
+			props: { jamo: 'ㄱ', audioSlot: 'lead', src: null }
 		});
 		expect(host.querySelector('button')).toBeNull();
 		unmount(app);

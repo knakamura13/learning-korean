@@ -66,7 +66,7 @@
 </div>
 
 <div class="hear">
-	<PlayButton jamo={current} />
+	<PlayButton jamo={current} audioSlot="lead" />
 </div>
 
 <div class="tools" role="group" aria-label="Derivation tools">

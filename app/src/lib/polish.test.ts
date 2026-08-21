@@ -5,7 +5,7 @@ import labRunner from './components/LabRunner.svelte?raw';
 import labPipRail from './components/LabPipRail.svelte?raw';
 import labRunnerPipRail from './components/labRunnerPipRail.svelte.ts?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
-import consonantClip from './components/ConsonantClip.svelte?raw';
+import audioClip from './components/AudioClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
 import readStep from './components/steps/ReadStep.svelte?raw';
@@ -130,7 +130,11 @@ describe('polish audit regressions', () => {
 	});
 
 	it('gives remaining interactive chrome a pressed state', () => {
-		expect(styleBlock(consonantClip)).toMatch(/\.play:active\s*\{/);
+		expect(styleBlock(audioClip)).toMatch(/\.play:active\s*\{/);
+		expect(styleBlock(audioClip)).toMatch(/\.play\s*\{[^}]*width:\s*44px/s);
+		expect(styleBlock(audioClip)).toMatch(/\.play\s*\{[^}]*min-width:\s*44px/s);
+		expect(styleBlock(audioClip)).toMatch(/\.play\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(audioClip)).toMatch(/\.play\[aria-disabled='true'\]/);
 		expect(styleBlock(vowelStep)).toMatch(/\.stamp:active:not\(:disabled\)\s*\{/);
 		expect(sittingCss).toMatch(/button\.pip:not\(\[data-selected\]\):active\s*\{/);
 		expect(styleBlock(layout)).toMatch(/nav a:active\s*\{/);
@@ -892,6 +896,24 @@ describe('polish audit regressions', () => {
 		expect(dockerfile).toMatch(/ARG PUBLIC_SITE_URL/);
 		expect(dockerfile).toMatch(/ENV PUBLIC_SITE_URL=/);
 		expect(dockerfile.indexOf('ARG PUBLIC_SITE_URL')).toBeLessThan(dockerfile.indexOf('RUN pnpm build'));
+	});
+
+	it('attaches vowel and final PlayButtons on the reference grids', () => {
+		expect(reference).toMatch(/audioSlot="vowel"/);
+		expect(reference).toMatch(/audioSlot="final"/);
+		expect(reference).toMatch(/audioSlot="lead"/);
+	});
+
+	it('picks a stage audio slot from vowel, lead, or final rather than leads only', () => {
+		expect(stage).toMatch(/items\.length <= 2/);
+		expect(stage).not.toMatch(/isConsonantLead\(item\.glyph\)/);
+		expect(stage).toMatch(/VOWELS/);
+		expect(stage).toMatch(/batchimSound/);
+		expect(stage).toMatch(/audioSlot=\{/);
+	});
+
+	it('does not mount PlayButton on the drill page', () => {
+		expect(drill).not.toMatch(/PlayButton/);
 	});
 
 	it('keeps pip-rail attach in sitting chrome without freezing LabRunner import paths', () => {

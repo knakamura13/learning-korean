@@ -4,6 +4,10 @@ Original pedagogical synthesis — not a recording of a person and not scraped
 from any course. Re-run from app/:
 
     python3 scripts/generate-consonant-audio.py
+
+For vowels, finals, and mp3 siblings (does not overwrite these opus files):
+
+    python3 scripts/generate-letter-audio.py
 """
 
 from __future__ import annotations
@@ -244,6 +248,7 @@ def encode_opus(wav: Path, opus: Path) -> None:
 
 
 def main() -> None:
+    print("Note: vowels, finals, and mp3 fallbacks → python3 scripts/generate-letter-audio.py")
     out_dir = Path(__file__).resolve().parents[1] / "static" / "audio" / "consonants"
     out_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:

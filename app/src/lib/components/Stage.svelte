@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { isConsonantLead } from '$lib/audio/consonants';
+	import type { AudioSlot } from '$lib/audio/letters';
+	import { LEADS, VOWELS, batchimSound } from '$lib/domain/hangul';
 	import PlayButton from './PlayButton.svelte';
 	import type { StageItem } from '$lib/content/types';
 
@@ -14,6 +15,13 @@
 	// Choice cards with a whole family on stage would spam a speaker on every
 	// letter. Audio is a check for the one or two jamo the card is about.
 	const playSubjects = $derived(items.length <= 2);
+
+	function stageAudioSlot(glyph: string): AudioSlot | null {
+		if ((VOWELS as readonly string[]).includes(glyph)) return 'vowel';
+		if ((LEADS as readonly string[]).includes(glyph)) return 'lead';
+		if (batchimSound(glyph)) return 'final';
+		return null;
+	}
 </script>
 
 <div class="stage" class:md={scale === 'md'}>
@@ -24,10 +32,13 @@
 		<div class="item">
 			<span class="glyph" lang="ko">{item.glyph}</span>
 			{#if item.caption}<span class="cap">{item.caption}</span>{/if}
-			{#if playSubjects && isConsonantLead(item.glyph)}
-				<div class="hear">
-					<PlayButton jamo={item.glyph} />
-				</div>
+			{#if playSubjects}
+				{@const slot = stageAudioSlot(item.glyph)}
+				{#if slot}
+					<div class="hear">
+						<PlayButton jamo={item.glyph} audioSlot={slot} />
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/each}

@@ -64,6 +64,19 @@ describe('review answer field', () => {
 		expect(src).not.toMatch(/answerRound/);
 	});
 
+	it('wires PlayButton audioSlot from reviewAudioSlot, not a lead-only gate', () => {
+		expect(src).toMatch(/audioSlot=\{reviewAudioSlot|reviewAudioSlot\(/);
+		expect(src).not.toMatch(/isConsonantLead/);
+		expect(src).toMatch(/<PlayButton\b/);
+	});
+
+	it('does not render PlayButton for block or pron cards', () => {
+		expect(src).toMatch(/case 'block'/);
+		expect(src).toMatch(/case 'pron'/);
+		expect(src).toMatch(/return null/);
+		expect(src).not.toMatch(/card\.kind === 'consonant' \|\| isConsonantLead/);
+	});
+
 	it('retries makeBlockTrial against sprintInventory when exclusive inventory fails', () => {
 		const make = src.match(/function makeBlockTrial[\s\S]*?\n\t\}/)?.[0] ?? '';
 		const args = [...make.matchAll(/trialForBlock\(([^)]*)\)/g)].map((m) => m[1]);
