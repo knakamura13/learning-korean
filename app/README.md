@@ -27,9 +27,9 @@ pnpm check        # svelte-check / tsc
 src/lib/domain/     pure logic, no framework, no I/O
   hangul.ts           the phonology and orthography of Korean
   srs.ts              SM-2 scheduler — pure, clock injected
-  deck.ts             the review deck: 299 cards across 10 lab tiers and 4 vocab
+  deck.ts             the review deck: 384 cards across 10 lab tiers and 7 vocab
                       packs (72 letter/construction, 55 generated blocks,
-                      72 pronunciation, 100 meanings)
+                      91 pronunciation, 166 meanings)
   blockDeck.ts        deterministic syllable-block card generation
   merge.ts            deterministic sync reconciliation (never asks the learner)
   storage.ts          persistence as a port

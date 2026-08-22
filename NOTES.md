@@ -67,8 +67,8 @@ The objection was to *lessons* that read like articles.
 Kyle asked for SRS to master every letter, sound, and compound. Built as:
 
 - `app/src/lib/domain/deck.ts` — originally 72 cards covering the letter
-  inventory (now 299: generated block cards, the lab06–lab10 pronunciation
-  tiers, and the vocabulary packs joined later): 19 consonants,
+  inventory (now 384: generated block cards, the lab06–lab10 pronunciation
+  tiers, and the seven vocabulary packs joined later): 19 consonants,
   10 basic vowels, 11 compound vowels + 5 construction cards, 16 batchim values,
   11 clusters.
 - `app/src/lib/domain/srs.ts` — SM-2 variant, pure, clock injected.
