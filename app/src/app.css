@@ -194,6 +194,31 @@ button { font: inherit; color: inherit; }
 	animation: skel-pulse 1.2s var(--ease-in-out) infinite;
 }
 
+/* Shared placeholder shapes; pages override widths where their layout needs. */
+.skel.line-ph {
+	width: 12rem;
+	max-width: 80%;
+	height: 0.7rem;
+}
+.skel.glyph-ph {
+	width: 4.5rem;
+	height: 4.5rem;
+	border-radius: var(--r-md);
+}
+
+/* Visually hidden, still read by assistive tech. */
+.vh {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
 .shell {
 	max-width: var(--shell);
 	margin: 0 auto;

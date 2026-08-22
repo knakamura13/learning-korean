@@ -73,14 +73,16 @@
 			transform var(--fast) var(--ease);
 	}
 
+	/* Key chip and focus treatment mirror Options.svelte — the lab grid and
+	   the tap grid are the same control to the learner. */
 	.key {
 		box-sizing: border-box;
 		font-family: var(--mono);
 		font-size: 0.75rem;
 		font-weight: 600;
 		line-height: 1;
-		color: var(--ink);
-		border: 1px solid var(--rule-strong);
+		color: var(--ink-faint);
+		border: 1px solid var(--rule);
 		border-radius: 2px;
 		min-width: 1.4em;
 		height: 1.4em;
@@ -102,8 +104,9 @@
 		border-color: var(--accent);
 	}
 	.opt:focus-visible {
-		outline: 2px solid var(--accent);
+		outline: 2px solid var(--paper);
 		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 	}
 	.opt:disabled {
 		cursor: default;

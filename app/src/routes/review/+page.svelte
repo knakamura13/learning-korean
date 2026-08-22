@@ -9,7 +9,7 @@
 	import SprintChoices from '$lib/components/SprintChoices.svelte';
 	import type { AudioSlot } from '$lib/audio/letters';
 	import { checkAnswer, type Card } from '$lib/domain/deck';
-	import { DEFAULT_NEW_PER_DAY, attemptSpeed } from '$lib/domain/srs';
+	import { attemptSpeed } from '$lib/domain/srs';
 	import { sprintEligible, sprintInventory, trialForBlock, type SprintTrial } from '$lib/domain/sprint';
 	import { blockInventory } from '$lib/domain/blockDeck';
 	import { LABS } from '$lib/content';
@@ -292,10 +292,13 @@
 			<span class="big" lang="ko">쉬어</span>
 			<h2>Review is clear</h2>
 			<p>Nothing is due. The next card comes back <strong>{whenNext}</strong>.</p>
+			{#if stats.streak >= 2}
+				<p class="streak-note">That is {stats.streak} days in a row — the spacing is holding.</p>
+			{/if}
 			<p class="muted tiny">
 				Reviewing early would only weaken the spacing — the gap is doing the work.
 				{#if stats.newLeft === 0 && stats.unseen > 0}
-					You have also hit today’s cap of {DEFAULT_NEW_PER_DAY} new cards, which keeps sessions short.
+					You have also hit today’s cap of {progress.studyPrefs.newPerDay} new cards, which keeps sessions short.
 				{/if}
 			</p>
 			{#if drillOpen}
@@ -676,6 +679,12 @@
 	.empty { padding: var(--s7) var(--s5); text-align: center; }
 	.empty .big { font-family: var(--hangul); font-size: 3.2rem; display: block; margin-bottom: var(--s3); }
 	.empty h2 { margin-bottom: var(--s2); }
+	/* Quiet streak acknowledgment — a sentence, not a celebration. */
+	.streak-note {
+		font-size: 0.85rem;
+		color: var(--good);
+		margin-block: var(--s2);
+	}
 	.empty p { color: var(--ink-soft); font-size: 0.92rem; max-width: 28rem; margin: 0 auto var(--s4); }
 
 	.loading {
@@ -683,16 +692,6 @@
 		flex-direction: column;
 		align-items: center;
 		gap: var(--s3);
-	}
-	.loading .glyph-ph {
-		width: 4.5rem;
-		height: 4.5rem;
-		border-radius: var(--r-md);
-	}
-	.loading .line-ph {
-		width: 12rem;
-		max-width: 80%;
-		height: 0.7rem;
 	}
 	.loading .field-ph {
 		width: 100%;

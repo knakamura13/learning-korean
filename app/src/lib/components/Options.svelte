@@ -156,6 +156,12 @@
 	.opt:disabled { cursor: default; }
 
 	.opt.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+	/* A correct pick settles — one small press-and-release, no celebration.
+	   Collapsed to 0.01ms by the global prefers-reduced-motion block. */
+	.opt.right { animation: opt-settle 0.28s var(--ease); }
+	@keyframes opt-settle {
+		40% { scale: 1.02; }
+	}
 	.opt.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 	.opt.dim { opacity: 0.4; }
 

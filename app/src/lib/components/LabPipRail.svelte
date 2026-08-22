@@ -286,18 +286,6 @@
 		}
 	}
 
-	.vh {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
-	}
-
 	@media (forced-colors: active) {
 		.rail-clip {
 			-webkit-mask-image: none;

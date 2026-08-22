@@ -534,7 +534,6 @@
 	.pile-skel .line-ph {
 		width: 7rem;
 		max-width: 90%;
-		height: 0.7rem;
 	}
 	.pile-skel .line-ph.short {
 		width: 4.5rem;
