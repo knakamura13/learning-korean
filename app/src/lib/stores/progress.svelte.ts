@@ -11,13 +11,20 @@ import {
 	emptyState, decodeStoredState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
 	openLab as openLabAccess, isOpened,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
-	weakest as weakestCards, gradeFromAttempt, tierReviewProgress,
-	type SrsState, type Grade, type Stats
+	weakest as weakestCards, gradeFromAttempt, tierReviewProgress, reviveState,
+	DEFAULT_NEW_PER_DAY, DEFAULT_REVIEW_PER_SITTING,
+	type SrsState, type Grade, type Stats, type QueueOptions
 } from '$lib/domain/srs';
+import { mergeSrsState } from '$lib/domain/merge';
 import { DECK, TIERS, cardsOfTier, type Card } from '$lib/domain/deck';
 import { browserStorage, memoryStorage, onStorageKey, type Storage } from '$lib/domain/storage';
 
 export const SRS_STORAGE_KEY = 'korean-srs-v1';
+
+export interface StudyPrefs {
+	newPerDay: number;
+	reviewsPerSitting: number;
+}
 
 export function createProgress(store: Storage = browser ? browserStorage(SRS_STORAGE_KEY) : memoryStorage()) {
 	const loaded = decodeStoredState(store.read());
@@ -25,6 +32,15 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 	let now = $state(Date.now());
 	let durable = $state(store.durable);
 	let corruptRaw = $state<string | null>(loaded.corrupt);
+	/** Signed-in learners get account pacing; guests keep the compiled defaults. */
+	let prefs = $state<StudyPrefs>({
+		newPerDay: DEFAULT_NEW_PER_DAY,
+		reviewsPerSitting: DEFAULT_REVIEW_PER_SITTING
+	});
+
+	function queueOpts(): QueueOptions {
+		return { newPerDay: prefs.newPerDay, reviewPerSitting: prefs.reviewsPerSitting };
+	}
 
 	function applyStored() {
 		const next = decodeStoredState(store.read());
@@ -36,7 +52,7 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 	onStorageKey(SRS_STORAGE_KEY, applyStored);
 
 	function persistPin() {
-		const next = pinNewForDay(state, DECK, now);
+		const next = pinNewForDay(state, DECK, now, queueOpts());
 		if (next !== state) commit(next);
 	}
 
@@ -62,11 +78,33 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 		},
 
 		get stats(): Stats {
-			return computeStats(state, DECK, now);
+			return computeStats(state, DECK, now, queueOpts());
 		},
 
 		get queue(): Card[] {
-			return dueCards(state, DECK, now);
+			return dueCards(state, DECK, now, queueOpts());
+		},
+
+		get studyPrefs(): StudyPrefs {
+			return prefs;
+		},
+
+		/** Account pacing from /api/me; re-pins today's draw under the new cap. */
+		setStudyPrefs(next: StudyPrefs) {
+			prefs = next;
+			persistPin();
+		},
+
+		/**
+		 * Merge a synced document into local state. Local storage stays the
+		 * source of truth; the merge never asks the learner anything. No-op
+		 * while local state is quarantined as corrupt.
+		 */
+		applyRemote(remoteSrs: unknown): boolean {
+			if (corruptRaw) return false;
+			const merged = mergeSrsState(state, reviveState(remoteSrs));
+			if (JSON.stringify(merged) === JSON.stringify(state)) return false;
+			return commit(merged);
 		},
 
 		get nextDue(): number | null {

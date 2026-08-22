@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import AccountSection from '$lib/components/AccountSection.svelte';
 	import LookPicker from '$lib/components/LookPicker.svelte';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import ProgressReset from '$lib/components/ProgressReset.svelte';
@@ -38,6 +39,8 @@
 		<h2 id="appearance-heading">Appearance</h2>
 		<LookPicker onPersistFail={() => (appearanceSaved = false)} />
 	</section>
+
+	<AccountSection />
 
 	<section id="backup" class="backup" aria-labelledby="backup-heading">
 		<h2 id="backup-heading">Backup</h2>
