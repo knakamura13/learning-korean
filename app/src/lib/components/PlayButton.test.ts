@@ -3,6 +3,7 @@
  */
 import { mount, unmount } from 'svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { letterAudioSources } from '$lib/audio/letters';
 import PlayButton from './PlayButton.svelte';
 import playButtonSrc from './PlayButton.svelte?raw';
 
@@ -23,12 +24,29 @@ describe('PlayButton', () => {
 		host.remove();
 	});
 
-	it('renders a control for a vowel in the vowel slot', () => {
+	it('mirrors the recording gate: no control until the clip is ingested', () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 		const app = mount(PlayButton, {
 			target: host,
 			props: { jamo: 'ㅏ', audioSlot: 'vowel' }
+		});
+		if (letterAudioSources('ㅏ', 'vowel') === null) {
+			expect(host.querySelector('button')).toBeNull();
+		} else {
+			expect(host.querySelector('button')).not.toBeNull();
+			expect(host.querySelectorAll('source').length).toBe(2);
+		}
+		unmount(app);
+		host.remove();
+	});
+
+	it('still renders a control when given an explicit src override', () => {
+		const host = document.createElement('div');
+		document.body.appendChild(host);
+		const app = mount(PlayButton, {
+			target: host,
+			props: { jamo: 'ㅏ', audioSlot: 'vowel', src: '/audio/vowels/a.opus' }
 		});
 		expect(host.querySelector('button')).not.toBeNull();
 		expect(host.querySelectorAll('source').length).toBe(2);

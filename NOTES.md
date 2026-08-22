@@ -235,6 +235,17 @@ in scope; word-list chasing is not. Design decisions:
   `ReviewCompose.svelte`). Trays honor unlock state — no compound vowels
   before Lab 03, no clusters before Lab 05, even as distractors.
 
+## Audio (reset 2026-08-22)
+
+The synthesized letter clips were removed 2026-08-22 — Kyle judged them
+meaningless noise ("random beeps and boops"), worse than no audio. The slug
+maps in `app/src/lib/audio/letters.ts` remain as the filename contract;
+`letterAudioSources` now gates on `recorded.ts` (empty), so no play buttons
+render until real clips land. Sally (native speaker) records next: runbook in
+`docs/recording/sally-runbook.md`, ingest via
+`app/scripts/ingest-recordings.mjs` (trim + loudnorm + opus/mp3 + regenerates
+the gate). Word-level TTS is deferred until after her recordings.
+
 ## Backlog of lesson ideas
 
 **Built:** Lab 01 (consonants, `lab01`) · Lab 02 (basic vowels, `lab02`) ·
