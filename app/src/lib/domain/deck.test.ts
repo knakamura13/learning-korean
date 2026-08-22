@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DECK, CARDS_BY_ID, TIERS, cardsOfTier, checkAnswer, normalize } from './deck';
+import { DECK, CARDS_BY_ID, TIERS, VOCAB_TIERS, cardsOfTier, checkAnswer, normalize } from './deck';
 import { BLOCK_COUNTS } from './blockDeck';
 import { applyLiaison, applyTensification, applyNasalization, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
 
@@ -63,9 +63,27 @@ describe('tiers', () => {
 		}
 	});
 
-	it('covers every card exactly once', () => {
-		const counted = TIERS.reduce((n, t) => n + cardsOfTier(t.id).length, 0);
+	it('covers every card exactly once across lab and vocab tiers', () => {
+		const counted = [...TIERS, ...VOCAB_TIERS].reduce(
+			(n, t) => n + cardsOfTier(t.id).length,
+			0
+		);
 		expect(counted).toBe(DECK.length);
+	});
+
+	it('sizes each vocab pack and never duplicates a lab pronunciation card', () => {
+		for (const tier of VOCAB_TIERS) {
+			expect(cardsOfTier(tier.id), tier.id).toHaveLength(tier.size);
+		}
+		const ids = DECK.map((c) => c.id);
+		expect(new Set(ids).size).toBe(ids.length);
+		// A lab-tier pron front must not reappear as a vocab pron card.
+		const labProns = new Set(
+			DECK.filter((c) => c.kind === 'pron' && !c.tier.startsWith('vocab')).map((c) => c.front)
+		);
+		for (const c of DECK.filter((c) => c.kind === 'pron' && c.tier.startsWith('vocab'))) {
+			expect(labProns.has(c.front), c.front).toBe(false);
+		}
 	});
 
 	it('points each tier at the lab that unlocks it', () => {

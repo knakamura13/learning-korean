@@ -57,19 +57,30 @@ export function mergeSrsState(a: SrsState, b: SrsState): SrsState {
 		days[iso] = Math.max(days[iso] ?? 0, count);
 	}
 
-	// The pin triple travels together: mixing one day's count with another
+	// A pin triple travels together: mixing one day's count with another
 	// day's ids would let a stale device re-draw past its daily cap. ISO dates
-	// compare lexically and '' sorts before every date.
-	let pin: Pick<SrsState, 'newDate' | 'newCount' | 'newIds'>;
-	if (a.newDate !== b.newDate) {
-		pin = a.newDate > b.newDate ? a : b;
-	} else {
-		pin = {
-			newDate: a.newDate,
-			newCount: Math.max(a.newCount, b.newCount),
-			newIds: unionIds(a.newIds, b.newIds)
+	// compare lexically and '' sorts before every date. Each track's triple
+	// merges independently.
+	function mergedPin(
+		aPin: { date: string; count: number; ids: string[] },
+		bPin: { date: string; count: number; ids: string[] }
+	): { date: string; count: number; ids: string[] } {
+		if (aPin.date !== bPin.date) return aPin.date > bPin.date ? aPin : bPin;
+		return {
+			date: aPin.date,
+			count: Math.max(aPin.count, bPin.count),
+			ids: unionIds(aPin.ids, bPin.ids)
 		};
 	}
+
+	const pin = mergedPin(
+		{ date: a.newDate, count: a.newCount, ids: a.newIds },
+		{ date: b.newDate, count: b.newCount, ids: b.newIds }
+	);
+	const vocabPin = mergedPin(
+		{ date: a.vocabNewDate, count: a.vocabNewCount, ids: a.vocabNewIds },
+		{ date: b.vocabNewDate, count: b.vocabNewCount, ids: b.vocabNewIds }
+	);
 
 	return reviveState({
 		version: 1,
@@ -77,9 +88,12 @@ export function mergeSrsState(a: SrsState, b: SrsState): SrsState {
 		openedLabs: unionIds(a.openedLabs, b.openedLabs),
 		cards,
 		days,
-		newDate: pin.newDate,
-		newCount: pin.newCount,
-		newIds: pin.newIds
+		newDate: pin.date,
+		newCount: pin.count,
+		newIds: pin.ids,
+		vocabNewDate: vocabPin.date,
+		vocabNewCount: vocabPin.count,
+		vocabNewIds: vocabPin.ids
 	});
 }
 

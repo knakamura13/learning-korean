@@ -24,6 +24,9 @@ export const MATURE_DAYS = 21;
 /** Sized to keep a session near the ten-minute budget. */
 export const DEFAULT_NEW_PER_DAY = 10;
 
+/** Vocabulary trickles separately so words never starve letter reviews. */
+export const DEFAULT_VOCAB_NEW_PER_DAY = 5;
+
 /** Overdue reviews drawn into one sitting; leftover debt stays in `stats.due`. */
 export const DEFAULT_REVIEW_PER_SITTING = 10;
 
@@ -79,6 +82,17 @@ export interface SrsState {
 	newCount: number;
 	/** Unseen card ids chosen for `newDate`. Empty until a draw that day. */
 	newIds: string[];
+	/** The vocabulary track's own daily pin — same shape, separate budget. */
+	vocabNewDate: string;
+	vocabNewCount: number;
+	vocabNewIds: string[];
+}
+
+export type Track = 'script' | 'vocab';
+
+/** Which daily new-card budget a tier draws from. */
+export function trackOfTier(tier: string): Track {
+	return tier.startsWith('vocab') ? 'vocab' : 'script';
 }
 
 export interface SchedulableCard {
@@ -95,7 +109,10 @@ export function emptyState(): SrsState {
 		days: {},
 		newDate: '',
 		newCount: 0,
-		newIds: []
+		newIds: [],
+		vocabNewDate: '',
+		vocabNewCount: 0,
+		vocabNewIds: []
 	};
 }
 
@@ -182,6 +199,7 @@ export function reviveState(raw: unknown): SrsState {
 	const version = s.version ?? s.v;
 	if (version !== 1) return emptyState();
 	const newCount = asFiniteNumber(s.newCount);
+	const vocabNewCount = asFiniteNumber(s.vocabNewCount);
 	return {
 		version: 1,
 		unlocked: Array.isArray(s.unlocked) ? s.unlocked.filter((x) => typeof x === 'string') : [],
@@ -190,7 +208,12 @@ export function reviveState(raw: unknown): SrsState {
 		days: reviveDays(s.days),
 		newDate: typeof s.newDate === 'string' ? s.newDate : '',
 		newCount: newCount !== null && newCount >= 0 ? Math.trunc(newCount) : 0,
-		newIds: Array.isArray(s.newIds) ? s.newIds.filter((id) => typeof id === 'string') : []
+		newIds: Array.isArray(s.newIds) ? s.newIds.filter((id) => typeof id === 'string') : [],
+		vocabNewDate: typeof s.vocabNewDate === 'string' ? s.vocabNewDate : '',
+		vocabNewCount: vocabNewCount !== null && vocabNewCount >= 0 ? Math.trunc(vocabNewCount) : 0,
+		vocabNewIds: Array.isArray(s.vocabNewIds)
+			? s.vocabNewIds.filter((id) => typeof id === 'string')
+			: []
 	};
 }
 
@@ -226,6 +249,7 @@ export function isSrsBackup(raw: unknown): boolean {
 	if (!isStringArray(s.unlocked)) return false;
 	if (s.openedLabs !== undefined && !isStringArray(s.openedLabs)) return false;
 	if (s.newIds !== undefined && !isStringArray(s.newIds)) return false;
+	if (s.vocabNewIds !== undefined && !isStringArray(s.vocabNewIds)) return false;
 	if (!s.cards || typeof s.cards !== 'object' || Array.isArray(s.cards)) return false;
 	for (const value of Object.values(s.cards as Record<string, unknown>)) {
 		if (!reviveCard(value)) return false;
@@ -350,21 +374,32 @@ export interface GradeResult {
 	wasNew: boolean;
 }
 
-export function grade(state: SrsState, id: string, g: Grade, now: number): GradeResult {
+export function grade(
+	state: SrsState,
+	id: string,
+	g: Grade,
+	now: number,
+	track: Track = 'script'
+): GradeResult {
 	const today = isoDay(now);
-	const rolled =
-		state.newDate === today ? state : { ...state, newDate: today, newCount: 0, newIds: [] };
+	const rolled = rollNewDay(state, today);
 
 	const wasNew = !rolled.cards[id];
 	const card = nextCard(rolled.cards[id], g, now);
 	const prevDays = asFiniteNumber(rolled.days[today]) ?? 0;
+
+	const counted = wasNew
+		? track === 'vocab'
+			? { vocabNewCount: rolled.vocabNewCount + 1 }
+			: { newCount: rolled.newCount + 1 }
+		: {};
 
 	return {
 		state: {
 			...rolled,
 			cards: { ...rolled.cards, [id]: card },
 			days: pruneDays({ ...rolled.days, [today]: prevDays + 1 }),
-			newCount: rolled.newCount + (wasNew ? 1 : 0)
+			...counted
 		},
 		card,
 		wasNew
@@ -377,6 +412,7 @@ export function grade(state: SrsState, id: string, g: Grade, now: number): Grade
 
 export interface QueueOptions {
 	newPerDay?: number;
+	vocabNewPerDay?: number;
 	reviewPerSitting?: number;
 	/** Injectable so tests are deterministic; defaults to Math.random. */
 	shuffle?: <T>(items: T[]) => T[];
@@ -413,13 +449,53 @@ function splitQueue<T extends SchedulableCard>(
 }
 
 function rollNewDay(state: SrsState, today: string): SrsState {
-	if (state.newDate === today) return state;
-	return { ...state, newDate: today, newCount: 0, newIds: [] };
+	const scriptStale = state.newDate !== today;
+	const vocabStale = state.vocabNewDate !== today;
+	if (!scriptStale && !vocabStale) return state;
+	return {
+		...state,
+		...(scriptStale ? { newDate: today, newCount: 0, newIds: [] } : {}),
+		...(vocabStale ? { vocabNewDate: today, vocabNewCount: 0, vocabNewIds: [] } : {})
+	};
+}
+
+/** The per-track view of the daily pin. Both tracks share one algorithm. */
+function pinOf(state: SrsState, track: Track): { count: number; ids: string[] } {
+	return track === 'vocab'
+		? { count: state.vocabNewCount, ids: state.vocabNewIds }
+		: { count: state.newCount, ids: state.newIds };
+}
+
+function capOf(opts: QueueOptions, track: Track): number {
+	return track === 'vocab'
+		? (opts.vocabNewPerDay ?? DEFAULT_VOCAB_NEW_PER_DAY)
+		: (opts.newPerDay ?? DEFAULT_NEW_PER_DAY);
+}
+
+function pinTrack<T extends SchedulableCard>(
+	rolled: SrsState,
+	fresh: T[],
+	track: Track,
+	opts: QueueOptions
+): string[] {
+	const shuffle = opts.shuffle ?? defaultShuffle;
+	const { count, ids } = pinOf(rolled, track);
+	const room = Math.max(0, capOf(opts, track) - count);
+	const mine = fresh.filter((c) => trackOfTier(c.tier) === track);
+	const unseen = new Set(mine.map((c) => c.id));
+	const kept = ids.filter((id) => unseen.has(id)).slice(0, room);
+	if (kept.length >= room) return kept;
+	const have = new Set(kept);
+	const drawn = shuffle(mine.filter((c) => !have.has(c.id)))
+		.slice(0, room - kept.length)
+		.map((c) => c.id);
+	return [...kept, ...drawn];
 }
 
 /**
- * Persist today’s unseen draw on state. Call before `due()` so reloads and
- * later visits the same calendar day keep the same new cards.
+ * Persist today’s unseen draw on state — one pin per track, so a vocabulary
+ * pack landing can never crowd letters out of the day (or vice versa). Call
+ * before `due()` so reloads the same calendar day keep the same new cards.
  */
 export function pinNewForDay<T extends SchedulableCard>(
 	state: SrsState,
@@ -427,34 +503,57 @@ export function pinNewForDay<T extends SchedulableCard>(
 	now: number,
 	opts: QueueOptions = {}
 ): SrsState {
-	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
-	const shuffle = opts.shuffle ?? defaultShuffle;
 	const today = isoDay(now);
 	const rolled = rollNewDay(state, today);
-	const room = Math.max(0, newPerDay - rolled.newCount);
 	const { fresh } = splitQueue(rolled, deck, now);
-	const unseen = new Set(fresh.map((c) => c.id));
-	const kept = rolled.newIds.filter((id) => unseen.has(id)).slice(0, room);
+	const newIds = pinTrack(rolled, fresh, 'script', opts);
+	const vocabNewIds = pinTrack(rolled, fresh, 'vocab', opts);
 
-	let newIds = kept;
-	if (kept.length < room) {
-		const have = new Set(kept);
-		const drawn = shuffle(fresh.filter((c) => !have.has(c.id)))
-			.slice(0, room - kept.length)
-			.map((c) => c.id);
-		newIds = [...kept, ...drawn];
+	if (
+		rolled === state &&
+		sameIds(newIds, state.newIds) &&
+		sameIds(vocabNewIds, state.vocabNewIds)
+	) {
+		return state;
 	}
+	return { ...rolled, newIds, vocabNewIds };
+}
 
-	if (rolled === state && sameIds(newIds, state.newIds)) return state;
-	return { ...rolled, newIds };
+function pinnedCards<T extends SchedulableCard>(
+	state: SrsState,
+	fresh: T[],
+	track: Track,
+	today: string,
+	opts: QueueOptions
+): T[] {
+	const dateOf = track === 'vocab' ? state.vocabNewDate : state.newDate;
+	const { count, ids } = pinOf(state, track);
+	const usedToday = dateOf === today ? count : 0;
+	const room = Math.max(0, capOf(opts, track) - usedToday);
+	const mine = fresh.filter((c) => trackOfTier(c.tier) === track);
+
+	const pin = dateOf === today ? ids : [];
+	if (pin.length === 0) {
+		const shuffle = opts.shuffle ?? defaultShuffle;
+		return shuffle(mine).slice(0, room);
+	}
+	const byId = new Map(mine.map((c) => [c.id, c]));
+	const picked: T[] = [];
+	for (const id of pin) {
+		if (picked.length >= room) break;
+		const card = byId.get(id);
+		if (card) picked.push(card);
+	}
+	return picked;
 }
 
 /**
- * Overdue reviews first (capped per sitting), then a capped trickle of unseen
- * cards. Leftover debt stays in `stats.due` so Review can offer another sitting.
+ * Overdue reviews first (both tracks, oldest due first, capped per sitting),
+ * then each track's capped trickle of unseen cards. Leftover debt stays in
+ * `stats.due` so Review can offer another sitting.
  *
- * When `state.newIds` is pinned for today, those ids are used instead of a
- * fresh shuffle so `/review` does not reshuffle unseen cards on every load.
+ * When a track's pin is set for today, those ids are used instead of a fresh
+ * shuffle so `/review` does not reshuffle unseen cards on every load.
  */
 export function due<T extends SchedulableCard>(
 	state: SrsState,
@@ -462,28 +561,15 @@ export function due<T extends SchedulableCard>(
 	now: number,
 	opts: QueueOptions = {}
 ): T[] {
-	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
 	const reviewPerSitting = opts.reviewPerSitting ?? DEFAULT_REVIEW_PER_SITTING;
-	const shuffle = opts.shuffle ?? defaultShuffle;
 	const today = isoDay(now);
-	const usedToday = state.newDate === today ? state.newCount : 0;
 	const { reviews, fresh } = splitQueue(state, deck, now);
 	const sittingReviews = reviews.slice(0, reviewPerSitting);
-	const room = Math.max(0, newPerDay - usedToday);
-
-	const pin = state.newDate === today ? state.newIds : [];
-	if (pin.length === 0) {
-		return [...sittingReviews, ...shuffle(fresh).slice(0, room)];
-	}
-
-	const byId = new Map(fresh.map((c) => [c.id, c]));
-	const pinned: T[] = [];
-	for (const id of pin) {
-		if (pinned.length >= room) break;
-		const card = byId.get(id);
-		if (card) pinned.push(card);
-	}
-	return [...sittingReviews, ...pinned];
+	return [
+		...sittingReviews,
+		...pinnedCards(state, fresh, 'script', today, opts),
+		...pinnedCards(state, fresh, 'vocab', today, opts)
+	];
 }
 
 /** Epoch ms of the soonest upcoming card, or null when nothing is scheduled. */
@@ -509,6 +595,8 @@ export interface Stats {
 	young: number;
 	due: number;
 	newLeft: number;
+	/** The vocabulary track's remaining daily draw, budgeted separately. */
+	vocabNewLeft: number;
 	queue: number;
 	lapsing: number;
 	streak: number;
@@ -574,13 +662,19 @@ export function stats<T extends SchedulableCard>(
 	opts: QueueOptions = {}
 ): Stats {
 	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
+	const vocabNewPerDay = opts.vocabNewPerDay ?? DEFAULT_VOCAB_NEW_PER_DAY;
 	const available = pool(state, deck);
 	const today = isoDay(now);
 
 	let seen = 0, mature = 0, young = 0, dueNow = 0, lapsing = 0;
+	let scriptUnseen = 0, vocabUnseen = 0;
 	for (const card of available) {
 		const st = state.cards[card.id];
-		if (!st) continue;
+		if (!st) {
+			if (trackOfTier(card.tier) === 'vocab') vocabUnseen++;
+			else scriptUnseen++;
+			continue;
+		}
 		seen++;
 		if (st.ivl >= MATURE_DAYS) mature++;
 		else young++;
@@ -589,7 +683,9 @@ export function stats<T extends SchedulableCard>(
 	}
 
 	const usedToday = state.newDate === today ? state.newCount : 0;
-	const newLeft = Math.max(0, Math.min(newPerDay - usedToday, available.length - seen));
+	const vocabUsedToday = state.vocabNewDate === today ? state.vocabNewCount : 0;
+	const newLeft = Math.max(0, Math.min(newPerDay - usedToday, scriptUnseen));
+	const vocabNewLeft = Math.max(0, Math.min(vocabNewPerDay - vocabUsedToday, vocabUnseen));
 
 	return {
 		unlocked: available.length,
@@ -600,7 +696,8 @@ export function stats<T extends SchedulableCard>(
 		young,
 		due: dueNow,
 		newLeft,
-		queue: dueNow + newLeft,
+		vocabNewLeft,
+		queue: dueNow + newLeft + vocabNewLeft,
 		lapsing,
 		streak: streak(state, now),
 		reviewedToday: state.days[today] ?? 0,

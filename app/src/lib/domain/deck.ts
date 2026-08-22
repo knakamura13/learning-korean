@@ -16,8 +16,11 @@ import {
 	applyLiaison, applyTensification, applyNasalization, applyHMerge, applyFlow,
 	batchimSound, fusionParts, romanizeWord
 } from './hangul';
+import { VOCAB_PACKS, WORDS } from './words';
 
-export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster' | 'pron' | 'block';
+export type CardKind =
+	| 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster'
+	| 'pron' | 'block' | 'meaning';
 
 export interface Card {
 	id: string;
@@ -288,13 +291,65 @@ const flow: Card[] = Object.keys(FLOW_NOTES).map((written) => {
 	);
 });
 
+/* ---------- vocabulary packs: meaning + pronunciation lanes ---------- */
+
+/** Words the lab tiers already quiz for pronunciation — no duplicate lane. */
+const LAB_PRON_FRONTS = new Set([
+	...Object.keys(LIAISON_NOTES),
+	...Object.keys(CONTACT_NOTES),
+	...Object.keys(HMERGE_NOTES),
+	...Object.keys(FLOW_NOTES)
+]);
+
+const vocabMeaning: Card[] = WORDS.map((word) =>
+	card(
+		`wm-${word.hangul}`,
+		word.hangul,
+		'what does this mean?',
+		word.glosses,
+		word.note ??
+			(word.hangul === word.spoken ? 'Reads exactly as written.' : `Said [${word.spoken}].`),
+		word.pack,
+		'meaning'
+	)
+);
+
+/** Pronunciation lane only where a sound change makes the spelling lie. */
+const vocabPron: Card[] = WORDS.filter(
+	(word) => word.hangul !== word.spoken && !LAB_PRON_FRONTS.has(word.hangul)
+).map((word) =>
+	card(
+		`wp-${word.hangul}`,
+		word.hangul,
+		'how is this said? (hyphenated cuts, or Hangul)',
+		withLlVariant([romanizeWord(word.spoken), word.spoken]),
+		word.note ?? `Said [${word.spoken}].`,
+		word.pack,
+		'pron'
+	)
+);
+
+export interface VocabTier {
+	id: string;
+	label: string;
+	size: number;
+}
+
+export const VOCAB_TIERS: VocabTier[] = VOCAB_PACKS.map((pack) => ({
+	id: pack.id,
+	label: pack.label,
+	size: vocabMeaning.filter((c) => c.tier === pack.id).length +
+		vocabPron.filter((c) => c.tier === pack.id).length
+}));
+
 /* ---------- assembly ---------- */
 
 const blockCatalog: Card[] = blockEntries();
 
 export const DECK: Card[] = [
 	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters,
-	...liaison, ...contact, ...hmerge, ...flow, ...blockCatalog
+	...liaison, ...contact, ...hmerge, ...flow, ...blockCatalog,
+	...vocabMeaning, ...vocabPron
 ];
 
 export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(

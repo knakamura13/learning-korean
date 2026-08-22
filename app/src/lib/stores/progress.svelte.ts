@@ -11,12 +11,12 @@ import {
 	emptyState, decodeStoredState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
 	openLab as openLabAccess, isOpened,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
-	weakest as weakestCards, gradeFromAttempt, tierReviewProgress, reviveState,
+	weakest as weakestCards, gradeFromAttempt, tierReviewProgress, reviveState, trackOfTier,
 	DEFAULT_NEW_PER_DAY, DEFAULT_REVIEW_PER_SITTING,
 	type SrsState, type Grade, type Stats, type QueueOptions
 } from '$lib/domain/srs';
 import { mergeSrsState } from '$lib/domain/merge';
-import { DECK, TIERS, cardsOfTier, type Card } from '$lib/domain/deck';
+import { CARDS_BY_ID, DECK, TIERS, VOCAB_TIERS, cardsOfTier, type Card } from '$lib/domain/deck';
 import { browserStorage, memoryStorage, onStorageKey, type Storage } from '$lib/domain/storage';
 
 export const SRS_STORAGE_KEY = 'korean-srs-v1';
@@ -135,6 +135,12 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 			return TIERS.map((tier, i) => ({ ...tier, ...rows[i] }));
 		},
 
+		/** Per-pack progress for the home Vocabulary section. */
+		get vocabProgress() {
+			const rows = tierReviewProgress(state, DECK, VOCAB_TIERS);
+			return VOCAB_TIERS.map((tier, i) => ({ ...tier, ...rows[i] }));
+		},
+
 		/** Returns how many cards this actually released. */
 		unlock(tiers: string[]): number {
 			const before = state.unlocked.length;
@@ -151,14 +157,16 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 			now = Date.now();
 			const wasNew = !state.cards[cardId];
 			const g = gradeFromAttempt(correct, elapsedMs, wasNew);
-			const result = gradeCard(state, cardId, g, now);
+			const track = trackOfTier(CARDS_BY_ID[cardId]?.tier ?? '');
+			const result = gradeCard(state, cardId, g, now, track);
 			commit(result.state);
 			return result;
 		},
 
 		grade(cardId: string, g: Grade) {
 			now = Date.now();
-			const result = gradeCard(state, cardId, g, now);
+			const track = trackOfTier(CARDS_BY_ID[cardId]?.tier ?? '');
+			const result = gradeCard(state, cardId, g, now, track);
 			commit(result.state);
 			return result;
 		},

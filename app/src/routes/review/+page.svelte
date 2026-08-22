@@ -6,12 +6,12 @@
 	import { progress } from '$lib/stores/progress.svelte';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
-	import SprintChoices from '$lib/components/SprintChoices.svelte';
+	import ReviewCompose from '$lib/components/ReviewCompose.svelte';
 	import type { AudioSlot } from '$lib/audio/letters';
 	import { TIERS, checkAnswer, type Card } from '$lib/domain/deck';
 	import { attemptSpeed } from '$lib/domain/srs';
-	import { sprintEligible, sprintInventory, trialForBlock, type SprintTrial } from '$lib/domain/sprint';
-	import { blockInventory } from '$lib/domain/blockDeck';
+	import { sprintEligible } from '$lib/domain/sprint';
+	import { composeTrial, type ComposeTrial } from '$lib/domain/blockCompose';
 	import { LABS } from '$lib/content';
 	import {
 		REVIEW_ANSWER_MAX_LENGTH,
@@ -34,8 +34,7 @@
 	let input = $state<HTMLInputElement | undefined>();
 	let ready = $state(false);
 	let emptyHint = $state(false);
-	let blockTrial = $state<SprintTrial | null>(null);
-	let choices = $state<SprintChoices | undefined>();
+	let blockTrial = $state<ComposeTrial | null>(null);
 
 	function reviewAudioSlot(kind: Card['kind']): AudioSlot | null {
 		switch (kind) {
@@ -50,6 +49,7 @@
 				return 'final';
 			case 'block':
 			case 'pron':
+			case 'meaning':
 				return null;
 			default: {
 				const _never: never = kind;
@@ -98,19 +98,6 @@
 		reset();
 	}
 
-	function cumulativeInventory(tier: string): string[] {
-		const order = TIERS.map((t) => t.id);
-		const idx = order.indexOf(tier);
-		return sprintInventory(order.slice(0, Math.max(idx + 1, 2)));
-	}
-
-	function makeBlockTrial(front: string, tier: string): SprintTrial | null {
-		const rng = Math.random;
-		return (
-			trialForBlock(front, blockInventory(tier), rng) ??
-			trialForBlock(front, cumulativeInventory(tier), rng)
-		);
-	}
 
 	async function reset() {
 		typed = '';
@@ -121,7 +108,7 @@
 		blockTrial = null;
 		const current = queue[index];
 		if (current?.kind === 'block') {
-			blockTrial = makeBlockTrial(current.front, current.tier);
+			blockTrial = composeTrial(current.front, unlockedTiers, Math.random);
 		}
 		sittingNew = Boolean(current && !progress.state.cards[current.id]);
 		await tick();
@@ -164,23 +151,18 @@
 		reset();
 	}
 
-	function pickBlock(index: number) {
-		if (answered || !blockTrial || !card) return;
-		if (card.kind === 'block') {
-			const value = blockTrial.options[index];
-			if (!value) return;
-			const ms = Date.now() - startedAt;
-			const ok = checkAnswer(card, value);
-			const result = progress.answer(card.id, ok, ms);
-			answered = true;
-			shown += 1;
-			if (ok) right += 1;
-			verdict = {
-				ok,
-				speed: ok ? attemptSpeed(ms) : '',
-				when: reviewIntervalCopy(result.card.ivl)
-			};
-		}
+	function pickCompose(ok: boolean) {
+		if (answered || !blockTrial || !card || card.kind !== 'block') return;
+		const ms = Date.now() - startedAt;
+		const result = progress.answer(card.id, ok, ms);
+		answered = true;
+		shown += 1;
+		if (ok) right += 1;
+		verdict = {
+			ok,
+			speed: ok ? attemptSpeed(ms) : '',
+			when: reviewIntervalCopy(result.card.ivl)
+		};
 	}
 
 	function onKey(e: KeyboardEvent) {
@@ -188,10 +170,6 @@
 		if (e.key === 'Enter' && answered) {
 			e.preventDefault();
 			next();
-			return;
-		}
-		if (blockCard && !answered) {
-			choices?.keyPick(e.key);
 			return;
 		}
 	}
@@ -322,12 +300,17 @@
 				</p>
 
 				<div class="glyph-row">
-					<div class="glyph" lang="ko">{card.front}</div>
+					{#if blockCard}
+						<!-- Composition inverts the card: show the sound, build the block. -->
+						<div class="glyph sound">{card.answers[0]}</div>
+					{:else}
+						<div class="glyph" lang="ko">{card.front}</div>
+					{/if}
 					{#if reviewSlot}
 						<PlayButton jamo={card.front} audioSlot={reviewSlot} />
 					{/if}
 				</div>
-				<p class="ask">{card.ask}</p>
+				<p class="ask">{blockCard ? 'build the block that says this' : card.ask}</p>
 
 				{#if !blockCard || !blockTrial}
 					<form
@@ -380,12 +363,7 @@
 				{:else if blockTrial}
 					<div class="block-answer">
 						{#key index}
-							<SprintChoices
-								bind:this={choices}
-								options={blockTrial.options}
-								onPick={pickBlock}
-								disabled={answered}
-							/>
+							<ReviewCompose trial={blockTrial} onPick={pickCompose} disabled={answered} />
 						{/key}
 						{#if answered}
 							<button class="btn" type="button" use:focusWhen={answered} onclick={next}>Next</button>
@@ -404,9 +382,13 @@
 					>
 						<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
 						<span class="ans">
-							{card.answers[0]}
-							{#if card.answers.length > 1}
-								<em>also: {card.answers.slice(1).join(', ')}</em>
+							{#if blockCard}
+								<span lang="ko">{card.front}</span> · {card.answers[0]}
+							{:else}
+								{card.answers[0]}
+								{#if card.answers.length > 1}
+									<em>also: {card.answers.slice(1).join(', ')}</em>
+								{/if}
 							{/if}
 						</span>
 						<span class="note">{card.note}</span>
@@ -509,6 +491,12 @@
 		font-weight: 500;
 		line-height: 1.05;
 		text-align: center;
+	}
+	/* A block card's front is now the sound, not the glyph. */
+	.glyph.sound {
+		font-family: var(--mono);
+		font-size: clamp(1.9rem, 5vw + 0.8rem, 3rem);
+		letter-spacing: 0.04em;
 	}
 
 	@media (max-height: 52rem) {
