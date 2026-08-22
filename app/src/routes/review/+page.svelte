@@ -98,7 +98,6 @@
 		reset();
 	}
 
-
 	async function reset() {
 		typed = '';
 		answered = false;
