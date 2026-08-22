@@ -348,6 +348,30 @@ describe('polish audit regressions', () => {
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
+	it('keeps ink-soft nav text at least 4.5:1 on the chrome surface, every look', () => {
+		// --chrome is color-mix(in srgb, var(--paper-sunk) N%, black); replicate
+		// the mix here so a palette or factor change cannot sneak under 4.5
+		// (axe caught 82% at 4.39 on watercolor/light — hence 87%).
+		const factor = appCss.match(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) (\d+)%, black\)/);
+		expect(factor).toBeTruthy();
+		const pct = Number(factor![1]) / 100;
+		const mixTowardBlack = (hex: string): string => {
+			const channels = [1, 3, 5].map((i) =>
+				Math.round(parseInt(hex.slice(i, i + 2), 16) * pct)
+			);
+			return `#${channels.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+		};
+		for (const look of LOOKS) {
+			for (const scheme of ['light', 'dark'] as const) {
+				const chrome = mixTowardBlack(look[scheme].paperSunk);
+				expect(
+					contrastRatio(look[scheme].inkSoft, chrome),
+					`${look.id}/${scheme} ink-soft on chrome`
+				).toBeGreaterThanOrEqual(4.5);
+			}
+		}
+	});
+
 	it('uses moss and rose under prefers-contrast, not 태극 red', () => {
 		expect(appCss).not.toMatch(/prefers-contrast:\s*more\)[\s\S]{0,400}--accent:\s*#/);
 		expect(activeSystem.contrastMoreLight?.accent.toLowerCase()).toBe('#1e3d2c');
@@ -679,7 +703,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('paints vertical overscroll with the header chrome color', () => {
-		expect(appCss).toMatch(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) 82%, black\)/);
+		expect(appCss).toMatch(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) \d+%, black\)/);
 		expect(appCss).toMatch(/html\s*\{[^}]*background-color:\s*var\(--chrome\)/s);
 		expect(appCss).toMatch(/body\s*\{[^}]*background-color:\s*var\(--paper\)/s);
 		expect(styleBlock(layout)).toMatch(/\.bar\s*\{[^}]*background:\s*var\(--chrome\)/s);

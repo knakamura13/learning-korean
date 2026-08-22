@@ -26,7 +26,9 @@
 	--shell: 62rem;
 	--sitting: 90rem;
 	/* Opaque nav / rubber-band canvas; matches header.bar. */
-	--chrome: color-mix(in srgb, var(--paper-sunk) 82%, black);
+	/* 87%, not 82%: ink-soft nav text on this surface must clear 4.5:1 in every
+	   look (worst case watercolor/light lands at 4.95). Guarded in polish.test. */
+	--chrome: color-mix(in srgb, var(--paper-sunk) 87%, black);
 }
 
 *,

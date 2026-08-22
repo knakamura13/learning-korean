@@ -88,6 +88,18 @@ sound. The reason Korean spelling and Korean speech diverge, and the reason the
 sound rules are learnable rather than arbitrary.
 _Avoid_: historical spelling, irregular spelling
 
+**Tensification** (경음화):
+A plain consonant hardening to its tense twin after a stop: 학교 → [학꾜],
+식당 → [식땅]. Taught in Lab 07 (표준 발음법 Article 23). The stop does not
+release; the following consonant absorbs the held pressure.
+_Avoid_: fortition (correct but opaque), doubling (confuses with ㄲ-as-letter)
+
+**Nasalization** (비음화):
+A stop becoming its nasal counterpart before a nasal: 입니다 → [임니다],
+국물 → [궁물]. Taught in Lab 07 (표준 발음법 Article 18). The mouth position
+holds; only the airflow reroutes through the nose.
+_Avoid_: assimilation alone (too broad — several rules assimilate)
+
 ## Pending — taught, not yet demonstrated
 
 _(Lesson 01 introduced: the five base shapes, the stroke rule, the doubling rule,

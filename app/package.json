@@ -17,9 +17,12 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"study": "vite build && vite preview --port 8777 --strictPort"
+		"study": "vite build && vite preview --port 8777 --strictPort",
+		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.13.0",
+		"@playwright/test": "^1.62.1",
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "2.70.3",
