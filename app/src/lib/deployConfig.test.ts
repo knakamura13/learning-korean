@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import packageJson from '../../package.json';
 import svelteConfig from '../../svelte.config.js?raw';
@@ -132,6 +132,48 @@ describe('license, health, and manifests', () => {
 		const start = readFileSync(new URL('../../scripts/start.mjs', import.meta.url), 'utf8');
 		expect(start).toMatch(/ADAPTER=node/);
 		expect(start).toMatch(/build\/index\.js/);
+	});
+});
+
+describe('accounts API deploy contract', () => {
+	it('documents the account env vars without baking any into the image', () => {
+		for (const name of ['DATABASE_URL', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']) {
+			expect(envExample).toContain(name);
+			expect(rootReadme).toContain(name);
+			expect(dockerfile).not.toContain(name);
+		}
+	});
+
+	it('talks to Postgres over Railway private networking, never the TCP proxy', () => {
+		expect(envExample).toMatch(/railway\.internal/);
+		expect(rootReadme).toMatch(/railway\.internal/);
+		expect(rootReadme).not.toMatch(/DATABASE_PUBLIC_URL/);
+	});
+
+	it('opts every API route out of prerendering', () => {
+		const apiDir = new URL('../routes/api/', import.meta.url);
+		const entries = readdirSync(apiDir, { recursive: true }) as string[];
+		const servers = entries.filter((p) => p.toString().endsWith('+server.ts'));
+		expect(servers.length).toBeGreaterThanOrEqual(8);
+		for (const rel of servers) {
+			const source = readFileSync(new URL(rel.toString(), apiDir), 'utf8');
+			expect(source, `${rel} must export prerender = false`).toMatch(
+				/export const prerender = false/
+			);
+		}
+	});
+
+	it('runs the Postgres integration suite in CI via a service container', () => {
+		const ci = readFileSync(ciPath, 'utf8');
+		expect(ci).toMatch(/postgres:16/);
+		expect(ci).toMatch(/TEST_DATABASE_URL/);
+		expect(ci).toMatch(/pg_isready/);
+	});
+
+	it('uses postgres.js and no deprecated auth dependency', () => {
+		expect(packageJson.dependencies).toHaveProperty('postgres');
+		expect(packageJson.dependencies).not.toHaveProperty('arctic');
+		expect(packageJson.dependencies).not.toHaveProperty('@auth/core');
 	});
 });
 

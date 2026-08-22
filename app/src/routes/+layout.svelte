@@ -7,6 +7,8 @@
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { labSession } from '$lib/stores/labSession.svelte';
+	import { session } from '$lib/stores/session.svelte';
 	import { activeSystem } from '$lib/theme/active';
 	import { applyLook, readLookId, readThemePref, subscribeSystemTheme } from '$lib/theme';
 
@@ -27,7 +29,16 @@
 
 	onMount(() => {
 		applyLook(readLookId(), readThemePref());
+		void session.load();
 		return subscribeSystemTheme();
+	});
+
+	// Every store commit reassigns these references; while signed in the sync
+	// engine turns that into a debounced push. A no-op for guests.
+	$effect(() => {
+		void progress.state;
+		void labSession.snapshot;
+		session.noteLocalChange();
 	});
 
 	function skipToMain(event: MouseEvent) {

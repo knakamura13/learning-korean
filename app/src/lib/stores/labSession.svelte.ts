@@ -16,6 +16,7 @@ import {
 	type LabProgress,
 	type LabSessions
 } from '$lib/domain/labSession';
+import { mergeLabSessions } from '$lib/domain/merge';
 import { browserStorage, memoryStorage, onStorageKey, type Storage } from '$lib/domain/storage';
 
 export const LAB_SESSION_STORAGE_KEY = 'korean-lab-session-v1';
@@ -77,6 +78,15 @@ export function createLabSession(
 
 		clear(labId: string) {
 			commit(clearLab(state, labId));
+		},
+
+		/** Merge a synced sitting map into local place. No-op while corrupt. */
+		applyRemote(remoteSessions: unknown): boolean {
+			if (corruptRaw) return false;
+			const merged = mergeLabSessions(state, reviveSessions(remoteSessions, LAB_STEP_COUNTS));
+			if (JSON.stringify(merged) === JSON.stringify(state)) return false;
+			commit(merged);
+			return true;
 		},
 
 		replaceAll(raw: unknown) {

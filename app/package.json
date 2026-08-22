@@ -35,7 +35,8 @@
 	},
 	"dependencies": {
 		"@shopify/draggable": "^1.2.1",
-		"dompurify": "3.4.14"
+		"dompurify": "3.4.14",
+		"postgres": "^3.4.9"
 	},
 	"pnpm": {
 		"overrides": {
