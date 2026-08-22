@@ -67,8 +67,8 @@ The objection was to *lessons* that read like articles.
 Kyle asked for SRS to master every letter, sound, and compound. Built as:
 
 - `app/src/lib/domain/deck.ts` — originally 72 cards covering the letter
-  inventory (now 147: generated block cards and lab06/lab07 pronunciation
-  tiers joined later): 19 consonants,
+  inventory (now 299: generated block cards, the lab06–lab10 pronunciation
+  tiers, and the vocabulary packs joined later): 19 consonants,
   10 basic vowels, 11 compound vowels + 5 construction cards, 16 batchim values,
   11 clusters.
 - `app/src/lib/domain/srs.ts` — SM-2 variant, pure, clock injected.
@@ -250,9 +250,11 @@ the gate). Word-level TTS is deferred until after her recordings.
 
 **Built:** Lab 01 (consonants, `lab01`) · Lab 02 (basic vowels, `lab02`) ·
 Lab 03 (compound vowels, `lab03`) · Lab 04 (batchim, `lab04`) · Lab 05 (clusters,
-`lab05`) · Lab 06 (liaison, `lab06`) · Lab 07 (tensification + nasalization, `lab07`).
-**All 72 letter cards are reachable — the writing system is fully covered.** Lab 06
-adds ten `lab06` pronunciation cards. Lab 07 adds ten `lab07` pronunciation cards.
+`lab05`) · Lab 06 (liaison, `lab06`) · Lab 07 (tensification + nasalization, `lab07`) ·
+Lab 08 (aspiration + ㅎ-deletion, `lab08`) · Lab 09 (lateralization + ㄹ→ㄴ, `lab09`) ·
+Lab 10 (names & address, `lab10`).
+**All 72 letter cards are reachable — the writing system is fully covered.** Each of
+labs 06–10 adds ten pronunciation cards to its own tier.
 
 Lab 02 scope note: it teaches the **10 basic vowels only**, deliberately matching deck
 tier `lab02`. Compound vowels and the mergers were split out into Lab 03 rather than
@@ -294,19 +296,30 @@ liaison so it does not get crammed into this rule. Keep that boundary in later l
 
 ### Beyond the writing system — sound changes
 
-The page is now fully covered. Lab 06 (liaison) is built. Lab 07 (tensification +
-nasalization) is built. What remains is how the page *sounds* when letters meet
-beyond those rules. Suggested order:
+The page is now fully covered, and so are the drilled sound changes: labs 06–09
+cover liaison, tensification + nasalization, aspiration + ㅎ-deletion, and the
+ㄹ rules; only palatalization stays reference-only. Suggested order was:
 
-1. **Tensification + nasalization** — 학교 → [학꾜], 입니다 → [임니다]. The two changes
-   that most often make a known word unrecognizable by ear. **Built as Lab 07.**
-2. **Aspiration + ㅎ-deletion** — **Next to implement.** Palatalization and ㄹ
-   assimilation remain after that.
+1. **Tensification + nasalization** — 학교 → [학꾜], 입니다 → [임니다]. **Built as Lab 07.**
+2. **Aspiration + ㅎ-deletion**, then the ㄹ rules. **Built as Labs 08–09.**
 3. **Names, part 2** — full names, honorific suffixes, and how Korean addresses people.
-   Ties off the "people in my life" half of the mission.
+   Ties off the "people in my life" half of the mission. **Built as Lab 10.**
 4. **Handwriting** — stroke order, one session.
 5. **Romanization traps** — why RR misleads, so he stops trusting it entirely.
 
 Sound-change deck tiers (`lab06`+) use rule-application cards: front is a written
 word, answer is its pronunciation. Lab 06 established the `pron` card kind in
-`deck.ts` (ten `lab06` cards).
+`deck.ts`; labs 06–10 each add ten.
+
+Lab 10 scope note: every name on a widget or deck card is **derivable by the
+engine** — `pronounceWord` chains the drilled rules, and the deck derives each
+answer from it, so a name whose real-life sound needs an unmodeled rule cannot
+ship. Two rejection classes to respect when adding names: given names starting
+이/야/여/요/유 after a batchim surname (김연아, 박열 — real speech ㄴ-inserts at
+the name boundary, the engine liaises), and stop batchim + ㄹ-initial given
+names (박라온 — the 독립-class two-rule chain the engine deliberately refuses).
+씨 forms need a space (은지 씨), which breaks block-cut romanization — 씨/님
+attachment is taught in choice cards, and only space-free forms (고객님,
+vocatives) become deck fronts. No new step types: names reuse `liaison`,
+`contact`, and `hmerge` widgets, which proves the point the lab makes — names
+are ordinary Korean at every junction.

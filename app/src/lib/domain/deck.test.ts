@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { DECK, CARDS_BY_ID, TIERS, VOCAB_TIERS, cardsOfTier, checkAnswer, normalize } from './deck';
 import { BLOCK_COUNTS } from './blockDeck';
-import { applyLiaison, applyTensification, applyNasalization, batchimSound, fusionParts, CLUSTERS, romanizeWord } from './hangul';
+import { applyLiaison, applyTensification, applyNasalization, batchimSound, fusionParts, CLUSTERS, pronounceWord, romanizeWord } from './hangul';
 
 describe('deck integrity', () => {
 	it('has no duplicate ids', () => {
@@ -178,6 +178,35 @@ describe('lab07 / pron cards', () => {
 		expect(checkAnswer(card, '학꾜')).toBe(true);
 		expect(checkAnswer(card, 'hakgyo')).toBe(false);
 		expect(checkAnswer(card, 'hak-gyo')).toBe(false);
+	});
+});
+
+describe('lab10 / pron cards', () => {
+	it('unlocks ten lab10 name cards derived from the full pronunciation chain', () => {
+		const cards = cardsOfTier('lab10');
+		expect(cards).toHaveLength(10);
+		expect(TIERS.find((t) => t.id === 'lab10')).toMatchObject({ lab: '0010', size: 10 });
+		for (const c of cards) {
+			expect(c.kind).toBe('pron');
+			const spoken = pronounceWord(c.front);
+			expect(c.answers).toContain(spoken);
+			expect(c.answers).toContain(romanizeWord(spoken));
+		}
+	});
+
+	it('requires the derived form for 박은지 — the block-cut spelling cannot pass', () => {
+		const card = CARDS_BY_ID['p-박은지'];
+		expect(checkAnswer(card, 'ba-geun-ji')).toBe(true);
+		expect(checkAnswer(card, '바근지')).toBe(true);
+		expect(checkAnswer(card, 'bak-eun-ji')).toBe(false);
+		expect(checkAnswer(card, 'park-eun-ji')).toBe(false);
+	});
+
+	it('accepts stay-names as written', () => {
+		const stay = CARDS_BY_ID['p-김민준'];
+		expect(checkAnswer(stay, 'gim-min-jun')).toBe(true);
+		expect(checkAnswer(stay, '김민준')).toBe(true);
+		expect(checkAnswer(stay, 'gi-min-jun')).toBe(false);
 	});
 });
 

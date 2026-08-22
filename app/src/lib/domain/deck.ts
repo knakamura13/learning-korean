@@ -14,7 +14,7 @@
 import { blockEntries } from './blockDeck';
 import {
 	applyLiaison, applyTensification, applyNasalization, applyHMerge, applyFlow,
-	batchimSound, fusionParts, romanizeWord
+	batchimSound, fusionParts, pronounceWord, romanizeWord
 } from './hangul';
 import { VOCAB_PACKS, WORDS } from './words';
 
@@ -291,6 +291,40 @@ const flow: Card[] = Object.keys(FLOW_NOTES).map((written) => {
 	);
 });
 
+/* ---------- tier lab10: names and address (the people in the mission) ---------- */
+
+/**
+ * Fronts are real full names, vocatives, and one honorific — words a message
+ * from a Korean speaker actually contains. Spoken forms derive from the full
+ * pronunciation chain, so a name whose real-life sound needs an unmodeled
+ * rule (ㄴ-insertion 김연아, stop-host ㄹ chains 박라온) cannot appear here.
+ */
+const NAME_NOTES: Record<string, string> = {
+	'김민준': 'A nasal batchim, then plain consonants: nothing fires. Most names read as written.',
+	'박은지': 'The surname\'s ㄱ jumps into 은: [바근지].',
+	'박보검': 'A stop then ㅂ tenses: [박뽀검].',
+	'박서준': 'A stop then ㅅ tenses: [박써준].',
+	'박나래': 'ㄱ before ㄴ nasalizes: [방나래].',
+	'김백현': 'ㄱ + ㅎ fuse into ㅋ: [김배켠].',
+	'하늘아': 'The vocative hands ㄹ a vowel to jump into: [하느라].',
+	'민준아': 'Calling 민준 — the ㄴ jumps: [민주나].',
+	'지우야': '야 after a vowel: no batchim, nothing to move.',
+	'고객님': 'The honorific\'s ㄴ nasalizes the ㄱ: [고갱님].'
+};
+
+const names: Card[] = Object.keys(NAME_NOTES).map((written) => {
+	const spoken = pronounceWord(written);
+	return card(
+		`p-${written}`,
+		written,
+		'how is this said? (hyphenated cuts, or Hangul)',
+		withLlVariant([romanizeWord(spoken), spoken]),
+		NAME_NOTES[written],
+		'lab10',
+		'pron'
+	);
+});
+
 /* ---------- vocabulary packs: meaning + pronunciation lanes ---------- */
 
 /** Words the lab tiers already quiz for pronunciation — no duplicate lane. */
@@ -298,7 +332,8 @@ const LAB_PRON_FRONTS = new Set([
 	...Object.keys(LIAISON_NOTES),
 	...Object.keys(CONTACT_NOTES),
 	...Object.keys(HMERGE_NOTES),
-	...Object.keys(FLOW_NOTES)
+	...Object.keys(FLOW_NOTES),
+	...Object.keys(NAME_NOTES)
 ]);
 
 const vocabMeaning: Card[] = WORDS.map((word) =>
@@ -348,7 +383,7 @@ const blockCatalog: Card[] = blockEntries();
 
 export const DECK: Card[] = [
 	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters,
-	...liaison, ...contact, ...hmerge, ...flow, ...blockCatalog,
+	...liaison, ...contact, ...hmerge, ...flow, ...names, ...blockCatalog,
 	...vocabMeaning, ...vocabPron
 ];
 
@@ -372,7 +407,8 @@ export const TIERS: Tier[] = [
 	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length },
 	{ id: 'lab07', label: 'Stops', lab: '0007', size: contact.length },
 	{ id: 'lab08', label: 'ㅎ merges', lab: '0008', size: hmerge.length },
-	{ id: 'lab09', label: 'ㄹ flows', lab: '0009', size: flow.length }
+	{ id: 'lab09', label: 'ㄹ flows', lab: '0009', size: flow.length },
+	{ id: 'lab10', label: 'Names', lab: '0010', size: names.length }
 ];
 
 export function cardsOfTier(tier: string): Card[] {
