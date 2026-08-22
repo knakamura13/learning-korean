@@ -225,16 +225,6 @@
 		align-items: center;
 		gap: var(--s3);
 	}
-	.loading .glyph-ph {
-		width: 4.5rem;
-		height: 4.5rem;
-		border-radius: var(--r-md);
-	}
-	.loading .line-ph {
-		width: 12rem;
-		max-width: 80%;
-		height: 0.7rem;
-	}
 	.loading .muted {
 		margin: var(--s2) 0 0;
 	}

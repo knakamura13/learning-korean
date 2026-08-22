@@ -22,6 +22,7 @@ import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
 import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
 import labSwitcher from './components/shell/LabSwitcher.svelte?raw';
+import sprintChoices from './components/SprintChoices.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
@@ -420,6 +421,46 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
+	});
+
+	it('collapses every animation and transition under prefers-reduced-motion', () => {
+		// Svelte in:fly/in:fade compile to CSS animations, so the starred
+		// !important block is what guards the 14 call sites that carry no
+		// local reduced-motion check. Do not narrow this selector.
+		expect(appCss).toMatch(
+			/@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\*, \*::before, \*::after\s*\{[^}]*animation-duration:\s*0\.01ms !important;[^}]*animation-iteration-count:\s*1 !important;[^}]*transition-duration:\s*0\.01ms !important/s
+		);
+	});
+
+	it('keeps the lab and tap answer grids visually identical', () => {
+		// Same control to the learner: key chips and focus treatment must match.
+		for (const source of [options, sprintChoices]) {
+			expect(styleBlock(source)).toMatch(/\.key\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
+			expect(styleBlock(source)).toMatch(/\.key\s*\{[^}]*border:\s*1px solid var\(--rule\)/s);
+			expect(styleBlock(source)).toMatch(/:focus-visible\s*\{[^}]*var\(--focus-ring\)/s);
+		}
+	});
+
+	it('defines visually-hidden and skeleton shapes once, in app.css', () => {
+		expect(appCss).toMatch(/\.vh\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/s);
+		expect(appCss).toMatch(/\.skel\.line-ph\s*\{/);
+		expect(appCss).toMatch(/\.skel\.glyph-ph\s*\{/);
+		for (const source of [labRunner, labPipRail]) {
+			expect(styleBlock(source)).not.toMatch(/\.vh\s*\{/);
+		}
+		for (const source of [review, drill]) {
+			expect(styleBlock(source)).not.toMatch(/glyph-ph\s*\{/);
+		}
+	});
+
+	it('earns its finish and streak moments quietly', () => {
+		expect(sittingCss).toMatch(/\.tally > div\s*\{[^}]*animation:\s*finish-rise/s);
+		expect(styleBlock(options)).toMatch(/opt-settle/);
+		expect(review).toMatch(/streak-note/);
+		expect(review).toMatch(/days in a row/);
+		// The daily-cap copy follows account prefs, not the compiled default.
+		expect(review).toMatch(/progress\.studyPrefs\.newPerDay/);
+		expect(review).not.toMatch(/DEFAULT_NEW_PER_DAY/);
 	});
 
 	it('gives phones a lab switcher where the index rail is display:none', () => {

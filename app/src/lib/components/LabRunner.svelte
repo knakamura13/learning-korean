@@ -472,18 +472,6 @@
 		max-width: var(--measure);
 	}
 
-	.vh {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
-	}
-
 	@media (forced-colors: active) {
 		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
 		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
@@ -626,6 +614,23 @@
 		gap: var(--s6);
 		flex-wrap: wrap;
 		margin-bottom: var(--s4);
+	}
+	/* The finish beat: results rise in quietly, one after another. The global
+	   prefers-reduced-motion block collapses these to 0.01ms. */
+	.tally > div {
+		animation: finish-rise 0.4s var(--ease) backwards;
+	}
+	.tally > div:nth-child(2) {
+		animation-delay: 0.09s;
+	}
+	.tally > div:nth-child(3) {
+		animation-delay: 0.18s;
+	}
+	@keyframes finish-rise {
+		from {
+			opacity: 0;
+			translate: 0 6px;
+		}
 	}
 	.tally b {
 		font-family: var(--mono);
