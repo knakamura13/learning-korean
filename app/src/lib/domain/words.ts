@@ -161,12 +161,13 @@ export const WORDS: WordEntry[] = [
 	w('일요일', '이료일', ['sunday'], 'vocab-time', 'Liaison: [이료일].'),
 	w('주말', '주말', ['weekend'], 'vocab-time'),
 	w('아침', '아침', ['morning', 'breakfast'], 'vocab-time', 'Also "breakfast" — the meal takes the hour\'s name.'),
-	w('점심', '점심', ['lunch', 'lunchtime', 'noon'], 'vocab-time'),
+	w('점심', '점심', ['lunch', 'lunchtime'], 'vocab-time', 'The midday meal — clock-noon is 정오.'),
 	w('저녁', '저녁', ['evening', 'dinner'], 'vocab-time', 'Also "dinner", like 아침.'),
 	w('밤', '밤', ['night', 'chestnut'], 'vocab-time', 'Also "chestnut" — context decides.'),
 	w('시간', '시간', ['time', 'hour'], 'vocab-time'),
-	w('분', '분', ['minute'], 'vocab-time'),
-	w('년', '년', ['year'], 'vocab-time'),
+	w('시', '시', ['oclock', 'o clock', 'hour'], 'vocab-time', 'The o\'clock marker: 3시에 만나요 — every plan you will ever text.'),
+	w('분', '분', ['minute'], 'vocab-time', 'Bound to a number: 오 분, 십 분 — never alone.'),
+	w('년', '년', ['year'], 'vocab-time', 'Bound to a number: 일 년, 이 년 — NEVER said alone; the bare word is an insult.'),
 	w('달', '달', ['month', 'moon'], 'vocab-time', 'Also "moon" — months once followed it.'),
 	w('매일', '매일', ['every day', 'everyday', 'daily'], 'vocab-time'),
 	w('언제', '언제', ['when'], 'vocab-time'),
@@ -217,10 +218,10 @@ export const WORDS: WordEntry[] = [
 	w('궁금해요', '궁금해요', ['curious', 'im curious', 'i wonder'], 'vocab-feelings'),
 	w('걱정돼요', '걱쩡돼요', ['worried', 'im worried'], 'vocab-feelings', 'Tensified: [걱쩡돼요].'),
 	w('힘들어요', '힘드러요', ['its hard', 'exhausted', 'im struggling'], 'vocab-feelings', 'Liaison: [힘드러요].'),
-	w('짜증나요', '짜증나요', ['annoyed', 'annoying', 'im annoyed'], 'vocab-feelings'),
+	w('짜증나요', '짜증나요', ['annoyed', 'annoying', 'im annoyed'], 'vocab-feelings', 'Texting spelling — dictionaries space it 짜증(이) 나다.'),
 	w('부러워요', '부러워요', ['jealous', 'envious', 'im jealous'], 'vocab-feelings'),
 	w('최고', '최고', ['the best', 'best', 'number one'], 'vocab-feelings'),
-	w('어떡해', '어떠캐', ['what do i do', 'oh no', 'what to do'], 'vocab-feelings', 'Aspiration: [어떠캐].')
+	w('어떡해', '어떠캐', ['what do i do', 'oh no', 'what to do'], 'vocab-feelings', 'Aspiration: [어떠캐]. Casual — 어떡해요 to elders.')
 ];
 
 export interface VocabPack {

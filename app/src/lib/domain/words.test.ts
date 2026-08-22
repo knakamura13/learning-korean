@@ -30,7 +30,7 @@ describe('the corpus obeys its own selection rules', () => {
 	});
 
 	it('fills all seven packs with a real spread of words', () => {
-		expect(WORDS.length).toBe(165);
+		expect(WORDS.length).toBe(166);
 		for (const pack of VOCAB_PACKS) {
 			expect(wordsOfPack(pack.id).length, pack.id).toBeGreaterThanOrEqual(20);
 		}
