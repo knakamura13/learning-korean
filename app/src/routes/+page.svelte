@@ -11,6 +11,7 @@
 	} from '$lib/domain/courseNav';
 	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
 	import { TIERS } from '$lib/domain/deck';
+	import { DEFAULT_VOCAB_NEW_PER_DAY } from '$lib/domain/srs';
 	import { sprintMissingLab } from '$lib/domain/sprint';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { tierCountLabel } from '$lib/domain/srs';
@@ -43,6 +44,12 @@
 	const course = LABS.map(toCourseLab);
 	const unlockedTiers = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
 	const sprintMissing = $derived(sprintMissingLab(unlockedTiers));
+	const packs = $derived(progress.vocabProgress);
+	const vocabOpenable = $derived(progress.isUnlocked('lab05'));
+
+	function openPack(id: string) {
+		progress.unlock([id]);
+	}
 
 	const navView = $derived.by(() =>
 		courseNavView({
@@ -293,6 +300,54 @@
 				</p>
 			{/if}
 		</div>
+	</section>
+
+	<section aria-labelledby="sec-vocab-heading">
+		<h2 id="sec-vocab-heading" class="sec">Vocabulary</h2>
+		{#if !ready}
+			<p class="pile-empty">Loading packs…</p>
+		{:else if !vocabOpenable}
+			<p class="pile-empty">
+				Word packs open after Lab 05 — real words use the whole letter inventory,
+				clusters included.
+			</p>
+		{:else}
+			<p class="pile-empty">
+				Real words, two lanes: meaning, and — where the spelling lies — pronunciation.
+				Words trickle in at {DEFAULT_VOCAB_NEW_PER_DAY} a day, beside the letters, never instead of them.
+			</p>
+			<div class="tiers card" role="region" aria-label="Vocabulary packs">
+				{#each packs as pack (pack.id)}
+					{@const pctMature = pct(pack.mature, pack.size)}
+					{@const pctYoung = pct(pack.young, pack.size)}
+					{@const pctUnseen = pct(pack.unseen, pack.size)}
+					<div
+						class="tier"
+						class:locked={!pack.unlocked}
+						role="group"
+						aria-label="{pack.label}: {pack.unlocked
+							? `${pack.mature} mastered, ${pack.young} learning, ${pack.unseen} not started (${pack.size} total)`
+							: 'not opened yet'}"
+					>
+						<span class="nm">{pack.label}</span>
+						<span class="track" aria-hidden="true">
+							{#if pack.unlocked}
+								<span class="m" style="width:{pctMature}%"></span>
+								<span class="y" style="width:{pctYoung}%"></span>
+								<span class="n" style="width:{pctUnseen}%"></span>
+							{/if}
+						</span>
+						{#if pack.unlocked}
+							<span class="ct" aria-hidden="true">{tierCountLabel(pack)}</span>
+						{:else}
+							<button type="button" class="btn ghost open-pack" onclick={() => openPack(pack.id)}>
+								Open · {pack.size} cards
+							</button>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</section>
 
 	<section class="sprint" aria-labelledby="sec-sprint-heading">
@@ -570,6 +625,12 @@
 		font-size: 0.72rem;
 		color: var(--ink-faint);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.open-pack {
+		flex: 0 0 auto;
+		font-size: 0.78rem;
+		white-space: nowrap;
 	}
 
 	.legend {

@@ -44,7 +44,12 @@ of mispronunciation and slow reading.
 ## Out of scope for now
 
 - Grammar, particles, conjugation, honorific levels. Script and pronunciation first.
-- Vocabulary building as an end in itself — words appear only as reading material.
+- Vocabulary building as an end in itself — chasing frequency lists or TOPIK word
+  counts. **Real words as reading substrate are in scope** (updated 2026-08-22):
+  the vocabulary packs exist because sound changes only live inside words, and
+  because reading the names, menus, and messages of the people in Kyle's life is
+  the mission's second half. Meaning comes along with the decoding, not instead
+  of it, and words trickle in on their own budget so they never crowd out letters.
 - TOPIK preparation. Possible eventually; not steering anything today.
 - Speaking and conversation practice. Production of the tense-consonant series is
   acknowledged as a months-long project, not a lesson goal.

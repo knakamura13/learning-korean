@@ -23,6 +23,7 @@ import labSpread from './components/shell/LabSpread.svelte?raw';
 import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
 import labSwitcher from './components/shell/LabSwitcher.svelte?raw';
 import sprintChoices from './components/SprintChoices.svelte?raw';
+import reviewCompose from './components/ReviewCompose.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
@@ -485,6 +486,13 @@ describe('polish audit regressions', () => {
 		// The daily-cap copy follows account prefs, not the compiled default.
 		expect(review).toMatch(/progress\.studyPrefs\.newPerDay/);
 		expect(review).not.toMatch(/DEFAULT_NEW_PER_DAY/);
+	});
+
+	it('sizes and themes the compose trays like every other answer control', () => {
+		expect(styleBlock(reviewCompose)).toMatch(/\.chip\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(reviewCompose)).toMatch(/--focus-ring/);
+		expect(styleBlock(reviewCompose)).toMatch(/forced-colors:\s*active/);
+		expect(reviewCompose).toMatch(/lang="ko"/);
 	});
 
 	it('gives phones a lab switcher where the index rail is display:none', () => {

@@ -210,6 +210,31 @@ Decisions worth preserving:
   from the Safari tab, and ITP can evict localStorage — server state is the
   durability fix, not just convenience.
 
+## Vocabulary packs (added 2026-08-22)
+
+MISSION.md's vocabulary exclusion was amended: words *as reading substrate* are
+in scope; word-list chasing is not. Design decisions:
+
+- **Corpus** (`domain/words.ts`): 100 words in four packs (names & people,
+  food & menus, messages, signs & places). Every entry's spoken form is both
+  authored and derived — the test asserts `pronounceWord(hangul) === spoken`,
+  so a word needing an unmodeled rule (ㄴ-insertion 서울역, stop-host ㄹ 독립,
+  palatalization 같이) cannot ship. Pick a different word, never weaken the check.
+- **Two lanes per word**: a meaning card (typed English) for all 100, and a
+  pronunciation card only where a sound change makes the spelling lie (22) —
+  and never when a lab tier already quizzes that word (학교, 좋아요, …).
+- **Separate daily budget**: the scheduler grew a second pin triple
+  (`vocabNew*` on `SrsState`, additive and backup-compatible) with its own cap
+  (5/day, compiled — a Settings knob is deferred). Words can never starve
+  letters out of the day, or vice versa. Reviews of both tracks share one
+  sitting, oldest due first.
+- **Packs unlock by hand, gated on Lab 05** — real words use the whole letter
+  inventory. Opening a pack is `unlock(['vocab-food'])`, same machinery as labs.
+- **Block cards flipped to composition** (same PR): the front is now the
+  sound; the learner builds the block from tap-trays (`domain/blockCompose.ts`,
+  `ReviewCompose.svelte`). Trays honor unlock state — no compound vowels
+  before Lab 03, no clusters before Lab 05, even as distractors.
+
 ## Backlog of lesson ideas
 
 **Built:** Lab 01 (consonants, `lab01`) · Lab 02 (basic vowels, `lab02`) ·

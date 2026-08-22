@@ -556,3 +556,74 @@ describe('day boundaries', () => {
 		expect(s.newDate).toBe(isoDay(T0 + DAY_MS));
 	});
 });
+
+describe('vocabulary track', () => {
+	const mixedDeck: SchedulableCard[] = [
+		...Array.from({ length: 19 }, (_, i) => ({ id: `c${i}`, tier: 'lab01' })),
+		...Array.from({ length: 12 }, (_, i) => ({ id: `w${i}`, tier: 'vocab-food' }))
+	];
+
+	function bothUnlocked(): SrsState {
+		return unlock(emptyState(), ['lab01', 'vocab-food']);
+	}
+
+	it('budgets each track separately in the daily draw', () => {
+		const pinned = pinNewForDay(bothUnlocked(), mixedDeck, T0, { shuffle: noShuffle });
+		expect(pinned.newIds).toHaveLength(10); // script default
+		expect(pinned.vocabNewIds).toHaveLength(5); // vocab default
+		expect(pinned.newIds.every((id) => id.startsWith('c'))).toBe(true);
+		expect(pinned.vocabNewIds.every((id) => id.startsWith('w'))).toBe(true);
+
+		const queue = due(pinned, mixedDeck, T0, { shuffle: noShuffle });
+		expect(queue).toHaveLength(15);
+	});
+
+	it('grading a vocab card spends the vocab budget, not the script budget', () => {
+		let state = pinNewForDay(bothUnlocked(), mixedDeck, T0, { shuffle: noShuffle });
+		state = grade(state, 'w0', GOOD, T0, 'vocab').state;
+		expect(state.vocabNewCount).toBe(1);
+		expect(state.newCount).toBe(0);
+		state = grade(state, 'c0', GOOD, T0).state;
+		expect(state.newCount).toBe(1);
+		expect(state.vocabNewCount).toBe(1);
+	});
+
+	it('rolls both pins on a new day and honors custom caps', () => {
+		let state = pinNewForDay(bothUnlocked(), mixedDeck, T0, {
+			shuffle: noShuffle,
+			newPerDay: 2,
+			vocabNewPerDay: 3
+		});
+		expect(state.newIds).toHaveLength(2);
+		expect(state.vocabNewIds).toHaveLength(3);
+
+		state = grade(state, 'w0', GOOD, T0, 'vocab').state;
+		const tomorrow = T0 + DAY_MS;
+		const rolled = pinNewForDay(state, mixedDeck, tomorrow, { shuffle: noShuffle });
+		expect(rolled.vocabNewCount).toBe(0);
+		expect(rolled.newDate).toBe(isoDay(tomorrow));
+		expect(rolled.vocabNewDate).toBe(isoDay(tomorrow));
+	});
+
+	it('reports vocabNewLeft separately and adds it to the queue stat', () => {
+		const s = stats(bothUnlocked(), mixedDeck, T0);
+		expect(s.newLeft).toBe(10);
+		expect(s.vocabNewLeft).toBe(5);
+		expect(s.queue).toBe(15);
+	});
+
+	it('a script-only deck leaves the vocab triple inert', () => {
+		const scriptOnly = unlock(emptyState(), ['lab01']);
+		const deck: SchedulableCard[] = Array.from({ length: 5 }, (_, i) => ({ id: `c${i}`, tier: 'lab01' }));
+		const pinned = pinNewForDay(scriptOnly, deck, T0, { shuffle: noShuffle });
+		expect(pinned.vocabNewIds).toEqual([]);
+		expect(stats(scriptOnly, deck, T0).vocabNewLeft).toBe(0);
+	});
+
+	it('revives legacy documents without vocab fields to safe defaults', () => {
+		const legacy = reviveState({ version: 1, unlocked: ['lab01'], cards: {}, days: {} });
+		expect(legacy.vocabNewDate).toBe('');
+		expect(legacy.vocabNewCount).toBe(0);
+		expect(legacy.vocabNewIds).toEqual([]);
+	});
+});

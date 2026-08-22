@@ -544,6 +544,25 @@ export function flowAction(word: string): FlowAction {
 	return { type: 'stay' };
 }
 
+/**
+ * Every drilled junction rule chained to a fixpoint. Derivation order: ㅎ
+ * resolves first (it decides whether liaison even sees the junction), then
+ * liaison fills empty onsets, then the stop rules, then ㄹ. Covers exactly
+ * what the labs cover — words needing ㄴ-insertion (서울역), stop-host ㄹ
+ * chains (독립), or palatalization (같이) are outside this function and must
+ * not enter the vocabulary corpus; the corpus test enforces that by checking
+ * every entry's authored spoken form against this derivation.
+ */
+export function pronounceWord(word: string): string {
+	let out = word;
+	for (let i = 0; i < 4; i++) {
+		const next = applyFlow(applyContact(applyLiaison(applyHMerge(out))));
+		if (next === out) return out;
+		out = next;
+	}
+	return out;
+}
+
 const LEAD_RR: Record<string, string> = {
 	'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
 	'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '', 'ㅈ': 'j', 'ㅉ': 'jj',
