@@ -2,7 +2,7 @@
 
 Interactive Hangul labs and a spaced-repetition review deck for reading Korean.
 
-SvelteKit + TypeScript, prerendered with `@sveltejs/adapter-static`. No server and no runtime data fetching — `pnpm build` writes a folder you can serve with anything.
+SvelteKit + TypeScript, prerendered with `@sveltejs/adapter-static`. `pnpm build` writes a folder you can serve with anything; signed-out use needs no server. The optional account/sync API (see "Accounts & cross-device sync") is the only dynamic surface and requires the Node adapter.
 
 The app lives in `app/`. Railway builds that tree with `@sveltejs/adapter-node` so the static site can listen on `PORT`.
 

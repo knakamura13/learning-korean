@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import LabRunner from '$lib/components/LabRunner.svelte';
 	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
+	import LabSwitcher from '$lib/components/shell/LabSwitcher.svelte';
 	import { LABS } from '$lib/content';
 	import { courseNavView, requiredLab, showPrerequisiteGate, toCourseLab } from '$lib/domain/courseNav';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -35,6 +36,7 @@
 
 <div class="with-rail">
 	<div class="shell sitting">
+	<LabSwitcher currentId={lab.id} />
 	{#if gated && prior}
 		<aside class="gate card" role="status">
 			<strong>Lab {String(prior.number).padStart(2, '0')} comes first.</strong>

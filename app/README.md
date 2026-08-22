@@ -2,8 +2,11 @@
 
 Interactive labs and a spaced-repetition deck for reading Korean.
 
-SvelteKit + TypeScript, built to a **static folder** — no server, no runtime
-data fetching, works offline.
+SvelteKit + TypeScript, prerendered pages built to a **static folder**. Signed
+out, the app needs no server and does no runtime data fetching (there is no
+service worker, so "offline" only means already-open pages keep working). The
+optional account/sync API is the one dynamic surface — absent from a static
+build, and the app detects that and runs as the guest app.
 
 ## Run it
 

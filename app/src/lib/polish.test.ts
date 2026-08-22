@@ -21,6 +21,7 @@ import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
 import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
 import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
+import labSwitcher from './components/shell/LabSwitcher.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
@@ -419,6 +420,21 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
+	});
+
+	it('gives phones a lab switcher where the index rail is display:none', () => {
+		// The rail hides below 72rem; the switcher hides at and above it.
+		expect(styleBlock(labIndexRail)).toMatch(/display:\s*none/);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/@media \(min-width: 72rem\)\s*\{\s*\.switcher\s*\{\s*display:\s*none/s
+		);
+		expect(labSwitcher).toMatch(/labPreviewModels/); // same models as the rail
+		expect(labSwitcher).toMatch(/attachModalDialog/); // native <dialog>, not hand-rolled
+		expect(styleBlock(labSwitcher)).toMatch(/\.trigger\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(labSwitcher)).toMatch(/\.sheet a\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(labSwitcher)).toMatch(/--focus-ring/);
+		expect(styleBlock(labSwitcher)).toMatch(/forced-colors:\s*active/);
+		expect(labPage).toMatch(/LabSwitcher/);
 	});
 
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
@@ -867,6 +883,12 @@ describe('polish audit regressions', () => {
 		expect(sittingCss).toMatch(
 			/\.finish h1\s*\{[^}]*font-size:\s*clamp\(1\.35rem, 1\.35rem \+ [^,]+, 1\.6rem\)/s
 		);
+		// The per-card instruction heading is on every card — it gets the same
+		// rem-inclusive contract as the page headings.
+		expect(sittingCss).toMatch(
+			/\.do\s*\{[^}]*font-size:\s*clamp\(1\.15rem, 1\.15rem \+ [^,]+, 1\.45rem\)/s
+		);
+		expect(sittingCss).not.toMatch(/clamp\(1\.15rem, 2\.8vw, 1\.45rem\)/);
 	});
 
 	it('gives generic links a real pressed translate, not a no-op', () => {

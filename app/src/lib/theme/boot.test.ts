@@ -261,3 +261,59 @@ describe('themeBootScript', () => {
 		).toBe(testPapers.botanicalKorea.dark);
 	});
 });
+
+describe('non-default look font preloads', () => {
+	// The getItem-throws test above leaves a Storage.prototype spy behind.
+	beforeEach(() => {
+		vi.restoreAllMocks();
+	});
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		localStorage.clear();
+	});
+
+	const testFonts: Record<string, string[]> = {
+		botanicalKorea: ['NotoSansKR-subset.woff2', 'Newsreader-Italic-latin.woff2'],
+		watercolor: ['CormorantGaramond-Regular.woff2', 'NotoSansKR-subset.woff2']
+	};
+
+	function preloadHrefs(): string[] {
+		return [...document.querySelectorAll<HTMLLinkElement>('link[rel="preload"][as="font"]')].map(
+			(l) => l.getAttribute('href') ?? ''
+		);
+	}
+
+	function bootWithFonts(look: string | null) {
+		setupDom();
+		stubScheme(false);
+		localStorage.clear();
+		if (look !== null) localStorage.setItem(LOOK_KEY, look);
+		const script = themeBootScript(testPapers, testFonts);
+		// eslint-disable-next-line no-eval
+		expect(() => eval(script)).not.toThrow();
+	}
+
+	it('injects preloads for a stored non-default look, pre-paint', () => {
+		bootWithFonts('watercolor');
+		expect(document.documentElement.getAttribute('data-look')).toBe('watercolor');
+		expect(preloadHrefs()).toEqual([
+			'/fonts/CormorantGaramond-Regular.woff2',
+			'/fonts/NotoSansKR-subset.woff2'
+		]);
+		const link = document.querySelector<HTMLLinkElement>('link[rel="preload"]');
+		expect(link?.getAttribute('type')).toBe('font/woff2');
+		expect(link?.crossOrigin).toBe('anonymous');
+	});
+
+	it('injects nothing for the default look — the layout already preloads it', () => {
+		bootWithFonts(null);
+		expect(preloadHrefs()).toEqual([]);
+		bootWithFonts(DEFAULT_LOOK_ID);
+		expect(preloadHrefs()).toEqual([]);
+	});
+
+	it('injects nothing for a look with no map entry', () => {
+		bootWithFonts('taegeuk');
+		expect(preloadHrefs()).toEqual([]);
+	});
+});

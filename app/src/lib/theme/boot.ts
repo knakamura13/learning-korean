@@ -1,6 +1,14 @@
 import { DEFAULT_LOOK_ID } from './catalog';
 import { LOOK_KEY } from './look';
 import { THEME_KEY } from './index';
+import type { DesignSystem } from './types.ts';
+
+/** Self-hosted files per look, for the boot script's non-default preloads. */
+export function lookFontFiles(systems: readonly DesignSystem[]): Record<string, string[]> {
+	return Object.fromEntries(
+		systems.map((s) => [s.id, s.fonts.flatMap((f) => (f.file ? [f.file] : []))])
+	);
+}
 
 export interface AppearanceBootInput {
 	look: string | null;
@@ -49,9 +57,15 @@ export function applyAppearanceDom(
 }
 
 export function themeBootScript(
-	lookPapers: Record<string, { light: string; dark: string }>
+	lookPapers: Record<string, { light: string; dark: string }>,
+	lookFonts: Record<string, string[]> = {}
 ): string {
 	const papersJson = JSON.stringify(lookPapers);
+	const fontsJson = JSON.stringify(lookFonts);
 
-	return `(function(){try{var look=null,theme=null;try{look=localStorage.getItem(${JSON.stringify(LOOK_KEY)});theme=localStorage.getItem(${JSON.stringify(THEME_KEY)});}catch(e){}var lookPapers=${papersJson};var knownIds=Object.keys(lookPapers);var lookId=look&&knownIds.indexOf(look)!==-1?look:${JSON.stringify(DEFAULT_LOOK_ID)};var themeAttr=theme==='light'||theme==='dark'?theme:null;var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var dark=themeAttr==='dark'||(themeAttr!=='light'&&prefersDark);var root=document.documentElement;root.setAttribute('data-look',lookId);if(themeAttr){root.setAttribute('data-theme',themeAttr);root.style.colorScheme=themeAttr;var cs=document.querySelector('meta[name="color-scheme"]');if(cs)cs.setAttribute('content',themeAttr);}var m=document.querySelector('meta[name="theme-color"][data-resolved]');if(m){var p=lookPapers[lookId];if(p)m.setAttribute('content',dark?p.dark:p.light);}}catch(e){}})();`;
+	// The layout only preloads the *default* look's fonts (prerendered HTML
+	// cannot know the visitor's stored look). For any other look this script
+	// injects the preloads pre-paint, so a non-default look gets the same
+	// cold-start font behavior the default enjoys.
+	return `(function(){try{var look=null,theme=null;try{look=localStorage.getItem(${JSON.stringify(LOOK_KEY)});theme=localStorage.getItem(${JSON.stringify(THEME_KEY)});}catch(e){}var lookPapers=${papersJson};var knownIds=Object.keys(lookPapers);var lookId=look&&knownIds.indexOf(look)!==-1?look:${JSON.stringify(DEFAULT_LOOK_ID)};var themeAttr=theme==='light'||theme==='dark'?theme:null;var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var dark=themeAttr==='dark'||(themeAttr!=='light'&&prefersDark);var root=document.documentElement;root.setAttribute('data-look',lookId);if(themeAttr){root.setAttribute('data-theme',themeAttr);root.style.colorScheme=themeAttr;var cs=document.querySelector('meta[name="color-scheme"]');if(cs)cs.setAttribute('content',themeAttr);}var m=document.querySelector('meta[name="theme-color"][data-resolved]');if(m){var p=lookPapers[lookId];if(p)m.setAttribute('content',dark?p.dark:p.light);}if(lookId!==${JSON.stringify(DEFAULT_LOOK_ID)}){var lookFonts=${fontsJson};var files=lookFonts[lookId]||[];for(var i=0;i<files.length;i++){var l=document.createElement('link');l.setAttribute('rel','preload');l.setAttribute('href','/fonts/'+files[i]);l.setAttribute('as','font');l.setAttribute('type','font/woff2');l.setAttribute('crossorigin','anonymous');document.head.appendChild(l);}}}catch(e){}})();`;
 }

@@ -5,6 +5,7 @@ import {
 	LORA_FALLBACKS,
 	optionalLatinFace
 } from './latinFallbacks.ts';
+import { HANGUL_WITH_FALLBACK, NOTO_SANS_KR_FALLBACK } from './hangulFallbacks.ts';
 
 const DISPLAY =
 	"'Cormorant Garamond', 'Cormorant Garamond Fallback', Georgia, 'Palatino Linotype', Palatino, serif";
@@ -12,7 +13,7 @@ const SERIF =
 	"'Libre Baskerville', 'Libre Baskerville Fallback', 'Noto Serif KR', Georgia, 'Palatino Linotype', Palatino, serif";
 const SANS = "'Lora', 'Lora Fallback', Georgia, 'Palatino Linotype', Palatino, serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
-const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
+const HANGUL = HANGUL_WITH_FALLBACK;
 
 const light: Palette = {
 	ink: '#2a1e14',
@@ -152,7 +153,8 @@ export const academia: DesignSystem = {
 			style: 'normal',
 			weight: '400 600',
 			display: 'optional'
-		}
+		},
+		NOTO_SANS_KR_FALLBACK
 	],
 	light,
 	dark,
