@@ -22,28 +22,37 @@ Each slot is one syllable:
 
 - **Leads (1–19):** the consonant with ㅡ after it — e.g. ㄱ is spoken **그**.
 - **Vowels (20–40):** the vowel with silent ㅇ in front — e.g. ㅏ is spoken **아**.
-- **Finals (41–47):** 어 with the final consonant, **held unreleased** — e.g.
-  ㄱ as a final is spoken **억**, stopping on the ㄱ without releasing it.
+- **Finals (41–47):** 어 with the final consonant. For the three stop finals
+  (억, 얻, 업), **stop on the consonant without releasing it** — no puff at
+  the end. The others (언, 얼, 엄, 엉) have no release to hold back; just say
+  them naturally.
 
 Two quirks, both fine: slot 12 (ㅇ as a lead) sounds identical to slot 38
 (the bare vowel ㅡ) because ㅇ is silent at the start of a syllable — record
-both anyway, they live at different URLs. And 얘/예 or 왜/외/웨 sounding the
-same to you is expected; just say them naturally.
+both anyway, they live at different URLs. And 애/에 sounding identical to you
+is expected — modern Korean merged them — and the same goes for 얘/예 and
+왜/외/웨; just say each one naturally.
 
 ## How to capture
 
 Pick whichever is easier:
 
-1. **One file per slot (preferred).** Record each syllable as its own file and
-   name it by the file name in the table below (the extension can be whatever
-   your recorder produces: `g.wav`, `g.m4a`, ...). For the five names that
-   appear twice (k, n, m, t, p exist as both a lead and a final), either put
-   the files in subfolders named `consonants/`, `vowels/`, `finals/`, or
-   prefix the name: `finals-k.m4a` vs `consonants-k.m4a`.
-2. **One continuous take.** Record everything in one go, saying the slot
-   number before each syllable ("one — 그 … two — 끄 …"). Kyle will split the
-   take into per-slot files afterward (any audio editor works) and then ingest
-   those — the script itself only accepts per-slot files.
+1. **One continuous take (easiest on a phone).** Record everything in one go,
+   saying the slot number before each syllable ("one — 그 … two — 끄 …").
+   Kyle will split the take into per-slot files afterward (any audio editor
+   works) and then ingest those — the script itself only accepts per-slot
+   files. No renaming for you at all.
+2. **One file per slot.** Record each syllable as its own file and name it by
+   the file name in the table below (the extension can be whatever your
+   recorder produces: `g.wav`, `g.m4a`, ...). Fair warning: that is 47 renames
+   on a phone. For the five names that appear twice (k, n, m, t, p exist as
+   both a lead and a final), either put the files in subfolders named
+   `consonants/`, `vowels/`, `finals/`, or prefix the name: `finals-k.m4a`
+   vs `consonants-k.m4a`.
+
+**When you're done:** get the folder (or the one long take) to Kyle however is
+easiest — AirDrop, shared drive, or a message. He runs the ingest script; you
+never touch it.
 
 Redoing a slot later is painless: re-record just that file and ingest again;
 the new clip overwrites the old one.
