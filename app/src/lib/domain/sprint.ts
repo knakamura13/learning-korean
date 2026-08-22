@@ -88,12 +88,12 @@ export function sprintInventory(unlocked: readonly string[]): string[] {
 	return blocks;
 }
 
-function pickIndex(length: number, rng: Rng): number {
+export function pickIndex(length: number, rng: Rng): number {
 	if (length <= 0) return 0;
 	return Math.min(length - 1, Math.floor(rng() * length));
 }
 
-function shuffled<T>(items: readonly T[], rng: Rng): T[] {
+export function shuffled<T>(items: readonly T[], rng: Rng): T[] {
 	const next = items.slice();
 	for (let i = next.length - 1; i > 0; i--) {
 		const j = pickIndex(i + 1, rng);
@@ -161,6 +161,18 @@ export function trialForBlock(
 	return { block, options: built.options, answerIndex: built.answerIndex };
 }
 
+/**
+ * Where the next trial comes from. The block sprint draws from a syllable
+ * inventory; the sound-change mill draws from unlocked pron cards. The round
+ * machinery below is agnostic — it only ever asks for "another one, not the
+ * front I just showed".
+ */
+export type TrialSource = (rng: Rng, avoid?: string) => SprintTrial | null;
+
+export function blockTrialSource(blocks: readonly string[]): TrialSource {
+	return (rng, avoid) => nextTrial(blocks, rng, avoid);
+}
+
 export function medianMs(samples: readonly number[]): number | null {
 	if (samples.length === 0) return null;
 	const sorted = [...samples].sort((a, b) => a - b);
@@ -181,8 +193,8 @@ export function idleRound(): SprintRound {
 	};
 }
 
-export function startRound(now: number, blocks: readonly string[], rng: Rng): SprintRound {
-	const trial = nextTrial(blocks, rng);
+export function startRoundFrom(now: number, source: TrialSource, rng: Rng): SprintRound {
+	const trial = source(rng);
 	if (!trial) return idleRound();
 	return {
 		phase: 'running',
@@ -195,17 +207,21 @@ export function startRound(now: number, blocks: readonly string[], rng: Rng): Sp
 	};
 }
 
+export function startRound(now: number, blocks: readonly string[], rng: Rng): SprintRound {
+	return startRoundFrom(now, blockTrialSource(blocks), rng);
+}
+
 export function tickRound(round: SprintRound, now: number): SprintRound {
 	if (round.phase !== 'running') return round;
 	if (now < round.endsAt) return round;
 	return { ...round, phase: 'done', trial: null };
 }
 
-export function answerRound(
+export function answerRoundFrom(
 	round: SprintRound,
 	optionIndex: number,
 	now: number,
-	blocks: readonly string[],
+	source: TrialSource,
 	rng: Rng
 ): SprintRound {
 	if (round.phase !== 'running' || !round.trial) return round;
@@ -221,9 +237,19 @@ export function answerRound(
 		correctMs
 	};
 	if (now >= round.endsAt) return { ...next, phase: 'done', trial: null };
-	const following = nextTrial(blocks, rng, trial.block);
+	const following = source(rng, trial.block);
 	if (!following) return { ...next, phase: 'done', trial: null };
 	return { ...next, trial: following, trialStartedAt: now };
+}
+
+export function answerRound(
+	round: SprintRound,
+	optionIndex: number,
+	now: number,
+	blocks: readonly string[],
+	rng: Rng
+): SprintRound {
+	return answerRoundFrom(round, optionIndex, now, blockTrialSource(blocks), rng);
 }
 
 export function sprintScore(round: SprintRound): {

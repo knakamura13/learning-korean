@@ -10,6 +10,7 @@
 		toCourseLab
 	} from '$lib/domain/courseNav';
 	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
+	import { TIERS } from '$lib/domain/deck';
 	import { sprintMissingLab } from '$lib/domain/sprint';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { tierCountLabel } from '$lib/domain/srs';
@@ -40,11 +41,7 @@
 	const tiers = $derived(progress.tierProgress);
 	const sessions = $derived(labSession.all);
 	const course = LABS.map(toCourseLab);
-	const unlockedTiers = $derived(
-		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'] as const).filter((tier) =>
-			progress.isUnlocked(tier)
-		)
-	);
+	const unlockedTiers = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
 	const sprintMissing = $derived(sprintMissingLab(unlockedTiers));
 
 	const navView = $derived.by(() =>

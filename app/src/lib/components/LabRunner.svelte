@@ -36,6 +36,8 @@
 	import ClusterStep from './steps/ClusterStep.svelte';
 	import LiaisonStep from './steps/LiaisonStep.svelte';
 	import ContactStep from './steps/ContactStep.svelte';
+	import HMergeStep from './steps/HMergeStep.svelte';
+	import FlowStep from './steps/FlowStep.svelte';
 	import ReadStep from './steps/ReadStep.svelte';
 	import LabSpread from './shell/LabSpread.svelte';
 	import LabPipRail from './LabPipRail.svelte';
@@ -392,6 +394,10 @@
 							<LiaisonStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'contact'}
 							<ContactStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'hmerge'}
+							<HMergeStep {step} {onSettle} {onNudge} />
+						{:else if step.type === 'flow'}
+							<FlowStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'read'}
 							<ReadStep {step} {onSettle} {onNudge} />
 						{:else}

@@ -13,7 +13,8 @@ import type { Lab, Step, ZoneId } from './types';
 import { TIERS, cardsOfTier } from '$lib/domain/deck';
 import {
 	compose, decompose, derive, derivations, buildVowel, sidesFor, fuse,
-	batchimSound, clusterParts, applyLiaison, liaisonAction, applyContact, contactAction, type TickSide
+	batchimSound, clusterParts, applyLiaison, liaisonAction, applyContact, contactAction,
+	applyHMerge, hMergeAction, applyFlow, flowAction, type TickSide
 } from '$lib/domain/hangul';
 
 const ALL_STEPS: { lab: Lab; step: Step; i: number }[] = LABS.flatMap((lab) =>
@@ -366,5 +367,74 @@ describe('contact steps agree with the phonology', () => {
 		expect(contactAction('한국')).toEqual({ type: 'stay' });
 		expect(contactAction('학교')).toEqual({ type: 'tense' });
 		expect(contactAction('국물')).toEqual({ type: 'nasal' });
+	});
+});
+
+describe('hmerge steps agree with the phonology', () => {
+	it('uses real syllables and derives speech from applyHMerge', () => {
+		for (const { lab, step, i } of ALL_STEPS) {
+			if (step.type !== 'hmerge') continue;
+			for (const ch of [...step.word]) {
+				expect(decompose(ch), `${where(lab, i)}: ${ch}`).not.toBeNull();
+			}
+			const spoken = applyHMerge(step.word);
+			for (const ch of [...spoken]) {
+				expect(decompose(ch), `${where(lab, i)}: spoken ${ch}`).not.toBeNull();
+			}
+			const action = hMergeAction(step.word);
+			if (action.type === 'stay') {
+				expect(spoken, `${where(lab, i)}: ${step.word} should stay`).toBe(step.word);
+			} else {
+				expect(spoken, `${where(lab, i)}: ${step.word} should change`).not.toBe(step.word);
+			}
+		}
+	});
+
+	it('covers both directions, both cluster survivors, deletion, and a Stay', () => {
+		const words = ALL_STEPS.filter((s) => s.step.type === 'hmerge').map((s) =>
+			s.step.type === 'hmerge' ? s.step.word : ''
+		);
+		expect(words).toContain('좋고'); // ㅎ-batchim direction
+		expect(words).toContain('입학'); // stop-batchim direction
+		expect(words).toContain('많아'); // ㄶ survivor liaises
+		expect(words).toContain('좋아요'); // plain deletion
+		expect(words).toContain('학교'); // Stay — Lab 07's junction, not this one
+		expect(hMergeAction('학교')).toEqual({ type: 'stay' });
+		expect(hMergeAction('축하')).toEqual({ type: 'aspirate' });
+		expect(hMergeAction('좋아요')).toEqual({ type: 'delete' });
+	});
+});
+
+describe('flow steps agree with the phonology', () => {
+	it('uses real syllables and derives speech from applyFlow', () => {
+		for (const { lab, step, i } of ALL_STEPS) {
+			if (step.type !== 'flow') continue;
+			for (const ch of [...step.word]) {
+				expect(decompose(ch), `${where(lab, i)}: ${ch}`).not.toBeNull();
+			}
+			const spoken = applyFlow(step.word);
+			for (const ch of [...spoken]) {
+				expect(decompose(ch), `${where(lab, i)}: spoken ${ch}`).not.toBeNull();
+			}
+			const action = flowAction(step.word);
+			if (action.type === 'stay') {
+				expect(spoken, `${where(lab, i)}: ${step.word} should stay`).toBe(step.word);
+			} else {
+				expect(spoken, `${where(lab, i)}: ${step.word} should change`).not.toBe(step.word);
+			}
+		}
+	});
+
+	it('covers both orders, the nasal wall, and a liaison Stay', () => {
+		const words = ALL_STEPS.filter((s) => s.step.type === 'flow').map((s) =>
+			s.step.type === 'flow' ? s.step.word : ''
+		);
+		expect(words).toContain('신라'); // ㄴ + ㄹ
+		expect(words).toContain('설날'); // ㄹ + ㄴ
+		expect(words).toContain('심리'); // the ㅁ wall
+		expect(words).toContain('물이'); // Stay — that ㄹ liaises instead
+		expect(flowAction('신라')).toEqual({ type: 'lateral' });
+		expect(flowAction('심리')).toEqual({ type: 'nasal' });
+		expect(flowAction('물이')).toEqual({ type: 'stay' });
 	});
 });

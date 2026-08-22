@@ -12,7 +12,10 @@
  */
 
 import { blockEntries } from './blockDeck';
-import { applyLiaison, applyTensification, applyNasalization, batchimSound, fusionParts, romanizeWord } from './hangul';
+import {
+	applyLiaison, applyTensification, applyNasalization, applyHMerge, applyFlow,
+	batchimSound, fusionParts, romanizeWord
+} from './hangul';
 
 export type CardKind = 'consonant' | 'vowel' | 'compound' | 'build' | 'batchim' | 'cluster' | 'pron' | 'block';
 
@@ -223,13 +226,75 @@ const contact: Card[] = Object.keys(CONTACT_NOTES).map((written) => {
 	);
 });
 
+/* ---------- tier lab08: ㅎ at the junction ---------- */
+
+const HMERGE_NOTES: Record<string, string> = {
+	'좋고': 'ㅎ hands its puff to ㄱ: [조코].',
+	'좋다': 'ㅎ + ㄷ fuse into ㅌ: [조타].',
+	'놓지': 'ㅎ + ㅈ fuse into ㅊ: [노치].',
+	'많다': 'ㄶ keeps ㄴ and spends its ㅎ on ㄷ: [만타].',
+	'싫다': 'ㅀ keeps ㄹ and spends its ㅎ on ㄷ: [실타].',
+	'축하': 'The stop fuses forward into ㅋ: [추카].',
+	'입학': 'ㅂ + ㅎ fuse into ㅍ: [이팍].',
+	'못하다': 'ㅅ neutralizes to [ㄷ] first, then fuses into ㅌ: [모타다].',
+	'좋아요': 'ㅎ before a vowel is simply not said: [조아요].',
+	'많아': 'The ㅎ dies and ㄴ makes the jump: [마나].'
+};
+
+const hmerge: Card[] = Object.keys(HMERGE_NOTES).map((written) => {
+	const spoken = applyHMerge(written);
+	return card(
+		`p-${written}`,
+		written,
+		'how is this said? (hyphenated cuts, or Hangul)',
+		[romanizeWord(spoken), spoken],
+		HMERGE_NOTES[written],
+		'lab08',
+		'pron'
+	);
+});
+
+/* ---------- tier lab09: ㄹ at the junction ---------- */
+
+const FLOW_NOTES: Record<string, string> = {
+	'신라': 'ㄴ meets ㄹ and flows: [실라].',
+	'한라산': 'Same flow inside the mountain\'s name: [할라산].',
+	'연락': 'ㄴ + ㄹ flows: [열락]. 연락해 — text me.',
+	'편리': 'ㄴ + ㄹ flows: [펼리].',
+	'설날': 'ㄹ first, same outcome: [설랄].',
+	'실내': 'ㄹ + ㄴ flows: [실래].',
+	'심리': 'Behind the ㅁ wall the ㄹ yields: [심니].',
+	'종로': 'Behind the ㅇ wall: [종노] — hence the Jongno signage.',
+	'음료수': 'ㅁ then ㄹ: the ㄹ yields to ㄴ: [음뇨수].',
+	'대통령': 'ㅇ then ㄹ: [대통녕].'
+};
+
+/** Lead-ㄹ blocks romanize with r; the assimilated l-l spelling is accepted too. */
+function withLlVariant(answers: string[]): string[] {
+	const variants = answers.map((a) => a.replace(/l-r/g, 'l-l')).filter((v) => !answers.includes(v));
+	return [...answers, ...variants];
+}
+
+const flow: Card[] = Object.keys(FLOW_NOTES).map((written) => {
+	const spoken = applyFlow(written);
+	return card(
+		`p-${written}`,
+		written,
+		'how is this said? (hyphenated cuts, or Hangul)',
+		withLlVariant([romanizeWord(spoken), spoken]),
+		FLOW_NOTES[written],
+		'lab09',
+		'pron'
+	);
+});
+
 /* ---------- assembly ---------- */
 
 const blockCatalog: Card[] = blockEntries();
 
 export const DECK: Card[] = [
 	...consonants, ...vowels, ...compounds, ...construction, ...batchim, ...clusters,
-	...liaison, ...contact, ...blockCatalog
+	...liaison, ...contact, ...hmerge, ...flow, ...blockCatalog
 ];
 
 export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
@@ -250,7 +315,9 @@ export const TIERS: Tier[] = [
 	{ id: 'lab04', label: 'Batchim · blocks', lab: '0004', size: batchim.length + blockCatalog.filter((c) => c.tier === 'lab04').length },
 	{ id: 'lab05', label: 'Clusters · blocks', lab: '0005', size: clusters.length + blockCatalog.filter((c) => c.tier === 'lab05').length },
 	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length },
-	{ id: 'lab07', label: 'Stops', lab: '0007', size: contact.length }
+	{ id: 'lab07', label: 'Stops', lab: '0007', size: contact.length },
+	{ id: 'lab08', label: 'ㅎ merges', lab: '0008', size: hmerge.length },
+	{ id: 'lab09', label: 'ㄹ flows', lab: '0009', size: flow.length }
 ];
 
 export function cardsOfTier(tier: string): Card[] {

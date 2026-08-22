@@ -8,7 +8,7 @@
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import SprintChoices from '$lib/components/SprintChoices.svelte';
 	import type { AudioSlot } from '$lib/audio/letters';
-	import { checkAnswer, type Card } from '$lib/domain/deck';
+	import { TIERS, checkAnswer, type Card } from '$lib/domain/deck';
 	import { attemptSpeed } from '$lib/domain/srs';
 	import { sprintEligible, sprintInventory, trialForBlock, type SprintTrial } from '$lib/domain/sprint';
 	import { blockInventory } from '$lib/domain/blockDeck';
@@ -63,11 +63,7 @@
 	const blockCard = $derived(card?.kind === 'block');
 	const reviewSlot = $derived(card ? reviewAudioSlot(card.kind) : null);
 	const stats = $derived(progress.stats);
-	const unlockedTiers = $derived(
-		(['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'] as const).filter((tier) =>
-			progress.isUnlocked(tier)
-		)
-	);
+	const unlockedTiers = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
 	const drillOpen = $derived(sprintEligible(unlockedTiers));
 	const body = $derived(
 		reviewBody({
@@ -103,7 +99,7 @@
 	}
 
 	function cumulativeInventory(tier: string): string[] {
-		const order = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'];
+		const order = TIERS.map((t) => t.id);
 		const idx = order.indexOf(tier);
 		return sprintInventory(order.slice(0, Math.max(idx + 1, 2)));
 	}

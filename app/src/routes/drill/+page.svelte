@@ -3,31 +3,34 @@
 	import { resolve } from '$app/paths';
 	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import SprintChoices from '$lib/components/SprintChoices.svelte';
+	import { TIERS } from '$lib/domain/deck';
+	import { millEligible, millMissingLab, millPool, pronTrialSource } from '$lib/domain/pronMill';
 	import {
-		answerRound,
+		answerRoundFrom,
+		blockTrialSource,
 		idleRound,
 		sprintEligible,
 		sprintInventory,
 		sprintMissingLab,
 		sprintScore,
-		startRound,
-		tickRound
+		startRoundFrom,
+		tickRound,
+		type TrialSource
 	} from '$lib/domain/sprint';
 	import { progress } from '$lib/stores/progress.svelte';
 
+	type Lane = 'blocks' | 'sounds';
+
 	let ready = $state(false);
+	let lane = $state<Lane>('blocks');
 	let round = $state(idleRound());
 	let running = $state(false);
 	let now = $state(0);
 	let choices = $state<SprintChoices | undefined>();
 
-	const unlocked = $derived(
-		['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'].filter((tier) =>
-			progress.isUnlocked(tier)
-		)
-	);
-	const missing = $derived(sprintMissingLab(unlocked));
-	const eligible = $derived(sprintEligible(unlocked));
+	const unlocked = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
+	const missing = $derived(lane === 'blocks' ? sprintMissingLab(unlocked) : millMissingLab(unlocked));
+	const eligible = $derived(lane === 'blocks' ? sprintEligible(unlocked) : millEligible(unlocked));
 	const score = $derived(sprintScore(round));
 	const remaining = $derived(
 		round.phase === 'running' ? Math.max(0, Math.ceil((round.endsAt - now) / 1000)) : 0
@@ -49,20 +52,27 @@
 		return () => clearInterval(id);
 	});
 
+	function source(): TrialSource {
+		return lane === 'blocks'
+			? blockTrialSource(sprintInventory(unlocked))
+			: pronTrialSource(millPool(unlocked));
+	}
+
+	function pickLane(next: Lane) {
+		if (running || lane === next) return;
+		lane = next;
+		round = idleRound();
+	}
+
 	function start() {
 		progress.tick();
-		const unlocked = ['lab01', 'lab02', 'lab03', 'lab04', 'lab05', 'lab06', 'lab07'].filter((tier) =>
-			progress.isUnlocked(tier)
-		);
-		const blocks = sprintInventory(unlocked);
-		round = startRound(Date.now(), blocks, Math.random);
+		round = startRoundFrom(Date.now(), source(), Math.random);
 		running = round.phase === 'running';
 		now = Date.now();
 	}
 
 	function pick(index: number) {
-		const blocks = sprintInventory(unlocked);
-		round = answerRound(round, index, Date.now(), blocks, Math.random);
+		round = answerRoundFrom(round, index, Date.now(), source(), Math.random);
 		if (round.phase !== 'running') running = false;
 	}
 
@@ -73,16 +83,36 @@
 	}
 </script>
 
-<svelte:head><title>Block sprint</title></svelte:head>
+<svelte:head><title>Drill</title></svelte:head>
 <svelte:window onkeydown={onKey} />
 
 <div class="shell narrow">
 	<header class="head" class:compact={running}>
 		<p class="eyebrow">Timed drill</p>
-		<h1>Block sprint</h1>
+		<h1>{lane === 'blocks' ? 'Block sprint' : 'Sound-change mill'}</h1>
+		{#if ready && !running}
+			<div class="lanes" role="group" aria-label="Drill lanes">
+				<button
+					type="button"
+					class="lane"
+					aria-pressed={lane === 'blocks'}
+					onclick={() => pickLane('blocks')}
+				>Blocks</button>
+				<button
+					type="button"
+					class="lane"
+					aria-pressed={lane === 'sounds'}
+					onclick={() => pickLane('sounds')}
+				>Sound changes</button>
+			</div>
+		{/if}
 		{#if ready && eligible && round.phase === 'idle'}
 			<p class="standfirst">
-				Read each block, tap its sound. One minute. The number is your median time.
+				{#if lane === 'blocks'}
+					Read each block, tap its sound. One minute. The number is your median time.
+				{:else}
+					Read each written word, tap how it is actually said. Same clock, same score.
+				{/if}
 			</p>
 		{/if}
 	</header>
@@ -96,14 +126,20 @@
 	{:else if missing}
 		<div class="card empty">
 			<span class="big" lang="ko">한</span>
-			<h2>Sprint is locked</h2>
-			<p>Finish Lab 0{missing.number} to unlock the sprint.</p>
+			<h2>{lane === 'blocks' ? 'Sprint is locked' : 'The mill is locked'}</h2>
+			<p>
+				{#if lane === 'blocks'}
+					Finish Lab 0{missing.number} to unlock the sprint.
+				{:else}
+					The mill quizzes sound changes — finish Lab 0{missing.number} to unlock the first ones.
+				{/if}
+			</p>
 			<a class="btn" href={resolve('/lab/[id]', { id: missing.id })}>Start Lab 0{missing.number}</a>
 		</div>
 	{:else if round.phase === 'running' && round.trial}
 		<div class="card drill">
 			<p class="timer" role="timer" aria-live="off">{remaining}</p>
-			<div class="glyph" lang="ko">{round.trial.block}</div>
+			<div class="glyph" class:word={lane === 'sounds'} lang="ko">{round.trial.block}</div>
 			{#key round.trial.block + round.seen}
 				<SprintChoices bind:this={choices} options={round.trial.options} onPick={pick} />
 			{/key}
@@ -153,6 +189,39 @@
 		margin: 0;
 	}
 
+	.lanes {
+		display: flex;
+		gap: var(--s2);
+		margin: 0 0 var(--s3);
+	}
+	.lane {
+		appearance: none;
+		min-height: 44px;
+		padding: var(--s1) var(--s3);
+		font: inherit;
+		font-size: 0.84rem;
+		color: var(--ink-soft);
+		background: var(--paper-raised);
+		border: 1px solid var(--rule);
+		border-radius: var(--r-pill);
+		cursor: pointer;
+		transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+	}
+	.lane:hover {
+		color: var(--ink);
+		border-color: var(--rule-strong);
+	}
+	.lane:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
+	.lane[aria-pressed='true'] {
+		color: var(--accent);
+		background: var(--accent-soft);
+		border-color: var(--accent);
+	}
+
 	.drill {
 		padding: var(--s5);
 	}
@@ -175,10 +244,17 @@
 		color: var(--ink);
 		margin: 0 0 var(--s4);
 	}
+	/* Words run longer than single blocks; keep them on the card. */
+	.glyph.word {
+		font-size: clamp(2.2rem, 6vw + 1rem, 4rem);
+	}
 
 	@media (max-height: 52rem) {
 		.glyph {
 			font-size: clamp(2.6rem, 6vw + 1rem, 4rem);
+		}
+		.glyph.word {
+			font-size: clamp(1.9rem, 4.5vw + 0.8rem, 3rem);
 		}
 	}
 
@@ -229,6 +305,12 @@
 		margin: var(--s2) 0 0;
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		.lane {
+			transition: none;
+		}
+	}
+
 	@media (forced-colors: active) {
 		.timer,
 		.glyph,
@@ -236,6 +318,15 @@
 		.empty h2,
 		.empty p {
 			color: CanvasText;
+		}
+		.lane {
+			background: ButtonFace;
+			color: ButtonText;
+			border-color: ButtonBorder;
+		}
+		.lane[aria-pressed='true'] {
+			background: Highlight;
+			color: HighlightText;
 		}
 	}
 </style>

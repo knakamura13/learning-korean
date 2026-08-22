@@ -414,6 +414,136 @@ export function contactAction(word: string): ContactAction {
 	return { type: 'stay' };
 }
 
+/* ------------------------------------------------------------------ *
+ * ㅎ at a junction — Article 12 (aspiration, ㅎ-deletion)
+ * ------------------------------------------------------------------ */
+
+/** ㅎ merging into a following plain consonant (ㅎ-batchim direction). */
+const ASPIRATED_FROM_LEAD: Record<string, string> = {
+	'ㄱ': 'ㅋ', 'ㄷ': 'ㅌ', 'ㅈ': 'ㅊ'
+};
+
+/** A stop representative merging with a following ㅎ (stop-batchim direction). */
+const ASPIRATED_FROM_STOP: Record<string, string> = {
+	'ㄱ': 'ㅋ', 'ㄷ': 'ㅌ', 'ㅂ': 'ㅍ'
+};
+
+/** What an ㅎ-family batchim leaves behind once its ㅎ is spent. */
+const H_REMAINDER: Record<string, string> = {
+	'ㅎ': '', 'ㄶ': 'ㄴ', 'ㅀ': 'ㄹ'
+};
+
+/**
+ * Fuse ㅎ with an adjacent plain consonant into its aspirated twin.
+ * Article 12 ①, both directions: an ㅎ-family batchim (ㅎ/ㄶ/ㅀ) before
+ * ㄱ/ㄷ/ㅈ, or a stop batchim before an ㅎ lead. ㅎ+ㅅ→ㅆ and cluster
+ * batchims before ㅎ (밝히다) are out of scope, like Article 15 is for
+ * liaison — the widget words never need them.
+ */
+export function applyAspiration(word: string): string {
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (!cur.final) continue;
+			if (cur.final in H_REMAINDER && next.lead in ASPIRATED_FROM_LEAD) {
+				next.lead = ASPIRATED_FROM_LEAD[next.lead];
+				cur.final = H_REMAINDER[cur.final];
+				continue;
+			}
+			if (next.lead !== 'ㅎ' || isCluster(cur.final)) continue;
+			const stop = batchimSound(cur.final);
+			const aspirated = ASPIRATED_FROM_STOP[stop];
+			if (!aspirated) continue;
+			next.lead = aspirated;
+			cur.final = '';
+		}
+	});
+}
+
+/**
+ * Drop an ㅎ-family batchim before a vowel. Article 12 ④: plain ㅎ simply
+ * vanishes (좋아요 → 조아요); ㄶ/ㅀ spend the ㅎ and liaise the survivor
+ * (많아 → 마나) — the jump applyLiaison deliberately refused to make.
+ */
+export function applyHDeletion(word: string): string {
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (next.lead !== 'ㅇ' || !(cur.final in H_REMAINDER)) continue;
+			const survivor = H_REMAINDER[cur.final];
+			cur.final = '';
+			if (survivor) next.lead = survivor;
+		}
+	});
+}
+
+export function applyHMerge(word: string): string {
+	const aspirated = applyAspiration(word);
+	if (aspirated !== word) return aspirated;
+	return applyHDeletion(word);
+}
+
+export type HMergeAction = { type: 'stay' } | { type: 'aspirate' } | { type: 'delete' };
+
+export function hMergeAction(word: string): HMergeAction {
+	if (applyAspiration(word) !== word) return { type: 'aspirate' };
+	if (applyHDeletion(word) !== word) return { type: 'delete' };
+	return { type: 'stay' };
+}
+
+/* ------------------------------------------------------------------ *
+ * ㄹ at a junction — Articles 20 and 19 (lateralization, ㄹ → ㄴ)
+ * ------------------------------------------------------------------ */
+
+const R_TO_N_HOSTS = new Set(['ㅁ', 'ㅇ']);
+
+/**
+ * ㄴ and ㄹ meeting in either order both come out ㄹㄹ.
+ * Article 20 only. The lexical exceptions it lists (의견란-type
+ * Sino-Korean compounds, which nasalize instead) are out of scope.
+ */
+export function applyLateralization(word: string): string {
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (cur.final === 'ㄴ' && next.lead === 'ㄹ') cur.final = 'ㄹ';
+			else if (cur.final === 'ㄹ' && next.lead === 'ㄴ') next.lead = 'ㄹ';
+		}
+	});
+}
+
+/**
+ * A lead ㄹ after ㅁ or ㅇ becomes ㄴ. Article 19's nasal-host half only —
+ * the stop-host chains (독립 → 동닙, two rules stacking) stay out of the
+ * widget's scope and are named honestly in the lab instead.
+ */
+export function applyRToN(word: string): string {
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (R_TO_N_HOSTS.has(cur.final) && next.lead === 'ㄹ') next.lead = 'ㄴ';
+		}
+	});
+}
+
+export function applyFlow(word: string): string {
+	const lateral = applyLateralization(word);
+	if (lateral !== word) return lateral;
+	return applyRToN(word);
+}
+
+export type FlowAction = { type: 'stay' } | { type: 'lateral' } | { type: 'nasal' };
+
+export function flowAction(word: string): FlowAction {
+	if (applyLateralization(word) !== word) return { type: 'lateral' };
+	if (applyRToN(word) !== word) return { type: 'nasal' };
+	return { type: 'stay' };
+}
+
 const LEAD_RR: Record<string, string> = {
 	'ㄱ': 'g', 'ㄲ': 'kk', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄸ': 'tt', 'ㄹ': 'r', 'ㅁ': 'm',
 	'ㅂ': 'b', 'ㅃ': 'pp', 'ㅅ': 's', 'ㅆ': 'ss', 'ㅇ': '', 'ㅈ': 'j', 'ㅉ': 'jj',
@@ -480,10 +610,9 @@ export function romanizeWord(word: string): string {
  * The eight changes that stand between spelling and speech.
  *
  * Korean spelling is morphophonemic: it preserves the identity of a word part
- * rather than transcribing what you hear. These rules are that gap. Liaison,
- * tensification, and nasalization have functions (`applyLiaison`,
- * `applyTensification`, `applyNasalization`); the rest are still reference data.
- * `scored` marks which ones the course already drills.
+ * rather than transcribing what you hear. These rules are that gap. Every
+ * change except palatalization now has an apply function and a lab that
+ * drills it; `scored` marks which ones the course covers.
  *
  * Source: 표준 발음법 (Standard Pronunciation Rules, 1988), Articles 12–23.
  */
@@ -493,7 +622,7 @@ export interface SoundChange {
 	korean: string;
 	trigger: string;
 	examples: { written: string; spoken: string; gloss?: string }[];
-	/** Liaison, tensification, and nasalization are scored lab steps. */
+	/** All but palatalization are scored lab steps. */
 	scored: boolean;
 }
 
@@ -535,7 +664,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'aspiration',
 		name: 'Aspiration',
 		korean: '격음화',
-		scored: false,
+		scored: true,
 		trigger: 'ㅎ next to ㄱ/ㄷ/ㅂ/ㅈ gives ㅋ/ㅌ/ㅍ/ㅊ',
 		examples: [
 			{ written: '좋고', spoken: '조코', gloss: 'good and…' },
@@ -546,7 +675,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'lateralization',
 		name: 'Lateralization',
 		korean: '유음화',
-		scored: false,
+		scored: true,
 		trigger: 'ㄴ+ㄹ or ㄹ+ㄴ become ㄹㄹ',
 		examples: [
 			{ written: '신라', spoken: '실라', gloss: 'Silla' },
@@ -557,7 +686,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'r-to-n',
 		name: 'ㄹ becomes ㄴ',
 		korean: 'ㄹ의 비음화',
-		scored: false,
+		scored: true,
 		trigger: 'ㄹ after ㅁ/ㅇ/ㄱ/ㅂ becomes ㄴ',
 		examples: [
 			{ written: '대통령', spoken: '대통녕', gloss: 'president' },
@@ -568,7 +697,7 @@ export const SOUND_CHANGES: SoundChange[] = [
 		id: 'h-deletion',
 		name: 'ㅎ deletion',
 		korean: 'ㅎ 탈락',
-		scored: false,
+		scored: true,
 		trigger: 'a ㅎ batchim before a vowel simply drops',
 		examples: [
 			{ written: '좋아요', spoken: '조아요', gloss: 'it is good' },
