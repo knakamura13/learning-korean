@@ -106,6 +106,20 @@ export interface ContactStep extends BaseStep {
 	gloss?: string;
 }
 
+/** Decide what ㅎ does at the junction: aspirate, delete, or stay. */
+export interface HMergeStep extends BaseStep {
+	type: 'hmerge';
+	word: string;
+	gloss?: string;
+}
+
+/** Decide what ㄹ does at the junction: flow to ㄹㄹ, yield to ㄴ, or stay. */
+export interface FlowStep extends BaseStep {
+	type: 'flow';
+	word: string;
+	gloss?: string;
+}
+
 /** Decode a real word block by block, then identify it. */
 export interface ReadStep extends BaseStep {
 	type: 'read';
@@ -124,6 +138,8 @@ export type Step =
 	| ClusterStep
 	| LiaisonStep
 	| ContactStep
+	| HMergeStep
+	| FlowStep
 	| ReadStep;
 
 export interface Lab {

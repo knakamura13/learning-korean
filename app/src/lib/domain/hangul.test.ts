@@ -6,6 +6,8 @@ import {
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
 	applyTensification, applyNasalization, applyContact, contactAction,
+	applyAspiration, applyHDeletion, applyHMerge, hMergeAction,
+	applyLateralization, applyRToN, applyFlow, flowAction,
 	romanizeSyllable, romanizeWord, jamoReading
 } from './hangul';
 
@@ -269,13 +271,8 @@ describe('liaison (Articles 13–14)', () => {
 	});
 
 	it('marks unimplemented sound changes so reference copy cannot claim they are scored', () => {
-		const unimplemented = SOUND_CHANGES.filter(
-			(s) => s.id !== 'liaison' && s.id !== 'tensification' && s.id !== 'nasalization'
-		);
-		expect(unimplemented.length).toBe(5);
-		for (const change of unimplemented) {
-			expect(change.scored, change.id).toBe(false);
-		}
+		const unimplemented = SOUND_CHANGES.filter((s) => !s.scored);
+		expect(unimplemented.map((s) => s.id)).toEqual(['palatalization']);
 	});
 
 	it('returns the input unchanged when any character is not a syllable', () => {
@@ -441,5 +438,103 @@ describe('contactAction', () => {
 		expect(romanizeWord(applyContact('학교'))).toBe('hak-kkyo');
 		expect(romanizeWord(applyContact('입니다'))).toBe('im-ni-da');
 		expect(romanizeWord(applyContact('국밥'))).toBe('guk-ppap');
+	});
+});
+
+describe('aspiration and ㅎ-deletion (Article 12)', () => {
+	it('an ㅎ-family batchim aspirates a following plain ㄱ/ㄷ/ㅈ', () => {
+		expect(applyAspiration('좋고')).toBe('조코');
+		expect(applyAspiration('좋다')).toBe('조타');
+		expect(applyAspiration('놓지')).toBe('노치');
+		// ㄶ/ㅀ spend the ㅎ and keep their first member in the slot.
+		expect(applyAspiration('많다')).toBe('만타');
+		expect(applyAspiration('싫다')).toBe('실타');
+	});
+
+	it('a stop batchim before an ㅎ lead fuses into the aspirate', () => {
+		expect(applyAspiration('축하')).toBe('추카');
+		expect(applyAspiration('입학')).toBe('이팍');
+		// ㅅ neutralizes to the [ㄷ] representative first, then aspirates.
+		expect(applyAspiration('못하다')).toBe('모타다');
+	});
+
+	it('deletes an ㅎ batchim before a vowel, liaising cluster survivors', () => {
+		expect(applyHDeletion('좋아요')).toBe('조아요');
+		expect(applyHDeletion('놓아')).toBe('노아');
+		expect(applyHDeletion('많아')).toBe('마나');
+		expect(applyHDeletion('싫어')).toBe('시러');
+	});
+
+	it('fires neither rule when no ㅎ is at the junction', () => {
+		expect(applyAspiration('학교')).toBe('학교');
+		expect(applyHDeletion('한국어')).toBe('한국어');
+		expect(applyHMerge('음악')).toBe('음악');
+		expect(applyAspiration('국물!')).toBe('국물!');
+	});
+
+	it('hMergeAction derives aspirate, delete, or stay', () => {
+		expect(hMergeAction('좋고')).toEqual({ type: 'aspirate' });
+		expect(hMergeAction('축하')).toEqual({ type: 'aspirate' });
+		expect(hMergeAction('좋아요')).toEqual({ type: 'delete' });
+		expect(hMergeAction('많아')).toEqual({ type: 'delete' });
+		expect(hMergeAction('학교')).toEqual({ type: 'stay' });
+	});
+
+	it('romanizes the merged forms the deck will accept', () => {
+		expect(romanizeWord(applyHMerge('축하'))).toBe('chu-ka');
+		expect(romanizeWord(applyHMerge('좋아요'))).toBe('jo-a-yo');
+		expect(romanizeWord(applyHMerge('많다'))).toBe('man-ta');
+	});
+});
+
+describe('lateralization and ㄹ→ㄴ (Articles 20 and 19)', () => {
+	it('ㄴ and ㄹ meeting in either order come out ㄹㄹ', () => {
+		expect(applyLateralization('신라')).toBe('실라');
+		expect(applyLateralization('한라산')).toBe('할라산');
+		expect(applyLateralization('연락')).toBe('열락');
+		expect(applyLateralization('편리')).toBe('펼리');
+		expect(applyLateralization('설날')).toBe('설랄');
+		expect(applyLateralization('실내')).toBe('실래');
+	});
+
+	it('a lead ㄹ after ㅁ or ㅇ becomes ㄴ', () => {
+		expect(applyRToN('심리')).toBe('심니');
+		expect(applyRToN('종로')).toBe('종노');
+		expect(applyRToN('음료수')).toBe('음뇨수');
+		expect(applyRToN('대통령')).toBe('대통녕');
+		expect(applyRToN('정류장')).toBe('정뉴장');
+	});
+
+	it('fires neither rule at other junctions', () => {
+		expect(applyLateralization('한국')).toBe('한국');
+		expect(applyRToN('학교')).toBe('학교');
+		expect(applyFlow('입니다')).toBe('입니다');
+		expect(applyRToN('신라!')).toBe('신라!');
+	});
+
+	it('flowAction derives lateral, nasal, or stay', () => {
+		expect(flowAction('신라')).toEqual({ type: 'lateral' });
+		expect(flowAction('설날')).toEqual({ type: 'lateral' });
+		expect(flowAction('심리')).toEqual({ type: 'nasal' });
+		expect(flowAction('종로')).toEqual({ type: 'nasal' });
+		expect(flowAction('한국')).toEqual({ type: 'stay' });
+	});
+
+	it('romanizes the flowed forms the deck will accept', () => {
+		// Block-cut romanization writes lead ㄹ as r; the deck also accepts
+		// the assimilated 'l-l' spelling on its flow cards.
+		expect(romanizeWord(applyFlow('신라'))).toBe('sil-ra');
+		expect(romanizeWord(applyFlow('심리'))).toBe('sim-ni');
+		expect(romanizeWord(applyFlow('대통령'))).toBe('dae-tong-nyeong');
+	});
+});
+
+describe('all eight sound changes are now scored', () => {
+	it('marks aspiration, ㅎ-deletion, lateralization, and ㄹ→ㄴ as drilled', () => {
+		const scored = SOUND_CHANGES.filter((c) => c.scored).map((c) => c.id).sort();
+		expect(scored).toEqual(
+			['aspiration', 'h-deletion', 'lateralization', 'liaison', 'nasalization', 'r-to-n', 'tensification'].sort()
+		);
+		expect(SOUND_CHANGES.find((c) => c.id === 'palatalization')?.scored).toBe(false);
 	});
 });
