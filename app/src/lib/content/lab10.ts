@@ -12,7 +12,7 @@ export const lab10: Lab = {
 	finish: {
 		title: 'The people half, closed',
 		summary:
-			'Family name first, one syllable plus two, no space — and a name obeys every junction rule you know. 아/야 calls a close friend and hands the name a vowel to liaise into; 씨 takes the full or given name, never a bare surname; 님 honors roles and titles. Reading the people in your life was the mission\'s second half. Left on the bench: handwriting, and the romanization traps.'
+			'Family name first, one syllable plus two, no space — and a name obeys every junction rule you know. 아/야 calls a close friend your age or younger, and 아 hands a batchim name a vowel to liaise into; 씨 takes the full or given name, never a bare surname; 님 honors roles and titles. Reading the people in your life was the mission\'s second half. Left on the bench: handwriting, and the romanization traps.'
 	},
 	steps: [
 		{
@@ -51,7 +51,7 @@ export const lab10: Lab = {
 		{
 			type: 'choice',
 			act: 'Act 2 · names at the junction',
-			do: 'Spelling vs speech. You have drilled four junction rules — which one fired?',
+			do: 'Spelling vs speech. You have drilled every junction rule — which one fired here?',
 			stage: [
 				{ glyph: '박은지', caption: 'as written' },
 				{ glyph: '바근지', caption: 'as said' }
@@ -112,7 +112,7 @@ export const lab10: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p>A name is ordinary Korean at every junction. <em>Park</em> is a citation form; the neighbor decides what <span class="hg">박</span> actually says. That is why a name you know can still surprise you out loud.</p>'
+				'<p>A name is ordinary Korean at every junction. <em>Park</em> is a citation form; the neighbor decides what <span class="hg">박</span> actually says. That is why a name you know can still surprise you out loud.</p><p>One class bends: a given name starting <span class="hg">이</span>/<span class="hg">여</span>/<span class="hg">유</span> after a batchim surname often inserts an <span class="jamo">ㄴ</span> — <span class="hg">김연아</span> is <span class="hg">[김녀나]</span>, not what liaison predicts. That class stays off your deck until its rule gets a lab.</p>'
 		},
 		{
 			type: 'choice',
@@ -128,7 +128,7 @@ export const lab10: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p>The vocative. A bare name plus <span class="hg">아</span> means <em>hey, 하늘</em> — strictly for people you are close to. And notice what it hands the name: a vowel, right after a batchim.</p>'
+				'<p>The vocative. A bare name plus <span class="hg">아</span> means <em>hey, 하늘</em> — for close friends your age or younger, never upward. You do not call a beloved <span class="hg">형</span> or a boss this way, however close.</p>'
 		},
 		{
 			type: 'liaison',
@@ -137,7 +137,7 @@ export const lab10: Lab = {
 			word: '하늘아',
 			gloss: 'hey, 하늘!',
 			teach:
-				'<p><span class="hg">[하느라]</span>. The <span class="jamo">ㄹ</span> jumps. Every consonant-final name does this when called — the suffix exists, in part, to be jumped into.</p>'
+				'<p><span class="hg">[하느라]</span>. The <span class="jamo">ㄹ</span> jumps. Every consonant-final name does this when called.</p>'
 		},
 		{
 			type: 'liaison',
@@ -166,7 +166,7 @@ export const lab10: Lab = {
 			answer: 0,
 			miss: '<p><span class="hg">씨</span> itself is fine — the question is what it is allowed to attach to.</p>',
 			teach:
-				'<p><span class="hg">씨</span> attaches to the full name or the given name — <span class="hg">김은지 씨</span>, <span class="hg">은지 씨</span> — never the bare surname. <span class="hg">김 씨</span> is how period dramas address servants. The classic learner mistake, now yours to skip.</p>'
+				'<p><span class="hg">씨</span> attaches to the full name or the given name — <span class="hg">김은지 씨</span>, <span class="hg">은지 씨</span> — never the bare surname. Calling someone <span class="hg">김 씨</span> to their face reads like a boss addressing hired help. The classic learner mistake, now yours to skip.</p>'
 		},
 		{
 			type: 'choice',
@@ -185,7 +185,7 @@ export const lab10: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p><span class="hg">님</span> is the ceiling: it attaches to roles and titles (<span class="hg">선생님</span>, <span class="hg">사장님</span>, <span class="hg">고객님</span>) and, online, straight to names. You will never offend anyone with <span class="hg">님</span>.</p>'
+				'<p><span class="hg">님</span> is the ceiling: it attaches to roles and titles (<span class="hg">선생님</span>, <span class="hg">사장님</span>, <span class="hg">고객님</span>) and, online, straight to names. When unsure, reach upward — too much <span class="hg">님</span> reads formal, never hostile.</p>'
 		},
 		{
 			type: 'contact',
@@ -199,16 +199,16 @@ export const lab10: Lab = {
 		{
 			type: 'read',
 			act: 'Act 5 · read it cold',
-			do: 'You operated this in Act 2. Now read it as a person.',
+			do: 'You operated this in Act 2. The blocks read as written — which cuts does the mouth actually say?',
 			blocks: [
 				{ block: '박', reading: 'bak' },
 				{ block: '은', reading: 'eun' },
 				{ block: '지', reading: 'ji' }
 			],
-			options: ['Park Eun-ji', 'Park Eun-ju', 'Bang Eun-ji', 'Baek Eun-ji'],
+			options: ['ba-geun-ji', 'bak-eun-ji', 'bang-eun-ji', 'ba-geun-chi'],
 			answer: 0,
 			teach:
-				'<p><strong>bak-eun-ji</strong>, said <span class="hg">[바근지]</span>. The spelling holds the name; your mouth holds the liaison. The deck will keep both.</p>'
+				'<p><strong>ba-geun-ji</strong> — the <span class="jamo">ㄱ</span> jumped, cold, without the widget. The spelling holds the name; your mouth holds the liaison. The deck will keep both.</p>'
 		},
 		{
 			type: 'read',
