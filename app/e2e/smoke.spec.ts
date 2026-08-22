@@ -17,7 +17,7 @@ for (const route of ROUTES) {
 	});
 }
 
-test('home shows the seven labs with Lab 01 as the entry point', async ({ page }) => {
+test('home shows all ten labs with Lab 01 as the entry point', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.getByText('start here')).toBeVisible();
 	// resolve() emits relative hrefs (./lab/0001), so match by accessible name.
@@ -25,7 +25,7 @@ test('home shows the seven labs with Lab 01 as the entry point', async ({ page }
 	await expect(
 		page.getByRole('link', { name: 'Find the Letters in Your Mouth', exact: true })
 	).toBeVisible();
-	await expect(page.getByRole('heading', { level: 3 })).toHaveCount(9);
+	await expect(page.getByRole('heading', { level: 3 })).toHaveCount(10);
 });
 
 test('a fresh visitor sees honest empty states on review and drill', async ({ page }) => {
@@ -45,7 +45,7 @@ test('the lab page shows the right lab navigation for the viewport', async ({ pa
 		await switcher.click();
 		const sheet = page.locator('dialog.sheet');
 		await expect(sheet).toBeVisible();
-		await expect(sheet.locator('a')).toHaveCount(9);
+		await expect(sheet.locator('a')).toHaveCount(10);
 		await expect(sheet.locator('a[aria-current="page"]')).toHaveCount(1);
 		await sheet.locator('a').nth(1).click();
 		await expect(page).toHaveURL(/\/lab\/0002$/);

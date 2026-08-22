@@ -27,14 +27,15 @@ pnpm check        # svelte-check / tsc
 src/lib/domain/     pure logic, no framework, no I/O
   hangul.ts           the phonology and orthography of Korean
   srs.ts              SM-2 scheduler — pure, clock injected
-  deck.ts             the review deck: 147 cards across 7 tiers (92 letter and
-                      construction cards, 55 generated blocks, 20 pronunciation)
+  deck.ts             the review deck: 299 cards across 10 lab tiers and 4 vocab
+                      packs (72 letter/construction, 55 generated blocks,
+                      72 pronunciation, 100 meanings)
   blockDeck.ts        deterministic syllable-block card generation
   merge.ts            deterministic sync reconciliation (never asks the learner)
   storage.ts          persistence as a port
 src/lib/content/    lessons as typed data
   types.ts            the step union every lab is built from
-  lab01..lab07.ts     the course
+  lab01..lab10.ts     the course
 src/lib/server/     the optional account API: Postgres access, Google OAuth,
                     sessions, CAS state store (absent from static builds)
 src/lib/sync/       client sync engine + typed API wrapper (guest mode is a value)
