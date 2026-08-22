@@ -54,7 +54,6 @@ export interface CourseNavView {
 	/** Skip-ahead grant — this lab is open even if the prerequisite is not. */
 	isOpened?: (labId: string) => boolean;
 	sessionFor: (labId: string) => LabProgress | undefined;
-	queue: number;
 }
 
 export function courseNavView(input: {
@@ -63,7 +62,6 @@ export function courseNavView(input: {
 	isUnlocked: (tier: string) => boolean;
 	isOpened?: (labId: string) => boolean;
 	sessionFor?: (labId: string) => LabProgress | undefined;
-	queue?: number;
 }): CourseNavView {
 	const unlocked = new Set(
 		input.labs.filter((lab) => input.isUnlocked(lab.unlocks)).map((lab) => lab.unlocks)
@@ -72,8 +70,7 @@ export function courseNavView(input: {
 		ready: input.ready,
 		isUnlocked: (tier) => unlocked.has(tier),
 		isOpened: input.isOpened,
-		sessionFor: input.sessionFor ?? (() => undefined),
-		queue: input.queue ?? 0
+		sessionFor: input.sessionFor ?? (() => undefined)
 	};
 }
 
@@ -135,21 +132,27 @@ export type ReviewPileBody = 'loading' | 'empty' | 'progress';
 
 export type ReviewPileView = {
 	body: ReviewPileBody;
-	due: number;
+	/** Cards the next sitting will present — the commitment the CTA promises. */
+	sitting: number;
+	/** Overdue cards that sitting will not reach. */
+	backlog: number;
 };
 
 /**
  * Home Review pile: do not paint six locked rows and a color legend before
- * any family has unlocked. Due count is 0 until progress has been read.
+ * any family has unlocked. Both counts are 0 until progress has been read.
+ *
+ * The CTA quotes `sitting`, never the whole pile — see `reviewLoad.ts`.
  */
 export function reviewPileView(
 	ready: boolean,
 	unlockedFamilies: number,
-	queue: number
+	sitting: number,
+	backlog: number
 ): ReviewPileView {
-	if (!ready) return { body: 'loading', due: 0 };
-	if (unlockedFamilies <= 0) return { body: 'empty', due: 0 };
-	return { body: 'progress', due: Math.max(0, queue) };
+	if (!ready) return { body: 'loading', sitting: 0, backlog: 0 };
+	if (unlockedFamilies <= 0) return { body: 'empty', sitting: 0, backlog: 0 };
+	return { body: 'progress', sitting: Math.max(0, sitting), backlog: Math.max(0, backlog) };
 }
 
 /** The next lab in course order after `currentId`, or null on the last lab. */

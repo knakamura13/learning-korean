@@ -470,6 +470,79 @@ describe('stats', () => {
 	});
 });
 
+/**
+ * `sitting` is what every surface quotes as the commitment, and `queue` is
+ * several sittings' worth after a gap. The two must never be confused again,
+ * so `sitting` is pinned to the length of the sitting `due()` actually
+ * builds — arithmetic on one side, a materialized list on the other.
+ */
+describe('sitting and backlog', () => {
+	const mixedDeck: SchedulableCard[] = [
+		...Array.from({ length: 40 }, (_, i) => ({ id: `c${i}`, tier: 'lab01' })),
+		...Array.from({ length: 20 }, (_, i) => ({ id: `w${i}`, tier: 'vocab-food' }))
+	];
+
+	/** Every card seen, `overdue` of them past due, the rest comfortably ahead. */
+	function withOverdue(overdue: number, now: number): SrsState {
+		let s = unlock(emptyState(), ['lab01', 'vocab-food']);
+		const cards: SrsState['cards'] = {};
+		mixedDeck.forEach((card, i) => {
+			cards[card.id] = {
+				ease: 2.5,
+				ivl: 6,
+				reps: 3,
+				lapses: 0,
+				due: i < overdue ? now - (i + 1) * 1000 : now + 30 * DAY_MS
+			};
+		});
+		s = { ...s, cards };
+		return s;
+	}
+
+	const opts = { shuffle: noShuffle };
+
+	it('equals the length of the sitting due() builds, at every debt level', () => {
+		for (const overdue of [0, 1, 5, 9, 10, 11, 25, 60]) {
+			const s = pinNewForDay(withOverdue(overdue, T0), mixedDeck, T0, opts);
+			const built = due(s, mixedDeck, T0, opts);
+			expect(stats(s, mixedDeck, T0, opts).sitting).toBe(built.length);
+		}
+	});
+
+	it('holds when unseen cards are drawn alongside overdue reviews', () => {
+		// Nothing graded yet: reviews are zero, both new trickles are full.
+		const fresh = pinNewForDay(unlock(emptyState(), ['lab01', 'vocab-food']), mixedDeck, T0, opts);
+		const st = stats(fresh, mixedDeck, T0, opts);
+		expect(st.sitting).toBe(due(fresh, mixedDeck, T0, opts).length);
+		expect(st.sitting).toBe(DEFAULT_NEW_PER_DAY + 5);
+		expect(st.backlog).toBe(0);
+	});
+
+	it('honors a custom per-sitting cap on both numbers', () => {
+		const s = pinNewForDay(withOverdue(30, T0), mixedDeck, T0, { ...opts, reviewPerSitting: 4 });
+		const st = stats(s, mixedDeck, T0, { ...opts, reviewPerSitting: 4 });
+		expect(st.due).toBe(30);
+		expect(st.sitting).toBe(4);
+		expect(st.backlog).toBe(26);
+		expect(st.sitting).toBe(due(s, mixedDeck, T0, { ...opts, reviewPerSitting: 4 }).length);
+	});
+
+	it('splits the pile so sitting reviews plus backlog account for every due card', () => {
+		const s = pinNewForDay(withOverdue(47, T0), mixedDeck, T0, opts);
+		const st = stats(s, mixedDeck, T0, opts);
+		expect(st.due).toBe(47);
+		expect(st.backlog).toBe(47 - DEFAULT_REVIEW_PER_SITTING);
+		expect(st.sitting).toBeLessThan(st.queue);
+	});
+
+	it('reports no backlog while the learner is on schedule', () => {
+		const s = pinNewForDay(withOverdue(3, T0), mixedDeck, T0, opts);
+		const st = stats(s, mixedDeck, T0, opts);
+		expect(st.backlog).toBe(0);
+		expect(st.sitting).toBe(st.queue);
+	});
+});
+
 describe('tier review progress', () => {
 	const tiers = [
 		{ id: 'lab01', size: 19 },

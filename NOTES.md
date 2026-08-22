@@ -91,6 +91,20 @@ Kyle asked for SRS to master every letter, sound, and compound. Built as:
 
 New cards are capped at 10/day to hold sessions near the 10-minute budget.
 
+4. **Quote the sitting, never the pile (2026-08-22).** Reviews are also capped
+   per sitting (`DEFAULT_REVIEW_PER_SITTING`), so `Stats.queue` — every overdue
+   card plus both full new-card allowances — is several sittings' worth after a
+   gap. Every surface printed `queue` anyway: a learner back after 24 days saw
+   **162** in the nav badge, on the Home CTA and in the Review strip, then got a
+   25-card sitting. The lab finish card said "162 are due today (daily new-card
+   cap of 10)", contradicting itself in one sentence. That number is the whole
+   decision to open the app on a ten-minute budget, and it was overstating the
+   commitment 6×, hardest for exactly the bursty learner MISSION.md predicts.
+   `Stats.sitting` (= `due().length`, pinned by a test) is now the headline and
+   `Stats.backlog` the context; wording lives in `domain/reviewLoad.ts` so the
+   four surfaces cannot drift apart again. Do not put `queue` back on screen —
+   its one honest job left is deciding "more waiting" vs "Review is clear".
+
 **Known constraint:** localStorage is unreliable on `file://` origins in some
 browsers. `storage.ts` probes on startup and `/review` shows a loud warning when
 writes will not survive. `progress.export()` / `progress.import()` are the escape hatch.

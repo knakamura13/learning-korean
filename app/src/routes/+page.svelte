@@ -10,6 +10,7 @@
 		toCourseLab
 	} from '$lib/domain/courseNav';
 	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
+	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
 	import { TIERS } from '$lib/domain/deck';
 	import { DEFAULT_VOCAB_NEW_PER_DAY } from '$lib/domain/srs';
 	import { sprintMissingLab } from '$lib/domain/sprint';
@@ -57,14 +58,19 @@
 			labs: course,
 			isUnlocked: (tier) => progress.isUnlocked(tier),
 			isOpened: (id) => progress.isOpened(id),
-			sessionFor: (id) => sessions[id],
-			queue: stats.queue
+			sessionFor: (id) => sessions[id]
 		})
 	);
 
 	const pile = $derived(
-		reviewPileView(navView.ready, tiers.filter((tier) => tier.unlocked).length, navView.queue)
+		reviewPileView(
+			navView.ready,
+			tiers.filter((tier) => tier.unlocked).length,
+			stats.sitting,
+			stats.backlog
+		)
 	);
+	const load = $derived(reviewLoadCopy(pile, progress.studyPrefs.reviewsPerSitting));
 
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
@@ -243,14 +249,13 @@
 	<section aria-labelledby="sec-review-heading">
 		<div class="sec-row">
 			<h2 id="sec-review-heading" class="sec">Review pile</h2>
-			{#if pile.body === 'progress' && pile.due > 0}
-				<a
-					class="btn"
-					href={resolve('/review')}
-					aria-label="{pile.due} cards due for review"
-				>Review {pile.due} due</a>
+			{#if pile.body === 'progress' && pile.sitting > 0}
+				<a class="btn" href={resolve('/review')} aria-label={load.actionAria}>{load.action}</a>
 			{/if}
 		</div>
+		{#if load.backlogNote}
+			<p class="backlog-note">{load.backlogNote}</p>
+		{/if}
 		<div
 			class="tiers card"
 			role="region"
@@ -440,6 +445,15 @@
 		min-height: 44px;
 	}
 	.sec-row .sec { margin: 0; }
+
+	/* Backlog is context for the CTA above it, not a headline of its own. */
+	.backlog-note {
+		margin: calc(var(--s2) * -1) 0 var(--s3);
+		font-size: 0.82rem;
+		line-height: 1.55;
+		color: var(--ink-soft);
+		max-width: 36rem;
+	}
 
 	section { margin-bottom: var(--s7); }
 

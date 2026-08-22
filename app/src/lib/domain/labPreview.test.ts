@@ -27,8 +27,7 @@ function view(partial: { ready?: boolean; unlocked?: string[] } = {}): CourseNav
 	return {
 		ready: partial.ready ?? true,
 		isUnlocked: (tier) => unlocked.has(tier),
-		sessionFor: () => undefined,
-		queue: 0
+		sessionFor: () => undefined
 	};
 }
 

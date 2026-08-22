@@ -349,6 +349,20 @@ describe('polish audit regressions', () => {
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
+	it('keeps ink-soft secondary copy at least 4.5:1 on paper, every look', () => {
+		// The backlog note and the pile standfirst are 0.82–0.88rem ink-soft on
+		// paper, so AA small-text applies. Every look clears 6.9 today; the
+		// assertion is the requirement, not the current margin.
+		for (const look of LOOKS) {
+			for (const scheme of ['light', 'dark'] as const) {
+				expect(
+					contrastRatio(look[scheme].inkSoft, look[scheme].paper),
+					`${look.id}/${scheme} ink-soft on paper`
+				).toBeGreaterThanOrEqual(4.5);
+			}
+		}
+	});
+
 	it('keeps ink-soft nav text at least 4.5:1 on the chrome surface, every look', () => {
 		// --chrome is color-mix(in srgb, var(--paper-sunk) N%, black); replicate
 		// the mix here so a palette or factor change cannot sneak under 4.5
@@ -652,7 +666,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
 		expect(layout).toMatch(/class="review-w"/);
 		expect(layout).toMatch(/class="badge" aria-hidden="true"/);
-		expect(layout).toMatch(/Review, \$\{queue\} cards due/);
+		expect(layout).toMatch(/aria-label=\{item\.href === '\/review' && sitting > 0\s*\?\s*load\.navAria/);
 		expect(styleBlock(layout)).toMatch(/\.review-w\s*\{[^}]*position:\s*relative/s);
 		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*position:\s*absolute/s);
 		expect(styleBlock(layout)).toMatch(/\.badge\s*\{[^}]*inset-block-end:/s);
@@ -733,7 +747,7 @@ describe('polish audit regressions', () => {
 		expect(home).not.toMatch(/class="peek"/);
 		expect(home).not.toMatch(/class="lab-actions"/);
 		expect(home).toMatch(/LockedLabPopover/);
-		expect(home).toMatch(/Review \{pile\.due\} due/);
+		expect(home).toMatch(/pile\.body === 'progress' && pile\.sitting > 0/);
 		expect(home).toMatch(/Letters land here after you finish a lab/);
 		expect(home).toMatch(/class="pile-skel"/);
 		expect(home).toMatch(/class="tier skel-row"/);
@@ -1016,5 +1030,59 @@ describe('polish audit regressions', () => {
 		expect(sitting).toMatch(/attachModalDialog/);
 		expect(labPipRail).toMatch(/aria-label="Lab card navigation"/);
 		expect(styleBlock(labRunner)).not.toMatch(/\.pip\s*\{/);
+	});
+
+	/**
+	 * `stats.queue` is the whole pile — after a two-week gap it was printing
+	 * 162 where the sitting served 25, on the one number that decides whether
+	 * a ten-minute app gets opened at all. No surface may quote it as the
+	 * commitment again; every one of them reads `stats.sitting` and takes its
+	 * wording from `reviewLoad.ts`.
+	 */
+	it('quotes the sitting, never the whole pile, wherever a review count is shown', () => {
+		for (const src of [layout, home, review]) {
+			expect(src).toMatch(/reviewLoadCopy/);
+			// The pile total may still gate "is anything left at all", but it
+			// may never reach the page as text.
+			expect(src).not.toMatch(/\{stats\.queue\}/);
+			expect(src).not.toMatch(/\{queue\}/);
+		}
+		expect(layout).not.toMatch(/stats\.queue/);
+		expect(home).not.toMatch(/stats\.queue/);
+		// Review's one legitimate use: deciding between "more waiting" and "clear".
+		expect(review).toMatch(/remainingDue: stats\.queue/);
+		// Nav badge: the number is the sitting; the backlog rides the a11y name.
+		expect(layout).toMatch(/const sitting = \$derived\(progress\.stats\.sitting\)/);
+		expect(layout).toMatch(/class="badge-n">\{sitting\}/);
+		expect(layout).not.toMatch(/\{queue\}<\/span>/);
+		// Home CTA and Review strip: commitment first, backlog as a quiet note.
+		expect(home).toMatch(/aria-label=\{load\.actionAria\}>\{load\.action\}/);
+		expect(home).toMatch(/\{#if load\.backlogNote\}/);
+		expect(home).not.toMatch(/Review \{pile\.due\} due/);
+		expect(review).toMatch(/<b>\{stats\.sitting\}<\/b><span>this sitting<\/span>/);
+		expect(review).toMatch(/\{load\.backlogNote\}/);
+		expect(review).not.toMatch(/Check for more/);
+		expect(review).toMatch(/\{load\.moreAction\}/);
+		// The pile total is not an alarm; the strip highlights work in hand.
+		expect(review).toMatch(/class:hot=\{stats\.sitting > 0\}/);
+		// The lab handoff gate follows the same number.
+		expect(labRunner).toMatch(/\$derived\(progress\.stats\.sitting\)/);
+		expect(labRunner).not.toMatch(/progress\.stats\.queue/);
+	});
+
+	it('renders the backlog note as secondary text on Home and Review', () => {
+		for (const css of [styleBlock(home), styleBlock(review)]) {
+			expect(css).toMatch(/\.backlog-note\s*\{[^}]*color:\s*var\(--ink-soft\)/s);
+			expect(css).toMatch(/\.backlog-note\s*\{[^}]*font-size:\s*0\.82rem/s);
+		}
+		// Review keeps one owner of the gap under the strip, so the note
+		// appearing or not cannot shift the card below it.
+		expect(styleBlock(review)).toMatch(/\.load\s*\{\s*margin-bottom:\s*var\(--s5\);\s*\}/);
+		expect(styleBlock(review)).not.toMatch(/\.strip\s*\{[^}]*margin-bottom/s);
+	});
+
+	it('holds review stat labels at the 0.75rem small-uppercase floor', () => {
+		expect(styleBlock(review)).toMatch(/\.stat span\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(review)).not.toMatch(/\.stat span\s*\{[^}]*font-size:\s*0\.7[0-4]rem/s);
 	});
 });
