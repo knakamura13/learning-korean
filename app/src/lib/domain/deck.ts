@@ -379,9 +379,13 @@ export function cardsOfTier(tier: string): Card[] {
 	return DECK.filter((c) => c.tier === tier);
 }
 
-/** Normalize a typed answer for comparison: case, spacing and stray punctuation. */
+/**
+ * Normalize a typed answer for comparison: case, spacing, stray punctuation,
+ * and apostrophes — glosses are authored apostrophe-free, so "I'm hungry"
+ * and "im hungry" must both pass.
+ */
 export function normalize(input: string): string {
-	return input.toLowerCase().replace(/\s+/g, '').replace(/[.,!?]/g, '');
+	return input.toLowerCase().replace(/\s+/g, '').replace(/[.,!?'’]/g, '');
 }
 
 export function normalizePron(input: string): string {

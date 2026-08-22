@@ -206,3 +206,12 @@ describe('block cards', () => {
 		expect(checkAnswer(card, '')).toBe(false);
 	});
 });
+
+describe('typed-meaning forgiveness', () => {
+	it('accepts natural apostrophes against apostrophe-free glosses', () => {
+		const card = DECK.find((c) => c.id === 'wm-괜찮아요')!;
+		expect(checkAnswer(card, "it's okay")).toBe(true);
+		expect(checkAnswer(card, 'its okay')).toBe(true);
+		expect(checkAnswer(card, 'I’m fine')).toBe(true);
+	});
+});
