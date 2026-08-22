@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { activeSystem } from './active.ts';
 import { LOOKS } from './catalog.ts';
-import { themeBootScript } from './boot.ts';
+import { lookFontFiles, themeBootScript } from './boot.ts';
 import type { DesignSystem } from './types.ts';
 
 const ICONS = [
@@ -53,6 +53,7 @@ export function webManifest(system: DesignSystem, scheme: 'light' | 'dark'): str
 			start_url: './',
 			scope: './',
 			display: 'standalone',
+			orientation: 'any',
 			background_color: paper,
 			theme_color: paper,
 			icons: ICONS
@@ -68,7 +69,7 @@ export function writeManifests(dir = new URL('../../../static/', import.meta.url
 	const lookPapers = Object.fromEntries(
 		LOOKS.map((system) => [system.id, { light: system.light.paper, dark: system.dark.paper }])
 	);
-	writeIfChanged(new URL('theme-boot.js', dir), `${themeBootScript(lookPapers)}\n`);
+	writeIfChanged(new URL('theme-boot.js', dir), `${themeBootScript(lookPapers, lookFontFiles(LOOKS))}\n`);
 }
 
 function writeIfChanged(url: URL, contents: string): void {

@@ -510,7 +510,8 @@
 	.do {
 		font-family: var(--sans);
 		font-style: normal;
-		font-size: clamp(1.15rem, 2.8vw, 1.45rem);
+		/* rem in the preferred term so 200% text zoom scales it (see polish.test). */
+		font-size: clamp(1.15rem, 1.15rem + 0.9vw, 1.45rem);
 		line-height: 1.34;
 		margin: var(--s2) 0 var(--s1);
 	}

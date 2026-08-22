@@ -1,9 +1,10 @@
 import type { DesignSystem, Palette } from '../types.ts';
+import { HANGUL_WITH_FALLBACK, NOTO_SANS_KR_FALLBACK } from './hangulFallbacks.ts';
 
 const SERIF = "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
 const SANS = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
 const MONO = "'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace";
-const HANGUL = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif";
+const HANGUL = HANGUL_WITH_FALLBACK;
 
 const light: Palette = {
 	ink: '#1a1a18',
@@ -86,7 +87,8 @@ export const taegeuk: DesignSystem = {
 			style: 'normal',
 			weight: '400 600',
 			display: 'optional'
-		}
+		},
+		NOTO_SANS_KR_FALLBACK
 	],
 	light,
 	dark,

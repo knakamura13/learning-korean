@@ -1,4 +1,4 @@
-import { themeBootScript } from './boot.ts';
+import { lookFontFiles, themeBootScript } from './boot.ts';
 import { allDesignSystemsCss } from './css.ts';
 import type { DesignSystem } from './types.ts';
 
@@ -21,5 +21,5 @@ export function applyDesignSystem(
 		.replaceAll(PAPER_PLACEHOLDER_LIGHT, fallback.light.paper)
 		.replaceAll(PAPER_PLACEHOLDER_DARK, fallback.dark.paper)
 		.replaceAll(CSS_PLACEHOLDER, allDesignSystemsCss(systems, fallback.id))
-		.replaceAll(BOOT_PLACEHOLDER, themeBootScript(lookPapers));
+		.replaceAll(BOOT_PLACEHOLDER, themeBootScript(lookPapers, lookFontFiles(systems)));
 }
