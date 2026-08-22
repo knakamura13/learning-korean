@@ -66,7 +66,9 @@ The objection was to *lessons* that read like articles.
 
 Kyle asked for SRS to master every letter, sound, and compound. Built as:
 
-- `app/src/lib/domain/deck.ts` — 72 cards covering the full inventory: 19 consonants,
+- `app/src/lib/domain/deck.ts` — originally 72 cards covering the letter
+  inventory (now 147: generated block cards and lab06/lab07 pronunciation
+  tiers joined later): 19 consonants,
   10 basic vowels, 11 compound vowels + 5 construction cards, 16 batchim values,
   11 clusters.
 - `app/src/lib/domain/srs.ts` — SM-2 variant, pure, clock injected.
@@ -146,7 +148,8 @@ of that session only — treat it as gone. Everything below is in `app/`.
 
 - `src/lib/domain/` — pure logic, no framework, no I/O.
   `hangul.ts` (phonology, orthography, derivation, sound changes), `srs.ts` (SM-2
-  with an injected clock), `deck.ts` (the 72 cards), `storage.ts` (persistence port).
+  with an injected clock), `deck.ts` + `blockDeck.ts` (the 147 cards),
+  `merge.ts` (sync reconciliation), `storage.ts` (persistence port).
 - `src/lib/content/` — lessons as typed data. `types.ts` defines the step union;
   `lab01..lab07.ts` are the course. `content.test.ts` validates the whole course
   against the domain.
@@ -155,7 +158,10 @@ of that session only — treat it as gone. Everything below is in `app/`.
   `contact`, `read`. Wrong answers do *not* advance on any step type; `choice` and `read`
   mark the missed option and ask the learner to try again, revealing the
   teaching only after a correct pick.
-- `src/routes/` — `/` dashboard, `/lab/[id]`, `/review`, `/reference`.
+- `src/routes/` — `/` dashboard, `/lab/[id]`, `/review`, `/drill` (60s block
+  sprint, never writes the scheduler), `/reference`, `/settings` (appearance,
+  account, backup), `/healthz`, and `/api/*` (the optional account/sync API).
+- `src/lib/server/` + `src/lib/sync/` — the accounts layer (see below).
 
 **`onNudge(html, soft)`** — composer widgets pass `soft: true` so valid intermediate
 states (building ㅗ on the way to ㅛ) don't count against the first-try tally.
@@ -173,6 +179,36 @@ that file. Do not hand-write reference tables that the domain can produce.
 **Authoring rule, now enforced by test:** all options within a card must be the same
 length. It has already caught one real slip (Lab 02's correct answer was the only
 seven-word option among five- and six-word distractors).
+
+## Accounts & cross-device sync (added 2026-08-22, production push)
+
+Grilling session 2026-08-21 settled the shape; PRs #121–#124 built it.
+Decisions worth preserving:
+
+- **Audience is a small circle** (Kyle + friends/family), not a public product.
+  Google OAuth only — hand-rolled code+PKCE flow in `server/googleOauth.ts`
+  because the small OAuth libraries are unmaintained (arctic is published as
+  "no longer supported") and the flow is two URLs and a fetch.
+- **The server is a dumb, revision-checked document store.** The wire format is
+  the existing v2 backup envelope; all merge/revive intelligence stays in the
+  pure client domain. `srs.ts`, `labSession.ts`, and `storage.ts` were not
+  touched — the "a future sync backend slots in without touching this file"
+  promise held.
+- **Login-and-load with deterministic merge** (`domain/merge.ts`): per-card
+  latest-review-wins (review instant recovered from the schedule), days take
+  max, whole-sitting-wins per lab. **The learner is never asked to pick a save
+  point** — a hard constraint from the grilling session.
+- **Guest mode is the app.** Without `DATABASE_URL` every API route answers
+  unavailable and the client runs exactly as before; a static build behaves
+  identically. First sign-in adopts the local deck; corrupt-quarantined state
+  makes the sync engine fully inert (pushing would clobber the account copy).
+- **Railway private networking only** for app↔DB (`postgres.railway.internal`)
+  — no egress fees. Runbook in the root README.
+- Study pacing (new/day, reviews/sitting) is an account preference with UI in
+  Settings; appearance stays device-local by design.
+- iOS note that motivated all this: an installed PWA gets storage partitioned
+  from the Safari tab, and ITP can evict localStorage — server state is the
+  durability fix, not just convenience.
 
 ## Backlog of lesson ideas
 

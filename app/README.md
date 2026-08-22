@@ -27,11 +27,17 @@ pnpm check        # svelte-check / tsc
 src/lib/domain/     pure logic, no framework, no I/O
   hangul.ts           the phonology and orthography of Korean
   srs.ts              SM-2 scheduler — pure, clock injected
-  deck.ts             the 72 review cards
+  deck.ts             the review deck: 147 cards across 7 tiers (92 letter and
+                      construction cards, 55 generated blocks, 20 pronunciation)
+  blockDeck.ts        deterministic syllable-block card generation
+  merge.ts            deterministic sync reconciliation (never asks the learner)
   storage.ts          persistence as a port
 src/lib/content/    lessons as typed data
   types.ts            the step union every lab is built from
   lab01..lab07.ts     the course
+src/lib/server/     the optional account API: Postgres access, Google OAuth,
+                    sessions, CAS state store (absent from static builds)
+src/lib/sync/       client sync engine + typed API wrapper (guest mode is a value)
 src/lib/theme/      swappable design systems (the look)
   active.ts           default / build-time look (Botanical Korea) for manifests, font preloads, and no-JS `:root`
   systems/botanicalKorea.ts  pressed-flowers look (default)
@@ -41,7 +47,8 @@ src/lib/theme/      swappable design systems (the look)
   css.ts              emits custom properties + @font-face only
   manifest.ts         PWA theme/background colours from the system
 src/lib/components/ the runner and one component per step type
-src/routes/         dashboard, /lab/[id], /review, /reference, /settings
+src/routes/         dashboard, /lab/[id], /review, /drill, /reference,
+                    /settings, /healthz, /api/* (accounts & sync)
 ```
 
 The look is a `DesignSystem` object: palettes, type stacks, shape, webfonts,
@@ -75,3 +82,11 @@ losing history in silence.
 `reviveState` also accepts the pre-rewrite payload shape (`v` instead of
 `version`), so serving this build from the old app's origin adopts existing
 progress rather than discarding it.
+
+With accounts enabled (see the repository README), a signed-in browser also
+syncs the same document to the server: localStorage stays the source of truth,
+pushes are debounced and revision-checked, and conflicts resolve through the
+pure merge in `domain/merge.ts` — per-card latest-review-wins, whole-sitting
+wins per lab, and the learner is never asked to pick a save point. Study pacing
+(`newPerDay`, `reviewsPerSitting`) becomes an account preference; guests keep
+the compiled defaults. Appearance keys stay device-local on purpose.

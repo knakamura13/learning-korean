@@ -296,10 +296,9 @@ describe('non-default look font preloads', () => {
 	it('injects preloads for a stored non-default look, pre-paint', () => {
 		bootWithFonts('watercolor');
 		expect(document.documentElement.getAttribute('data-look')).toBe('watercolor');
-		expect(preloadHrefs()).toEqual([
-			'/fonts/CormorantGaramond-Regular.woff2',
-			'/fonts/NotoSansKR-subset.woff2'
-		]);
+		// NotoSansKR is in the default look's set — the layout already preloads
+		// it server-side, so the boot script must not duplicate it.
+		expect(preloadHrefs()).toEqual(['/fonts/CormorantGaramond-Regular.woff2']);
 		const link = document.querySelector<HTMLLinkElement>('link[rel="preload"]');
 		expect(link?.getAttribute('type')).toBe('font/woff2');
 		expect(link?.crossOrigin).toBe('anonymous');

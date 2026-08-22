@@ -170,6 +170,17 @@ describe('accounts API deploy contract', () => {
 		expect(ci).toMatch(/pg_isready/);
 	});
 
+	it('gates CI on the Playwright smoke and axe suites after both builds', () => {
+		const ci = readFileSync(ciPath, 'utf8');
+		expect(ci).toMatch(/playwright install --with-deps chromium/);
+		expect(ci).toMatch(/pnpm test:e2e/);
+		// e2e runs against the node build, so it must come after that build step.
+		expect(ci.indexOf('pnpm test:e2e')).toBeGreaterThan(ci.indexOf('ADAPTER=node pnpm build'));
+		expect(packageJson.scripts['test:e2e']).toBe('playwright test');
+		expect(packageJson.devDependencies).toHaveProperty('@playwright/test');
+		expect(packageJson.devDependencies).toHaveProperty('@axe-core/playwright');
+	});
+
 	it('uses postgres.js and no deprecated auth dependency', () => {
 		expect(packageJson.dependencies).toHaveProperty('postgres');
 		expect(packageJson.dependencies).not.toHaveProperty('arctic');
