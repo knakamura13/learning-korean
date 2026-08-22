@@ -5,25 +5,24 @@ import {
 	consonantAudioSrc,
 	isConsonantLead
 } from './consonants';
-
-const clipModules = import.meta.glob('../../../static/audio/consonants/*.opus', {
-	eager: true,
-	query: '?url',
-	import: 'default'
-}) as Record<string, string>;
+import { RECORDED } from './recorded';
 
 describe('consonant audio mapping', () => {
-	it('maps every lab-01 lead jamo to a static opus path', () => {
+	it('keeps a slug for every lab-01 lead jamo, gated on the recording set', () => {
 		expect(LEADS).toHaveLength(19);
 		for (const jamo of LEADS) {
+			const slug = CONSONANT_AUDIO_SLUG[jamo];
+			expect(slug, jamo).toBeTruthy();
 			const src = consonantAudioSrc(jamo);
-			expect(src, jamo).toMatch(
-				new RegExp(`/audio/consonants/${CONSONANT_AUDIO_SLUG[jamo]}\\.opus$`)
-			);
+			if (RECORDED.has(`consonants/${slug}`)) {
+				expect(src, jamo).toMatch(new RegExp(`/audio/consonants/${slug}\\.opus$`));
+			} else {
+				expect(src, jamo).toBeNull();
+			}
 		}
 	});
 
-	it('returns null when there is no clip for the glyph', () => {
+	it('returns null when the glyph has no lead slot at all', () => {
 		expect(consonantAudioSrc('ㅏ')).toBeNull();
 		expect(consonantAudioSrc('가')).toBeNull();
 		expect(consonantAudioSrc('')).toBeNull();
@@ -35,13 +34,5 @@ describe('consonant audio mapping', () => {
 		expect(isConsonantLead('ㅇ')).toBe(true);
 		expect(isConsonantLead('ㅏ')).toBe(false);
 		expect(isConsonantLead('ㄳ')).toBe(false);
-	});
-
-	it('ships a file for every mapped slug', () => {
-		const names = Object.keys(clipModules).map((p) => p.split('/').pop());
-		for (const jamo of LEADS) {
-			const slug = CONSONANT_AUDIO_SLUG[jamo];
-			expect(names, slug).toContain(`${slug}.opus`);
-		}
 	});
 });

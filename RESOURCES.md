@@ -72,11 +72,11 @@ Not yet raised with Kyle — these are candidates, not commitments.
 
 ## Gaps
 
-- **Letter inventory ships (leads, vowels, neutralized finals). Word-level /
-  sound-change clips are still missing.** Isolated clips live in
-  `app/static/audio/{consonants,vowels,finals}/` (see LICENSE there). Native-speaker
-  recordings and word audio remain the gap. How To Study Korean remains the best
-  external model for those.
+- **No letter audio ships today.** The synthesized clips were removed
+  2026-08-22 as meaningless noise; native-speaker recordings (Sally) are the
+  plan of record — see `docs/recording/sally-runbook.md`. Word-level /
+  sound-change clips come after that. How To Study Korean remains the best
+  external model in the meantime.
 - **No handwriting/stroke-order source yet.** Kyle flagged handwriting as a
   secondary interest; nothing authoritative on stroke order is bookmarked.
 - **No corpus of real beginner-readable text.** Loanwords carried Lesson 01, but a

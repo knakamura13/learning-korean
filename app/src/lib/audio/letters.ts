@@ -1,6 +1,5 @@
 import { assets } from '$app/paths';
 import {
-	CLUSTERS,
 	LEADS,
 	REPRESENTATIVE,
 	VOWELS,
@@ -9,6 +8,7 @@ import {
 	type Representative,
 	type Vowel
 } from '$lib/domain/hangul';
+import { RECORDED } from './recorded';
 
 export type AudioSlot = 'lead' | 'vowel' | 'final';
 
@@ -17,6 +17,18 @@ export interface LetterSources {
 	mp3: string;
 }
 
+/*
+ * Filename contract for native-speaker letter recordings.
+ *
+ * The synthesized clips that used to live at these URLs were removed on
+ * 2026-08-22: they were meaningless machine noise, not Korean, and playing
+ * them taught nothing. The slug maps below are kept deliberately — they are
+ * the TARGET contract that real recordings land on. When Sally (a native
+ * speaker) records the letters, `app/scripts/ingest-recordings.mjs` encodes
+ * her takes to `static/audio/<dir>/<slug>.{opus,mp3}` and regenerates
+ * `./recorded.ts`. Until a slug is in RECORDED, `letterAudioSources` returns
+ * null and the UI renders no play button at all (see PlayButton.svelte).
+ */
 export const LEAD_AUDIO_SLUG: Record<Lead, string> = {
 	ㄱ: 'g', ㄲ: 'kk', ㄴ: 'n', ㄷ: 'd', ㄸ: 'tt', ㄹ: 'r', ㅁ: 'm',
 	ㅂ: 'b', ㅃ: 'pp', ㅅ: 's', ㅆ: 'ss', ㅇ: 'silent', ㅈ: 'j', ㅉ: 'jj',
@@ -33,7 +45,8 @@ export const FINAL_AUDIO_SLUG: Record<Representative, string> = {
 	ㄱ: 'k', ㄴ: 'n', ㄷ: 't', ㄹ: 'l', ㅁ: 'm', ㅂ: 'p', ㅇ: 'ng'
 };
 
-function pair(dir: string, slug: string): LetterSources {
+function pair(dir: string, slug: string): LetterSources | null {
+	if (!RECORDED.has(`${dir}/${slug}`)) return null;
 	return {
 		opus: `${assets}/audio/${dir}/${slug}.opus`,
 		mp3: `${assets}/audio/${dir}/${slug}.mp3`
