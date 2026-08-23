@@ -528,7 +528,7 @@
 	.lab.resume .num { color: var(--rose); }
 
 	.lab h3 { font-size: 1.15rem; margin-bottom: var(--s1); }
-	.lab p { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.55; }
+	.lab p { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.55; max-width: var(--measure); }
 
 	.meta {
 		display: flex;

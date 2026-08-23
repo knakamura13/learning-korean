@@ -240,6 +240,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		min-width: 44px;
 		min-height: 44px;
 		padding: 0.3rem 0.55rem;
 		border: 1px solid var(--rule-strong);
@@ -262,8 +263,11 @@
 		position: absolute;
 		left: calc(50% + (var(--cx) - var(--lx)) * 100cqw);
 		top: calc(50% + (var(--cy) - var(--ly)) * 100cqh);
-		width: 2.75rem;
-		height: 2.75rem;
+		/* CSS px, not rem: htmlSize is 106.25% and AAA 2.5.5 is 44×44 CSS pixels. */
+		width: 44px;
+		height: 44px;
+		min-width: 44px;
+		min-height: 44px;
 		transform: translate(-50%, -50%);
 		border-radius: 50%;
 	}

@@ -14,25 +14,25 @@ const HANGUL = HANGUL_WITH_FALLBACK;
 
 const light: Palette = {
 	ink: '#3d4852',
-	inkSoft: '#4a5568',
+	inkSoft: '#485164',
 	inkFaint: '#46525c',
 	paper: '#f9f6f2',
 	paperSunk: '#f5f0e8',
 	paperRaised: '#fffef8',
 	rule: '#e8e2d8',
 	ruleStrong: '#b18057',
-	accent: '#4a5568',
+	accent: '#444c5e',
 	accentInk: '#fffef8',
 	accentSoft: '#e6e8ec',
 	blue: '#2d3748',
 	blueSoft: '#e8eaf0',
-	good: '#516d4d',
+	good: '#3e543c',
 	goodSoft: '#e8eee6',
-	bad: '#9c5951',
+	bad: '#72423c',
 	badSoft: '#f6ebe9',
-	warn: '#7d5c3c',
+	warn: '#654930',
 	warnSoft: '#f4ece4',
-	rose: '#8a4a44',
+	rose: '#76403a',
 	roseSoft: '#f6ebe9',
 	shadow1: '0 2px 8px rgba(74, 85, 104, 0.08), 0 1px 3px rgba(74, 85, 104, 0.08)',
 	shadow2: '0 4px 15px rgba(74, 85, 104, 0.12), 0 4px 20px rgba(74, 85, 104, 0.08)',
@@ -48,14 +48,14 @@ const dark: Palette = {
 	paperRaised: '#242a34',
 	rule: '#323844',
 	ruleStrong: '#6c737f',
-	accent: '#a8b4c4',
+	accent: '#b5bfcc',
 	accentInk: '#1a1e26',
 	accentSoft: '#2a3140',
 	blue: '#c4bbd8',
 	blueSoft: '#262033',
 	good: '#a8c4a2',
 	goodSoft: '#1c2a1e',
-	bad: '#d4837a',
+	bad: '#dc9b93',
 	badSoft: '#2a1e1c',
 	warn: '#ddb892',
 	warnSoft: '#2a2318',
@@ -69,8 +69,9 @@ const dark: Palette = {
 /**
  * Pigment washes on paper: indigo, ochre, sage, coral, lavender.
  * Tokens follow https://ggprompts.com/styles/watercolor.html, with caption
- * inks and action colours lifted to WCAG AA against paper. Dark is a night
- * indigo wash of the same pigments (the guide is light-only).
+ * inks and action colours lifted to WCAG AAA (7:1) against paper and soft
+ * surfaces. Dark is a night indigo wash of the same pigments (the guide is
+ * light-only).
  */
 export const watercolor: DesignSystem = {
 	id: 'watercolor',

@@ -21,9 +21,9 @@ describe('palette pairings', () => {
 		});
 	}
 
-	it('keeps academia dark hero card body copy at least 4.5:1 on accent', () => {
+	it('keeps academia dark hero card body copy at least 7:1 on accent', () => {
 		const { accent, accentInk } = academia.dark;
 		const heroBody = mixSrgb(accentInk, accent, 92);
-		expect(contrastRatio(heroBody, accent)).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(heroBody, accent)).toBeGreaterThanOrEqual(7);
 	});
 });
