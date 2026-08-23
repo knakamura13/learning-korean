@@ -6,7 +6,7 @@
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
-	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
+	import { OG_IMAGE_ALT, pageCanonical, pageShareTitle, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { session } from '$lib/stores/session.svelte';
@@ -18,6 +18,14 @@
 
 	const canonical = $derived(pageCanonical(page.url.pathname));
 	const ogImage = $derived(siteAsset('/og.png'));
+	const shareTitle = $derived(
+		pageShareTitle(
+			page.url.pathname,
+			page.data.lab && typeof page.data.lab === 'object'
+				? (page.data.lab as { number: number; title: string })
+				: null
+		)
+	);
 
 	const nav = [
 		{ href: '/', label: 'Labs' },
@@ -71,10 +79,10 @@
 		<meta property="og:url" content={canonical} />
 	{/if}
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Korean — labs and review" />
+	<meta property="og:title" content={shareTitle} />
 	<meta property="og:description" content={SITE_DESCRIPTION} />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="Korean — labs and review" />
+	<meta name="twitter:title" content={shareTitle} />
 	<meta name="twitter:description" content={SITE_DESCRIPTION} />
 	{#if ogImage}
 		<meta property="og:image" content={ogImage} />
@@ -129,6 +137,7 @@
 				<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
 				overwrite the unread file until you restore or reset.
 				<a href="{resolve('/settings')}#backup">Download a backup</a>
+				<span class="warn-sep" aria-hidden="true"> · </span>
 				<a href="{resolve('/settings')}#reset">Reset progress</a>
 			</div>
 		</div>
@@ -140,6 +149,15 @@
 				<a href="{resolve('/settings')}#backup">Download a backup</a>
 				before you do anything else, and serve the built app over HTTP rather than
 				opening the files directly.
+			</div>
+		</div>
+	{:else if !healthz && session.notice}
+		<div class="storage-warn">
+			<div class="warn card">
+				<strong>{session.notice.message}</strong>
+				<button type="button" class="notice-dismiss" onclick={() => session.clearNotice()}>
+					Dismiss
+				</button>
 			</div>
 		</div>
 	{/if}
@@ -195,6 +213,21 @@
 		margin: 0 auto;
 		padding: var(--s4) max(var(--s4), env(safe-area-inset-left)) 0
 			max(var(--s4), env(safe-area-inset-right));
+	}
+
+	.warn-sep { color: var(--ink-faint); }
+
+	.notice-dismiss {
+		appearance: none;
+		margin-inline-start: var(--s3);
+		padding: 0;
+		border: 0;
+		background: none;
+		font: inherit;
+		color: var(--blue);
+		text-decoration: underline;
+		text-underline-offset: 0.16em;
+		cursor: pointer;
 	}
 
 	.bar {

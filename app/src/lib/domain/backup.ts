@@ -39,13 +39,20 @@ export function exportedStatus(filename: string): BackupStatus {
 	};
 }
 
-export function importedStatus(ok: boolean): BackupStatus {
-	return ok
-		? { tone: 'right', message: 'Progress restored from that backup.' }
-		: {
-				tone: 'wrong',
-				message: "That file doesn't look like a Korean progress backup — nothing was changed."
-			};
+export type ImportFailReason = 'invalid' | 'too-large';
+
+export function importedStatus(ok: boolean, reason: ImportFailReason = 'invalid'): BackupStatus {
+	if (ok) return { tone: 'right', message: 'Progress restored from that backup.' };
+	if (reason === 'too-large') {
+		return {
+			tone: 'wrong',
+			message: 'That file is too large to restore — nothing was changed.'
+		};
+	}
+	return {
+		tone: 'wrong',
+		message: "That file doesn't look like a Korean progress backup — nothing was changed."
+	};
 }
 
 export function wrapExport(srsText: string, sessions: LabSessions): string {

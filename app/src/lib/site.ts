@@ -49,3 +49,17 @@ export function pageCanonical(pathname: string): string | undefined {
 export function siteAsset(file: string): string | undefined {
 	return absoluteAssetUrl(siteUrl(), file);
 }
+
+/** Per-page share title. Matches the document `<title>` so OG/Twitter are not site-wide. */
+export function pageShareTitle(
+	pathname: string,
+	lab?: { number: number; title: string } | null
+): string {
+	if (pathname.startsWith('/review')) return 'Daily review';
+	if (pathname.startsWith('/drill')) return 'Drill';
+	if (pathname.startsWith('/settings')) return 'Settings';
+	if (pathname.startsWith('/reference')) return 'Reference — every letter and rule';
+	if (pathname.startsWith('/lab/') && lab) return `Lab ${lab.number} — ${lab.title}`;
+	if (pathname.startsWith('/lab/')) return 'Lab';
+	return 'Korean — labs and review';
+}

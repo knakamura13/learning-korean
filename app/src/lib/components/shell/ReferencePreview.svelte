@@ -79,7 +79,7 @@
 	}
 
 	.face {
-		width: min(20rem, calc(100vw - 1.5rem));
+		width: var(--popover-max);
 		padding: var(--s4);
 		background: var(--paper-raised);
 		border: 1px solid var(--rule-strong);

@@ -37,6 +37,11 @@ describe('drill page source contracts', () => {
 		expect(src).toMatch(/median/);
 	});
 
+	it('lets the learner end a running round without waiting out the timer', () => {
+		expect(src).toMatch(/endRound/);
+		expect(src).toMatch(/>End round</);
+	});
+
 	it('gates the clock on a running $state flag', () => {
 		expect(src).toMatch(/let running = \$state\(false\)/);
 		expect(src).toMatch(/\$effect\(\(\) => \{/);

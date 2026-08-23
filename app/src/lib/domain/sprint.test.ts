@@ -15,6 +15,7 @@ import {
 	sprintMissingLab,
 	sprintScore,
 	startRound,
+	endRound,
 	tickRound,
 	type Rng
 } from './sprint';
@@ -165,6 +166,18 @@ describe('round', () => {
 		const after = answerRound(round, 0, t0 + SPRINT_MS + 10, blocks(), rng);
 		expect(after).toBe(round);
 		expect(idleRound().phase).toBe('idle');
+	});
+
+	it('lets the learner end a running round without waiting out the clock', () => {
+		const t0 = 5_000;
+		const round = startRound(t0, blocks(), rng);
+		expect(round.phase).toBe('running');
+		const ended = endRound(round);
+		expect(ended.phase).toBe('done');
+		expect(ended.trial).toBeNull();
+		expect(ended.seen).toBe(round.seen);
+		expect(endRound(ended)).toBe(ended);
+		expect(endRound(idleRound()).phase).toBe('idle');
 	});
 });
 

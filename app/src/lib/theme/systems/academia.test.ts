@@ -35,6 +35,12 @@ describe('academia', () => {
 		expect(academia.shape.rPill).toBe('0px');
 	});
 
+	it('keeps light-mode links a distinct ink-blue so hover is not a no-op', () => {
+		expect(academia.light.blue.toLowerCase()).not.toBe(academia.light.accent.toLowerCase());
+		expect(academia.light.blue.toLowerCase()).toBe('#3a4a62');
+		expect(academia.light.blueSoft.toLowerCase()).not.toBe(academia.light.accentSoft.toLowerCase());
+	});
+
 	it('uses Cormorant for display, Libre Baskerville for serif, and Lora for reading', () => {
 		expect(academia.type.display).toContain('Cormorant Garamond');
 		expect(academia.type.serif).toContain('Libre Baskerville');

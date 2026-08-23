@@ -71,7 +71,7 @@
 		const file = pending;
 		if (!file) return;
 		if (file.size > MAX_BACKUP_BYTES) {
-			publishStatus(importedStatus(false));
+			publishStatus(importedStatus(false, 'too-large'));
 			pending = null;
 			if (fileInput) fileInput.value = '';
 			return;

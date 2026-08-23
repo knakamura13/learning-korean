@@ -132,6 +132,11 @@ describe('license, health, and manifests', () => {
 		const start = readFileSync(new URL('../../scripts/start.mjs', import.meta.url), 'utf8');
 		expect(start).toMatch(/ADAPTER=node/);
 		expect(start).toMatch(/build\/index\.js/);
+		expect(start).toMatch(/cache-control/);
+		expect(start).toMatch(/\/fonts\//);
+		expect(start).toMatch(/http\.createServer/);
+		expect(dockerfile).toMatch(/COPY --from=build \/app\/scripts \.\/scripts/);
+		expect(dockerfile).toMatch(/CMD \["node", "scripts\/start\.mjs"\]/);
 	});
 });
 

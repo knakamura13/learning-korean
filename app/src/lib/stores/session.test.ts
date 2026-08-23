@@ -128,6 +128,16 @@ describe('session store', () => {
 		const session = createSession(api);
 		await session.load();
 		await vi.waitFor(() => expect(session.status).toBe('guest'));
+		expect(session.notice?.message).toMatch(/Progress in this browser is kept/);
+		session.clearNotice();
+		expect(session.notice).toBeNull();
+	});
+
+	it('does not treat a missing backend as a signed-out error', async () => {
+		const session = createSession(fakeApi({ me: async () => ({ kind: 'unavailable' }) }));
+		await session.load();
+		expect(session.status).toBe('guest');
+		expect(session.notice).toBeNull();
 	});
 
 	it('noteLocalChange is safe for guests', async () => {

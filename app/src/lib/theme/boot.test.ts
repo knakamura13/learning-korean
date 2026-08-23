@@ -37,6 +37,7 @@ function setupDom() {
 	document.head.innerHTML = `
 		<meta name="color-scheme" content="light dark" />
 		<meta name="theme-color" content="#placeholder" data-resolved />
+		<link rel="manifest" href="/manifest.webmanifest" />
 	`;
 }
 
@@ -72,6 +73,9 @@ function expectDomMatchesResolver(
 	const expectedPaper = themeColor?.getAttribute('content');
 	const expectedScheme = colorScheme?.getAttribute('content');
 	const expectedColorScheme = document.documentElement.style.colorScheme;
+	const expectedManifest = document
+		.querySelector('link[rel="manifest"]:not([media])')
+		?.getAttribute('href');
 
 	setupDom();
 	runBootScript(input.look, input.theme, input.prefersDark);
@@ -86,6 +90,9 @@ function expectDomMatchesResolver(
 	).toBe(expectedPaper);
 	expect(document.querySelector('meta[name="color-scheme"]')?.getAttribute('content')).toBe(
 		expectedScheme
+	);
+	expect(document.querySelector('link[rel="manifest"]:not([media])')?.getAttribute('href')).toBe(
+		expectedManifest
 	);
 }
 
@@ -172,6 +179,25 @@ describe('applyAppearanceDom', () => {
 		expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
 		expect(themeColor?.getAttribute('content')).toBe(testPapers.taegeuk.dark);
 		expect(colorScheme?.getAttribute('content')).toBe('dark');
+		expect(document.querySelector('link[rel="manifest"]:not([media])')?.getAttribute('href')).toBe(
+			'/manifest-dark.webmanifest'
+		);
+	});
+
+	it('restores the light manifest when appearance is light', () => {
+		const boot = resolveAppearanceBoot({
+			look: 'botanicalKorea',
+			theme: 'light',
+			prefersDark: true,
+			knownLookIds
+		});
+		const themeColor = document.querySelector<HTMLMetaElement>(
+			'meta[name="theme-color"][data-resolved]'
+		);
+		applyAppearanceDom(document.documentElement, boot, testPapers, themeColor, null);
+		expect(document.querySelector('link[rel="manifest"]:not([media])')?.getAttribute('href')).toBe(
+			'/manifest.webmanifest'
+		);
 	});
 });
 

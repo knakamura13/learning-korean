@@ -29,6 +29,14 @@
 	   Paper-sunk (not a darkened mix): dark text on a darkened chrome can never
 	   clear AAA 7:1 in light looks. Palette inks now clear 7:1 on paper-sunk. */
 	--chrome: var(--paper-sunk);
+	--popover-max: min(
+		20rem,
+		calc(100dvw - 1.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+	);
+	--safe-top: env(safe-area-inset-top, 0px);
+	--safe-right: env(safe-area-inset-right, 0px);
+	--safe-bottom: env(safe-area-inset-bottom, 0px);
+	--safe-left: env(safe-area-inset-left, 0px);
 }
 
 *,

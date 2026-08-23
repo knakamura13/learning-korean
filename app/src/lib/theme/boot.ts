@@ -54,6 +54,17 @@ export function applyAppearanceDom(
 	if (paperSet && themeColor) {
 		themeColor.setAttribute('content', paperSet[boot.dark ? 'dark' : 'light']);
 	}
+
+	const manifest = document.querySelector<HTMLLinkElement>('link[rel="manifest"]:not([media])');
+	if (manifest) {
+		const href = manifest.getAttribute('href') ?? '/manifest.webmanifest';
+		manifest.setAttribute(
+			'href',
+			boot.dark
+				? href.replace(/manifest(?:-dark)?\.webmanifest/, 'manifest-dark.webmanifest')
+				: href.replace(/manifest-dark\.webmanifest/, 'manifest.webmanifest')
+		);
+	}
 }
 
 export function themeBootScript(
@@ -67,5 +78,5 @@ export function themeBootScript(
 	// parser-blocking classic script injects font preloads for *every* look
 	// (including the default) before paint. Returning academia/watercolor
 	// visitors then download only their look's fonts, not the default's too.
-	return `(function(){try{var look=null,theme=null;try{look=localStorage.getItem(${JSON.stringify(LOOK_KEY)});theme=localStorage.getItem(${JSON.stringify(THEME_KEY)});}catch(e){}var lookPapers=${papersJson};var knownIds=Object.keys(lookPapers);var lookId=look&&knownIds.indexOf(look)!==-1?look:${JSON.stringify(DEFAULT_LOOK_ID)};var themeAttr=theme==='light'||theme==='dark'?theme:null;var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var dark=themeAttr==='dark'||(themeAttr!=='light'&&prefersDark);var root=document.documentElement;root.setAttribute('data-look',lookId);if(themeAttr){root.setAttribute('data-theme',themeAttr);root.style.colorScheme=themeAttr;var cs=document.querySelector('meta[name="color-scheme"]');if(cs)cs.setAttribute('content',themeAttr);}var m=document.querySelector('meta[name="theme-color"][data-resolved]');if(m){var p=lookPapers[lookId];if(p)m.setAttribute('content',dark?p.dark:p.light);}var lookFonts=${fontsJson};var files=lookFonts[lookId]||[];for(var i=0;i<files.length;i++){var l=document.createElement('link');l.setAttribute('rel','preload');l.setAttribute('href','/fonts/'+files[i]);l.setAttribute('as','font');l.setAttribute('type','font/woff2');l.setAttribute('crossorigin','anonymous');document.head.appendChild(l);}}catch(e){}})();`;
+	return `(function(){try{var look=null,theme=null;try{look=localStorage.getItem(${JSON.stringify(LOOK_KEY)});theme=localStorage.getItem(${JSON.stringify(THEME_KEY)});}catch(e){}var lookPapers=${papersJson};var knownIds=Object.keys(lookPapers);var lookId=look&&knownIds.indexOf(look)!==-1?look:${JSON.stringify(DEFAULT_LOOK_ID)};var themeAttr=theme==='light'||theme==='dark'?theme:null;var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var dark=themeAttr==='dark'||(themeAttr!=='light'&&prefersDark);var root=document.documentElement;root.setAttribute('data-look',lookId);if(themeAttr){root.setAttribute('data-theme',themeAttr);root.style.colorScheme=themeAttr;var cs=document.querySelector('meta[name="color-scheme"]');if(cs)cs.setAttribute('content',themeAttr);}var m=document.querySelector('meta[name="theme-color"][data-resolved]');if(m){var p=lookPapers[lookId];if(p)m.setAttribute('content',dark?p.dark:p.light);}var man=document.querySelector('link[rel="manifest"]:not([media])');if(man){var href=man.getAttribute('href')||'/manifest.webmanifest';man.setAttribute('href',dark?href.replace(/manifest(?:-dark)?\\.webmanifest/,'manifest-dark.webmanifest'):href.replace(/manifest-dark\\.webmanifest/,'manifest.webmanifest'));}var lookFonts=${fontsJson};var files=lookFonts[lookId]||[];for(var i=0;i<files.length;i++){var l=document.createElement('link');l.setAttribute('rel','preload');l.setAttribute('href','/fonts/'+files[i]);l.setAttribute('as','font');l.setAttribute('type','font/woff2');l.setAttribute('crossorigin','anonymous');document.head.appendChild(l);}}catch(e){}})();`;
 }

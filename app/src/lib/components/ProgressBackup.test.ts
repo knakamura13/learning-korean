@@ -147,6 +147,8 @@ describe('ProgressBackup — restore', () => {
 		expect(importJson).not.toHaveBeenCalled();
 		const status = root.querySelector('.status');
 		expect(status?.getAttribute('data-tone')).toBe('wrong');
+		expect(status?.textContent).toMatch(/too large/);
+		expect(status?.textContent).toMatch(/nothing was changed/);
 	});
 
 	it('reports failure without alarming the learner into thinking data was lost', async () => {

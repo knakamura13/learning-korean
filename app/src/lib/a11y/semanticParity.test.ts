@@ -88,9 +88,10 @@ describe('a11y semantic parity (#144)', () => {
 		expect(layout).toMatch(/<footer\b/);
 	});
 
-	it('gives /healthz a document title and a heading', () => {
+	it('gives /healthz a document title, a heading, and noindex', () => {
 		expect(healthz).toMatch(/<title>/);
 		expect(healthz).toMatch(/<h1\b/);
+		expect(healthz).toMatch(/name="robots" content="noindex"/);
 	});
 
 	it('drops the redundant title on the settings link', () => {

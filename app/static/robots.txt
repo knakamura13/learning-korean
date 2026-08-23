@@ -1,3 +1,4 @@
-# allow crawling everything by default
+# Crawlers skip the Railway healthcheck. The rest of the app is public.
 User-agent: *
-Disallow:
+Disallow: /healthz
+Disallow: /healthz/

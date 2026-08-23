@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 import { LOOKS, PAPER_LIGHT } from '$lib/theme';
+import { session } from '$lib/stores/session.svelte';
 import SettingsPage from './+page.svelte';
 import src from './+page.svelte?raw';
 import layout from '../+layout.svelte?raw';
@@ -34,7 +35,7 @@ function selectRadio(root: ParentNode, name: string, value: string) {
 	flushSync();
 }
 
-beforeEach(() => {
+beforeEach(async () => {
 	localStorage.clear();
 	document.documentElement.removeAttribute('data-theme');
 	document.documentElement.removeAttribute('data-look');
@@ -44,6 +45,11 @@ beforeEach(() => {
 		<meta name="theme-color" content="${PAPER_LIGHT}" data-resolved />
 	`;
 	stubScheme(false);
+	vi.stubGlobal(
+		'fetch',
+		vi.fn(async () => new Response(null, { status: 404 }))
+	);
+	await session.load();
 });
 
 afterEach(() => {
@@ -106,6 +112,7 @@ describe('Settings page — Appearance', () => {
 
 describe('Settings page — Backup', () => {
 	it('exposes #backup with Backup heading, note copy, and ProgressBackup — not a details fold', () => {
+		expect(src).toMatch(/session\.status !== 'unknown'/);
 		expect(src).toMatch(/id="backup"/);
 		expect(src).toMatch(/<h2[^>]*>Backup<\/h2>/);
 		expect(src).toMatch(/ProgressBackup/);

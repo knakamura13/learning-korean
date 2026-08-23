@@ -8,6 +8,7 @@
 	import {
 		answerRoundFrom,
 		blockTrialSource,
+		endRound,
 		idleRound,
 		sprintEligible,
 		sprintInventory,
@@ -117,6 +118,13 @@
 		}
 	}
 
+	function end() {
+		if (!running) return;
+		round = endRound(round);
+		running = false;
+		announceRoundEnd(round);
+	}
+
 	function pick(index: number) {
 		const trial = round.trial;
 		if (!trial) return;
@@ -197,6 +205,7 @@
 			{#key round.trial.block + round.seen}
 				<SprintChoices options={round.trial.options} onPick={pick} />
 			{/key}
+			<button class="btn ghost end-round" type="button" onclick={end}>End round</button>
 		</div>
 	{:else if round.phase === 'done'}
 		<div class="card empty">
@@ -279,6 +288,12 @@
 
 	.drill {
 		padding: var(--s5);
+	}
+
+	.end-round {
+		margin-block-start: var(--s4);
+		width: 100%;
+		justify-content: center;
 	}
 
 	.timer {

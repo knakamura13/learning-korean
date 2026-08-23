@@ -60,7 +60,7 @@
 		align-items: stretch;
 		flex-shrink: 0;
 		min-width: 0;
-		min-height: 12rem;
+		min-height: 16rem;
 		padding: var(--s5);
 		background: var(--paper-sunk);
 		border: 1px solid var(--rule-strong);

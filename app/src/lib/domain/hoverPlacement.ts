@@ -6,7 +6,7 @@
  */
 
 export const POPOVER_OFFSET_PX = 12;
-export const POPOVER_PAD_PX = 8;
+export const POPOVER_PAD_PX = 12;
 export const PREVIEW_HOVER_BUFFER_PX = 4;
 /** 0.5rem at a 16px root — lift the card above the cursor / number midline. */
 export const PREVIEW_LIFT_PX = 8;

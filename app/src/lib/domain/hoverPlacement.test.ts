@@ -26,7 +26,7 @@ describe('anchorPopover', () => {
 
 	it('clamps onto the viewport rather than overflowing', () => {
 		const placed = anchorPopover({ x: 10, y: 790 }, { w: 320, h: 220 }, { w: 400, h: 800 });
-		expect(placed.left).toBeGreaterThanOrEqual(8);
+		expect(placed.left).toBeGreaterThanOrEqual(12);
 		expect(placed.top + 220).toBeLessThanOrEqual(800);
 	});
 

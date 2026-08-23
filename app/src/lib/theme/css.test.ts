@@ -306,6 +306,8 @@ describe('delivery', () => {
 		expect(manifestSrc).toMatch(/theme-boot\.js/);
 		expect(pluginSrc).not.toMatch(/transformIndexHtml/);
 		expect(pluginSrc).not.toMatch(/virtual:design-system/);
+		expect(pluginSrc).toMatch(/isImmutableStaticAsset/);
+		expect(pluginSrc).toMatch(/IMMUTABLE_CACHE_CONTROL/);
 	});
 
 	it('lets theme-boot inject look font preloads; layout does not bake them', () => {

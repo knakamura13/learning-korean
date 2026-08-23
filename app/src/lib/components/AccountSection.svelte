@@ -9,7 +9,7 @@
 	let reviewsPerSitting = $state(progress.studyPrefs.reviewsPerSitting);
 	let prefsStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
 	let confirmingDelete = $state(false);
-	let deleteStatus = $state<string | null>(null);
+	let deleteStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
 	let saving = $state(false);
 
 	const authFailed = $derived(page.url.searchParams.get('auth') === 'failed');
@@ -24,7 +24,14 @@
 		event.preventDefault();
 		prefsStatus = null;
 		const next = { newPerDay: Math.trunc(newPerDay), reviewsPerSitting: Math.trunc(reviewsPerSitting) };
-		if (next.newPerDay < 0 || next.newPerDay > 50 || next.reviewsPerSitting < 1 || next.reviewsPerSitting > 100) {
+		if (
+			!Number.isInteger(next.newPerDay) ||
+			!Number.isInteger(next.reviewsPerSitting) ||
+			next.newPerDay < 0 ||
+			next.newPerDay > 50 ||
+			next.reviewsPerSitting < 1 ||
+			next.reviewsPerSitting > 100
+		) {
 			prefsStatus = { tone: 'wrong', message: 'New cards 0–50 and reviews 1–100.' };
 			return;
 		}
@@ -40,8 +47,14 @@
 		confirmingDelete = false;
 		const ok = await session.deleteAccount();
 		deleteStatus = ok
-			? 'Account deleted. Progress in this browser is untouched and works signed out.'
-			: 'Could not delete the account — check your connection and try again.';
+			? {
+					tone: 'right',
+					message: 'Account deleted. Progress in this browser is untouched and works signed out.'
+				}
+			: {
+					tone: 'wrong',
+					message: 'Could not delete the account — check your connection and try again.'
+				};
 	}
 </script>
 
@@ -68,7 +81,7 @@
 				follows you to any signed-in device.
 			</p>
 
-			<form class="prefs" onsubmit={savePrefs}>
+			<form class="prefs" novalidate onsubmit={savePrefs}>
 				<div class="fields">
 					<label>
 						<span>New cards per day</span>
@@ -124,7 +137,9 @@
 		{/if}
 
 		{#if deleteStatus}
-			<p class="status" data-tone="right" role="status" aria-live="polite">{deleteStatus}</p>
+			<p class="status" data-tone={deleteStatus.tone} role="status" aria-live="polite">
+				{deleteStatus.message}
+			</p>
 		{/if}
 	</section>
 {/if}
