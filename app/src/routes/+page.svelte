@@ -516,7 +516,7 @@
 	.lab.now .num { color: var(--accent-ink); }
 	.lab.now p,
 	.lab.now .meta {
-		color: color-mix(in srgb, var(--accent-ink) 82%, var(--accent));
+		color: color-mix(in srgb, var(--accent-ink) 92%, var(--accent));
 	}
 	a.lab.now::before,
 	a.lab.now::after {
