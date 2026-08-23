@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
-	import { assets, resolve } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
@@ -10,7 +10,6 @@
 	import { progress } from '$lib/stores/progress.svelte';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { session } from '$lib/stores/session.svelte';
-	import { activeSystem } from '$lib/theme/active';
 	import { applyLook, readLookId, readThemePref, subscribeSystemTheme } from '$lib/theme';
 
 	let { children } = $props();
@@ -64,17 +63,6 @@
 </script>
 
 <svelte:head>
-	{#each activeSystem.fonts as face (face.file ?? face.family)}
-		{#if face.file}
-			<link
-				rel="preload"
-				href="{assets}/fonts/{face.file}"
-				as="font"
-				type="font/woff2"
-				crossorigin="anonymous"
-			/>
-		{/if}
-	{/each}
 	{#if canonical}
 		<link rel="canonical" href={canonical} />
 		<meta property="og:url" content={canonical} />
