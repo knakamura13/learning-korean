@@ -15,6 +15,7 @@
 		type LookId,
 		type ThemePref
 	} from '$lib/theme';
+	import KoText from './KoText.svelte';
 
 	let { onPersistFail }: { onPersistFail?: () => void } = $props();
 
@@ -69,7 +70,7 @@
 					/>
 					<span class="look-body">
 						<span class="look-name">{system.name}</span>
-						<span class="look-summary">{system.summary}</span>
+						<span class="look-summary"><KoText text={system.summary} /></span>
 						<span class="chips">
 							<span
 								class="chip"

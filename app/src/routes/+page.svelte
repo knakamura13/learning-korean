@@ -19,6 +19,7 @@
 	import { progress } from '$lib/stores/progress.svelte';
 	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
 	import LockedLabPopover from '$lib/components/shell/LockedLabPopover.svelte';
+	import KoText from '$lib/components/KoText.svelte';
 
 	// Prerendered HTML has no stored progress. Gate completion badges
 	// and deck-tier counts until the client has ticked, so we never flash
@@ -179,7 +180,7 @@
 						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
 						<div class="body">
 							<h3 id="lab-{lab.id}-title">{lab.title}</h3>
-							<p>{lab.standfirst}</p>
+							<p><KoText text={lab.standfirst} /></p>
 							<div class="meta">
 								<span>~{lab.minutes} min</span>
 								<span>{lab.steps.length} cards</span>
@@ -227,7 +228,7 @@
 						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
 						<div class="body">
 							<h3 id="lab-{lab.id}-title">{lab.title}</h3>
-							<p>{lab.standfirst}</p>
+							<p><KoText text={lab.standfirst} /></p>
 							<div class="meta">
 								<span>~{lab.minutes} min</span>
 								<span>{lab.steps.length} cards</span>
@@ -287,7 +288,7 @@
 						role="group"
 						aria-label="{tier.label}: {tier.unlocked ? `${tier.mature} mastered, ${tier.young} learning, ${tier.unseen} not started (${tier.size} total)` : 'locked'}"
 					>
-						<span class="nm">{tier.label}</span>
+						<span class="nm"><KoText text={tier.label} /></span>
 						<span class="track" aria-hidden="true">
 							{#if tier.unlocked}
 								<span class="m" style="width:{pctMature}%" title="{tier.mature} mastered ({pctMature}%)"></span>
@@ -334,7 +335,7 @@
 							? `${pack.mature} mastered, ${pack.young} learning, ${pack.unseen} not started (${pack.size} total)`
 							: 'not opened yet'}"
 					>
-						<span class="nm">{pack.label}</span>
+						<span class="nm"><KoText text={pack.label} /></span>
 						<span class="track" aria-hidden="true">
 							{#if pack.unlocked}
 								<span class="m" style="width:{pctMature}%"></span>

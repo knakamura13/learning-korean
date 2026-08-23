@@ -151,7 +151,7 @@
 					<span class="big" lang="ko">{c}</span>
 					<span class="rom2">{SOUND[c]}</span>
 					<span class="nm" lang="ko">{NAMES[c]}</span>
-					<span class="fin">final: {batchimSound(c) || '—'}</span>
+					<span class="fin">final: <KoText text={batchimSound(c) || '—'} /></span>
 					<div class="hear">
 						<PlayButton jamo={c} audioSlot="lead" />
 					</div>
@@ -302,7 +302,7 @@
 			{#each SOUND_CHANGES as sc (sc.id)}
 				<div class="row wrap">
 					<span class="scname">
-						{sc.name}
+						<KoText text={sc.name} />
 						<em class="hg" lang="ko">{sc.korean}</em>
 						{#if !sc.scored}
 							<span class="muted tiny">not scored yet</span>

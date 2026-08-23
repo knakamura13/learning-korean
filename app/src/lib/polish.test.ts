@@ -152,6 +152,27 @@ describe('polish audit regressions', () => {
 		expect(promptOpen).not.toMatch(/data-prompt-live/);
 	});
 
+	it('tags Hangul in the SR live prompt via KoText (WCAG 3.1.2)', () => {
+		expect(labRunner).toMatch(/import KoText from '\.\/KoText\.svelte'/);
+		expect(labRunner).toMatch(
+			/<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true"><KoText text=\{promptLive\} \/><\/p>/
+		);
+	});
+
+	it('tags static Hangul on home, reference, and settings with KoText', () => {
+		expect(home).toMatch(/import KoText from '\$lib\/components\/KoText\.svelte'/);
+		expect(home).toMatch(/<p><KoText text=\{lab\.standfirst\} \/><\/p>/);
+		expect(home).toMatch(/<span class="nm"><KoText text=\{tier\.label\} \/><\/span>/);
+		expect(reference).toMatch(
+			/<span class="fin">final: <KoText text=\{batchimSound\(c\) \|\| '—'\} \/><\/span>/
+		);
+		expect(reference).toMatch(/<span class="scname">\s*<KoText text=\{sc\.name\} \/>/s);
+		expect(lookPicker).toMatch(/import KoText from '\.\/KoText\.svelte'/);
+		expect(lookPicker).toMatch(
+			/<span class="look-summary"><KoText text=\{system\.summary\} \/><\/span>/
+		);
+	});
+
 	it('announces lab verdicts from a persistent live region outside the card key', () => {
 		expect(sitting).toMatch(/data-verdict-live/);
 		expect(sitting).toMatch(/data-verdict-live[^>]*aria-live="polite"/);
