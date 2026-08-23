@@ -76,6 +76,13 @@ describe('ProgressBackup — export', () => {
 	});
 });
 
+function restoreButtons(root: ParentNode) {
+	const buttons = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
+	const cancel = buttons.find((b) => /^\s*Cancel\s*$/.test(b.textContent ?? ''));
+	const confirm = buttons.find((b) => /Replace progress|Restoring/i.test(b.textContent ?? ''));
+	return { buttons, cancel, confirm };
+}
+
 describe('ProgressBackup — restore', () => {
 	it('asks for confirmation before replacing progress, and does nothing on cancel', async () => {
 		const importJson = vi.fn(() => true);
@@ -89,12 +96,23 @@ describe('ProgressBackup — restore', () => {
 		expect(dialog?.textContent).toContain('my-backup.json');
 		expect(importJson).not.toHaveBeenCalled();
 
-		const [, cancel] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
-		cancel.click();
+		const { cancel } = restoreButtons(root);
+		cancel!.click();
 		flushSync();
 
 		expect(root.querySelector('dialog.confirm')).toBeNull();
 		expect(importJson).not.toHaveBeenCalled();
+	});
+
+	it('puts Cancel first so a reflex Enter cannot replace progress', async () => {
+		const root = render({ exportJson: () => '{}', importJson: () => true });
+		const file = new File(['{"version":1}'], 'safe.json', { type: 'application/json' });
+		await selectFile(root, file);
+
+		const { buttons, cancel, confirm } = restoreButtons(root);
+		expect(buttons[0]).toBe(cancel);
+		expect(buttons[1]).toBe(confirm);
+		expect(document.activeElement).toBe(cancel);
 	});
 
 	it('imports the chosen file and reports success on confirm', async () => {
@@ -104,8 +122,8 @@ describe('ProgressBackup — restore', () => {
 		const file = new File(['{"version":1}'], 'good.json', { type: 'application/json' });
 		await selectFile(root, file);
 
-		const [confirm] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
-		confirm.click();
+		const { confirm } = restoreButtons(root);
+		confirm!.click();
 		flushSync();
 		await waitFor(() => importJson.mock.calls.length > 0);
 
@@ -121,8 +139,8 @@ describe('ProgressBackup — restore', () => {
 		const file = new File(['{"version":1}'], 'huge.json', { type: 'application/json' });
 		Object.defineProperty(file, 'size', { value: 200_001 });
 		await selectFile(root, file);
-		const [confirm] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
-		confirm.click();
+		const { confirm } = restoreButtons(root);
+		confirm!.click();
 		flushSync();
 		await macrotask();
 
@@ -137,8 +155,8 @@ describe('ProgressBackup — restore', () => {
 
 		const file = new File(['not json'], 'bad.json', { type: 'application/json' });
 		await selectFile(root, file);
-		const [confirm] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
-		confirm.click();
+		const { confirm } = restoreButtons(root);
+		confirm!.click();
 		flushSync();
 		await waitFor(() => importJson.mock.calls.length > 0);
 

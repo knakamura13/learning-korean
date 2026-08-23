@@ -111,9 +111,6 @@
 				reviewed since that backup will be lost.
 			</p>
 			<div class="actions">
-				<button type="button" class="btn" disabled={busy} onclick={confirmRestore}>
-					{busy ? 'Restoring…' : 'Replace progress'}
-				</button>
 				<button
 					type="button"
 					class="btn ghost"
@@ -122,6 +119,9 @@
 					onclick={cancelRestore}
 				>
 					Cancel
+				</button>
+				<button type="button" class="btn" disabled={busy} onclick={confirmRestore}>
+					{busy ? 'Restoring…' : 'Replace progress'}
 				</button>
 			</div>
 		</dialog>
