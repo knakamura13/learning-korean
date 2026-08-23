@@ -168,6 +168,22 @@ describe('Escape restore-focus must not reopen the preview', () => {
 		expect(previewAfterEscapeRestoreFocus(null, 'press')).toBeNull();
 	});
 
+	it('closes keyboard and press previews on Escape once focus leaves the group', () => {
+		expect(decideWindowEscape('0001', 'keyboard', false)).toEqual({ action: 'close' });
+		expect(decideWindowEscape('0001', 'press', false)).toEqual({ action: 'close' });
+	});
+
+	it('still dismisses keyboard and press previews on Escape while focus stays in the group', () => {
+		expect(decideWindowEscape('0001', 'keyboard', true)).toEqual({
+			action: 'dismiss',
+			restoreId: '0001'
+		});
+		expect(decideWindowEscape('0001', 'press', true)).toEqual({
+			action: 'dismiss',
+			restoreId: '0001'
+		});
+	});
+
 	it('opens on a later real focus after the restore-focus skip', () => {
 		expect(decideItemFocusOpen(true)).toEqual({ action: 'skip' });
 		expect(decideItemFocusOpen(false)).toEqual({ action: 'open' });

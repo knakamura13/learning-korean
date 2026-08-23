@@ -220,6 +220,13 @@ export class HoverPreview {
 		}
 	};
 
+	#focusInPreviewGroup = (): boolean => {
+		const active = document.activeElement;
+		if (!(active instanceof Element)) return false;
+		if (this.navEl?.contains(active)) return true;
+		return Boolean(active.closest(`#${this.panelId}`));
+	};
+
 	onItemFocusOut = (e: FocusEvent) => {
 		const next = e.relatedTarget;
 		if (next instanceof Node && this.navEl?.contains(next)) return;
@@ -237,7 +244,7 @@ export class HoverPreview {
 
 	onWindowKey = (e: KeyboardEvent) => {
 		if (e.key !== 'Escape') return;
-		const decision = decideWindowEscape(this.openId, this.mode);
+		const decision = decideWindowEscape(this.openId, this.mode, this.#focusInPreviewGroup());
 		switch (decision.action) {
 			case 'ignore':
 				return;

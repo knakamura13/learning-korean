@@ -23,7 +23,7 @@ const light: Palette = {
 	paperSunk: '#f5efe3',
 	paperRaised: '#fff9f0',
 	rule: '#ede5d5',
-	ruleStrong: '#e3d9c6',
+	ruleStrong: '#938976',
 	accent: '#5c3d2e',
 	accentInk: '#faf6ee',
 	accentSoft: '#ede5d5',
@@ -52,8 +52,8 @@ const dark: Palette = {
 	paperRaised: '#3d2914',
 	rule: '#5c4630',
 	ruleStrong: '#9a7b4f',
-	/** Lifted burgundy so `color: var(--accent)` stays 4.5:1 on brown paper. */
-	accent: '#c47a82',
+	/** Lifted rose so `color: var(--accent)` stays 4.5:1 on paper, raised, and accent-soft. */
+	accent: '#e8a8a2',
 	accentInk: '#2a1a0a',
 	accentSoft: '#4a1c23',
 	blue: '#f4f1e8',
@@ -161,7 +161,7 @@ export const academia: DesignSystem = {
 	contrastMoreLight: {
 		inkFaint: '#4a3b2e',
 		rule: '#c4b394',
-		ruleStrong: '#a88b3d',
+		ruleStrong: '#a48739',
 		accent: '#3e2518',
 		accentSoft: '#ede5d5',
 		rose: '#4a3b12',

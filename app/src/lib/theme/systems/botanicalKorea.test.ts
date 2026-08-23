@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { contrastRatio } from '../contrast';
 import { designSystemCss } from '../css';
+import {
+	assertPairings,
+	BORDER_PAIRINGS,
+	paletteStates,
+	TEXT_PAIRINGS
+} from '../palettePairings';
 import { botanicalKorea, LATIN_UNICODE_RANGE } from './botanicalKorea';
 
 describe('botanicalKorea', () => {
@@ -16,16 +21,10 @@ describe('botanicalKorea', () => {
 		expect(botanicalKorea.dark.roseSoft.toLowerCase()).toBe('#3a2428');
 	});
 
-	it('keeps caption-size ink-faint at least 7:1 and action inks at 4.5:1', () => {
-		const { light, dark } = botanicalKorea;
-		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);
-		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(4.5);
-		for (const name of ['rose', 'good', 'blue', 'warn'] as const) {
-			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(4.5);
-			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(4.5);
-		}
+	it('keeps painted palette pairings across schemes and contrast-more', () => {
+		const states = paletteStates(botanicalKorea);
+		assertPairings(states, TEXT_PAIRINGS);
+		assertPairings(states, BORDER_PAIRINGS);
 	});
 
 	it('self-hosts Hangul sans as an optional webfont and keeps a serif stack token', () => {
