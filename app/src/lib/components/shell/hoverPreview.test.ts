@@ -151,6 +151,7 @@ describe('HoverPreview', () => {
 		hover.onItemFocus('clusters', { currentTarget: item } as unknown as FocusEvent);
 		expect(hover.openId).toBe('clusters');
 		expect(hover.mode).toBe('keyboard');
+		item.focus();
 
 		const dismiss = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
 		hover.onWindowKey(dismiss);
@@ -203,5 +204,82 @@ describe('HoverPreview', () => {
 		expect(hover.armedForNavigate).toBeNull();
 		expect(hover.openedBy).toBe('keyboard');
 		void first;
+	});
+
+	it('onItemFocusOut keeps the preview open while focus stays in the rail-and-panel group', () => {
+		const hover = createHover();
+		const item = makeItem('sources');
+		const nav = document.createElement('nav');
+		nav.appendChild(item);
+		document.body.appendChild(nav);
+		hover.bindNav(nav);
+
+		const panel = document.createElement('div');
+		panel.id = 'test-preview';
+		const closeBtn = document.createElement('button');
+		panel.appendChild(closeBtn);
+		document.body.appendChild(panel);
+
+		hover.openPreview('sources', 'keyboard', null);
+
+		hover.onItemFocusOut({ relatedTarget: closeBtn } as FocusEvent);
+		expect(hover.openId).toBe('sources');
+
+		const nextItem = makeItem('batchim');
+		nav.appendChild(nextItem);
+		hover.onItemFocusOut({ relatedTarget: nextItem } as FocusEvent);
+		expect(hover.openId).toBe('sources');
+	});
+
+	it('onItemFocusOut closes when focus leaves the rail-and-panel group', () => {
+		const hover = createHover();
+		const item = makeItem('sources');
+		const nav = document.createElement('nav');
+		nav.appendChild(item);
+		document.body.appendChild(nav);
+		hover.bindNav(nav);
+
+		const panel = document.createElement('div');
+		panel.id = 'test-preview';
+		const closeBtn = document.createElement('button');
+		panel.appendChild(closeBtn);
+		document.body.appendChild(panel);
+
+		const outside = document.createElement('a');
+		outside.href = '#downstream';
+		document.body.appendChild(outside);
+
+		hover.openPreview('sources', 'keyboard', null);
+
+		hover.onItemFocusOut({ relatedTarget: outside } as FocusEvent);
+		expect(hover.openId).toBeNull();
+
+		hover.openPreview('sources', 'keyboard', null);
+		closeBtn.focus();
+		hover.onItemFocusOut({ relatedTarget: outside } as FocusEvent);
+		expect(hover.openId).toBeNull();
+	});
+
+	it('closes on Escape from outside the rail-and-panel group without restoring focus', () => {
+		const hover = createHover();
+		const item = makeItem('sources');
+		const nav = document.createElement('nav');
+		nav.appendChild(item);
+		document.body.appendChild(nav);
+		hover.bindNav(nav);
+
+		const outside = document.createElement('a');
+		outside.href = '#link';
+		document.body.appendChild(outside);
+
+		hover.openPreview('sources', 'keyboard', null);
+		outside.focus();
+		expect(document.activeElement).toBe(outside);
+
+		const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+		hover.onWindowKey(event);
+		expect(event.defaultPrevented).toBe(false);
+		expect(hover.openId).toBeNull();
+		expect(document.activeElement).toBe(outside);
 	});
 });

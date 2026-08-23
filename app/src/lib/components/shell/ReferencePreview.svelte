@@ -14,7 +14,8 @@
 		onClose,
 		onMeasure,
 		onPointerEnter,
-		onPointerLeave
+		onPointerLeave,
+		onFocusOut
 	}: {
 		model: ReferencePreviewModel;
 		placement: PopoverPlacement;
@@ -24,6 +25,7 @@
 		onMeasure?: (size: { w: number; h: number }) => void;
 		onPointerEnter?: () => void;
 		onPointerLeave?: (e: PointerEvent) => void;
+		onFocusOut?: (e: FocusEvent) => void;
 	} = $props();
 
 	function reportSize(node: HTMLElement) {
@@ -49,6 +51,7 @@
 	aria-labelledby="{panelId}-title"
 	onpointerenter={onPointerEnter}
 	onpointerleave={onPointerLeave}
+	onfocusout={onFocusOut}
 >
 	<div class="face" {@attach reportSize}>
 		<p class="eyebrow">{model.nav}</p>

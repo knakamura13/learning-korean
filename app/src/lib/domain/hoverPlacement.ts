@@ -83,11 +83,14 @@ export function isHoverPointerType(pointerType: string): boolean {
 /**
  * Hover Escape hides the overlay without claiming the key, so a lab picker
  * can still handle it. Keyboard and press claim it so a panel that stole
- * focus can close and return to the number.
+ * focus can close and return to the number — but only while focus is still
+ * inside the rail-and-panel group. Once tab moves past the panel, Escape
+ * should close without yanking focus back to the rail.
  */
 export function decideWindowEscape(
 	openId: string | null,
-	mode: PreviewOpenMode
+	mode: PreviewOpenMode,
+	focusInPreviewGroup = true
 ): WindowEscapeDecision {
 	if (openId === null) return { action: 'ignore' };
 	switch (mode) {
@@ -95,7 +98,9 @@ export function decideWindowEscape(
 			return { action: 'close' };
 		case 'keyboard':
 		case 'press':
-			return { action: 'dismiss', restoreId: openId };
+			return focusInPreviewGroup
+				? { action: 'dismiss', restoreId: openId }
+				: { action: 'close' };
 		default: {
 			const _exhaustive: never = mode;
 			return _exhaustive;

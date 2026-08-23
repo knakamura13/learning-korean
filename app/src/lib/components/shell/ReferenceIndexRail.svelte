@@ -96,6 +96,7 @@
 		onClose={hover.closePreview}
 		onPointerEnter={hover.onPreviewPointerEnter}
 		onPointerLeave={hover.onItemPointerLeave}
+		onFocusOut={hover.onItemFocusOut}
 		onMeasure={(size) => {
 			hover.panelSize = size;
 		}}
