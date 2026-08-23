@@ -13,6 +13,8 @@ import liaisonStep from './components/steps/LiaisonStep.svelte?raw';
 import contactStep from './components/steps/ContactStep.svelte?raw';
 import clusterStep from './components/steps/ClusterStep.svelte?raw';
 import buildStep from './components/steps/BuildStep.svelte?raw';
+import hMergeStep from './components/steps/HMergeStep.svelte?raw';
+import flowStep from './components/steps/FlowStep.svelte?raw';
 import stage from './components/Stage.svelte?raw';
 import options from './components/Options.svelte?raw';
 import tray from './components/Tray.svelte?raw';
@@ -467,11 +469,35 @@ describe('polish audit regressions', () => {
 	});
 
 	it('collapses every animation and transition under prefers-reduced-motion', () => {
-		// Svelte in:fly/in:fade compile to CSS animations, so the starred
-		// !important block is what guards the 14 call sites that carry no
-		// local reduced-motion check. Do not narrow this selector.
+		// CSS transitions/animations: starred !important block.
 		expect(appCss).toMatch(
 			/@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\*, \*::before, \*::after\s*\{[^}]*animation-duration:\s*0\.01ms !important;[^}]*animation-iteration-count:\s*1 !important;[^}]*transition-duration:\s*0\.01ms !important/s
+		);
+		// Svelte in:/out: compile to WAAPI (element.animate) — CSS cannot
+		// collapse them. Durations must flow through motion().
+		const transitionSources = [
+			labRunner,
+			review,
+			readStep,
+			buildStep,
+			liaisonStep,
+			contactStep,
+			clusterStep,
+			hMergeStep,
+			flowStep
+		];
+		const ungated: string[] = [];
+		for (const src of transitionSources) {
+			for (const match of src.matchAll(/\bin:(fly|fade)\b/g)) {
+				const after = src.slice(match.index! + match[0].length);
+				if (!/^\s*=\s*\{motion\s*\(/.test(after)) {
+					ungated.push(match[0] + after.slice(0, 48).replace(/\s+/g, ' '));
+				}
+			}
+		}
+		expect(ungated).toEqual([]);
+		expect(readFileSync(new URL('./a11y/motion.ts', import.meta.url), 'utf8')).toMatch(
+			/duration:\s*0/
 		);
 	});
 

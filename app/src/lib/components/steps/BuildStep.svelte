@@ -5,6 +5,7 @@
 	import type { BuildStep } from '$lib/content/types';
 	import { fly } from 'svelte/transition';
 	import { untrack } from 'svelte';
+	import { motion } from '$lib/a11y/motion';
 
 	let { step, onSettle, onNudge }: {
 		step: BuildStep;
@@ -60,7 +61,7 @@
 			class:cur={i === path.length - 1}
 			class:win={i === path.length - 1 && won}
 			lang="ko"
-			in:fly={{ y: 8, duration: 220 }}
+			in:fly={motion({ y: 8, duration: 220 })}
 		>{glyph}</span>
 	{/each}
 </div>

@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import type { Lab } from '$lib/content/types';
 	import { firstWellControl } from '$lib/a11y/firstWellControl';
+	import { motion } from '$lib/a11y/motion';
 	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav } from '$lib/a11y/shortcuts';
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
@@ -267,7 +268,7 @@
 {#if finished}
 	<LabSpread>
 		{#snippet article()}
-			<div class="finish card" in:fly={{ y: 12, duration: 300 }}>
+			<div class="finish card" in:fly={motion({ y: 12, duration: 300 })}>
 				<span class="seal" lang="ko">한글</span>
 				<h1>{lab.finish.title}</h1>
 				<p class="summary">{lab.finish.summary}</p>
@@ -358,7 +359,7 @@
 				/>
 				<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true">{promptLive}</p>
 				{#key index}
-					<div class="prompt" bind:this={cardEl} in:fly={{ y: 10, duration: 260 }}>
+					<div class="prompt" bind:this={cardEl} in:fly={motion({ y: 10, duration: 260 })}>
 						{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
 						<h2 class="do">{@html labHtml(step.do)}</h2>
 						{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
@@ -418,7 +419,7 @@
 								<div
 									class="fb"
 									data-tone={feedback.tone}
-									in:fade={{ duration: 180 }}
+									in:fade={motion({ duration: 180 })}
 									aria-live="polite"
 									aria-atomic="true"
 								>
@@ -430,7 +431,7 @@
 							{/if}
 
 							{#if settled}
-								<div class="foot" in:fade={{ duration: 160 }}>
+								<div class="foot" in:fade={motion({ duration: 160 })}>
 									<button
 										class="btn"
 										use:focusWhen={{ active: true, preventScroll: true }}

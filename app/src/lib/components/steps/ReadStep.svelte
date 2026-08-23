@@ -3,6 +3,7 @@
 	import type { ReadStep } from '$lib/content/types';
 	import { resolveChoicePick } from '$lib/domain/advancePick';
 	import { fly } from 'svelte/transition';
+	import { motion } from '$lib/a11y/motion';
 
 	let { step, onSettle, onNudge }: {
 		step: ReadStep;
@@ -62,7 +63,7 @@
 </p>
 
 {#if allOpen}
-	<div in:fly={{ y: 10, duration: 240 }}>
+	<div in:fly={motion({ y: 10, duration: 240 })}>
 		<Options options={step.options} answer={step.answer} onPick={handle} />
 	</div>
 {/if}

@@ -2,6 +2,7 @@
 	import { applyContact, contactAction, type ContactAction } from '$lib/domain/hangul';
 	import type { ContactStep } from '$lib/content/types';
 	import { fly } from 'svelte/transition';
+	import { motion } from '$lib/a11y/motion';
 
 	let { step, onSettle, onNudge }: {
 		step: ContactStep;
@@ -68,7 +69,7 @@
 </div>
 
 {#if solved}
-	<p class="pron" in:fly={{ y: 8, duration: 260 }}>
+	<p class="pron" in:fly={motion({ y: 8, duration: 260 })}>
 		<span class="hg" lang="ko">{step.word}</span>
 		<span class="arr">is said</span>
 		<span class="hg said" lang="ko">[{spoken}]</span>
