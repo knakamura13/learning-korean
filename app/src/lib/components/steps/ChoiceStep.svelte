@@ -27,10 +27,6 @@
 			}
 		}
 	}
-
-	export function key(k: string) {
-		picker?.keyPick(k);
-	}
 </script>
 
 {#if step.stage?.length}

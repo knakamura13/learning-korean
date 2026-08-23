@@ -28,6 +28,15 @@
 		const i = choiceIndexFromKey(keyScheme, key, options.length);
 		if (i !== null) pick(i);
 	}
+
+	/** WCAG 2.1.4: digit/letter picks are active only while a choice control is focused. */
+	function onChoiceKeydown(e: KeyboardEvent) {
+		if (locked || disabled || e.metaKey || e.ctrlKey || e.altKey) return;
+		const i = choiceIndexFromKey(keyScheme, e.key, options.length);
+		if (i === null) return;
+		e.preventDefault();
+		pick(i);
+	}
 </script>
 
 <div class="opts" role="group" aria-label="answer choices">
@@ -36,6 +45,7 @@
 			class="opt"
 			disabled={locked || disabled}
 			onclick={() => pick(i)}
+			onkeydown={onChoiceKeydown}
 			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {text}"
 		>
 			<span class="key" aria-hidden="true"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
