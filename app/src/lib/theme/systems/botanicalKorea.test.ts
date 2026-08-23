@@ -13,9 +13,9 @@ describe('botanicalKorea', () => {
 		expect(botanicalKorea.id).toBe('botanicalKorea');
 		expect(botanicalKorea.light.paper.toLowerCase()).toBe('#faf5ee');
 		expect(botanicalKorea.dark.paper.toLowerCase()).toBe('#1a2420');
-		expect(botanicalKorea.light.accent.toLowerCase()).toBe('#315c45');
-		expect(botanicalKorea.dark.accent.toLowerCase()).toBe('#a6c1ae');
-		expect(botanicalKorea.light.rose.toLowerCase()).toBe('#7a3e46');
+		expect(botanicalKorea.light.accent.toLowerCase()).toBe('#2f5742');
+		expect(botanicalKorea.dark.accent.toLowerCase()).toBe('#abc5b3');
+		expect(botanicalKorea.light.rose.toLowerCase()).toBe('#753b43');
 		expect(botanicalKorea.light.roseSoft.toLowerCase()).toBe('#f3e6e8');
 		expect(botanicalKorea.dark.rose.toLowerCase()).toBe('#e8b4ba');
 		expect(botanicalKorea.dark.roseSoft.toLowerCase()).toBe('#3a2428');

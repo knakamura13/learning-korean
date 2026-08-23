@@ -138,7 +138,12 @@
 		<h1>Every letter and rule</h1>
 		<p class="lede">
 			Generated from the same module the labs run on, so it cannot drift from what the app
-			teaches.
+			teaches. First-use terms:
+			<abbr title="Final consonant slot at the bottom of a syllable block (받침)">batchim</abbr>,
+			<abbr title="Batchim moving into the next syllable when it begins with placeholder ㅇ (연음)">liaison</abbr>,
+			and deck
+			<abbr title="A gated review slice unlocked by finishing a lab">tiers</abbr>
+			are expanded here; lesson prose defines them in context.
 		</p>
 	</header>
 
@@ -196,7 +201,10 @@
 	</section>
 
 	<section id="batchim" aria-labelledby="sec-batchim-heading">
-		<h2 id="sec-batchim-heading" class="sec">Batchim — 27 finals, 7 sounds</h2>
+		<h2 id="sec-batchim-heading" class="sec">
+			<abbr title="Final consonant slot at the bottom of a syllable block (받침)">Batchim</abbr>
+			— 27 finals, 7 sounds
+		</h2>
 		<div class="rows card">
 			{#each REPRESENTATIVE as r (r)}
 				<div class="row">
@@ -423,7 +431,7 @@
 
 	.head { margin-bottom: var(--s4); max-width: var(--measure); }
 	h1 { margin: var(--s2) 0 var(--s3); }
-	.lede { color: var(--ink-soft); }
+	.lede { color: var(--ink-soft); max-width: var(--measure); }
 
 	section {
 		margin-bottom: var(--s7);
@@ -558,7 +566,7 @@
 		overflow-wrap: anywhere;
 	}
 
-	.src { margin: 0; padding-inline-start: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--ink-soft); }
+	.src { margin: 0; padding-inline-start: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--ink-soft); max-width: var(--measure); }
 	.src li { margin-bottom: var(--s2); }
 	.src a {
 		display: inline-flex;

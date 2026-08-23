@@ -25,10 +25,10 @@ describe('academia', () => {
 	it('uses walnut / lifted burgundy for actions and bronze / honey for rose', () => {
 		expect(academia.light.accent.toLowerCase()).toBe('#5c3d2e');
 		expect(academia.light.accentInk.toLowerCase()).toBe('#faf6ee');
-		expect(academia.light.rose.toLowerCase()).toBe('#6b4e12');
-		expect(academia.dark.accent.toLowerCase()).toBe('#e8a8a2');
+		expect(academia.light.rose.toLowerCase()).toBe('#654911');
+		expect(academia.dark.accent.toLowerCase()).toBe('#e8aaa4');
 		expect(academia.dark.accentInk.toLowerCase()).toBe('#2a1a0a');
-		expect(academia.dark.rose.toLowerCase()).toBe('#d4a843');
+		expect(academia.dark.rose.toLowerCase()).toBe('#dab55e');
 		expect(academia.shape.rSm).toBe('0px');
 		expect(academia.shape.rMd).toBe('0px');
 		expect(academia.shape.rLg).toBe('0px');
@@ -104,8 +104,8 @@ describe('academia', () => {
 			rose: '#4a3b12'
 		});
 		expect(academia.contrastMoreDark).toMatchObject({
-			accent: '#e8a8a2',
-			rose: '#dead40'
+			accent: '#e8aaa4',
+			rose: '#e0b34d'
 		});
 		const css = designSystemCss(academia);
 		expect(css).toContain('--accent: #3e2518');

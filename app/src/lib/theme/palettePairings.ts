@@ -10,22 +10,33 @@ export interface PalettePairing {
 	min: number;
 }
 
-/** Text and status colours the UI actually paints, not just the four-token/paper loop. */
+/**
+ * Text and status colours the UI actually paints.
+ * Floors are WCAG 2.2 AAA (7:1) for normal text — issue #142 stretch.
+ * Soft-surface status inks are included; they used to sit at AA only.
+ */
 export const TEXT_PAIRINGS: readonly PalettePairing[] = [
 	{ fg: 'inkFaint', bg: 'paper', min: 7 },
 	{ fg: 'inkFaint', bg: 'paperRaised', min: 7 },
 	{ fg: 'inkFaint', bg: 'paperSunk', min: 7 },
-	{ fg: 'inkSoft', bg: 'paper', min: 4.5 },
-	{ fg: 'accent', bg: 'paper', min: 4.5 },
-	{ fg: 'accent', bg: 'paperRaised', min: 4.5 },
-	{ fg: 'accent', bg: 'accentSoft', min: 4.5 },
-	{ fg: 'accent', bg: 'accentInk', min: 4.5 },
-	{ fg: 'rose', bg: 'paper', min: 4.5 },
-	{ fg: 'good', bg: 'paper', min: 4.5 },
-	{ fg: 'blue', bg: 'paper', min: 4.5 },
-	{ fg: 'warn', bg: 'paper', min: 4.5 },
-	{ fg: 'warn', bg: 'warnSoft', min: 4.5 },
-	{ fg: 'bad', bg: 'paper', min: 4.5 }
+	{ fg: 'inkSoft', bg: 'paper', min: 7 },
+	{ fg: 'inkSoft', bg: 'paperSunk', min: 7 },
+	{ fg: 'ink', bg: 'paper', min: 7 },
+	{ fg: 'ink', bg: 'paperSunk', min: 7 },
+	{ fg: 'accent', bg: 'paper', min: 7 },
+	{ fg: 'accent', bg: 'paperRaised', min: 7 },
+	{ fg: 'accent', bg: 'paperSunk', min: 7 },
+	{ fg: 'accent', bg: 'accentSoft', min: 7 },
+	{ fg: 'accent', bg: 'accentInk', min: 7 },
+	{ fg: 'rose', bg: 'paper', min: 7 },
+	{ fg: 'rose', bg: 'roseSoft', min: 7 },
+	{ fg: 'good', bg: 'paper', min: 7 },
+	{ fg: 'good', bg: 'goodSoft', min: 7 },
+	{ fg: 'blue', bg: 'paper', min: 7 },
+	{ fg: 'warn', bg: 'paper', min: 7 },
+	{ fg: 'warn', bg: 'warnSoft', min: 7 },
+	{ fg: 'bad', bg: 'paper', min: 7 },
+	{ fg: 'bad', bg: 'badSoft', min: 7 }
 ];
 
 /** Control borders that identify inputs, chips, and lanes (WCAG 1.4.11). */

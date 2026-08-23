@@ -16,7 +16,7 @@
 	--s6: 2rem;
 	--s7: 3rem;
 	--s8: 4rem;
-	--focus-ring: 0 0 0 3px color-mix(in srgb, var(--blue) 35%, transparent), 0 0 0 1px var(--blue);
+	--focus-ring: 0 0 0 4px color-mix(in srgb, var(--blue) 40%, transparent), 0 0 0 2px var(--blue);
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 	--fast: 130ms;
@@ -25,10 +25,10 @@
 	--measure: 36rem;
 	--shell: 62rem;
 	--sitting: 90rem;
-	/* Opaque nav / rubber-band canvas; matches header.bar. */
-	/* 87%, not 82%: ink-soft nav text on this surface must clear 4.5:1 in every
-	   look (worst case watercolor/light lands at 4.95). Guarded in polish.test. */
-	--chrome: color-mix(in srgb, var(--paper-sunk) 87%, black);
+	/* Opaque nav / rubber-band canvas; matches header.bar.
+	   Paper-sunk (not a darkened mix): dark text on a darkened chrome can never
+	   clear AAA 7:1 in light looks. Palette inks now clear 7:1 on paper-sunk. */
+	--chrome: var(--paper-sunk);
 }
 
 *,
@@ -96,7 +96,8 @@ h3 { font-size: 1.1rem; }
 h1, h2 { text-wrap: balance; }
 /* Lab prompts are sentences. Balance wraps at spaces inside jamo lists. */
 h2.do { text-wrap: pretty; }
-p { margin: 0 0 var(--s4); text-wrap: pretty; }
+/* 1.4.8 (d): paragraph spacing ≥ 1.5× line spacing. UI chrome resets margin. */
+p { margin: 0 0 calc(var(--leading) * 1.5 * 1em); text-wrap: pretty; }
 
 /* Hangul stays Noto Sans KR. These beat heading --display italic (0,1,0 > 0,0,1). */
 :lang(ko) {

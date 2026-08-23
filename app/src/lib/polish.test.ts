@@ -399,40 +399,36 @@ describe('polish audit regressions', () => {
 		expect(contrastRatio(activeSystem.dark.inkFaint, activeSystem.dark.paper)).toBeGreaterThanOrEqual(7);
 	});
 
-	it('keeps ink-soft secondary copy at least 4.5:1 on paper, every look', () => {
-		// The backlog note and the pile standfirst are 0.82–0.88rem ink-soft on
-		// paper, so AA small-text applies. Every look clears 6.9 today; the
-		// assertion is the requirement, not the current margin.
+	it('keeps ink-soft secondary copy at least 7:1 on paper, every look', () => {
+		// AAA 1.4.6: backlog note and pile standfirst are ink-soft on paper.
 		for (const look of LOOKS) {
 			for (const scheme of ['light', 'dark'] as const) {
 				expect(
 					contrastRatio(look[scheme].inkSoft, look[scheme].paper),
 					`${look.id}/${scheme} ink-soft on paper`
-				).toBeGreaterThanOrEqual(4.5);
+				).toBeGreaterThanOrEqual(7);
 			}
 		}
 	});
 
-	it('keeps ink-soft nav text at least 4.5:1 on the chrome surface, every look', () => {
-		// --chrome is color-mix(in srgb, var(--paper-sunk) N%, black); replicate
-		// the mix here so a palette or factor change cannot sneak under 4.5
-		// (axe caught 82% at 4.39 on watercolor/light — hence 87%).
-		const factor = appCss.match(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) (\d+)%, black\)/);
-		expect(factor).toBeTruthy();
-		const pct = Number(factor![1]) / 100;
-		const mixTowardBlack = (hex: string): string => {
-			const channels = [1, 3, 5].map((i) =>
-				Math.round(parseInt(hex.slice(i, i + 2), 16) * pct)
-			);
-			return `#${channels.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-		};
+	it('keeps header chrome text at least 7:1 on the chrome surface, every look', () => {
+		// --chrome is paper-sunk (AAA decision: darkened mixes block dark text).
+		expect(appCss).toMatch(/--chrome:\s*var\(--paper-sunk\)/);
 		for (const look of LOOKS) {
 			for (const scheme of ['light', 'dark'] as const) {
-				const chrome = mixTowardBlack(look[scheme].paperSunk);
+				const chrome = look[scheme].paperSunk;
 				expect(
 					contrastRatio(look[scheme].inkSoft, chrome),
 					`${look.id}/${scheme} ink-soft on chrome`
-				).toBeGreaterThanOrEqual(4.5);
+				).toBeGreaterThanOrEqual(7);
+				expect(
+					contrastRatio(look[scheme].ink, chrome),
+					`${look.id}/${scheme} ink on chrome`
+				).toBeGreaterThanOrEqual(7);
+				expect(
+					contrastRatio(look[scheme].accent, chrome),
+					`${look.id}/${scheme} accent on chrome`
+				).toBeGreaterThanOrEqual(7);
 			}
 		}
 	});
@@ -445,31 +441,31 @@ describe('polish audit regressions', () => {
 		expect(systemCss).toContain('--rose: #5c2c33');
 		expect(systemCss).not.toContain('--accent: #8a2a22');
 		expect(contrastRatio(activeSystem.contrastMoreLight!.accent, activeSystem.light.paper)).toBeGreaterThanOrEqual(
-			4.5
+			7
 		);
-		expect(contrastRatio(activeSystem.contrastMoreLight!.rose, activeSystem.light.paper)).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(activeSystem.contrastMoreLight!.rose, activeSystem.light.paper)).toBeGreaterThanOrEqual(7);
 	});
 
 	it('locks Botanical Korea paper, moss, and rose with WCAG floors', () => {
 		expect(activeSystem.id).toBe('botanicalKorea');
 		const { light, dark } = activeSystem;
 		expect(light.paper.toLowerCase()).toBe('#faf5ee');
-		expect(light.accent.toLowerCase()).toBe('#315c45');
+		expect(light.accent.toLowerCase()).toBe('#2f5742');
 		expect(light.accentInk.toLowerCase()).toBe('#fffdf8');
-		expect(light.rose.toLowerCase()).toBe('#7a3e46');
+		expect(light.rose.toLowerCase()).toBe('#753b43');
 		expect(dark.paper.toLowerCase()).toBe('#1a2420');
-		expect(dark.accent.toLowerCase()).toBe('#a6c1ae');
+		expect(dark.accent.toLowerCase()).toBe('#abc5b3');
 		expect(dark.rose.toLowerCase()).toBe('#e8b4ba');
 		expect(systemCss).toContain('--paper: #faf5ee');
-		expect(systemCss).toContain('--rose: #7a3e46');
+		expect(systemCss).toContain('--rose: #753b43');
 		expect(systemCss).toContain('--rose-soft: #f3e6e8');
 		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
 		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);
-		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(4.5);
+		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(7);
+		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(7);
 		for (const name of ['rose', 'good', 'blue', 'warn'] as const) {
-			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(4.5);
-			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(4.5);
+			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(7);
+			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(7);
 		}
 	});
 
@@ -828,10 +824,34 @@ describe('polish audit regressions', () => {
 	});
 
 	it('paints vertical overscroll with the header chrome color', () => {
-		expect(appCss).toMatch(/--chrome:\s*color-mix\(in srgb, var\(--paper-sunk\) \d+%, black\)/);
+		expect(appCss).toMatch(/--chrome:\s*var\(--paper-sunk\)/);
 		expect(appCss).toMatch(/html\s*\{[^}]*background-color:\s*var\(--chrome\)/s);
 		expect(appCss).toMatch(/body\s*\{[^}]*background-color:\s*var\(--paper\)/s);
 		expect(styleBlock(layout)).toMatch(/\.bar\s*\{[^}]*background:\s*var\(--chrome\)/s);
+	});
+
+	it('keeps a focus ring thick enough for WCAG 2.4.13 area', () => {
+		expect(appCss).toMatch(
+			/--focus-ring:\s*0 0 0 4px color-mix\(in srgb, var\(--blue\) [^)]+\), 0 0 0 2px var\(--blue\)/
+		);
+	});
+
+	it('keeps paragraph spacing at least 1.5× line spacing for 1.4.8', () => {
+		expect(appCss).toMatch(
+			/p\s*\{[^}]*margin:\s*0 0 calc\(var\(--leading\) \* 1\.5 \* 1em\)/s
+		);
+	});
+
+	it('caps body prose on home and reference with --measure', () => {
+		expect(styleBlock(home)).toMatch(/\.lab p\s*\{[^}]*max-width:\s*var\(--measure\)/s);
+		expect(styleBlock(reference)).toMatch(/\.lede\s*\{[^}]*max-width:\s*var\(--measure\)/s);
+		expect(styleBlock(reference)).toMatch(/\.src\s*\{[^}]*max-width:\s*var\(--measure\)/s);
+	});
+
+	it('expands specialist chrome terms on /reference at first use', () => {
+		expect(reference).toMatch(/<abbr title="[^"]*받침[^"]*">/);
+		expect(reference).toMatch(/<abbr title="[^"]*연음[^"]*">/);
+		expect(reference).toMatch(/<abbr title="[^"]*[Tt]ier[^"]*"|<abbr title="[^"]*gated review[^"]*">/);
 	});
 
 	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
@@ -954,8 +974,9 @@ describe('polish audit regressions', () => {
 
 	it('paints the favicon 한 on moss, not 태극 red', () => {
 		const svg = readFileSync(new URL('../../static/favicon.svg', import.meta.url), 'utf8');
-		expect(svg).toMatch(/fill="#315c45"/);
+		expect(svg).toMatch(/fill="#2f5742"/);
 		expect(svg).not.toMatch(/#a4342b/);
+		expect(svg).not.toMatch(/#902d26/);
 	});
 
 	it('emits absolute Open Graph images only, with dimensions and a dark manifest', () => {

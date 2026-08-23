@@ -28,6 +28,16 @@ describe('mouth hit press geometry', () => {
 		expect(appCss).not.toMatch(/button:not\(:disabled\):active/);
 	});
 
+	it('sizes mouth-zone hit circles to at least 44×44 CSS pixels', () => {
+		expect(css).toMatch(/\.dot\s*\{[^}]*width:\s*44px/s);
+		expect(css).toMatch(/\.dot\s*\{[^}]*height:\s*44px/s);
+		expect(css).toMatch(/\.dot\s*\{[^}]*min-width:\s*44px/s);
+		expect(css).toMatch(/\.dot\s*\{[^}]*min-height:\s*44px/s);
+		expect(css).toMatch(/\.callout\s*\{[^}]*min-width:\s*44px/s);
+		expect(css).toMatch(/\.callout\s*\{[^}]*min-height:\s*44px/s);
+		expect(css).not.toMatch(/\.dot\s*\{[^}]*width:\s*2\.75rem/s);
+	});
+
 	it('sizes the mouth to the well and keeps hits on the SVG frame', () => {
 		expect(css).toMatch(/\.mouth-wrap\s*\{[^}]*width:\s*100%/s);
 		expect(css).not.toMatch(/\.mouth-wrap\s*\{[^}]*max-width:\s*30rem/s);
