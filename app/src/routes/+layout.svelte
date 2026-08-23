@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
+	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
 	import { OG_IMAGE_ALT, pageCanonical, SITE_DESCRIPTION, siteAsset } from '$lib/site';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { labSession } from '$lib/stores/labSession.svelte';
@@ -24,7 +25,11 @@
 		{ href: '/reference', label: 'Reference' }
 	] as const;
 
-	const queue = $derived(progress.stats.queue);
+	// The badge quotes the sitting, not the whole pile: it is the number that
+	// decides whether Review gets opened, and after a gap the pile is several
+	// sittings' worth. Backlog rides along in the accessible name.
+	const sitting = $derived(progress.stats.sitting);
+	const load = $derived(reviewLoadCopy(progress.stats, progress.studyPrefs.reviewsPerSitting));
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
 
 	onMount(() => {
@@ -104,12 +109,12 @@
 					href={resolve(item.href)}
 					class:active={isActive}
 					aria-current={isActive ? 'page' : undefined}
-					aria-label={item.href === '/review' && queue > 0
-						? `Review, ${queue} cards due`
+					aria-label={item.href === '/review' && sitting > 0
+						? load.navAria
 						: undefined}
 				>
 					{#if item.href === '/review'}
-						Revie<span class="review-w">w{#if queue > 0}<span class="badge" aria-hidden="true"><span class="badge-n">{queue}</span></span>{/if}</span>
+						Revie<span class="review-w">w{#if sitting > 0}<span class="badge" aria-hidden="true"><span class="badge-n">{sitting}</span></span>{/if}</span>
 					{:else}
 						{item.label}
 					{/if}

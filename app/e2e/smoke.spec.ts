@@ -5,7 +5,7 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { noHorizontalOverflow, seedGuestState } from './helpers';
+import { lapsedSrsDoc, noHorizontalOverflow, seedGuestState } from './helpers';
 
 const ROUTES = ['/', '/lab/0001', '/review', '/drill', '/reference', '/settings'];
 
@@ -69,6 +69,32 @@ test('review with unlocked progress starts a sitting', async ({ page }) => {
 	// Review auto-starts when cards are available: progress bar + typed answer.
 	await expect(page.getByRole('progressbar', { name: 'Review progress' })).toBeVisible();
 	await expect(page.getByRole('textbox').first()).toBeVisible();
+});
+
+/**
+ * The cross-surface regression: the nav badge, the Home CTA and the sitting
+ * itself each named a different number. A returning learner saw 19 in two
+ * places and got 10 cards. Only a real browser can watch all three at once.
+ */
+test('a returning learner is promised the sitting, not the pile', async ({ page }) => {
+	await seedGuestState(page, lapsedSrsDoc());
+
+	await page.goto('/');
+	const cta = page.getByRole('link', { name: /^Review 10 cards/ });
+	await expect(cta).toBeVisible();
+	await expect(page.getByText(/9 more are waiting/)).toBeVisible();
+	// The pile total must not be the promise anywhere on the page.
+	await expect(page.getByRole('link', { name: /Review 19/ })).toHaveCount(0);
+
+	const badge = page.locator('.badge-n');
+	await expect(badge).toHaveText('10');
+	await expect(page.getByRole('link', { name: /Review, 10 cards in this sitting/ })).toBeVisible();
+
+	await cta.click();
+	await expect(page.getByRole('progressbar', { name: 'Review progress' })).toHaveAttribute(
+		'aria-valuetext',
+		'Card 1 of 10'
+	);
 });
 
 test('settings offers appearance and backup, and export downloads a file', async ({ page }) => {

@@ -68,7 +68,8 @@
 	const course = LABS.map(toCourseLab);
 	const nextLab = $derived(followingLab(course, lab.id));
 	const finishCopy = $derived(labFinishCopy(released, progress.stats));
-	const dueNow = $derived(progress.stats.queue);
+	/** Gate for the review handoff: is there anything in the next sitting? */
+	const dueNow = $derived(progress.stats.sitting);
 	const promptLive = $derived(step.do.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
 	let choiceRef = $state<ChoiceStep | undefined>();
 	let cardEl = $state<HTMLDivElement>();

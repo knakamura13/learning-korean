@@ -598,6 +598,14 @@ export interface Stats {
 	/** The vocabulary track's remaining daily draw, budgeted separately. */
 	vocabNewLeft: number;
 	queue: number;
+	/**
+	 * Cards the next sitting will actually present — exactly `due().length`.
+	 * This is the commitment to quote in the UI. `queue` is everything
+	 * available today, which after a gap is several sittings' worth.
+	 */
+	sitting: number;
+	/** Overdue cards this sitting will not reach. Zero when on schedule. */
+	backlog: number;
 	lapsing: number;
 	streak: number;
 	reviewedToday: number;
@@ -663,6 +671,7 @@ export function stats<T extends SchedulableCard>(
 ): Stats {
 	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
 	const vocabNewPerDay = opts.vocabNewPerDay ?? DEFAULT_VOCAB_NEW_PER_DAY;
+	const reviewPerSitting = opts.reviewPerSitting ?? DEFAULT_REVIEW_PER_SITTING;
 	const available = pool(state, deck);
 	const today = isoDay(now);
 
@@ -686,6 +695,9 @@ export function stats<T extends SchedulableCard>(
 	const vocabUsedToday = state.vocabNewDate === today ? state.vocabNewCount : 0;
 	const newLeft = Math.max(0, Math.min(newPerDay - usedToday, scriptUnseen));
 	const vocabNewLeft = Math.max(0, Math.min(vocabNewPerDay - vocabUsedToday, vocabUnseen));
+	// Mirrors how `due()` builds a sitting: capped reviews, then each track's
+	// capped trickle. `srs.test.ts` asserts the two never drift.
+	const sittingReviews = Math.min(dueNow, Math.max(0, reviewPerSitting));
 
 	return {
 		unlocked: available.length,
@@ -698,6 +710,8 @@ export function stats<T extends SchedulableCard>(
 		newLeft,
 		vocabNewLeft,
 		queue: dueNow + newLeft + vocabNewLeft,
+		sitting: sittingReviews + newLeft + vocabNewLeft,
+		backlog: dueNow - sittingReviews,
 		lapsing,
 		streak: streak(state, now),
 		reviewedToday: state.days[today] ?? 0,

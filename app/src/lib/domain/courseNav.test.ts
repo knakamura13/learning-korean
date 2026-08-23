@@ -46,7 +46,6 @@ function view(partial: {
 	unlocked?: string[];
 	opened?: string[];
 	sessions?: Record<string, LabProgress>;
-	queue?: number;
 }): CourseNavView {
 	const unlocked = new Set(partial.unlocked ?? []);
 	const opened = new Set(partial.opened ?? []);
@@ -54,8 +53,7 @@ function view(partial: {
 		ready: partial.ready ?? true,
 		isUnlocked: (tier) => unlocked.has(tier),
 		isOpened: (labId) => opened.has(labId),
-		sessionFor: (id) => partial.sessions?.[id],
-		queue: partial.queue ?? 0
+		sessionFor: (id) => partial.sessions?.[id]
 	};
 }
 
@@ -136,17 +134,33 @@ describe('labCardState', () => {
 
 describe('reviewPileView', () => {
 	it('stays loading until progress is read so prerender cannot flash locked rows', () => {
-		expect(reviewPileView(false, 0, 10)).toEqual({ body: 'loading', due: 0 });
-		expect(reviewPileView(false, 19, 10)).toEqual({ body: 'loading', due: 0 });
+		expect(reviewPileView(false, 0, 10, 4)).toEqual({ body: 'loading', sitting: 0, backlog: 0 });
+		expect(reviewPileView(false, 19, 10, 4)).toEqual({ body: 'loading', sitting: 0, backlog: 0 });
 	});
 
 	it('uses an empty state when no family has unlocked yet', () => {
-		expect(reviewPileView(true, 0, 0)).toEqual({ body: 'empty', due: 0 });
+		expect(reviewPileView(true, 0, 0, 0)).toEqual({ body: 'empty', sitting: 0, backlog: 0 });
 	});
 
-	it('shows progress and due count once a family is in the pile', () => {
-		expect(reviewPileView(true, 19, 10)).toEqual({ body: 'progress', due: 10 });
-		expect(reviewPileView(true, 19, 0)).toEqual({ body: 'progress', due: 0 });
+	it('carries the sitting and the backlog separately once a family is in the pile', () => {
+		expect(reviewPileView(true, 19, 25, 137)).toEqual({
+			body: 'progress',
+			sitting: 25,
+			backlog: 137
+		});
+		expect(reviewPileView(true, 19, 0, 0)).toEqual({
+			body: 'progress',
+			sitting: 0,
+			backlog: 0
+		});
+	});
+
+	it('never reports a negative count', () => {
+		expect(reviewPileView(true, 19, -3, -8)).toEqual({
+			body: 'progress',
+			sitting: 0,
+			backlog: 0
+		});
 	});
 });
 
@@ -182,22 +196,20 @@ describe('showPrerequisiteGate', () => {
 });
 
 describe('courseNavView', () => {
-	it('snapshots unlocked course tiers and passes session, queue, and skip-ahead', () => {
+	it('snapshots unlocked course tiers and passes session and skip-ahead', () => {
 		const session = mid(2, 16);
 		const nav = courseNavView({
 			ready: true,
 			labs,
 			isUnlocked: (tier) => tier === 'lab01',
 			isOpened: (id) => id === '0002',
-			sessionFor: (id) => (id === '0001' ? session : undefined),
-			queue: 7
+			sessionFor: (id) => (id === '0001' ? session : undefined)
 		});
 		expect(nav.ready).toBe(true);
 		expect(nav.isUnlocked('lab01')).toBe(true);
 		expect(nav.isUnlocked('lab02')).toBe(false);
 		expect(nav.isOpened?.('0002')).toBe(true);
 		expect(nav.sessionFor('0001')).toBe(session);
-		expect(nav.queue).toBe(7);
 	});
 
 	it('keeps later labs gated before hydration even when unlocks would pass', () => {
@@ -205,8 +217,7 @@ describe('courseNavView', () => {
 			ready: false,
 			labs,
 			isUnlocked: () => true,
-			sessionFor: () => undefined,
-			queue: 0
+			sessionFor: () => undefined
 		});
 		expect(showPrerequisiteGate(labs[1], labs, nav)).toBe(true);
 		expect(nextLabId(labs, nav)).toBe('0001');

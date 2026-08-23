@@ -29,6 +29,33 @@ export function guestSrsDoc() {
 	};
 }
 
+/**
+ * A learner who studied for a month and then vanished: every lab01 card is
+ * long overdue. The pile is 19 where a sitting is 10, which is the shape that
+ * used to make the badge quote six sittings as one.
+ */
+export function lapsedSrsDoc() {
+	const day = 86_400_000;
+	const ids = [
+		'c-g', 'c-kk', 'c-n', 'c-d', 'c-tt', 'c-r', 'c-m', 'c-b', 'c-pp', 'c-s',
+		'c-ss', 'c-ng0', 'c-j', 'c-jj', 'c-ch', 'c-k', 'c-t', 'c-p', 'c-h'
+	];
+	const cards: Record<string, unknown> = {};
+	ids.forEach((id, i) => {
+		cards[id] = { ease: 2.5, ivl: 6, reps: 4, lapses: 0, due: Date.now() - (i + 2) * day };
+	});
+	return {
+		version: 1,
+		unlocked: ['lab01'],
+		openedLabs: [],
+		cards,
+		days: {},
+		newDate: '',
+		newCount: 0,
+		newIds: []
+	};
+}
+
 export async function seedGuestState(page: Page, doc: unknown = guestSrsDoc()): Promise<void> {
 	await page.addInitScript((value) => {
 		localStorage.setItem('korean-srs-v1', value);

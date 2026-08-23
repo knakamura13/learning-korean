@@ -46,8 +46,7 @@
 			labs: course,
 			isUnlocked: (tier) => progress.isUnlocked(tier),
 			isOpened: (id) => progress.isOpened(id),
-			sessionFor: (id) => labSession.all[id],
-			queue: progress.stats.queue
+			sessionFor: (id) => labSession.all[id]
 		})
 	);
 

@@ -10,6 +10,7 @@
 	import type { AudioSlot } from '$lib/audio/letters';
 	import { TIERS, checkAnswer, type Card } from '$lib/domain/deck';
 	import { attemptSpeed } from '$lib/domain/srs';
+	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
 	import { sprintEligible } from '$lib/domain/sprint';
 	import { composeTrial, type ComposeTrial } from '$lib/domain/blockCompose';
 	import { LABS } from '$lib/content';
@@ -63,6 +64,7 @@
 	const blockCard = $derived(card?.kind === 'block');
 	const reviewSlot = $derived(card ? reviewAudioSlot(card.kind) : null);
 	const stats = $derived(progress.stats);
+	const load = $derived(reviewLoadCopy(stats, progress.studyPrefs.reviewsPerSitting));
 	const unlockedTiers = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
 	const drillOpen = $derived(sprintEligible(unlockedTiers));
 	const body = $derived(
@@ -218,11 +220,18 @@
 	{/if}
 
 	{#if chrome.showStats}
-		<div class="strip" role="region" aria-label="Review session statistics">
-			<div class="stat" class:hot={stats.queue > 0}><b>{stats.queue}</b><span>to review</span></div>
-			<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
-			<div class="stat"><b>{stats.seen}</b><span>reviewed</span></div>
-			<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
+		<div class="load">
+			<div class="strip" role="region" aria-label="Review session statistics">
+				<div class="stat" class:hot={stats.sitting > 0}>
+					<b>{stats.sitting}</b><span>this sitting</span>
+				</div>
+				<div class="stat"><b>{stats.mature}</b><span>mastered</span></div>
+				<div class="stat"><b>{stats.seen}</b><span>reviewed</span></div>
+				<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
+			</div>
+			{#if load.backlogNote}
+				<p class="backlog-note">{load.backlogNote}</p>
+			{/if}
 		</div>
 	{/if}
 
@@ -258,7 +267,7 @@
 					come back fast on purpose.
 				{/if}
 			</p>
-			<button class="btn" onclick={start}>Check for more</button>
+			<button class="btn" onclick={start}>{load.moreAction}</button>
 		</div>
 	{:else if body === 'clear'}
 		<div class="card empty" in:fade>
@@ -422,11 +431,20 @@
 		line-height: 1.55;
 	}
 
+	.load { margin-bottom: var(--s5); }
+
 	.strip {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
 		gap: var(--s2);
-		margin-bottom: var(--s5);
+	}
+
+	/* Backlog explains the capped sitting above it; it never leads. */
+	.backlog-note {
+		margin: var(--s3) 0 0;
+		font-size: 0.82rem;
+		line-height: 1.55;
+		color: var(--ink-soft);
 	}
 
 	@media (min-width: 40rem) {
@@ -448,7 +466,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.stat span {
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--ink);
