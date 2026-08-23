@@ -244,6 +244,11 @@ button { font: inherit; color: inherit; }
 	border-radius: var(--r-lg);
 	box-shadow: var(--shadow-1);
 }
+/* .card's resting shadow would otherwise beat :focus-visible (equal specificity,
+   later cascade). Redeclare like .btn so the ring still paints. */
+.card:focus-visible {
+	box-shadow: var(--focus-ring), var(--shadow-1);
+}
 .lab.card::before,
 .lab.card::after {
 	content: '';

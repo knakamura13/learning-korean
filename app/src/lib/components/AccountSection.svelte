@@ -181,8 +181,9 @@
 		border-radius: var(--r-sm);
 	}
 	.fields input:focus-visible {
-		outline: var(--focus-ring);
+		outline: 2px solid var(--paper);
 		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 	}
 
 	.actions {
