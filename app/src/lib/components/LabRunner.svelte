@@ -71,6 +71,13 @@
 	/** Gate for the review handoff: is there anything in the next sitting? */
 	const dueNow = $derived(progress.stats.sitting);
 	const promptLive = $derived(step.do.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+	const verdictLive = $derived.by(() => {
+		if (!feedback) return '';
+		const label =
+			feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite';
+		const detail = feedback.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+		return detail ? `${label}. ${detail}` : label;
+	});
 	let cardEl = $state<HTMLDivElement>();
 	let workEl = $state<HTMLDivElement>();
 	let confirmingRestart = $state(false);
@@ -409,6 +416,7 @@
 		{/snippet}
 		{#snippet after()}
 			{#if ready}
+				<p class="vh" data-verdict-live aria-live="polite" aria-atomic="true">{verdictLive}</p>
 				{#key index}
 					{#if feedback || settled}
 						<div
@@ -420,8 +428,6 @@
 									class="fb"
 									data-tone={feedback.tone}
 									in:fade={motion({ duration: 180 })}
-									aria-live="polite"
-									aria-atomic="true"
 								>
 									<span class="verdict">
 										{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}

@@ -74,7 +74,9 @@ async function waitForReady(): Promise<void> {
 }
 
 function settleCurrentCard(): void {
-	for (const btn of [...document.querySelectorAll<HTMLButtonElement>('button.opt:not(:disabled)')]) {
+	for (const btn of [
+		...document.querySelectorAll<HTMLButtonElement>('button.opt:not([aria-disabled="true"])')
+	]) {
 		if (document.querySelector('.foot .btn')) break;
 		btn.click();
 		flushSync();

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { resolve } from '$app/paths';
+	import { firstWellControl } from '$lib/a11y/firstWellControl';
 	import SprintChoices from '$lib/components/SprintChoices.svelte';
 	import { TIERS } from '$lib/domain/deck';
 	import { millEligible, millMissingLab, millPool, pronTrialSource } from '$lib/domain/pronMill';
@@ -25,6 +26,9 @@
 	let round = $state(idleRound());
 	let running = $state(false);
 	let now = $state(0);
+	let drillLive = $state('');
+	let drillCard = $state<HTMLDivElement | undefined>();
+	let lastMilestone = $state<30 | 10 | null>(null);
 
 	const unlocked = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
 	const missing = $derived(lane === 'blocks' ? sprintMissingLab(unlocked) : millMissingLab(unlocked));
@@ -44,8 +48,23 @@
 		const id = setInterval(() => {
 			const t = Date.now();
 			now = t;
-			round = tickRound(round, t);
-			if (round.phase !== 'running') running = false;
+			const next = tickRound(round, t);
+			const secs =
+				next.phase === 'running' ? Math.max(0, Math.ceil((next.endsAt - t) / 1000)) : 0;
+			if (next.phase === 'running') {
+				if (secs <= 10 && lastMilestone !== 10) {
+					lastMilestone = 10;
+					drillLive = '10 seconds left';
+				} else if (secs <= 30 && secs > 10 && lastMilestone === null) {
+					lastMilestone = 30;
+					drillLive = '30 seconds left';
+				}
+			}
+			round = next;
+			if (next.phase !== 'running') {
+				running = false;
+				announceRoundEnd(next);
+			}
 		}, 100);
 		return () => clearInterval(id);
 	});
@@ -56,10 +75,34 @@
 			: pronTrialSource(millPool(unlocked));
 	}
 
+	function announce(message: string) {
+		drillLive = '';
+		void tick().then(() => {
+			drillLive = message;
+		});
+	}
+
+	function focusFirstChoice() {
+		void tick().then(() => {
+			firstWellControl(drillCard)?.focus({ preventScroll: true });
+		});
+	}
+
+	function announceRoundEnd(from = round) {
+		const endScore = sprintScore(from);
+		const median =
+			endScore.medianMs === null
+				? 'no median time'
+				: `median ${endScore.medianMs} milliseconds`;
+		announce(`Round over. ${endScore.correct} of ${endScore.seen} correct. ${median}.`);
+	}
+
 	function pickLane(next: Lane) {
 		if (running || lane === next) return;
 		lane = next;
 		round = idleRound();
+		drillLive = '';
+		lastMilestone = null;
 	}
 
 	function start() {
@@ -67,11 +110,29 @@
 		round = startRoundFrom(Date.now(), source(), Math.random);
 		running = round.phase === 'running';
 		now = Date.now();
+		lastMilestone = null;
+		if (round.phase === 'running' && round.trial) {
+			announce(`Round started. Prompt ${round.trial.block}.`);
+			focusFirstChoice();
+		}
 	}
 
 	function pick(index: number) {
+		const trial = round.trial;
+		if (!trial) return;
+		const correct = index === trial.answerIndex;
 		round = answerRoundFrom(round, index, Date.now(), source(), Math.random);
-		if (round.phase !== 'running') running = false;
+		if (round.phase !== 'running') {
+			running = false;
+			announceRoundEnd();
+			return;
+		}
+		if (round.trial) {
+			announce(
+				`${correct ? 'Correct' : 'Missed'}. Next prompt ${round.trial.block}.`
+			);
+			focusFirstChoice();
+		}
 	}
 </script>
 
@@ -108,6 +169,8 @@
 		{/if}
 	</header>
 
+	<p class="vh" data-drill-live aria-live="polite" aria-atomic="true">{drillLive}</p>
+
 	{#if !ready}
 		<div class="card empty loading" aria-busy="true">
 			<div class="skel glyph-ph" aria-hidden="true"></div>
@@ -128,7 +191,7 @@
 			<a class="btn" href={resolve('/lab/[id]', { id: missing.id })}>Start Lab 0{missing.number}</a>
 		</div>
 	{:else if round.phase === 'running' && round.trial}
-		<div class="card drill">
+		<div class="card drill" bind:this={drillCard}>
 			<p class="timer" role="timer" aria-live="off">{remaining}</p>
 			<div class="glyph" class:word={lane === 'sounds'} lang="ko">{round.trial.block}</div>
 			{#key round.trial.block + round.seen}

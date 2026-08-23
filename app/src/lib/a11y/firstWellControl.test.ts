@@ -39,6 +39,14 @@ describe('firstWellControl', () => {
 		expect(firstWellControl(root)?.textContent).toBe('ㄴ');
 	});
 
+	it('skips aria-disabled controls so focus does not land on a locked miss', () => {
+		const root = well(`
+			<button type="button" aria-disabled="true">missed</button>
+			<button type="button">open</button>
+		`);
+		expect(firstWellControl(root)?.textContent).toBe('open');
+	});
+
 	it('skips audio play buttons so a choice card lands on the answer, not the speaker', () => {
 		const root = well(`
 			<button type="button" class="play" aria-label="Play ㄱ">play</button>

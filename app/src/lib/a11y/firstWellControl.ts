@@ -18,6 +18,7 @@ export function firstWellControl(root: ParentNode | null | undefined): HTMLEleme
 }
 
 function isDisabled(el: HTMLElement): boolean {
+	if (el.getAttribute('aria-disabled') === 'true') return true;
 	if (
 		el instanceof HTMLButtonElement ||
 		el instanceof HTMLInputElement ||
@@ -26,5 +27,5 @@ function isDisabled(el: HTMLElement): boolean {
 	) {
 		return el.disabled;
 	}
-	return el.getAttribute('aria-disabled') === 'true';
+	return false;
 }
