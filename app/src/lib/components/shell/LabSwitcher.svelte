@@ -118,8 +118,9 @@
 		border-color: var(--rule-strong);
 	}
 	.trigger:focus-visible {
-		outline: var(--focus-ring);
+		outline: 2px solid var(--paper);
 		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 	}
 	.trigger .title {
 		overflow: hidden;
@@ -186,8 +187,9 @@
 		background: var(--paper-sunk);
 	}
 	.sheet a:focus-visible {
-		outline: var(--focus-ring);
-		outline-offset: -2px;
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 	}
 	.sheet a[aria-current='page'] {
 		background: var(--accent-soft);

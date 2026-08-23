@@ -25,6 +25,7 @@ import labSwitcher from './components/shell/LabSwitcher.svelte?raw';
 import sprintChoices from './components/SprintChoices.svelte?raw';
 import reviewCompose from './components/ReviewCompose.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
+import accountSection from './components/AccountSection.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
@@ -586,6 +587,32 @@ describe('polish audit regressions', () => {
 		expect(appCss).not.toMatch(/body::before[\s\S]{0,200}z-index:\s*1000/);
 		expect(appCss).toMatch(/width='400'\s+height='400'/);
 		expect(appCss).toMatch(/background-size:\s*400px\s+400px/);
+	});
+
+	it('redeclaration keeps the focus ring on .card after its resting box-shadow', () => {
+		// Equal specificity: .card's box-shadow would otherwise beat :focus-visible.
+		// Same pattern as .btn — redeclare the ring on the box-shadow bearer.
+		expect(appCss).toMatch(
+			/\.card:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\),\s*var\(--shadow-1\)/s
+		);
+		expect(appCss).toMatch(/\.btn:focus-visible[\s\S]*?box-shadow:\s*var\(--focus-ring\)/);
+		// Home lab cards also set box-shadow on :hover in a scoped block that beats
+		// global .card:focus-visible — redeclare there too.
+		expect(styleBlock(home)).toMatch(
+			/a\.lab:hover:focus-visible[\s\S]*?box-shadow:\s*var\(--focus-ring\),\s*var\(--shadow-1\)/s
+		);
+	});
+
+	it('uses --focus-ring only as box-shadow, never as outline', () => {
+		// --focus-ring is a multi-layer box-shadow token, not an outline shorthand.
+		expect(appCss).not.toMatch(/outline:\s*var\(--focus-ring\)/);
+		for (const source of [accountSection, labSwitcher]) {
+			const css = styleBlock(source);
+			expect(css).not.toMatch(/outline:\s*var\(--focus-ring\)/);
+			expect(css).toMatch(/outline:\s*2px solid var\(--paper\)/);
+			expect(css).toMatch(/outline-offset:\s*2px/);
+			expect(css).toMatch(/box-shadow:\s*var\(--focus-ring\)/);
+		}
 	});
 
 	it('keeps the lab well free of specimen ticks', () => {
