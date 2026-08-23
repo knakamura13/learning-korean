@@ -37,10 +37,10 @@
 				have a backup file.
 			</p>
 			<div class="actions">
-				<button type="button" class="btn" onclick={confirmReset}>Clear progress</button>
 				<button type="button" class="btn ghost" use:focusWhen={true} onclick={cancelReset}>
 					Cancel
 				</button>
+				<button type="button" class="btn" onclick={confirmReset}>Clear progress</button>
 			</div>
 		</dialog>
 	{/if}

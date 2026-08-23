@@ -17,6 +17,13 @@ afterEach(() => {
 	document.body.innerHTML = '';
 });
 
+function confirmButtons(root: ParentNode) {
+	const buttons = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
+	const cancel = buttons.find((b) => /^\s*Cancel\s*$/.test(b.textContent ?? ''));
+	const confirm = buttons.find((b) => /Clear progress/i.test(b.textContent ?? ''));
+	return { buttons, cancel, confirm };
+}
+
 describe('ProgressReset', () => {
 	it('asks for confirmation before clearing progress, and does nothing on cancel', () => {
 		const onReset = vi.fn();
@@ -30,12 +37,23 @@ describe('ProgressReset', () => {
 		expect(dialog?.textContent).toMatch(/cannot be undone/i);
 		expect(onReset).not.toHaveBeenCalled();
 
-		const [, cancel] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
-		cancel.click();
+		const { cancel } = confirmButtons(root);
+		cancel!.click();
 		flushSync();
 
 		expect(root.querySelector('dialog.confirm')).toBeNull();
 		expect(onReset).not.toHaveBeenCalled();
+	});
+
+	it('puts Cancel first so a reflex Enter cannot wipe progress', () => {
+		const root = render({ onReset: vi.fn() });
+		root.querySelector<HTMLButtonElement>('button')!.click();
+		flushSync();
+
+		const { buttons, cancel, confirm } = confirmButtons(root);
+		expect(buttons[0]).toBe(cancel);
+		expect(buttons[1]).toBe(confirm);
+		expect(document.activeElement).toBe(cancel);
 	});
 
 	it('resets on confirm and reports that progress was cleared', () => {
@@ -44,8 +62,8 @@ describe('ProgressReset', () => {
 
 		root.querySelector<HTMLButtonElement>('button')!.click();
 		flushSync();
-		const [confirm] = [...root.querySelectorAll<HTMLButtonElement>('.confirm button')];
-		confirm.click();
+		const { confirm } = confirmButtons(root);
+		confirm!.click();
 		flushSync();
 
 		expect(onReset).toHaveBeenCalledOnce();

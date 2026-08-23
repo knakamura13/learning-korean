@@ -5,6 +5,7 @@ import labRunner from './components/LabRunner.svelte?raw';
 import labPipRail from './components/LabPipRail.svelte?raw';
 import labRunnerPipRail from './components/labRunnerPipRail.svelte.ts?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
+import progressReset from './components/ProgressReset.svelte?raw';
 import audioClip from './components/AudioClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
@@ -91,6 +92,26 @@ describe('polish audit regressions', () => {
 		expect(progressBackup).toMatch(/attachModalDialog/);
 		expect(sitting).toMatch(/<dialog\b[^>]*class="restart-confirm"/);
 		expect(sitting).toMatch(/attachModalDialog/);
+	});
+
+	it('puts Cancel first in destructive confirm dialogs so showModal focuses the safe action', () => {
+		// showModal focuses the first focusable descendant; Cancel must precede
+		// the destructive button (LabRunner restart-confirm is the known-good pattern).
+		const cases: { source: string; destructive: RegExp }[] = [
+			{ source: labRunner, destructive: />\s*Start over\s*</ },
+			{ source: progressReset, destructive: />\s*Clear progress\s*</ },
+			{ source: progressBackup, destructive: />\s*\{busy \? 'Restoring…' : 'Replace progress'\}\s*</ },
+			{ source: accountSection, destructive: />\s*Delete account\s*</ }
+		];
+		for (const { source, destructive } of cases) {
+			const dialog = source.match(/<dialog\b[\s\S]*?<\/dialog>/)?.[0] ?? '';
+			expect(dialog.length).toBeGreaterThan(0);
+			const cancelIdx = dialog.search(/>\s*Cancel\s*</);
+			const destructiveIdx = dialog.search(destructive);
+			expect(cancelIdx).toBeGreaterThanOrEqual(0);
+			expect(destructiveIdx).toBeGreaterThanOrEqual(0);
+			expect(cancelIdx).toBeLessThan(destructiveIdx);
+		}
 	});
 
 	it('opens the locked-lab overlay as a native modal dialog', () => {
