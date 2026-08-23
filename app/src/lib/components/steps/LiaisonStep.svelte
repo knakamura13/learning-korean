@@ -58,9 +58,7 @@
 			class:dim={solved && picked !== jamo}
 			disabled={solved}
 			onclick={() => pick(jamo)}
-			lang="ko"
-			aria-label="Move {jamo}"
-		>{jamo}</button>
+		><span class="vh">Move </span><span lang="ko">{jamo}</span></button>
 	{/each}
 	<button
 		class="pick stay"

@@ -42,10 +42,13 @@
 	class="play"
 	class:failed
 	aria-disabled={failed}
-	aria-label={failed ? `Couldn't play ${jamo}` : playing ? `Pause ${jamo}` : `Play ${jamo}`}
 	aria-pressed={playing}
 	onclick={toggle}
 >
+	<span class="vh">
+		{#if failed}Couldn't play{:else if playing}Pause{:else}Play{/if}
+	</span>
+	<span class="vh" lang="ko">{jamo}</span>
 	{#if playing}
 		<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
 			<rect x="6" y="5" width="4.5" height="14" rx="1" fill="currentColor" />

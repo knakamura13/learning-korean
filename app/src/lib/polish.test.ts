@@ -876,7 +876,9 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
-		expect(layout).toMatch(/class="brand"[^>]*aria-label="Korean 한"/);
+		expect(layout).toMatch(/class="brand"/);
+		expect(layout).not.toMatch(/aria-label="Korean 한"/);
+		expect(layout).toMatch(/class="mark" lang="ko">한/);
 		expect(layout).toMatch(/class="mark" lang="ko"/);
 		expect(layout).toMatch(/pathname === '\/' \|\| page\.url\.pathname\.startsWith\('\/lab\/'\)/);
 		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);

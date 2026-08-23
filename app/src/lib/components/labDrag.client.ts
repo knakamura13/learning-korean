@@ -68,6 +68,7 @@ export function bindLabDrag(container: HTMLElement, handlers: LabDragHandlers): 
 		handlers.onStop?.(pointFrom(event));
 	};
 	const onMirror = (event: MirrorCreatedEvent) => {
+		event.mirror.setAttribute('aria-hidden', 'true');
 		handlers.decorateMirror?.(event.mirror, event.originalSource);
 	};
 

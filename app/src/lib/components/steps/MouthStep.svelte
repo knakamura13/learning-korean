@@ -56,7 +56,8 @@
 
 <div class="mouth-wrap">
 	<p class="instruction" id="mouth-instruction">
-		Choose one of the labeled places. The labels are interactive.
+		Choose one place of articulation. The five labels run front to back: lips, teeth, ridge,
+		soft palate, throat.
 	</p>
 	<div class="mouth-stage">
 		<svg
@@ -110,32 +111,39 @@
 		{/each}
 		</svg>
 
-		<div class="zones" role="group" aria-label="place of articulation" aria-describedby="mouth-instruction">
-			{#each ZONES as z (z.id)}
+		<div
+			class="zones"
+			role="list"
+			aria-label="Places of articulation, front to back"
+			aria-describedby="mouth-instruction"
+		>
+			{#each ZONES as z, i (z.id)}
 				{@const label = labelFor(z.id)}
 				{@const isPrior = priorLabels.has(z.id) && !(solved && z.id === step.zone)}
 				{@const locked = solved || isPrior}
-				<button
-					type="button"
-					class="hit"
-					class:locked
-					class:wrong={wrong === z.id}
-					disabled={locked}
-					style="--cx: {z.cx / 440}; --cy: {z.cy / 300}; --lx: {z.lx / 440}; --ly: {z.ly / 300};"
-					aria-label={label ? `${z.tag}, ${label}` : z.tag}
-					onmouseenter={() => (hover = z.id)}
-					onmouseleave={() => {
-						if (hover === z.id) hover = null;
-					}}
-					onfocus={() => (hover = z.id)}
-					onblur={() => {
-						if (hover === z.id) hover = null;
-					}}
-					onclick={() => pick(z.id)}
-				>
-					<span class="callout">{z.tag}</span>
-					<span class="dot" aria-hidden="true"></span>
-				</button>
+				<div role="listitem" aria-posinset={i + 1} aria-setsize={ZONES.length}>
+					<button
+						type="button"
+						class="hit"
+						class:locked
+						class:wrong={wrong === z.id}
+						disabled={locked}
+						style="--cx: {z.cx / 440}; --cy: {z.cy / 300}; --lx: {z.lx / 440}; --ly: {z.ly / 300};"
+						onmouseenter={() => (hover = z.id)}
+						onmouseleave={() => {
+							if (hover === z.id) hover = null;
+						}}
+						onfocus={() => (hover = z.id)}
+						onblur={() => {
+							if (hover === z.id) hover = null;
+						}}
+						onclick={() => pick(z.id)}
+					>
+						<span class="callout">{z.tag}</span>
+						{#if label}<span class="vh" lang="ko">{label}</span>{/if}
+						<span class="dot" aria-hidden="true"></span>
+					</button>
+				</div>
 			{/each}
 		</div>
 	</div>

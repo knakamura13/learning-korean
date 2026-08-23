@@ -24,24 +24,22 @@
 		state?: 'empty' | 'partial' | 'win' | 'dead';
 	} = $props();
 
+	const uid = $props.id();
+
 	/** Phonetic job from slot shape — fusion trays are named first/second, not vowel. */
 	function phoneticColumn(slot: Slot): JamoSlot {
 		if (slot.bottom) return 'batchim';
 		if (slot.value && (VOWELS as readonly string[]).includes(slot.value)) return 'vowel';
 		return 'lead';
 	}
-
-	function slotAriaLabel(slot: Slot, reading: string): string | undefined {
-		if (!slot.name) return undefined;
-		if (!slot.value) return `${slot.name}: empty`;
-		if (!reading) return `${slot.name}: ${slot.value}`;
-		return `${slot.name}: ${slot.value}, ${reading}`;
-	}
 </script>
 
 <div class="asm">
 	{#each slots as slot, i (i)}
 		{@const reading = slot.value ? jamoReading(slot.value, phoneticColumn(slot)) : ''}
+		{@const nameId = `${uid}-slot-${i}-name`}
+		{@const valueId = `${uid}-slot-${i}-value`}
+		{@const readingId = `${uid}-slot-${i}-reading`}
 		{#if i > 0}<span class="op">+</span>{/if}
 		<div
 			class={[
@@ -52,14 +50,28 @@
 				slot.name && trayLift.current?.dock === slot.name && 'hot'
 			]}
 			data-slot={slot.name}
-			lang={hasHangul(slot.value ?? '') ? 'ko' : undefined}
-			aria-label={slotAriaLabel(slot, reading)}
+			role={slot.name ? 'group' : undefined}
+			aria-labelledby={slot.name
+				? [nameId, slot.value ? valueId : undefined, reading ? readingId : undefined]
+						.filter(Boolean)
+						.join(' ')
+				: undefined}
 		>
 			{#if slot.name}
-				<span class="slot-name">{slot.name}</span>
+				<span class="slot-name" id={nameId}>{slot.name}</span>
 			{/if}
-			<span class="slot-value">{slot.value ?? ''}</span>
-			<span class="slot-reading" lang="en" aria-hidden="true">{#if reading}{reading}{/if}</span>
+			<span
+				class="slot-value"
+				id={valueId}
+				lang={hasHangul(slot.value ?? '') ? 'ko' : undefined}
+			>{slot.value ?? ''}</span>
+			{#if reading}
+				<span class="slot-reading" id={readingId} lang="en">{reading}</span>
+			{:else if slot.name && !slot.value}
+				<span class="slot-reading vh" id={readingId} lang="en">empty</span>
+			{:else}
+				<span class="slot-reading" aria-hidden="true"></span>
+			{/if}
 		</div>
 	{/each}
 	<span class="op">=</span>

@@ -171,8 +171,9 @@ button { font: inherit; color: inherit; }
 	font-size: 0.86em;
 	color: var(--ink-soft);
 }
-.rom::before { content: '['; }
-.rom::after { content: ']'; }
+/* Alt text empty so brackets stay visual-only in the accessibility tree. */
+.rom::before { content: '[' / ''; }
+.rom::after { content: ']' / ''; }
 
 .eyebrow {
 	font-size: 0.75rem;
