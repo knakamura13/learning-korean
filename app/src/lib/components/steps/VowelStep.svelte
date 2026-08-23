@@ -755,6 +755,7 @@
 			color: HighlightText;
 			border-color: Highlight;
 		}
+		.tick-mark { background: CanvasText; }
 		.dock.held {
 			background: transparent;
 			border-color: transparent;

@@ -252,7 +252,7 @@
 	nav {
 		--tab-r: 12px;
 		display: flex;
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 		align-self: stretch;
 		align-items: stretch;
 		gap: 0.35rem;

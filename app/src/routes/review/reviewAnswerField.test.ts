@@ -45,6 +45,11 @@ describe('review answer field', () => {
 		expect(src).toMatch(/input\?\.focus\(\{\s*preventScroll:\s*true\s*\}\)/);
 	});
 
+	it('focuses the first compose chip when advancing onto a block card', () => {
+		expect(src).toMatch(/firstWellControl\(blockAnswerEl\)\?\.focus\(\{\s*preventScroll:\s*true\s*\}\)/);
+		expect(src).toMatch(/bind:this=\{blockAnswerEl\}/);
+	});
+
 	it('stacks the answer field above Check on phones', () => {
 		expect(src).toMatch(/@media \(max-width: 36rem\)/);
 		expect(src).toMatch(/\.answer-controls \.in,\s*\.answer-controls \.btn \{ flex: 1 1 100%; \}/);

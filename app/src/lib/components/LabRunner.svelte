@@ -480,12 +480,6 @@
 		max-width: var(--measure);
 	}
 
-	@media (forced-colors: active) {
-		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
-		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
-		.fb[data-tone='wrong'] { background: Canvas; border-inline-start-color: ButtonText; }
-	}
-
 	.loading {
 		display: flex;
 		flex-direction: column;
@@ -570,6 +564,14 @@
 	}
 	.fb[data-tone='right'] .verdict { color: var(--good); }
 	.fb[data-tone='wrong'] .verdict { color: var(--bad); }
+
+	@media (forced-colors: active) {
+		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
+		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
+		.fb[data-tone='wrong'] { background: Canvas; border-inline-start-color: ButtonText; }
+		.fb[data-tone='right'] .verdict { color: CanvasText; }
+		.fb[data-tone='wrong'] .verdict { color: CanvasText; }
+	}
 
 	.foot {
 		margin-top: var(--s4);

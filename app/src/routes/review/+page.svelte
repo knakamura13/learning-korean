@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { motion } from '$lib/a11y/motion';
 	import { focusWhen, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { firstWellControl } from '$lib/a11y/firstWellControl';
 	import { progress } from '$lib/stores/progress.svelte';
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
@@ -34,6 +35,7 @@
 	let startedAt = 0;
 	let sittingNew = $state(false);
 	let input = $state<HTMLInputElement | undefined>();
+	let blockAnswerEl = $state<HTMLDivElement | undefined>();
 	let ready = $state(false);
 	let emptyHint = $state(false);
 	let blockTrial = $state<ComposeTrial | null>(null);
@@ -114,8 +116,9 @@
 		}
 		sittingNew = Boolean(current && !progress.state.cards[current.id]);
 		await tick();
-		if (!current || current.kind === 'block') {
-			/* do not focus the missing input */
+		if (!current) return;
+		if (current.kind === 'block') {
+			firstWellControl(blockAnswerEl)?.focus({ preventScroll: true });
 		} else {
 			input?.focus({ preventScroll: true });
 		}
@@ -370,7 +373,7 @@
 						{/if}
 					</form>
 				{:else if blockTrial}
-					<div class="block-answer">
+					<div class="block-answer" bind:this={blockAnswerEl}>
 						{#key index}
 							<ReviewCompose trial={blockTrial} onPick={pickCompose} disabled={answered} />
 						{/key}
@@ -603,25 +606,6 @@
 	.answer-controls .in.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	.answer-controls .in.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 
-	@media (forced-colors: active) {
-		.stat {
-			background: Canvas;
-			color: CanvasText;
-			border-color: ButtonBorder;
-		}
-		.stat.hot { border-color: Highlight; background: Canvas; }
-		.bar { background: ButtonBorder; }
-		.bar i { background: Highlight; }
-		.in {
-			background: Canvas;
-			color: CanvasText;
-			border-color: ButtonBorder;
-		}
-		.in.right { border-color: Highlight; background: Canvas; color: CanvasText; }
-		.in.wrong { border-color: ButtonText; background: Canvas; color: CanvasText; }
-		.ans em { color: CanvasText; }
-	}
-
 	.fb {
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
@@ -644,6 +628,30 @@
 	}
 	.fb[data-tone='right'] .v { color: var(--good); }
 	.fb[data-tone='wrong'] .v { color: var(--bad); }
+
+	@media (forced-colors: active) {
+		.stat {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.stat.hot { border-color: Highlight; background: Canvas; }
+		.bar { background: ButtonBorder; }
+		.bar i { background: Highlight; }
+		.in {
+			background: Canvas;
+			color: CanvasText;
+			border-color: ButtonBorder;
+		}
+		.in.right { border-color: Highlight; background: Canvas; color: CanvasText; }
+		.in.wrong { border-color: ButtonText; background: Canvas; color: CanvasText; }
+		.ans em { color: CanvasText; }
+		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
+		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
+		.fb[data-tone='right'] .v { color: CanvasText; }
+		.fb[data-tone='wrong'] { background: Canvas; border-inline-start-color: ButtonText; }
+		.fb[data-tone='wrong'] .v { color: CanvasText; }
+	}
 
 	.ans { display: block; font-family: var(--mono); font-size: 1.05rem; margin-bottom: var(--s1); }
 	.ans em { font-size: 0.78rem; color: var(--ink-soft); font-style: normal; }
