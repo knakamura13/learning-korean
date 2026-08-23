@@ -535,7 +535,8 @@
 	}
 	.work-skel .mouth-ph {
 		width: 100%;
-		aspect-ratio: 440 / 300;
+		min-height: 16rem;
+		aspect-ratio: 1;
 	}
 
 	.advance {

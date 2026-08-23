@@ -217,6 +217,12 @@ export function tickRound(round: SprintRound, now: number): SprintRound {
 	return { ...round, phase: 'done', trial: null };
 }
 
+/** Stop a running round immediately. Idle and done rounds are unchanged. */
+export function endRound(round: SprintRound): SprintRound {
+	if (round.phase !== 'running') return round;
+	return { ...round, phase: 'done', trial: null };
+}
+
 export function answerRoundFrom(
 	round: SprintRound,
 	optionIndex: number,

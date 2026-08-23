@@ -40,7 +40,9 @@ import settingsPage from '../routes/settings/+page.svelte?raw';
 import reference from '../routes/reference/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
 import errorPage from '../routes/+error.svelte?raw';
+import healthzPage from '../routes/healthz/+page.svelte?raw';
 import appHtml from '../app.html?raw';
+import vitePlugin from './theme/vitePlugin.ts?raw';
 import manifest from '../../static/manifest.webmanifest?raw';
 import { activeSystem } from './theme/active';
 import { LOOKS } from './theme/catalog';
@@ -227,7 +229,8 @@ describe('polish audit regressions', () => {
 		expect(well).toMatch(/class="[^"]*(?:work-skel|mouth-ph)/);
 		expect(well).toMatch(/aria-hidden="true"/);
 		expect(well).toMatch(/<MouthStep/);
-		expect(sittingCss).toMatch(/aspect-ratio:\s*440\s*\/\s*300/);
+		expect(sittingCss).toMatch(/\.work-skel \.mouth-ph\s*\{[^}]*aspect-ratio:\s*1/s);
+		expect(sittingCss).toMatch(/\.work-skel \.mouth-ph\s*\{[^}]*min-height:\s*16rem/s);
 	});
 
 	it('dims locked home chrome without opacity on live text', () => {
@@ -628,7 +631,7 @@ describe('polish audit regressions', () => {
 		expect(css).toMatch(
 			/min-width:\s*72rem[^}]*scroll-margin-block-start:\s*calc\(48px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/s
 		);
-		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100dvh/s);
+		expect(css).toMatch(/#sources\s*\{[^}]*min-height:\s*calc\(100lvh/s);
 	});
 
 	it('sizes reference source links to at least 44px', () => {
@@ -739,6 +742,7 @@ describe('polish audit regressions', () => {
 
 		expect(zoneBoard).toMatch(/aspect-ratio:\s*1/);
 		expect(zoneBoard).toMatch(/width:\s*min\(100%/);
+		expect(zoneBoard).toMatch(/max\(16rem/);
 		expect(zoneBoard).not.toMatch(/12rem/);
 		expect(zoneBoard).not.toMatch(/paper-sunk/);
 		expect(zoneBoard).toMatch(/paper-raised/);
@@ -901,8 +905,8 @@ describe('polish audit regressions', () => {
 		expect(home).toMatch(/class="tier skel-row"/);
 		expect(styleBlock(home)).toMatch(/\.flag\s*\{[^}]*min-height:\s*1\.6rem/s);
 		expect(styleBlock(home)).toMatch(/\.sec-row\s*\{[^}]*min-height:\s*44px/s);
-		expect(styleBlock(home)).toMatch(/\.pile-empty\s*\{[^}]*min-height:\s*16rem/s);
-		expect(styleBlock(home)).toMatch(/\.sprint \.pile-empty\s*\{[^}]*min-height:\s*unset/s);
+		expect(styleBlock(home)).toMatch(/\.pile-skel\s*\{[^}]*min-height:\s*16rem/s);
+		expect(styleBlock(home)).not.toMatch(/\.pile-empty\s*\{[^}]*min-height:\s*16rem/s);
 		expect(home).not.toMatch(/pile-empty loading-copy/);
 	});
 
@@ -1050,7 +1054,7 @@ describe('polish audit regressions', () => {
 		expect(boot).toMatch(/querySelector\('meta\[name="theme-color"\]\[data-resolved\]'\)/);
 	});
 
-	it('sizes eyebrow chrome at 0.75rem so small uppercase type clears APCA', () => {
+	it('sizes eyebrow chrome at 0.75rem for small uppercase type', () => {
 		expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).toMatch(/\.answer-label\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).toMatch(/\.tag\s*\{[^}]*font-size:\s*0\.75rem/s);
@@ -1271,5 +1275,71 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(vowelStep)).toMatch(
 			/@media \(forced-colors:\s*active\)[\s\S]*\.tick-mark\s*\{\s*background:\s*CanvasText/
 		);
+	});
+});
+
+describe('issue #145 polish leftovers', () => {
+	it('stamps immutable Cache-Control on self-hosted fonts in the Vite plugin', () => {
+		expect(vitePlugin).toMatch(/isImmutableStaticAsset/);
+		expect(vitePlugin).toMatch(/IMMUTABLE_CACHE_CONTROL/);
+		expect(vitePlugin).toMatch(/configureServer/);
+		expect(vitePlugin).toMatch(/configurePreviewServer/);
+	});
+
+	it('gates Settings Backup until /api/me settles, without a min-height reservation', () => {
+		expect(settingsPage).toMatch(/session\.status !== 'unknown'/);
+		expect(settingsPage).toMatch(/id="backup"/);
+		expect(styleBlock(settingsPage)).not.toMatch(/#backup\s*\{[^}]*min-height/s);
+	});
+
+	it('swaps the unscoped PWA manifest for dark appearance in theme-boot', () => {
+		expect(layout).not.toMatch(/rel="manifest"/);
+		writeManifests();
+		const boot = readFileSync(new URL('../../static/theme-boot.js', import.meta.url), 'utf8');
+		expect(boot).toMatch(/manifest-dark\.webmanifest/);
+		expect(boot).toMatch(/link\[rel="manifest"\]:not\(\[media\]\)/);
+	});
+
+	it('surfaces session expiry as a designed notice and keeps local progress', () => {
+		const sessionSrc = readFileSync(new URL('./stores/session.svelte.ts', import.meta.url), 'utf8');
+		expect(sessionSrc).toMatch(/Signed out\. Progress in this browser is kept\./);
+		expect(layout).toMatch(/session\.notice/);
+		expect(layout).toMatch(/session\.clearNotice/);
+	});
+
+	it('names oversized backup restore as too-large, not a generic invalid file', () => {
+		expect(progressBackup).toMatch(/importedStatus\(false, 'too-large'\)/);
+	});
+
+	it('gives Home an all-labs-complete state and Drill an in-page end', () => {
+		expect(home).toMatch(/courseComplete/);
+		expect(home).toMatch(/Labs are done\. Review and Drill keep the inventory warm\./);
+		expect(drill).toMatch(/endRound/);
+		expect(drill).toMatch(/>End round</);
+	});
+
+	it('lets the study-pace range guard fire instead of native validation UI', () => {
+		expect(accountSection).toMatch(/<form class="prefs" novalidate/);
+		expect(accountSection).toMatch(/New cards 0–50 and reviews 1–100\./);
+		expect(accountSection).toMatch(/deleteStatus\.tone/);
+	});
+
+	it('separates storage-warning actions, noindexes /healthz, and matches OG titles to the page', () => {
+		expect(layout).toMatch(/class="warn-sep"/);
+		expect(layout).toMatch(/pageShareTitle/);
+		expect(healthzPage).toMatch(/name="robots" content="noindex"/);
+		const robots = readFileSync(new URL('../../static/robots.txt', import.meta.url), 'utf8');
+		expect(robots).toMatch(/Disallow:\s*\/healthz/);
+		expect(existsSync(new URL('./assets/favicon.svg', import.meta.url))).toBe(false);
+	});
+
+	it('sizes rail popovers from --popover-max and clamps stamps’ touch-action to live controls', () => {
+		expect(appCss).toMatch(/--popover-max:\s*min\(/);
+		expect(appCss).toMatch(/100dvw/);
+		expect(styleBlock(labPreview)).toMatch(/width:\s*var\(--popover-max\)/);
+		expect(styleBlock(lockedLabPopover)).toMatch(/width:\s*var\(--popover-max\)/);
+		expect(styleBlock(referencePreview)).toMatch(/width:\s*var\(--popover-max\)/);
+		expect(styleBlock(vowelStep)).toMatch(/\.stamp:not\(:disabled\)\s*\{[^}]*touch-action:\s*none/s);
+		expect(styleBlock(vowelStep)).not.toMatch(/\.stamp\s*\{[^}]*touch-action:\s*none/s);
 	});
 });

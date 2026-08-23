@@ -116,6 +116,12 @@ export function nextLabId(labs: CourseLab[], view: CourseNavView): string | null
 	return null;
 }
 
+/** True when every lab is finished and none is mid-sitting. */
+export function courseComplete(labs: CourseLab[], view: CourseNavView): boolean {
+	if (!view.ready || labs.length === 0) return false;
+	return labs.every((lab) => labCardState(lab, labs, view).done);
+}
+
 export function labCardState(lab: CourseLab, labs: CourseLab[], view: CourseNavView): LabCardState {
 	const resume = sessionResume(lab, view);
 	const done = isDone(lab, view);

@@ -57,6 +57,15 @@ describe('importedStatus', () => {
 		const status = importedStatus(false);
 		expect(status.tone).toBe('wrong');
 		expect(status.message).toMatch(/nothing was changed/);
+		expect(status.message).toMatch(/doesn't look like/);
+	});
+
+	it('names the actual reject reason when the file is too large', () => {
+		const status = importedStatus(false, 'too-large');
+		expect(status.tone).toBe('wrong');
+		expect(status.message).toMatch(/too large/);
+		expect(status.message).toMatch(/nothing was changed/);
+		expect(status.message).not.toMatch(/doesn't look like/);
 	});
 });
 

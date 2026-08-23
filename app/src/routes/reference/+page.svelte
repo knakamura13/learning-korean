@@ -443,7 +443,7 @@
 	/* Last block is short; without leftover viewport, #dictionary-order cannot
 	   settle under the sticky bar (other jumps already land ~85px). */
 	#sources {
-		min-height: calc(100dvh - (var(--s7) + 2rem));
+		min-height: calc(100lvh - (var(--s7) + 2rem));
 	}
 
 	.sec {

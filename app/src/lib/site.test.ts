@@ -3,6 +3,7 @@ import {
 	absoluteAssetUrl,
 	absolutePageUrl,
 	normalizeSiteUrl,
+	pageShareTitle,
 	OG_IMAGE_ALT,
 	SITE_DESCRIPTION
 } from './site';
@@ -54,5 +55,19 @@ describe('sharing copy', () => {
 		expect(SITE_DESCRIPTION).toMatch(/labs and spaced repetition/i);
 		expect(OG_IMAGE_ALT).toMatch(/한/);
 		expect(OG_IMAGE_ALT).toMatch(/Korean — labs and review/);
+	});
+});
+
+describe('pageShareTitle', () => {
+	it('matches the per-page document title, not a site-wide default', () => {
+		expect(pageShareTitle('/')).toBe('Korean — labs and review');
+		expect(pageShareTitle('/review')).toBe('Daily review');
+		expect(pageShareTitle('/drill')).toBe('Drill');
+		expect(pageShareTitle('/settings')).toBe('Settings');
+		expect(pageShareTitle('/reference')).toBe('Reference — every letter and rule');
+		expect(pageShareTitle('/lab/0001', { number: 1, title: 'Find the Letters in Your Mouth' })).toBe(
+			'Lab 1 — Find the Letters in Your Mouth'
+		);
+		expect(pageShareTitle('/lab/0001')).toBe('Lab');
 	});
 });

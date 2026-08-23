@@ -58,7 +58,7 @@ export class HoverPreview {
 	}
 
 	placement = $derived(
-		this.anchor ? anchorPopover(this.anchor, this.panelSize, this.viewportSize) : { left: 8, top: 8 }
+		this.anchor ? anchorPopover(this.anchor, this.panelSize, this.viewportSize) : { left: 12, top: 12 }
 	);
 
 	panelBox = $derived(

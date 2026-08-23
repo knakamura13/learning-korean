@@ -142,7 +142,7 @@ export const watercolor: DesignSystem = {
 		rule: '#c4b8a5',
 		ruleStrong: '#a67c52',
 		accent: '#2d3748',
-		accentSoft: '#d5d8de',
+		accentSoft: '#dce0e6',
 		rose: '#6b3532',
 		roseSoft: '#f0d6d4'
 	},

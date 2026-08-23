@@ -5,6 +5,7 @@ import {
 	nextLabId,
 	reviewPileView,
 	showPrerequisiteGate,
+	courseComplete,
 	courseNavView,
 	type CourseLab,
 	type CourseNavView
@@ -169,6 +170,16 @@ describe('followingLab', () => {
 		expect(followingLab(labs, '0001')?.id).toBe('0002');
 		expect(followingLab(labs, '0003')).toBeNull();
 		expect(followingLab(labs, 'missing')).toBeNull();
+	});
+});
+
+describe('courseComplete', () => {
+	it('is false until every lab is done after hydration', () => {
+		expect(courseComplete(labs, view({ ready: false, unlocked: ['lab01', 'lab02', 'lab03'] }))).toBe(
+			false
+		);
+		expect(courseComplete(labs, view({ unlocked: ['lab01', 'lab02'] }))).toBe(false);
+		expect(courseComplete(labs, view({ unlocked: ['lab01', 'lab02', 'lab03'] }))).toBe(true);
 	});
 });
 

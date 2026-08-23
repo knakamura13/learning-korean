@@ -18,6 +18,11 @@ import { labSession } from './labSession.svelte';
 
 export type SessionStatus = 'unknown' | 'guest' | 'signed-in';
 
+export interface SessionNotice {
+	tone: 'wrong';
+	message: string;
+}
+
 export interface SessionUserInfo {
 	email: string;
 	name: string | null;
@@ -27,6 +32,7 @@ export function createSession(api: SyncApi = createSyncApi()) {
 	let status = $state<SessionStatus>('unknown');
 	let user = $state<SessionUserInfo | null>(null);
 	let accountsAvailable = $state(false);
+	let notice = $state<SessionNotice | null>(null);
 	let engine: SyncEngine | null = null;
 	let detach: (() => void) | null = null;
 
@@ -46,9 +52,10 @@ export function createSession(api: SyncApi = createSyncApi()) {
 		labSession.applyRemote(envelope.sessions);
 	}
 
-	function becomeGuest() {
+	function becomeGuest(nextNotice: SessionNotice | null = null) {
 		status = 'guest';
 		user = null;
+		notice = nextNotice;
 		engine?.stop();
 		engine = null;
 		detach?.();
@@ -60,7 +67,11 @@ export function createSession(api: SyncApi = createSyncApi()) {
 			api,
 			buildDoc,
 			applyRemote,
-			onAuthLost: becomeGuest
+			onAuthLost: () =>
+				becomeGuest({
+					tone: 'wrong',
+					message: 'Signed out. Progress in this browser is kept.'
+				})
 		});
 		void engine.start();
 
@@ -90,6 +101,13 @@ export function createSession(api: SyncApi = createSyncApi()) {
 		get accountsAvailable() {
 			return accountsAvailable;
 		},
+		get notice() {
+			return notice;
+		},
+
+		clearNotice() {
+			notice = null;
+		},
 
 		/** Called once from the layout. Safe to call again after sign-out. */
 		async load() {
@@ -106,6 +124,7 @@ export function createSession(api: SyncApi = createSyncApi()) {
 			}
 			user = result.data.user;
 			status = 'signed-in';
+			notice = null;
 			if (result.data.prefs) progress.setStudyPrefs(result.data.prefs);
 			startEngine();
 		},

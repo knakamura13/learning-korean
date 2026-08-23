@@ -18,7 +18,7 @@ const light: Palette = {
 	accent: '#902d26',
 	accentInk: '#ffffff',
 	accentSoft: '#f9ece9',
-	blue: '#2b5b89',
+	blue: '#24507a',
 	blueSoft: '#eaf1f7',
 	good: '#28593a',
 	goodSoft: '#e8f1eb',

@@ -33,6 +33,7 @@ ENV HOST_HEADER=x-forwarded-host
 
 COPY --from=build /app/build ./build
 COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/.npmrc ./
+COPY --from=build /app/scripts ./scripts
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable && corepack prepare pnpm@10.33.3 --activate \
@@ -42,4 +43,4 @@ USER node
 
 EXPOSE 3000
 
-CMD ["node", "build/index.js"]
+CMD ["node", "scripts/start.mjs"]

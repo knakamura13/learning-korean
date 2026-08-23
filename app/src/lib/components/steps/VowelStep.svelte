@@ -510,7 +510,7 @@
 	.zone {
 		position: relative;
 		box-sizing: border-box;
-		width: min(100%, calc(100dvh - 14rem));
+		width: min(100%, max(16rem, calc(100dvh - 14rem)));
 		max-width: 100%;
 		aspect-ratio: 1;
 		margin: 0 auto var(--s5);
@@ -688,8 +688,10 @@
 		gap: 0.08rem;
 		transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
 			transform var(--fast) var(--ease);
-		touch-action: none;
 		user-select: none;
+	}
+	.stamp:not(:disabled) {
+		touch-action: none;
 	}
 	.stamp:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
 	.stamp:active:not(:disabled) { transform: translateY(0); }

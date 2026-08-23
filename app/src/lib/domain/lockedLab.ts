@@ -26,28 +26,53 @@ export interface PopoverPlacement {
 	top: number;
 }
 
-export const CLICK_POPOVER_PAD_PX = 8;
+export const CLICK_POPOVER_PAD_PX = 12;
+
+export interface EdgePad {
+	top: number;
+	right: number;
+	bottom: number;
+	left: number;
+}
+
+export function popoverPadWithSafeArea(
+	insets: Partial<EdgePad> = {},
+	base = CLICK_POPOVER_PAD_PX
+): EdgePad {
+	return {
+		top: base + (insets.top ?? 0),
+		right: base + (insets.right ?? 0),
+		bottom: base + (insets.bottom ?? 0),
+		left: base + (insets.left ?? 0)
+	};
+}
+
+function resolvePad(pad: number | EdgePad): EdgePad {
+	if (typeof pad === 'number') return { top: pad, right: pad, bottom: pad, left: pad };
+	return pad;
+}
 
 /** Place the panel at the click, flipping toward the start/up if it would overflow. */
 export function placeClickPopover(
 	point: ClickPoint,
 	panel: PanelBox,
 	viewport: ViewportBox,
-	pad = CLICK_POPOVER_PAD_PX
+	pad: number | EdgePad = CLICK_POPOVER_PAD_PX
 ): PopoverPlacement {
+	const edge = resolvePad(pad);
 	let left = point.x;
 	let top = point.y;
 
-	if (left + panel.w > viewport.w - pad) left = point.x - panel.w;
-	if (left < pad) left = pad;
-	if (left + panel.w > viewport.w - pad) {
-		left = Math.max(pad, viewport.w - pad - panel.w);
+	if (left + panel.w > viewport.w - edge.right) left = point.x - panel.w;
+	if (left < edge.left) left = edge.left;
+	if (left + panel.w > viewport.w - edge.right) {
+		left = Math.max(edge.left, viewport.w - edge.right - panel.w);
 	}
 
-	if (top + panel.h > viewport.h - pad) top = point.y - panel.h;
-	if (top < pad) top = pad;
-	if (top + panel.h > viewport.h - pad) {
-		top = Math.max(pad, viewport.h - pad - panel.h);
+	if (top + panel.h > viewport.h - edge.bottom) top = point.y - panel.h;
+	if (top < edge.top) top = edge.top;
+	if (top + panel.h > viewport.h - edge.bottom) {
+		top = Math.max(edge.top, viewport.h - edge.bottom - panel.h);
 	}
 
 	return { left, top };

@@ -3,13 +3,14 @@
 	import { resolve } from '$app/paths';
 	import { LABS } from '$lib/content';
 	import {
+		courseComplete,
 		courseNavView,
 		labCardState,
 		requiredLab,
 		reviewPileView,
 		toCourseLab
 	} from '$lib/domain/courseNav';
-	import { lockedLabPopoverCopy, placeClickPopover } from '$lib/domain/lockedLab';
+	import { lockedLabPopoverCopy, placeClickPopover, popoverPadWithSafeArea } from '$lib/domain/lockedLab';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
 	import { TIERS } from '$lib/domain/deck';
 	import { DEFAULT_VOCAB_NEW_PER_DAY } from '$lib/domain/srs';
@@ -28,12 +29,21 @@
 	let lockedOpen = $state<{ labId: string; x: number; y: number } | null>(null);
 	let panelSize = $state({ w: 320, h: 220 });
 	let viewport = $state({ w: 1200, h: 800 });
+	let safePad = $state(popoverPadWithSafeArea());
 
 	onMount(() => {
 		progress.tick();
 		ready = true;
 		const sync = () => {
 			viewport = { w: window.innerWidth, h: window.innerHeight };
+			const cs = getComputedStyle(document.documentElement);
+			const px = (name: string) => parseFloat(cs.getPropertyValue(name)) || 0;
+			safePad = popoverPadWithSafeArea({
+				top: px('--safe-top'),
+				right: px('--safe-right'),
+				bottom: px('--safe-bottom'),
+				left: px('--safe-left')
+			});
 		};
 		sync();
 		window.addEventListener('resize', sync);
@@ -72,6 +82,7 @@
 		)
 	);
 	const load = $derived(reviewLoadCopy(pile, progress.studyPrefs.reviewsPerSitting));
+	const labsDone = $derived(courseComplete(course, navView));
 
 	function pct(part: number, whole: number) {
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
@@ -96,7 +107,7 @@
 			: null
 	);
 	const lockedPlacement = $derived(
-		lockedOpen ? placeClickPopover(lockedOpen, panelSize, viewport) : null
+		lockedOpen ? placeClickPopover(lockedOpen, panelSize, viewport, safePad) : null
 	);
 
 	function openLocked(e: MouseEvent, labId: string) {
@@ -161,6 +172,9 @@
 
 	<section aria-labelledby="sec-labs-heading">
 		<h2 id="sec-labs-heading" class="sec">Labs</h2>
+		{#if labsDone}
+			<p class="course-done">Labs are done. Review and Drill keep the inventory warm.</p>
+		{/if}
 		<div class="labs">
 			{#each LABS as lab (lab.id)}
 				{@const item = toCourseLab(lab)}
@@ -437,6 +451,14 @@
 		margin: 0 0 var(--s3);
 	}
 
+	.course-done {
+		margin: 0 0 var(--s4);
+		max-width: var(--measure);
+		font-size: 0.92rem;
+		line-height: 1.55;
+		color: var(--ink-soft);
+	}
+
 	.sec-row {
 		display: flex;
 		align-items: center;
@@ -599,10 +621,11 @@
 		line-height: 1.55;
 		color: var(--ink-soft);
 		max-width: 32rem;
+	}
+	.pile-skel {
 		min-height: 16rem;
 	}
 	.sprint .pile-empty {
-		min-height: unset;
 		margin-block-end: var(--s3);
 	}
 	.pile-skel .line-ph {
