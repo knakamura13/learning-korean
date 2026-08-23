@@ -46,10 +46,13 @@
 			class:open={opened.has(i)}
 			onclick={() => reveal(i)}
 			aria-expanded={opened.has(i)}
-			aria-label="Block {i + 1}: {b.block}{opened.has(i) ? `, reading: ${b.reading}` : ', click to reveal reading'}"
 		>
+			<span class="vh">Block {i + 1}: </span>
 			<span class="ch" lang="ko">{b.block}</span>
 			<span class="rd">{opened.has(i) ? b.reading : ''}</span>
+			<span class="vh">
+				{opened.has(i) ? `, reading: ${b.reading}` : ', click to reveal reading'}
+			</span>
 		</button>
 	{/each}
 </div>

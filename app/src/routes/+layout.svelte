@@ -32,6 +32,9 @@
 	const sitting = $derived(progress.stats.sitting);
 	const load = $derived(reviewLoadCopy(progress.stats, progress.studyPrefs.reviewsPerSitting));
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+	const healthz = $derived(
+		page.url.pathname === '/healthz' || page.url.pathname === '/healthz/'
+	);
 
 	onMount(() => {
 		applyLook(readLookId(), readThemePref());
@@ -86,9 +89,10 @@
 <a class="skip" href="#main" onclick={skipToMain}>Skip to content</a>
 
 <div class="frame">
+{#if !healthz}
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
-		<a class="brand" href={resolve('/')} aria-label="Korean 한">
+		<a class="brand" href={resolve('/')}>
 			<span class="name">Korean</span>
 			<span class="mark" lang="ko">한</span>
 		</a>
@@ -116,9 +120,10 @@
 		<SettingsLink />
 	</div>
 </header>
+{/if}
 
 <main id="main" onblur={clearSkipLanding}>
-	{#if storageReady && (progress.corrupt || labSession.corrupt)}
+	{#if !healthz && storageReady && (progress.corrupt || labSession.corrupt)}
 		<div class="storage-warn">
 			<div class="warn card">
 				<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
@@ -127,7 +132,7 @@
 				<a href="{resolve('/settings')}#reset">Reset progress</a>
 			</div>
 		</div>
-	{:else if storageReady && (!progress.durable || !labSession.durable)}
+	{:else if !healthz && storageReady && (!progress.durable || !labSession.durable)}
 		<div class="storage-warn">
 			<div class="warn card">
 				<strong>Progress will not be saved.</strong> This browser is blocking storage on this
@@ -140,6 +145,12 @@
 	{/if}
 	{@render children()}
 </main>
+
+{#if !healthz}
+<footer class="site-foot">
+	<p>Interactive labs for reading Korean.</p>
+</footer>
+{/if}
 </div>
 
 <style>
@@ -163,6 +174,20 @@
 	main {
 		flex: 1 1 auto;
 		position: relative;
+	}
+
+	.site-foot {
+		padding: var(--s4) max(var(--s4), env(safe-area-inset-left))
+			max(var(--s5), env(safe-area-inset-bottom)) max(var(--s4), env(safe-area-inset-right));
+		border-top: 1px solid var(--rule);
+		color: var(--ink-faint);
+		font-size: 0.78rem;
+		text-align: center;
+	}
+	.site-foot p {
+		margin: 0;
+		max-width: var(--shell);
+		margin-inline: auto;
 	}
 
 	.storage-warn {

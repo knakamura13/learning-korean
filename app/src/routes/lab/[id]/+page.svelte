@@ -38,7 +38,7 @@
 	<div class="shell sitting">
 	<LabSwitcher currentId={lab.id} />
 	{#if gated && prior}
-		<aside class="gate card" role="status">
+		<aside class="gate card">
 			<strong>Lab {String(prior.number).padStart(2, '0')} comes first.</strong>
 			This lab assumes you have finished
 			<a href={resolve('/lab/[id]', { id: prior.id })}>{prior.title}</a>.

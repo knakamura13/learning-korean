@@ -21,10 +21,19 @@
 	let fileInput = $state<HTMLInputElement | undefined>();
 	let pending = $state<File | null>(null);
 	let status = $state<BackupStatus | null>(null);
+	let statusLive = $state('');
 	let busy = $state(false);
+	let liveEl = $state<HTMLElement | undefined>();
+
+	function publishStatus(next: BackupStatus) {
+		status = next;
+		statusLive = next.message;
+		queueMicrotask(() => liveEl?.focus());
+	}
 
 	function download() {
 		status = null;
+		statusLive = '';
 		const filename = backupFilename(now());
 		const blob = new Blob([exportJson()], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
@@ -33,11 +42,12 @@
 		a.download = filename;
 		a.click();
 		URL.revokeObjectURL(url);
-		status = exportedStatus(filename);
+		publishStatus(exportedStatus(filename));
 	}
 
 	function chooseFile() {
 		status = null;
+		statusLive = '';
 		fileInput?.click();
 	}
 
@@ -45,6 +55,7 @@
 		const input = e.currentTarget as HTMLInputElement;
 		pending = input.files?.[0] ?? null;
 		status = null;
+		statusLive = '';
 	}
 
 	function readText(file: File): Promise<string> {
@@ -60,7 +71,7 @@
 		const file = pending;
 		if (!file) return;
 		if (file.size > MAX_BACKUP_BYTES) {
-			status = importedStatus(false);
+			publishStatus(importedStatus(false));
 			pending = null;
 			if (fileInput) fileInput.value = '';
 			return;
@@ -68,9 +79,9 @@
 		busy = true;
 		try {
 			const text = await readText(file);
-			status = importedStatus(importJson(text));
+			publishStatus(importedStatus(importJson(text)));
 		} catch {
-			status = importedStatus(false);
+			publishStatus(importedStatus(false));
 		} finally {
 			busy = false;
 			pending = null;
@@ -81,6 +92,7 @@
 	function cancelRestore() {
 		pending = null;
 		status = null;
+		statusLive = '';
 		if (fileInput) fileInput.value = '';
 	}
 </script>
@@ -127,8 +139,16 @@
 		</dialog>
 	{/if}
 
+	<p
+		class="vh"
+		data-backup-live
+		aria-live="polite"
+		aria-atomic="true"
+		tabindex="-1"
+		bind:this={liveEl}
+	>{statusLive}</p>
 	{#if status}
-		<p class="status" data-tone={status.tone} role="status" aria-live="polite">{status.message}</p>
+		<p class="status" data-tone={status.tone}>{status.message}</p>
 	{/if}
 </div>
 
