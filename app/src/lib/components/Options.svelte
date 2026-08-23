@@ -79,13 +79,14 @@
 
 <div class="opts" class:stack role="group" aria-label="answer choices">
 	{#each choices as choice, i (choice.text)}
+		{@const locked = solved || disabled || misses.includes(i)}
 		<button
 			class="opt"
 			class:hangul
 			class:right={solved && choice.correct}
 			class:wrong={misses.includes(i)}
 			class:dim={solved && !choice.correct && !misses.includes(i)}
-			disabled={solved || disabled || misses.includes(i)}
+			aria-disabled={locked ? 'true' : undefined}
 			onclick={() => pick(i)}
 			onkeydown={onChoiceKeydown}
 			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {choice.text}"
@@ -149,12 +150,12 @@
 	}
 	.key span { transform: translateY(1.5px); }
 
-	.opt:hover:not(:disabled) {
+	.opt:hover:not([aria-disabled='true']) {
 		border-color: var(--accent);
 		transform: translateY(-1px);
 		box-shadow: var(--shadow-1);
 	}
-	.opt:active:not(:disabled) {
+	.opt:active:not([aria-disabled='true']) {
 		transform: translateY(0);
 		box-shadow: none;
 	}
@@ -163,7 +164,7 @@
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 	}
-	.opt:disabled { cursor: default; }
+	.opt[aria-disabled='true'] { cursor: default; }
 
 	.opt.right { border-color: var(--good); background: var(--good-soft); color: var(--good); }
 	/* A correct pick settles — one small press-and-release, no celebration.

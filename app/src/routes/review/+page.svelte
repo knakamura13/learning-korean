@@ -186,6 +186,22 @@
 		const days = Math.round(hours / 24);
 		return `in ${days} day${days === 1 ? '' : 's'}`;
 	});
+
+	const verdictLive = $derived.by(() => {
+		if (!verdict || !card) return '';
+		const parts: string[] = [];
+		parts.push(verdict.ok ? `Correct · ${verdict.speed}` : 'Missed');
+		if (blockCard) {
+			parts.push(`${card.front} · ${card.answers[0]}`);
+		} else {
+			const also =
+				card.answers.length > 1 ? ` also: ${card.answers.slice(1).join(', ')}` : '';
+			parts.push(`${card.answers[0]}${also}`);
+		}
+		if (card.note) parts.push(card.note);
+		parts.push(`${verdict.ok ? '' : 'reset — '}${verdict.when}`);
+		return parts.join('. ').replace(/\s+/g, ' ').trim();
+	});
 </script>
 
 <svelte:head><title>Daily review</title></svelte:head>
@@ -275,6 +291,7 @@
 			{/if}
 		</div>
 	{:else if body === 'sitting'}
+		<p class="vh" data-verdict-live aria-live="polite" aria-atomic="true">{verdictLive}</p>
 		{#key index}
 			<div class="card review" in:fly={motion({ y: 10, duration: 220 })} aria-labelledby="review-card-tag">
 				<div
@@ -369,8 +386,6 @@
 						class="fb"
 						data-tone={verdict.ok ? 'right' : 'wrong'}
 						in:fade={motion({ duration: 150 })}
-						aria-live="polite"
-						aria-atomic="true"
 					>
 						<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
 						<span class="ans">

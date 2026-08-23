@@ -41,9 +41,10 @@
 
 <div class="opts" role="group" aria-label="answer choices">
 	{#each options as text, i (text)}
+		{@const inert = locked || disabled}
 		<button
 			class="opt"
-			disabled={locked || disabled}
+			aria-disabled={inert ? 'true' : undefined}
 			onclick={() => pick(i)}
 			onkeydown={onChoiceKeydown}
 			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {text}"
@@ -106,10 +107,10 @@
 		transform: translateY(1.5px);
 	}
 
-	.opt:hover:not(:disabled) {
+	.opt:hover:not([aria-disabled='true']) {
 		border-color: var(--accent);
 	}
-	.opt:active:not(:disabled) {
+	.opt:active:not([aria-disabled='true']) {
 		transform: translateY(1px);
 		border-color: var(--accent);
 	}
@@ -118,7 +119,7 @@
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 	}
-	.opt:disabled {
+	.opt[aria-disabled='true'] {
 		cursor: default;
 	}
 

@@ -24,6 +24,13 @@ describe('drill page source contracts', () => {
 		expect(src).toMatch(/role="timer"/);
 	});
 
+	it('announces verdicts, prompt advances, and round end from one polite region; timer stays off', () => {
+		expect(src).toMatch(/data-drill-live[^>]*aria-live="polite"/);
+		expect(src).toMatch(/data-drill-live[^>]*aria-atomic="true"/);
+		expect(src).toMatch(/role="timer"[^>]*aria-live="off"/);
+		expect(src).not.toMatch(/role="timer"[^>]*aria-live="polite"/);
+	});
+
 	it('has idle and done copy', () => {
 		expect(src).toMatch(/Start 60-second round/);
 		expect(src).toMatch(/Another round/);

@@ -152,6 +152,18 @@ describe('polish audit regressions', () => {
 		expect(promptOpen).not.toMatch(/data-prompt-live/);
 	});
 
+	it('announces lab verdicts from a persistent live region outside the card key', () => {
+		expect(sitting).toMatch(/data-verdict-live/);
+		expect(sitting).toMatch(/data-verdict-live[^>]*aria-live="polite"/);
+		expect(sitting).toMatch(/data-verdict-live[^>]*aria-atomic="true"/);
+		const after = sitting.match(/\{#snippet after\(\)\}([\s\S]*?)\{\/snippet\}/)?.[1] ?? '';
+		const keyedFb = after.match(/\{#key index\}[\s\S]*?class="fb"[\s\S]*?\{\/key\}/)?.[0] ?? '';
+		expect(keyedFb).not.toMatch(/aria-live/);
+		expect(after).toMatch(/data-verdict-live/);
+		const verdictBeforeKey = after.split(/\{#key index\}/)[0] ?? '';
+		expect(verdictBeforeKey).toMatch(/data-verdict-live/);
+	});
+
 	it('gives the settings control pressed-state feedback', () => {
 		expect(settingsLink).toMatch(/\.settings:active\s*\{/);
 	});

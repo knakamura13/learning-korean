@@ -40,11 +40,27 @@ describe('Options', () => {
 
 		expect(onPick).toHaveBeenCalledWith(false, expect.any(Number));
 		expect(optionButton(el, 'bookcase').classList.contains('wrong')).toBe(true);
-		expect(optionButton(el, 'bookcase').disabled).toBe(true);
+		expect(optionButton(el, 'bookcase').disabled).toBe(false);
+		expect(optionButton(el, 'bookcase').getAttribute('aria-disabled')).toBe('true');
 		expect(optionButton(el, 'baseball').classList.contains('right')).toBe(false);
 		expect(optionButton(el, 'baseball').disabled).toBe(false);
+		expect(optionButton(el, 'baseball').getAttribute('aria-disabled')).toBeNull();
 		expect(optionButton(el, 'birthday').disabled).toBe(false);
 		expect(optionButton(el, 'backpack').classList.contains('dim')).toBe(false);
+	});
+
+	it('keeps keyboard focus on a missed option instead of dumping it to body', () => {
+		const onPick = vi.fn();
+		const el = render(Options, { ...props, onPick });
+		const missed = optionButton(el, 'bookcase');
+		missed.focus();
+		expect(document.activeElement).toBe(missed);
+
+		missed.click();
+		flushSync();
+
+		expect(document.activeElement).toBe(missed);
+		expect(document.activeElement).not.toBe(document.body);
 	});
 
 	it('lets the learner pick again after a miss, then locks on a correct pick', () => {
@@ -60,7 +76,8 @@ describe('Options', () => {
 		expect(optionButton(el, 'baseball').classList.contains('right')).toBe(true);
 		expect(optionButton(el, 'bookcase').classList.contains('wrong')).toBe(true);
 		expect(optionButton(el, 'birthday').classList.contains('dim')).toBe(true);
-		expect(optionButton(el, 'baseball').disabled).toBe(true);
-		expect(optionButton(el, 'birthday').disabled).toBe(true);
+		expect(optionButton(el, 'baseball').disabled).toBe(false);
+		expect(optionButton(el, 'baseball').getAttribute('aria-disabled')).toBe('true');
+		expect(optionButton(el, 'birthday').getAttribute('aria-disabled')).toBe('true');
 	});
 });
