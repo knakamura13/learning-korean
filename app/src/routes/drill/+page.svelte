@@ -245,6 +245,7 @@
 
 	.lanes {
 		display: flex;
+		flex-wrap: wrap;
 		gap: var(--s2);
 		margin: 0 0 var(--s3);
 	}

@@ -243,6 +243,8 @@ describe('polish audit regressions', () => {
 		expect(reference).toMatch(/pinnedSection/);
 		expect(reference).toMatch(/shouldReleaseJumpPin/);
 		expect(reference).toMatch(/releaseJumpPin/);
+		expect(reference).toMatch(/heading\?\.focus\(\{\s*preventScroll:\s*true\s*\}\)/);
+		expect(reference).toMatch(/class="sec" tabindex="-1"/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/flex-wrap:\s*wrap/);
 		expect(styleBlock(referenceIndexRail)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(referenceIndexRail)).toMatch(/\.ref-index\s*\{[^}]*position:\s*sticky/s);
@@ -766,7 +768,7 @@ describe('polish audit regressions', () => {
 		);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*padding-block-start:\s*0\.6rem/s);
-		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*nowrap/s);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*wrap/s);
 		expect(layout).toMatch(/class="review-w"/);
 		expect(layout).toMatch(/class="badge" aria-hidden="true"/);
 		expect(layout).toMatch(/aria-label=\{item\.href === '\/review' && sitting > 0\s*\?\s*load\.navAria/);
@@ -1196,5 +1198,34 @@ describe('polish audit regressions', () => {
 		expect(review).not.toMatch(/Saved progress could not be read\./);
 		expect(review).not.toMatch(/Progress will not be saved\./);
 		expect(appCss).toMatch(/\.warn\s*\{[^}]*border:\s*1px solid var\(--bad\)/s);
+	});
+
+	it('keeps issue #143 a11y follow-ups: wrap, forced-colors specificity, focus return', () => {
+		expect(styleBlock(drill)).toMatch(/\.lanes\s*\{[^}]*flex-wrap:\s*wrap/s);
+		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*wrap/s);
+		expect(styleBlock(reference)).toMatch(/\.lkind,\s*\.scname\s*\{[^}]*flex:\s*0 1 9rem/s);
+		expect(styleBlock(reference)).toMatch(/\.lkind,\s*\.scname\s*\{[^}]*min-width:\s*0/s);
+
+		const mouthForced = styleBlock(mouthStep).match(
+			/@media \(forced-colors:\s*active\)\s*\{[\s\S]*?(?=@media|$)/
+		)?.[0];
+		expect(mouthForced).toMatch(/\.zone\.hot/);
+		expect(mouthForced).toMatch(/\.zone\.right/);
+		expect(mouthForced).toMatch(/\.zone\.prior/);
+		expect(mouthForced).toMatch(/fill-opacity:\s*1/);
+
+		const labCss = styleBlock(labRunner);
+		const fbForcedIdx = labCss.search(
+			/@media \(forced-colors:\s*active\)\s*\{[\s\S]*?\.fb\[data-tone='right'\]\s*\{\s*background:\s*Canvas/
+		);
+		const fbToneIdx = labCss.search(/\.fb\[data-tone='right'\]\s*\{[^}]*var\(--good\)/);
+		expect(fbForcedIdx).toBeGreaterThan(fbToneIdx);
+
+		expect(styleBlock(review)).toMatch(
+			/@media \(forced-colors:\s*active\)[\s\S]*\.fb\[data-tone='right'\]/
+		);
+		expect(styleBlock(vowelStep)).toMatch(
+			/@media \(forced-colors:\s*active\)[\s\S]*\.tick-mark\s*\{\s*background:\s*CanvasText/
+		);
 	});
 });

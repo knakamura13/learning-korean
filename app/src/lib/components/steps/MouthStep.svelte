@@ -337,7 +337,12 @@
 	}
 
 	@media (forced-colors: active) {
-		.zone {
+		/* Compound selectors match .zone.right/.hot/.prior/.wrong fill-opacity. */
+		.zone,
+		.zone.hot,
+		.zone.right,
+		.zone.prior,
+		.zone.wrong {
 			fill: Canvas;
 			fill-opacity: 1;
 			stroke: ButtonText;

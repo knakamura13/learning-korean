@@ -92,6 +92,8 @@
 			top: jumpScrollY(el.getBoundingClientRect().top, window.scrollY, offset),
 			behavior: reduce ? 'auto' : 'smooth'
 		});
+		const heading = el.querySelector<HTMLElement>('h2.sec');
+		heading?.focus({ preventScroll: true });
 	}
 
 	function releaseJumpPin() {
@@ -144,7 +146,7 @@
 
 	<div class="page">
 	<section id="consonants" aria-labelledby="sec-consonants-heading">
-		<h2 id="sec-consonants-heading" class="sec">19 consonants</h2>
+		<h2 id="sec-consonants-heading" class="sec" tabindex="-1">19 consonants</h2>
 		<div class="grid">
 			{#each LEADS as c (c)}
 				<div class="cell">
@@ -161,7 +163,7 @@
 	</section>
 
 	<section id="simple-vowels" aria-labelledby="sec-simple-vowels-heading">
-		<h2 id="sec-simple-vowels-heading" class="sec">10 simple vowels</h2>
+		<h2 id="sec-simple-vowels-heading" class="sec" tabindex="-1">10 simple vowels</h2>
 		<div class="grid">
 			{#each SIMPLE as v (v)}
 				<div class="cell">
@@ -177,7 +179,7 @@
 	</section>
 
 	<section id="compound-vowels" aria-labelledby="sec-compounds-heading">
-		<h2 id="sec-compounds-heading" class="sec">11 compound vowels</h2>
+		<h2 id="sec-compounds-heading" class="sec" tabindex="-1">11 compound vowels</h2>
 		<div class="grid">
 			{#each COMPOUNDS as v (v)}
 				{@const parts = fusionParts(v)}
@@ -196,7 +198,7 @@
 	</section>
 
 	<section id="batchim" aria-labelledby="sec-batchim-heading">
-		<h2 id="sec-batchim-heading" class="sec">Batchim — 27 finals, 7 sounds</h2>
+		<h2 id="sec-batchim-heading" class="sec" tabindex="-1">Batchim — 27 finals, 7 sounds</h2>
 		<div class="rows card">
 			{#each REPRESENTATIVE as r (r)}
 				<div class="row">
@@ -215,7 +217,7 @@
 	</section>
 
 	<section id="clusters" aria-labelledby="sec-clusters-heading">
-		<h2 id="sec-clusters-heading" class="sec">11 clusters</h2>
+		<h2 id="sec-clusters-heading" class="sec" tabindex="-1">11 clusters</h2>
 		<div class="rows card">
 			{#each CLUSTERS as c (c)}
 				{@const parts = clusterParts(c)}
@@ -258,7 +260,7 @@
 	</section>
 
 	<section id="derivation" aria-labelledby="sec-derivation-heading">
-		<h2 id="sec-derivation-heading" class="sec">The derivation map</h2>
+		<h2 id="sec-derivation-heading" class="sec" tabindex="-1">The derivation map</h2>
 		<p class="lede tiny muted">
 			Five shapes drawn from the articulators; a stroke adds breath, doubling adds tension.
 			Rebuilt here from the same map the labs use.
@@ -277,7 +279,7 @@
 	</section>
 
 	<section id="block-layouts" aria-labelledby="sec-layouts-heading">
-		<h2 id="sec-layouts-heading" class="sec">Block layouts</h2>
+		<h2 id="sec-layouts-heading" class="sec" tabindex="-1">Block layouts</h2>
 		<div class="rows card">
 			{#each BLOCK_LAYOUTS as l (l.kind)}
 				<div class="row wrap">
@@ -293,7 +295,7 @@
 	</section>
 
 	<section id="sound-changes" aria-labelledby="sec-sound-changes-heading">
-		<h2 id="sec-sound-changes-heading" class="sec">The eight sound changes</h2>
+		<h2 id="sec-sound-changes-heading" class="sec" tabindex="-1">The eight sound changes</h2>
 		<p class="lede tiny muted">
 			Korean spelling preserves what a word <em>is</em>; these rules are how it sounds. They
 			are the roadmap for everything after Lab 05.
@@ -326,7 +328,7 @@
 	</section>
 
 	<section id="dictionary-order" aria-labelledby="sec-ganada-heading">
-		<h2 id="sec-ganada-heading" class="sec">Dictionary order (<span lang="ko">가나다순</span>)</h2>
+		<h2 id="sec-ganada-heading" class="sec" tabindex="-1">Dictionary order (<span lang="ko">가나다순</span>)</h2>
 		<div class="card ganada">
 			<p class="glabel">consonants</p>
 			<p class="hg grow" lang="ko">{GANADA_CONSONANTS.join(' ')}</p>
@@ -340,7 +342,7 @@
 	</section>
 
 	<section id="sources" aria-labelledby="sec-sources-heading">
-		<h2 id="sec-sources-heading" class="sec">Sources</h2>
+		<h2 id="sec-sources-heading" class="sec" tabindex="-1">Sources</h2>
 		<ul class="src">
 			<li>
 				<a href="https://www.korean.go.kr/"
@@ -518,7 +520,8 @@
 	.row.wrap .vals { flex: 1 1 18rem; flex-direction: column; align-items: flex-start; gap: var(--s1); }
 
 	.lkind, .scname {
-		flex: 0 0 9rem;
+		flex: 0 1 9rem;
+		min-width: 0;
 		font-size: 0.8rem;
 		font-weight: 600;
 	}
