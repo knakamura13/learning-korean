@@ -92,4 +92,18 @@ describe('Options chrome stays in lockstep with the scheme', () => {
 		expect(src.default).toContain('choiceKeyLabel(keyScheme, i)');
 		expect(src.default).not.toMatch(/<span class="key">\{i \+ 1\}<\/span>/);
 	});
+
+	it('scopes digit/letter picks to the choice group, not the window (WCAG 2.1.4)', async () => {
+		const options = await import('../components/Options.svelte?raw');
+		const sprint = await import('../components/SprintChoices.svelte?raw');
+		const labRunner = await import('../components/LabRunner.svelte?raw');
+		const drill = await import('../../routes/drill/+page.svelte?raw');
+
+		for (const src of [options.default, sprint.default]) {
+			expect(src).toMatch(/onkeydown=\{onChoiceKeydown\}/);
+			expect(src).toMatch(/WCAG 2\.1\.4/);
+		}
+		expect(labRunner.default).not.toMatch(/isChoiceShortcutKey/);
+		expect(drill.default).not.toMatch(/<svelte:window onkeydown/);
+	});
 });

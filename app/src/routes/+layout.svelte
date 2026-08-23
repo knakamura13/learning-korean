@@ -15,6 +15,8 @@
 
 	let { children } = $props();
 
+	let storageReady = $state(false);
+
 	const canonical = $derived(pageCanonical(page.url.pathname));
 	const ogImage = $derived(siteAsset('/og.png'));
 
@@ -34,6 +36,8 @@
 
 	onMount(() => {
 		applyLook(readLookId(), readThemePref());
+		progress.tick();
+		storageReady = true;
 		void session.load();
 		return subscribeSystemTheme();
 	});
@@ -126,6 +130,26 @@
 </header>
 
 <main id="main" onblur={clearSkipLanding}>
+	{#if storageReady && (progress.corrupt || labSession.corrupt)}
+		<div class="storage-warn">
+			<div class="warn card">
+				<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
+				overwrite the unread file until you restore or reset.
+				<a href="{resolve('/settings')}#backup">Download a backup</a>
+				<a href="{resolve('/settings')}#reset">Reset progress</a>
+			</div>
+		</div>
+	{:else if storageReady && (!progress.durable || !labSession.durable)}
+		<div class="storage-warn">
+			<div class="warn card">
+				<strong>Progress will not be saved.</strong> This browser is blocking storage on this
+				origin, so your review history will vanish when you close the tab.
+				<a href="{resolve('/settings')}#backup">Download a backup</a>
+				before you do anything else, and serve the built app over HTTP rather than
+				opening the files directly.
+			</div>
+		</div>
+	{/if}
 	{@render children()}
 </main>
 </div>
@@ -151,6 +175,13 @@
 	main {
 		flex: 1 1 auto;
 		position: relative;
+	}
+
+	.storage-warn {
+		max-width: var(--shell);
+		margin: 0 auto;
+		padding: var(--s4) max(var(--s4), env(safe-area-inset-left)) 0
+			max(var(--s4), env(safe-area-inset-right));
 	}
 
 	.bar {
@@ -226,6 +257,7 @@
 		display: inline-flex;
 		align-items: center;
 		/* 44px hit target. 48px .inner keeps a 4px gap under the bar’s top edge. */
+		min-width: 44px;
 		min-height: 44px;
 		padding: 0 0.75rem;
 		border-radius: 0;

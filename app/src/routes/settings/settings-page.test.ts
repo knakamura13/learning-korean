@@ -162,12 +162,14 @@ describe('Settings backup deep link — layout and Review', () => {
 		expect(layout).not.toMatch(/SiteFooter/);
 	});
 
-	it('Review storage warnings deep-link to Settings #backup', () => {
-		expect(review).toMatch(/href="\{resolve\('\/settings'\)\}#backup"/);
-		expect(review).toMatch(/href="\{resolve\('\/settings'\)\}#reset"/);
-		expect(review).not.toMatch(/#progress-backup/);
-		expect(review).toMatch(/Download a backup/);
-		expect(review).toMatch(/Reset progress/);
+	it('storage warnings deep-link to Settings #backup from the root layout', () => {
+		expect(layout).toMatch(/href="\{resolve\('\/settings'\)\}#backup"/);
+		expect(layout).toMatch(/href="\{resolve\('\/settings'\)\}#reset"/);
+		expect(layout).not.toMatch(/#progress-backup/);
+		expect(layout).toMatch(/Download a backup/);
+		expect(layout).toMatch(/Reset progress/);
+		expect(review).not.toMatch(/Download a backup/);
+		expect(review).not.toMatch(/Reset progress/);
 		expect(review).not.toMatch(/ProgressBackup/);
 	});
 });

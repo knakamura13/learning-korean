@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
 	import SprintChoices from '$lib/components/SprintChoices.svelte';
 	import { TIERS } from '$lib/domain/deck';
 	import { millEligible, millMissingLab, millPool, pronTrialSource } from '$lib/domain/pronMill';
@@ -26,7 +25,6 @@
 	let round = $state(idleRound());
 	let running = $state(false);
 	let now = $state(0);
-	let choices = $state<SprintChoices | undefined>();
 
 	const unlocked = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
 	const missing = $derived(lane === 'blocks' ? sprintMissingLab(unlocked) : millMissingLab(unlocked));
@@ -75,16 +73,9 @@
 		round = answerRoundFrom(round, index, Date.now(), source(), Math.random);
 		if (round.phase !== 'running') running = false;
 	}
-
-	function onKey(e: KeyboardEvent) {
-		if (!running) return;
-		if (shouldIgnoreShortcut(e.target)) return;
-		choices?.keyPick(e.key);
-	}
 </script>
 
 <svelte:head><title>Drill</title></svelte:head>
-<svelte:window onkeydown={onKey} />
 
 <div class="shell narrow">
 	<header class="head" class:compact={running}>
@@ -141,7 +132,7 @@
 			<p class="timer" role="timer" aria-live="off">{remaining}</p>
 			<div class="glyph" class:word={lane === 'sounds'} lang="ko">{round.trial.block}</div>
 			{#key round.trial.block + round.seen}
-				<SprintChoices bind:this={choices} options={round.trial.options} onPick={pick} />
+				<SprintChoices options={round.trial.options} onPick={pick} />
 			{/key}
 		</div>
 	{:else if round.phase === 'done'}

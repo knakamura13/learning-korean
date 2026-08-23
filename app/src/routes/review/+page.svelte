@@ -202,23 +202,6 @@
 		{/if}
 	</header>
 
-	{#if ready && (progress.corrupt || labSession.corrupt)}
-		<div class="warn card">
-			<strong>Saved progress could not be read.</strong> Back it up now — reviews will not
-			overwrite the unread file until you restore or reset.
-			<a href="{resolve('/settings')}#backup">Download a backup</a>
-			<a href="{resolve('/settings')}#reset">Reset progress</a>
-		</div>
-	{:else if ready && (!progress.durable || !labSession.durable)}
-		<div class="warn card">
-			<strong>Progress will not be saved.</strong> This browser is blocking storage on this
-			origin, so your review history will vanish when you close the tab.
-			<a href="{resolve('/settings')}#backup">Download a backup</a>
-			before you do anything else, and serve the built app over HTTP rather than
-			opening the files directly.
-		</div>
-	{/if}
-
 	{#if chrome.showStats}
 		<div class="load">
 			<div class="strip" role="region" aria-label="Review session statistics">
@@ -420,15 +403,6 @@
 		font-size: 1.05rem;
 		color: var(--ink-soft);
 		margin: 0;
-	}
-
-	.warn {
-		border-color: var(--bad);
-		background: var(--bad-soft);
-		padding: var(--s3) var(--s4);
-		margin-bottom: var(--s4);
-		font-size: 0.86rem;
-		line-height: 1.55;
 	}
 
 	.load { margin-bottom: var(--s5); }

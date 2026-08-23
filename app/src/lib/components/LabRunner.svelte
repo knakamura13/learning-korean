@@ -3,9 +3,8 @@
 	import { fly, fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import type { Lab } from '$lib/content/types';
-	import { isChoiceShortcutKey } from '$lib/a11y/choiceKeys';
 	import { firstWellControl } from '$lib/a11y/firstWellControl';
-	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav, shouldIgnoreShortcut } from '$lib/a11y/shortcuts';
+	import { focusWhen, shouldAdvanceOnEnter, shouldIgnoreArrowNav } from '$lib/a11y/shortcuts';
 	import { labHtml } from '$lib/a11y/sanitize';
 	import { revealAdvance, shouldRevealAdvance } from '$lib/a11y/revealAdvance';
 	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
@@ -71,7 +70,6 @@
 	/** Gate for the review handoff: is there anything in the next sitting? */
 	const dueNow = $derived(progress.stats.sitting);
 	const promptLive = $derived(step.do.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
-	let choiceRef = $state<ChoiceStep | undefined>();
 	let cardEl = $state<HTMLDivElement>();
 	let workEl = $state<HTMLDivElement>();
 	let confirmingRestart = $state(false);
@@ -260,11 +258,6 @@
 			next();
 			return;
 		}
-		if (shouldIgnoreShortcut(e.target)) return;
-		if (!settled && step.type === 'choice' && isChoiceShortcutKey(e.key, step.options)) {
-			e.preventDefault();
-			choiceRef?.key(e.key);
-		}
 	}
 
 </script>
@@ -380,7 +373,7 @@
 						{#if step.type === 'mouth'}
 							<MouthStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'choice'}
-							<ChoiceStep bind:this={choiceRef} {step} {onSettle} {onNudge} />
+							<ChoiceStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'build'}
 							<BuildStep {step} {onSettle} {onNudge} />
 						{:else if step.type === 'assemble'}

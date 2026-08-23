@@ -222,12 +222,12 @@ describe('HoverPreview', () => {
 
 		hover.openPreview('sources', 'keyboard', null);
 
-		hover.onItemFocusOut({ relatedTarget: closeBtn } as FocusEvent);
+		hover.onItemFocusOut({ relatedTarget: closeBtn } as unknown as FocusEvent);
 		expect(hover.openId).toBe('sources');
 
 		const nextItem = makeItem('batchim');
 		nav.appendChild(nextItem);
-		hover.onItemFocusOut({ relatedTarget: nextItem } as FocusEvent);
+		hover.onItemFocusOut({ relatedTarget: nextItem } as unknown as FocusEvent);
 		expect(hover.openId).toBe('sources');
 	});
 
@@ -251,12 +251,12 @@ describe('HoverPreview', () => {
 
 		hover.openPreview('sources', 'keyboard', null);
 
-		hover.onItemFocusOut({ relatedTarget: outside } as FocusEvent);
+		hover.onItemFocusOut({ relatedTarget: outside } as unknown as FocusEvent);
 		expect(hover.openId).toBeNull();
 
 		hover.openPreview('sources', 'keyboard', null);
 		closeBtn.focus();
-		hover.onItemFocusOut({ relatedTarget: outside } as FocusEvent);
+		hover.onItemFocusOut({ relatedTarget: outside } as unknown as FocusEvent);
 		expect(hover.openId).toBeNull();
 	});
 
