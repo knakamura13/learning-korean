@@ -182,7 +182,10 @@ describe('Tray', () => {
 		const eo = radioNamed(group, 'ㅓ');
 		expect(eo.getAttribute('role')).toBe('radio');
 		expect(eo.getAttribute('aria-checked')).toBe('false');
-		expect(eo.getAttribute('aria-label')).toBe('second vowel: ㅓ');
+		expect(eo.getAttribute('aria-label')).toBeNull();
+		expect(eo.getAttribute('lang')).toBe('ko');
+		expect(eo.textContent).toContain('ㅓ');
+		expect(group.getAttribute('aria-labelledby')).toBeTruthy();
 	});
 
 	it('marks the selected chip checked and visually on', () => {
@@ -351,8 +354,10 @@ describe('FusionStep trays', () => {
 		const emptySlots = [...root.querySelectorAll<HTMLElement>('.slot')];
 		expect(emptySlots).toHaveLength(2);
 		for (const slot of emptySlots) {
-			expect(slot.getAttribute('aria-label')).toBe(`${slot.dataset.slot}: empty`);
-			expect(slot.querySelector('.slot-reading')?.textContent).toBe('');
+			expect(slot.getAttribute('aria-label')).toBeNull();
+			expect(slot.getAttribute('role')).toBe('group');
+			expect(slot.getAttribute('aria-labelledby')).toBeTruthy();
+			expect(slot.querySelector('.slot-reading')?.textContent).toBe('empty');
 		}
 		expect(root.querySelector('.out .slot-reading')).toBeNull();
 
@@ -364,12 +369,14 @@ describe('FusionStep trays', () => {
 		const [first, second] = [...root.querySelectorAll<HTMLElement>('.slot')];
 		expect(first.querySelector('.slot-reading')?.textContent).toBe('u');
 		expect(second.querySelector('.slot-reading')?.textContent).toBe('eo');
-		expect(first.querySelector('.slot-reading')?.getAttribute('aria-hidden')).toBe('true');
-		expect(first.getAttribute('aria-label')).toBe('first: ㅜ, u');
-		expect(second.getAttribute('aria-label')).toBe('second: ㅓ, eo');
+		expect(first.querySelector('.slot-value')?.getAttribute('lang')).toBe('ko');
+		expect(first.getAttribute('aria-labelledby')).toMatch(/name|value|reading/);
+		expect(first.getAttribute('aria-label')).toBeNull();
+		expect(second.getAttribute('aria-label')).toBeNull();
 
 		const tray = labeledGroup(root, 'first vowel');
-		expect(radioNamed(tray, 'ㅜ').getAttribute('aria-label')).toBe('first vowel: ㅜ');
+		expect(radioNamed(tray, 'ㅜ').getAttribute('aria-label')).toBeNull();
+		expect(radioNamed(tray, 'ㅜ').getAttribute('lang')).toBe('ko');
 		expect(radioNamed(tray, 'ㅜ').querySelector('.slot-reading')).toBeNull();
 		expect(root.querySelector('.out')?.textContent?.replace(/\s+/g, '')).toBe('ㅝ');
 	});
@@ -427,8 +434,11 @@ describe('AssembleStep trays', () => {
 		expect(leadSlot.querySelector('.slot-reading')?.textContent).toBe('m');
 		expect(vowelSlot.querySelector('.slot-reading')?.textContent).toBe('a');
 		expect(batchimSlot.querySelector('.slot-reading')?.textContent).toBe('p');
-		expect(leadSlot.getAttribute('aria-label')).toBe('consonant: ㅁ, m');
-		expect(batchimSlot.getAttribute('aria-label')).toBe('batchim: ㅂ, p');
+		expect(leadSlot.getAttribute('aria-label')).toBeNull();
+		expect(leadSlot.getAttribute('aria-labelledby')).toBeTruthy();
+		expect(leadSlot.querySelector('.slot-value')?.textContent).toBe('ㅁ');
+		expect(batchimSlot.querySelector('.slot-value')?.textContent).toBe('ㅂ');
+		expect(batchimSlot.getAttribute('aria-label')).toBeNull();
 	});
 
 	it('leaves a silent lead ㅇ unlabeled on the plate', () => {
@@ -455,7 +465,9 @@ describe('AssembleStep trays', () => {
 		const reading = leadSlot.querySelector('.slot-reading');
 		expect(reading?.textContent).toBe('');
 		expect(reading?.matches(':empty')).toBe(true);
-		expect(leadSlot.getAttribute('aria-label')).toBe('consonant: ㅇ');
+		expect(leadSlot.getAttribute('aria-label')).toBeNull();
+		expect(leadSlot.querySelector('.slot-value')?.textContent).toBe('ㅇ');
+		expect(leadSlot.getAttribute('aria-labelledby')).toBeTruthy();
 		expect(vowelSlot.querySelector('.slot-reading')?.textContent).toBe('wi');
 	});
 

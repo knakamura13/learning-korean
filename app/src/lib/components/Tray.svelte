@@ -153,7 +153,6 @@
 				class={['chip', text && 'text', on && 'on', tone === 'blue' && 'blue', dock && 'draggable']}
 				role="radio"
 				aria-checked={on}
-				aria-label="{label}: {item}"
 				data-item={item}
 				tabindex={i === activeIndex ? 0 : -1}
 				{disabled}
@@ -162,7 +161,7 @@
 			>
 				<span class="glyph">{item}</span>
 				{#if on}
-					<span class="mark">{mark}</span>
+					<span class="mark" lang="en">{mark}</span>
 				{/if}
 			</button>
 		{/each}

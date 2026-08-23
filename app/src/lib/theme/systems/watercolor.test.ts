@@ -16,11 +16,11 @@ describe('watercolor', () => {
 		expect(watercolor.light.paper.toLowerCase()).toBe('#f9f6f2');
 		expect(watercolor.light.paperRaised.toLowerCase()).toBe('#fffef8');
 		expect(watercolor.light.paperSunk.toLowerCase()).toBe('#f5f0e8');
-		expect(watercolor.light.accent.toLowerCase()).toBe('#4a5568');
+		expect(watercolor.light.accent.toLowerCase()).toBe('#444c5e');
 		expect(watercolor.light.accentInk.toLowerCase()).toBe('#fffef8');
-		expect(watercolor.light.rose.toLowerCase()).toBe('#8a4a44');
+		expect(watercolor.light.rose.toLowerCase()).toBe('#76403a');
 		expect(watercolor.dark.paper.toLowerCase()).toBe('#1a1e26');
-		expect(watercolor.dark.accent.toLowerCase()).toBe('#a8b4c4');
+		expect(watercolor.dark.accent.toLowerCase()).toBe('#b5bfcc');
 		expect(watercolor.dark.rose.toLowerCase()).toBe('#e8a8a2');
 	});
 

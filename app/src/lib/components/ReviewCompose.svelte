@@ -43,6 +43,13 @@
 		if (picked === jamo) return 'wrong';
 		return 'dim';
 	}
+
+	function chipVerdict(slot: 'lead' | 'vowel' | 'final', jamo: string): 'correct' | 'incorrect' | null {
+		const state = chipState(slot, jamo);
+		if (state === 'right') return 'correct';
+		if (state === 'wrong') return 'incorrect';
+		return null;
+	}
 </script>
 
 <div class="compose">
@@ -59,14 +66,16 @@
 			<span class="label">{row.label}</span>
 			<div class="chips">
 				{#each row.chips as jamo (jamo)}
+					{@const verdict = chipVerdict(row.slot, jamo)}
 					<button
 						type="button"
 						class="chip {chipState(row.slot, jamo)}"
 						aria-pressed={(row.slot === 'lead' ? lead : row.slot === 'vowel' ? vowel : final) === jamo}
 						disabled={disabled || fired}
-						lang="ko"
 						onclick={() => select(row.slot, jamo)}
-					>{jamo}</button>
+					>
+						<span lang="ko">{jamo}</span>{#if verdict}<span class="vh">, {verdict}</span>{/if}
+					</button>
 				{/each}
 			</div>
 		</div>

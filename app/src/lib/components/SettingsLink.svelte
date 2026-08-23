@@ -11,7 +11,6 @@
 	href={resolve('/settings')}
 	class="settings"
 	aria-label="Settings"
-	title="Settings"
 	aria-current={onSettings ? 'page' : undefined}
 >
 	<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">

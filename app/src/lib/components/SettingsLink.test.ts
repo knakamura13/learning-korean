@@ -23,7 +23,7 @@ describe('SettingsLink', () => {
 
 	it('is a Settings link with person silhouette, not a gear', () => {
 		expect(src).toMatch(/aria-label="Settings"/);
-		expect(src).toMatch(/title="Settings"/);
+		expect(src).not.toMatch(/\btitle="/);
 		expect(src).toMatch(/href=\{resolve\('\/settings'\)\}/);
 		expect(src).toMatch(/class="settings"/);
 		expect(src).toMatch(/viewBox="0 0 24 24"/);

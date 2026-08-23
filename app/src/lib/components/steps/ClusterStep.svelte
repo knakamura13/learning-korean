@@ -47,9 +47,7 @@
 			class:dim={solved && jamo !== winner}
 			disabled={solved}
 			onclick={() => pick(jamo)}
-			lang="ko"
-			aria-label="Choose consonant {jamo}"
-		>{jamo}</button>
+		><span class="vh">Choose consonant </span><span lang="ko">{jamo}</span></button>
 	{/each}
 </div>
 

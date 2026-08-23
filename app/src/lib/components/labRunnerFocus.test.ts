@@ -123,4 +123,27 @@ describe('LabRunner card-change focus', () => {
 		expect((document.activeElement as HTMLElement).classList.contains('opt')).toBe(true);
 		expect(document.querySelector('[data-prompt-live]')?.textContent).toContain('Second question');
 	});
+
+	it('keeps Hangul in the live prompt under lang="ko"', async () => {
+		const hangulLab: Lab = {
+			...lab,
+			id: 'hangul-prompt-lab',
+			steps: [
+				{
+					type: 'choice',
+					do: 'Say <span class="jamo">ㄱ</span> slowly',
+					teach: '<p>one</p>',
+					options: ['alpha', 'bravo'],
+					answer: 0
+				}
+			]
+		};
+		render(LabRunner, { lab: hangulLab });
+		await waitForReady();
+
+		const live = document.querySelector('[data-prompt-live]');
+		expect(live?.textContent).toMatch(/ㄱ/);
+		const ko = live?.querySelectorAll('[lang="ko"]') ?? [];
+		expect([...ko].some((el) => el.textContent?.includes('ㄱ'))).toBe(true);
+	});
 });

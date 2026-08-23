@@ -140,51 +140,56 @@
 		<h1>Every letter and rule</h1>
 		<p class="lede">
 			Generated from the same module the labs run on, so it cannot drift from what the app
-			teaches.
+			teaches. First-use terms:
+			<abbr title="Final consonant slot at the bottom of a syllable block (받침)">batchim</abbr>,
+			<abbr title="Batchim moving into the next syllable when it begins with placeholder ㅇ (연음)">liaison</abbr>,
+			and deck
+			<abbr title="A gated review slice unlocked by finishing a lab">tiers</abbr>
+			are expanded here; lesson prose defines them in context.
 		</p>
 	</header>
 
 	<div class="page">
 	<section id="consonants" aria-labelledby="sec-consonants-heading">
 		<h2 id="sec-consonants-heading" class="sec" tabindex="-1">19 consonants</h2>
-		<div class="grid">
+		<ul class="grid">
 			{#each LEADS as c (c)}
-				<div class="cell">
+				<li class="cell">
 					<span class="big" lang="ko">{c}</span>
 					<span class="rom2">{SOUND[c]}</span>
 					<span class="nm" lang="ko">{NAMES[c]}</span>
-					<span class="fin">final: {batchimSound(c) || '—'}</span>
+					<span class="fin">final: <KoText text={batchimSound(c) || '—'} /></span>
 					<div class="hear">
 						<PlayButton jamo={c} audioSlot="lead" />
 					</div>
-				</div>
+				</li>
 			{/each}
-		</div>
+		</ul>
 	</section>
 
 	<section id="simple-vowels" aria-labelledby="sec-simple-vowels-heading">
 		<h2 id="sec-simple-vowels-heading" class="sec" tabindex="-1">10 simple vowels</h2>
-		<div class="grid">
+		<ul class="grid">
 			{#each SIMPLE as v (v)}
-				<div class="cell">
+				<li class="cell">
 					<span class="big" lang="ko">{v}</span>
 					<span class="rom2">{SOUND[v]}</span>
 					<span class="nm">{harmony(v)}</span>
 					<div class="hear">
 						<PlayButton jamo={v} audioSlot="vowel" />
 					</div>
-				</div>
+				</li>
 			{/each}
-		</div>
+		</ul>
 	</section>
 
 	<section id="compound-vowels" aria-labelledby="sec-compounds-heading">
 		<h2 id="sec-compounds-heading" class="sec" tabindex="-1">11 compound vowels</h2>
-		<div class="grid">
+		<ul class="grid">
 			{#each COMPOUNDS as v (v)}
 				{@const parts = fusionParts(v)}
 				{@const merged = mergedWith(v)}
-				<div class="cell">
+				<li class="cell">
 					<span class="big" lang="ko">{v}</span>
 					<span class="rom2">{SOUND[v]}</span>
 					<span class="nm"><KoText text={parts ? `${parts[0]} + ${parts[1]}` : ''} /></span>
@@ -192,13 +197,16 @@
 					<div class="hear">
 						<PlayButton jamo={v} audioSlot="vowel" />
 					</div>
-				</div>
+				</li>
 			{/each}
-		</div>
+		</ul>
 	</section>
 
 	<section id="batchim" aria-labelledby="sec-batchim-heading">
-		<h2 id="sec-batchim-heading" class="sec" tabindex="-1">Batchim — 27 finals, 7 sounds</h2>
+		<h2 id="sec-batchim-heading" class="sec" tabindex="-1">
+			<abbr title="Final consonant slot at the bottom of a syllable block (받침)">Batchim</abbr>
+			— 27 finals, 7 sounds
+		</h2>
 		<div class="rows card">
 			{#each REPRESENTATIVE as r (r)}
 				<div class="row">
@@ -304,7 +312,7 @@
 			{#each SOUND_CHANGES as sc (sc.id)}
 				<div class="row wrap">
 					<span class="scname">
-						{sc.name}
+						<KoText text={sc.name} />
 						<em class="hg" lang="ko">{sc.korean}</em>
 						{#if !sc.scored}
 							<span class="muted tiny">not scored yet</span>
@@ -425,7 +433,7 @@
 
 	.head { margin-bottom: var(--s4); max-width: var(--measure); }
 	h1 { margin: var(--s2) 0 var(--s3); }
-	.lede { color: var(--ink-soft); }
+	.lede { color: var(--ink-soft); max-width: var(--measure); }
 
 	section {
 		margin-bottom: var(--s7);
@@ -452,6 +460,9 @@
 		display: grid;
 		gap: var(--s2);
 		grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr));
+		list-style: none;
+		margin: 0;
+		padding: 0;
 	}
 
 	.cell {
@@ -561,7 +572,7 @@
 		overflow-wrap: anywhere;
 	}
 
-	.src { margin: 0; padding-inline-start: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--ink-soft); }
+	.src { margin: 0; padding-inline-start: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--ink-soft); max-width: var(--measure); }
 	.src li { margin-bottom: var(--s2); }
 	.src a {
 		display: inline-flex;
