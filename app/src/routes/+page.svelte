@@ -479,6 +479,13 @@
 	}
 	a.lab:hover,
 	button.lab:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+	/* Scoped .lab:hover beats global .card:focus-visible — keep the ring like .btn. */
+	a.lab:focus-visible,
+	button.lab:focus-visible,
+	a.lab:hover:focus-visible,
+	button.lab:hover:focus-visible {
+		box-shadow: var(--focus-ring), var(--shadow-1);
+	}
 	a.lab:active,
 	button.lab:active {
 		transform: translateY(0);

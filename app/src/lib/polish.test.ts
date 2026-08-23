@@ -596,6 +596,11 @@ describe('polish audit regressions', () => {
 			/\.card:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\),\s*var\(--shadow-1\)/s
 		);
 		expect(appCss).toMatch(/\.btn:focus-visible[\s\S]*?box-shadow:\s*var\(--focus-ring\)/);
+		// Home lab cards also set box-shadow on :hover in a scoped block that beats
+		// global .card:focus-visible — redeclare there too.
+		expect(styleBlock(home)).toMatch(
+			/a\.lab:hover:focus-visible[\s\S]*?box-shadow:\s*var\(--focus-ring\),\s*var\(--shadow-1\)/s
+		);
 	});
 
 	it('uses --focus-ring only as box-shadow, never as outline', () => {
