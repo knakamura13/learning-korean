@@ -3,10 +3,11 @@ import { botanicalKorea } from './systems/botanicalKorea.ts';
 /**
  * Build-time default look (Botanical Korea).
  *
- * `activeSystem` stamps no-JS `:root`, PWA manifests, header font preloads,
- * and the prerendered theme-color. Runtime look is `LOOKS` + `html[data-look]`
- * via LookPicker / `korean-look`. Do not reassign `activeSystem` to paint a
- * look — that would change the no-JS default and the manifests.
+ * `activeSystem` stamps no-JS `:root`, PWA manifests, and the prerendered
+ * theme-color. Font preloads are injected by `theme-boot.js` for the stored
+ * look. Runtime look is `LOOKS` + `html[data-look]` via LookPicker /
+ * `korean-look`. Do not reassign `activeSystem` to paint a look — that would
+ * change the no-JS default and the manifests.
  *
  * Components keep using `var(--ink)` / `var(--paper)` / `var(--accent)` /
  * `var(--rose)`.

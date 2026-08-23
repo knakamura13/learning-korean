@@ -48,6 +48,21 @@ def fetch(url: str, dest: Path) -> None:
 		raise RuntimeError(f"{url} too small: {dest.stat().st_size} bytes")
 
 
+def pin_weight(src: Path, dest: Path) -> None:
+	"""Instance wght=400; keep opsz for font-optical-sizing: auto."""
+	cmd = [
+		sys.executable,
+		"-m",
+		"fontTools.varLib.instancer",
+		str(src),
+		"wght=400",
+		f"--output={dest}",
+	]
+	subprocess.run(cmd, check=True)
+	if dest.stat().st_size < 10_000:
+		raise RuntimeError(f"instanced font too small: {dest}")
+
+
 def subset(src: Path, dest: Path) -> None:
 	cmd = [
 		sys.executable,
@@ -76,8 +91,11 @@ def main() -> None:
 			by_name[name] = dest
 		for src_name, out_name in OUTPUTS:
 			out = OUT / out_name
+			pinned = tmp_path / f"pinned-{out_name}.ttf"
+			print(f"instance wght=400 → {out_name}")
+			pin_weight(by_name[src_name], pinned)
 			print(f"subset {out_name}")
-			subset(by_name[src_name], out)
+			subset(pinned, out)
 			print(f"  {out_name}: {out.stat().st_size} bytes")
 
 

@@ -227,7 +227,7 @@
 			<p class="muted">Loading Review…</p>
 		</div>
 	{:else if body === 'locked'}
-		<div class="card empty" in:fade={motion()}>
+		<div class="card empty" in:fade={motion({ duration: 150 })}>
 			<span class="big" lang="ko">한</span>
 			<h2>Nothing in Review yet</h2>
 			<p>
@@ -237,7 +237,7 @@
 			<a class="btn" href={resolve('/lab/[id]', { id: '0001' })}>Start Lab 01</a>
 		</div>
 	{:else if body === 'check-for-more'}
-		<div class="card empty" in:fade={motion()}>
+		<div class="card empty" in:fade={motion({ duration: 150 })}>
 			<span class="big" lang="ko">{right / Math.max(shown, 1) >= 0.8 ? '좋아' : '또'}</span>
 			<h2>{right} of {shown} first time</h2>
 			<p>
@@ -254,7 +254,7 @@
 			<button class="btn" onclick={start}>{load.moreAction}</button>
 		</div>
 	{:else if body === 'clear'}
-		<div class="card empty" in:fade={motion()}>
+		<div class="card empty" in:fade={motion({ duration: 150 })}>
 			<span class="big" lang="ko">쉬어</span>
 			<h2>Review is clear</h2>
 			<p>Nothing is due. The next card comes back <strong>{whenNext}</strong>.</p>

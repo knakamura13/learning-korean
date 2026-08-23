@@ -308,10 +308,11 @@ describe('delivery', () => {
 		expect(pluginSrc).not.toMatch(/virtual:design-system/);
 	});
 
-	it('preloads system webfonts from the layout so asset URLs are already resolved', () => {
-		expect(layoutSrc).toMatch(/activeSystem\.fonts/);
-		expect(layoutSrc).toMatch(/rel="preload"/);
+	it('lets theme-boot inject look font preloads; layout does not bake them', () => {
+		expect(manifestSrc).toMatch(/themeBootScript/);
+		expect(manifestSrc).toMatch(/lookFontFiles/);
+		expect(layoutSrc).not.toMatch(/activeSystem\.fonts/);
+		expect(layoutSrc).not.toMatch(/rel="preload"/);
 		expect(layoutSrc).not.toMatch(/%sveltekit\.assets%/);
-		expect(layoutSrc).toMatch(/face\.file/);
 	});
 });

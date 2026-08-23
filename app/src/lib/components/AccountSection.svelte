@@ -107,9 +107,6 @@
 						stays and keeps working signed out. This cannot be undone.
 					</p>
 					<div class="actions">
-						<button type="button" class="btn" onclick={() => void confirmDelete()}>
-							Delete account
-						</button>
 						<button
 							type="button"
 							class="btn ghost"
@@ -117,6 +114,9 @@
 							onclick={() => (confirmingDelete = false)}
 						>
 							Cancel
+						</button>
+						<button type="button" class="btn" onclick={() => void confirmDelete()}>
+							Delete account
 						</button>
 					</div>
 				</dialog>

@@ -5,6 +5,7 @@ import labRunner from './components/LabRunner.svelte?raw';
 import labPipRail from './components/LabPipRail.svelte?raw';
 import labRunnerPipRail from './components/labRunnerPipRail.svelte.ts?raw';
 import progressBackup from './components/ProgressBackup.svelte?raw';
+import progressReset from './components/ProgressReset.svelte?raw';
 import audioClip from './components/AudioClip.svelte?raw';
 import vowelStep from './components/steps/VowelStep.svelte?raw';
 import mouthStep from './components/steps/MouthStep.svelte?raw';
@@ -93,6 +94,26 @@ describe('polish audit regressions', () => {
 		expect(progressBackup).toMatch(/attachModalDialog/);
 		expect(sitting).toMatch(/<dialog\b[^>]*class="restart-confirm"/);
 		expect(sitting).toMatch(/attachModalDialog/);
+	});
+
+	it('puts Cancel first in destructive confirm dialogs so showModal focuses the safe action', () => {
+		// showModal focuses the first focusable descendant; Cancel must precede
+		// the destructive button (LabRunner restart-confirm is the known-good pattern).
+		const cases: { source: string; destructive: RegExp }[] = [
+			{ source: labRunner, destructive: />\s*Start over\s*</ },
+			{ source: progressReset, destructive: />\s*Clear progress\s*</ },
+			{ source: progressBackup, destructive: />\s*\{busy \? 'Restoring…' : 'Replace progress'\}\s*</ },
+			{ source: accountSection, destructive: />\s*Delete account\s*</ }
+		];
+		for (const { source, destructive } of cases) {
+			const dialog = source.match(/<dialog\b[\s\S]*?<\/dialog>/)?.[0] ?? '';
+			expect(dialog.length).toBeGreaterThan(0);
+			const cancelIdx = dialog.search(/>\s*Cancel\s*</);
+			const destructiveIdx = dialog.search(destructive);
+			expect(cancelIdx).toBeGreaterThanOrEqual(0);
+			expect(destructiveIdx).toBeGreaterThanOrEqual(0);
+			expect(cancelIdx).toBeLessThan(destructiveIdx);
+		}
 	});
 
 	it('opens the locked-lab overlay as a native modal dialog', () => {
@@ -269,7 +290,7 @@ describe('polish audit regressions', () => {
 
 	it('loads tokens from the active design system rather than hard-coding a palette', () => {
 		expect(appHtml).toContain('%%DESIGN_SYSTEM_CSS%%');
-		expect(layout).toMatch(/activeSystem\.fonts/);
+		expect(layout).not.toMatch(/activeSystem\.fonts/);
 		expect(layout).not.toMatch(/virtual:design-system/);
 		expect(appCss).not.toMatch(/--paper:\s*#/);
 		expect(appCss).toMatch(/--s1:/);
@@ -278,7 +299,7 @@ describe('polish audit regressions', () => {
 		expect(viteConfig).toMatch(/designSystemPlugin/);
 	});
 
-	it('keeps unused Botanical Korea faces on disk without preloading them', () => {
+	it('keeps unused Botanical Korea faces on disk without shipping them in CSS', () => {
 		expect(existsSync(new URL('../../static/fonts/NotoSerifKR-subset.woff2', import.meta.url))).toBe(true);
 		expect(existsSync(new URL('../../static/fonts/Newsreader-latin.woff2', import.meta.url))).toBe(true);
 		expect(systemCss).toMatch(/--serif:/);
@@ -286,7 +307,21 @@ describe('polish audit regressions', () => {
 		expect(systemCss).not.toMatch(/NotoSerifKR-subset\.woff2/);
 		expect(systemCss).not.toMatch(/Newsreader-latin\.woff2/);
 		expect(systemCss).toMatch(/font-display:\s*optional/);
-		expect(layout).toMatch(/activeSystem\.fonts/);
+		expect(layout).not.toMatch(/activeSystem\.fonts/);
+	});
+
+	it('pins Newsreader italic to wght 400 so the preload stays under 80 KB', () => {
+		const italic = new URL('../../static/fonts/Newsreader-Italic-latin.woff2', import.meta.url);
+		expect(existsSync(italic)).toBe(true);
+		const bytes = readFileSync(italic);
+		expect(bytes.byteLength).toBeLessThan(80_000);
+		expect(bytes.byteLength).toBeGreaterThan(20_000);
+	});
+
+	it('gives /review empty-state fades an explicit short duration', () => {
+		// Duration is gated through motion() so reduced-motion zeros it (see #140).
+		expect(review).toMatch(/in:fade=\{motion\(\{\s*duration:\s*150\s*\}\)\}/);
+		expect(review).not.toMatch(/in:fade(?!=)/);
 	});
 
 	it('self-hosts Newsreader italic for English display type', () => {
