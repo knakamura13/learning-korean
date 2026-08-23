@@ -41,6 +41,7 @@
 	import ReadStep from './steps/ReadStep.svelte';
 	import LabSpread from './shell/LabSpread.svelte';
 	import LabPipRail from './LabPipRail.svelte';
+	import KoText from './KoText.svelte';
 
 	let { lab }: { lab: Lab } = $props();
 
@@ -364,7 +365,7 @@
 					{furthest}
 					onJump={jumpTo}
 				/>
-				<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true">{promptLive}</p>
+				<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true"><KoText text={promptLive} /></p>
 				{#key index}
 					<div class="prompt" bind:this={cardEl} in:fly={motion({ y: 10, duration: 260 })}>
 						{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
