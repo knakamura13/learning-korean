@@ -444,6 +444,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('sizes popover actions, pip, settings, brand, and lab-index hits to at least 44px', () => {
+		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-width:\s*44px/s);
 		expect(appCss).toMatch(/\.btn\s*\{[^}]*min-height:\s*44px/s);
 		expect(home).toMatch(/LockedLabPopover/);
 		expect(sittingCss).toMatch(/\.pip\s*\{[^}]*min-width:\s*44px/s);
@@ -460,6 +461,8 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(settingsLink)).toMatch(/min-height:\s*44px/);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-width:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*44px/s);
 	});
 
 	it('collapses every animation and transition under prefers-reduced-motion', () => {
@@ -1084,5 +1087,14 @@ describe('polish audit regressions', () => {
 	it('holds review stat labels at the 0.75rem small-uppercase floor', () => {
 		expect(styleBlock(review)).toMatch(/\.stat span\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(review)).not.toMatch(/\.stat span\s*\{[^}]*font-size:\s*0\.7[0-4]rem/s);
+	});
+
+	it('surfaces corrupt or non-durable storage from the root layout on every route', () => {
+		expect(layout).toMatch(/storageReady && \(progress\.corrupt \|\| labSession\.corrupt\)/);
+		expect(layout).toMatch(/Saved progress could not be read\./);
+		expect(layout).toMatch(/Progress will not be saved\./);
+		expect(review).not.toMatch(/Saved progress could not be read\./);
+		expect(review).not.toMatch(/Progress will not be saved\./);
+		expect(appCss).toMatch(/\.warn\s*\{[^}]*border:\s*1px solid var\(--bad\)/s);
 	});
 });
