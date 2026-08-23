@@ -218,7 +218,7 @@ describe('Escape from the panel (would fail today’s reopen loop)', () => {
 
 	it('wires dismiss and focus-open through the extracted decisions', () => {
 		expect(src).toMatch(/onkeydown=\{hover\.onWindowKey\}/);
-		expect(hoverPreview).toMatch(/decideWindowEscape\(this\.openId,\s*this\.mode\)/);
+		expect(hoverPreview).toMatch(/decideWindowEscape\(this\.openId,\s*this\.mode,\s*this\.#focusInPreviewGroup\(\)\)/);
 		expect(hoverPreview).toMatch(/case 'close':/);
 		expect(hoverPreview).toMatch(/decideItemFocusOpen\(this\.#suppressFocusOpen\)/);
 		expect(hoverPreview).toMatch(/#suppressFocusOpen = true/);

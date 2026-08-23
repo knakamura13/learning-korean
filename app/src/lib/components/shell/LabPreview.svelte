@@ -16,7 +16,8 @@
 		onClose,
 		onMeasure,
 		onPointerEnter,
-		onPointerLeave
+		onPointerLeave,
+		onFocusOut
 	}: {
 		model: LabPreviewModel;
 		placement: PopoverPlacement;
@@ -26,6 +27,7 @@
 		onMeasure?: (size: { w: number; h: number }) => void;
 		onPointerEnter?: () => void;
 		onPointerLeave?: (e: PointerEvent) => void;
+		onFocusOut?: (e: FocusEvent) => void;
 	} = $props();
 
 	function actionClass(label: LabPreviewModel['actionLabel']): string {
@@ -64,6 +66,7 @@
 	aria-labelledby="{panelId}-title"
 	onpointerenter={onPointerEnter}
 	onpointerleave={onPointerLeave}
+	onfocusout={onFocusOut}
 >
 	<div class="face" {@attach reportSize}>
 		<p class="eyebrow">{model.eyebrow}</p>
