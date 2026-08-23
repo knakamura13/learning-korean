@@ -1,8 +1,13 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { activeSystem } from '../active';
-import { contrastRatio } from '../contrast';
 import { designSystemCss } from '../css';
+import {
+	assertPairings,
+	BORDER_PAIRINGS,
+	paletteStates,
+	TEXT_PAIRINGS
+} from '../palettePairings';
 import { academia } from './academia';
 
 describe('academia', () => {
@@ -21,7 +26,7 @@ describe('academia', () => {
 		expect(academia.light.accent.toLowerCase()).toBe('#5c3d2e');
 		expect(academia.light.accentInk.toLowerCase()).toBe('#faf6ee');
 		expect(academia.light.rose.toLowerCase()).toBe('#6b4e12');
-		expect(academia.dark.accent.toLowerCase()).toBe('#c47a82');
+		expect(academia.dark.accent.toLowerCase()).toBe('#e8a8a2');
 		expect(academia.dark.accentInk.toLowerCase()).toBe('#2a1a0a');
 		expect(academia.dark.rose.toLowerCase()).toBe('#d4a843');
 		expect(academia.shape.rSm).toBe('0px');
@@ -38,16 +43,10 @@ describe('academia', () => {
 		expect(academia.leading).toBe('1.75');
 	});
 
-	it('keeps caption-size ink-faint at least 7:1 and action inks at 4.5:1', () => {
-		const { light, dark } = academia;
-		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);
-		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(4.5);
-		for (const name of ['rose', 'good', 'blue', 'warn'] as const) {
-			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(4.5);
-			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(4.5);
-		}
+	it('keeps painted palette pairings across schemes and contrast-more', () => {
+		const states = paletteStates(academia);
+		assertPairings(states, TEXT_PAIRINGS);
+		assertPairings(states, BORDER_PAIRINGS);
 	});
 
 	it('self-hosts Academia Latin faces next to Hangul', () => {

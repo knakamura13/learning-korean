@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { contrastRatio } from '../contrast';
+import {
+	assertPairings,
+	BORDER_PAIRINGS,
+	paletteStates,
+	TEXT_PAIRINGS
+} from '../palettePairings';
 import { taegeuk } from './taegeuk';
 
 describe('taegeuk', () => {
@@ -8,16 +13,10 @@ describe('taegeuk', () => {
 		expect(taegeuk.dark.paper.toLowerCase()).toBe('#131316');
 	});
 
-	it('keeps caption-size ink-faint at least 7:1 and action inks at 4.5:1', () => {
-		const { light, dark } = taegeuk;
-		expect(contrastRatio(light.inkFaint, light.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(dark.inkFaint, dark.paper)).toBeGreaterThanOrEqual(7);
-		expect(contrastRatio(light.accent, light.accentInk)).toBeGreaterThanOrEqual(4.5);
-		expect(contrastRatio(dark.accent, dark.accentInk)).toBeGreaterThanOrEqual(4.5);
-		for (const name of ['rose', 'good', 'blue', 'warn'] as const) {
-			expect(contrastRatio(light[name], light.paper)).toBeGreaterThanOrEqual(4.5);
-			expect(contrastRatio(dark[name], dark.paper)).toBeGreaterThanOrEqual(4.5);
-		}
+	it('keeps painted palette pairings across schemes and contrast-more', () => {
+		const states = paletteStates(taegeuk);
+		assertPairings(states, TEXT_PAIRINGS);
+		assertPairings(states, BORDER_PAIRINGS);
 	});
 
 	it('owns Hangul as a webfont on the system, not as a CSS special case', () => {
