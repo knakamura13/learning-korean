@@ -262,7 +262,7 @@ describe('themeBootScript', () => {
 	});
 });
 
-describe('non-default look font preloads', () => {
+describe('look font preloads', () => {
 	// The getItem-throws test above leaves a Storage.prototype spy behind.
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -296,19 +296,26 @@ describe('non-default look font preloads', () => {
 	it('injects preloads for a stored non-default look, pre-paint', () => {
 		bootWithFonts('watercolor');
 		expect(document.documentElement.getAttribute('data-look')).toBe('watercolor');
-		// NotoSansKR is in the default look's set — the layout already preloads
-		// it server-side, so the boot script must not duplicate it.
-		expect(preloadHrefs()).toEqual(['/fonts/CormorantGaramond-Regular.woff2']);
+		expect(preloadHrefs()).toEqual([
+			'/fonts/CormorantGaramond-Regular.woff2',
+			'/fonts/NotoSansKR-subset.woff2'
+		]);
 		const link = document.querySelector<HTMLLinkElement>('link[rel="preload"]');
 		expect(link?.getAttribute('type')).toBe('font/woff2');
 		expect(link?.crossOrigin).toBe('anonymous');
 	});
 
-	it('injects nothing for the default look — the layout already preloads it', () => {
+	it('injects preloads for the default look too — layout does not bake them', () => {
 		bootWithFonts(null);
-		expect(preloadHrefs()).toEqual([]);
+		expect(preloadHrefs()).toEqual([
+			'/fonts/NotoSansKR-subset.woff2',
+			'/fonts/Newsreader-Italic-latin.woff2'
+		]);
 		bootWithFonts(DEFAULT_LOOK_ID);
-		expect(preloadHrefs()).toEqual([]);
+		expect(preloadHrefs()).toEqual([
+			'/fonts/NotoSansKR-subset.woff2',
+			'/fonts/Newsreader-Italic-latin.woff2'
+		]);
 	});
 
 	it('injects nothing for a look with no map entry', () => {

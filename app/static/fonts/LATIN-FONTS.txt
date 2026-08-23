@@ -2,7 +2,8 @@ Self-hosted Latin subsets (OFL)
 ================================
 
 These woff2 files were subset from official OFL sources (Google Fonts mirrors
-of upstream) by `app/scripts/vendor-latin-fonts.py`. Hangul remains
+of upstream) by `app/scripts/vendor-latin-fonts.py`, which pins `wght=400`
+before subsetting and keeps the `opsz` axis for optical sizing. Hangul remains
 `NotoSansKR-subset.woff2`. The SIL Open Font License text is in OFL.txt.
 
 Newsreader

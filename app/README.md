@@ -40,7 +40,7 @@ src/lib/server/     the optional account API: Postgres access, Google OAuth,
                     sessions, CAS state store (absent from static builds)
 src/lib/sync/       client sync engine + typed API wrapper (guest mode is a value)
 src/lib/theme/      swappable design systems (the look)
-  active.ts           default / build-time look (Botanical Korea) for manifests, font preloads, and no-JS `:root`
+  active.ts           default / build-time look (Botanical Korea) for manifests and no-JS `:root`
   systems/botanicalKorea.ts  pressed-flowers look (default)
   systems/taegeuk.ts         ink-and-paper palette
   systems/watercolor.ts      pigment-wash option
@@ -56,8 +56,8 @@ The look is a `DesignSystem` object: palettes, type stacks, shape, webfonts,
 and contrast-more overrides. Components only use semantic CSS variables
 (`--ink`, `--paper`, `--accent`, `--serif`, …). Space, motion, and shell width
 stay in `app.css`. Runtime look is `html[data-look]` chosen in Settings; `active.ts`
-only supplies the build-time default for manifests, font preloads, and the no-JS
-`:root` fallback.
+only supplies the build-time default for manifests and the no-JS `:root`
+fallback. Font preloads come from `theme-boot.js` for the stored look.
 
 ## Two rules worth keeping
 
