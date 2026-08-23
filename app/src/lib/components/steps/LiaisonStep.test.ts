@@ -35,7 +35,11 @@ const base = {
 };
 
 function click(el: HTMLElement, label: string) {
-	const btn = [...el.querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
+	const btn = [...el.querySelectorAll('button')].find((b) => {
+		const glyph = b.querySelector('[lang="ko"]')?.textContent?.trim();
+		if (glyph === label) return true;
+		return b.textContent?.trim() === label;
+	});
 	if (!btn) throw new Error(`no button "${label}"`);
 	btn.click();
 	flushSync();
