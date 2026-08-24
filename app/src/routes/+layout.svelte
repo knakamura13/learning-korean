@@ -16,6 +16,7 @@
 	let { children } = $props();
 
 	let storageReady = $state(false);
+	let brandHot = $state(false);
 
 	const canonical = $derived(pageCanonical(page.url.pathname));
 	const ogImage = $derived(siteAsset('/og.png'));
@@ -101,7 +102,12 @@
 {#if !healthz}
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
-		<a class="brand" href={resolve('/')}>
+		<a
+			class={['brand', { wiggling: brandHot }]}
+			href={resolve('/')}
+			onpointerenter={() => (brandHot = true)}
+			onpointerleave={() => (brandHot = false)}
+		>
 			<span class="name">Korean</span>
 			<BrandMark />
 		</a>
@@ -266,6 +272,21 @@
 		text-decoration: none;
 		color: var(--ink);
 		font-weight: 400;
+	}
+	.brand:hover :global(.jamo-h),
+	.brand.wiggling :global(.jamo-h),
+	.brand:focus-visible :global(.jamo-h) {
+		animation: han-wiggle-h 640ms var(--ease-in-out) infinite;
+	}
+	.brand:hover :global(.jamo-a),
+	.brand.wiggling :global(.jamo-a),
+	.brand:focus-visible :global(.jamo-a) {
+		animation: han-wiggle-a 640ms var(--ease-in-out) 80ms infinite;
+	}
+	.brand:hover :global(.jamo-n),
+	.brand.wiggling :global(.jamo-n),
+	.brand:focus-visible :global(.jamo-n) {
+		animation: han-wiggle-n 640ms var(--ease-in-out) 160ms infinite;
 	}
 
 	.name {
@@ -477,6 +498,20 @@
 			justify-content: flex-start;
 			margin-inline-start: 0;
 			gap: var(--s1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.brand:hover :global(.jamo-h),
+		.brand:hover :global(.jamo-a),
+		.brand:hover :global(.jamo-n),
+		.brand.wiggling :global(.jamo-h),
+		.brand.wiggling :global(.jamo-a),
+		.brand.wiggling :global(.jamo-n),
+		.brand:focus-visible :global(.jamo-h),
+		.brand:focus-visible :global(.jamo-a),
+		.brand:focus-visible :global(.jamo-n) {
+			animation: none;
 		}
 	}
 

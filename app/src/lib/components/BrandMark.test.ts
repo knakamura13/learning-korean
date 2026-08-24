@@ -23,12 +23,12 @@ describe('BrandMark', () => {
 	});
 
 	it('wiggles each jamo on brand hover with a reduced-motion fallback', () => {
-		expect(css).toMatch(/@keyframes wiggle-h/);
-		expect(css).toMatch(/@keyframes wiggle-a/);
-		expect(css).toMatch(/@keyframes wiggle-n/);
+		expect(css).toMatch(/@keyframes -global-han-wiggle-h/);
+		expect(css).toMatch(/@keyframes -global-han-wiggle-a/);
+		expect(css).toMatch(/@keyframes -global-han-wiggle-n/);
 		expect(css).toMatch(/:global\(a\.brand:hover\) \.jamo-h/);
-		expect(css).toMatch(/animation-delay:\s*80ms|:global\(a\.brand:hover\) \.jamo-a \{[^}]*80ms/s);
-		expect(css).toMatch(/:global\(a\.brand:hover\) \.jamo-n \{[^}]*160ms/s);
+		expect(css).toMatch(/han-wiggle-a 640ms var\(--ease-in-out\) 80ms infinite/);
+		expect(css).toMatch(/han-wiggle-n 640ms var\(--ease-in-out\) 160ms infinite/);
 		expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
 		expect(css).toMatch(/animation:\s*none/);
 		expect(css).toMatch(/color:\s*var\(--ink\)/);
@@ -40,6 +40,9 @@ describe('layout BrandMark entry', () => {
 	it('mounts BrandMark beside the English name', () => {
 		expect(layout).toMatch(/BrandMark/);
 		expect(layout).toMatch(/class="name">Korean/);
+		expect(layout).toMatch(/class=\{\['brand', \{ wiggling: brandHot \}\]\}/);
+		expect(layout).toMatch(/onpointerenter/);
+		expect(layout).toMatch(/han-wiggle-h/);
 		expect(layout).not.toMatch(/class="mark" lang="ko">한/);
 	});
 });

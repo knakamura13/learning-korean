@@ -1,15 +1,13 @@
 <span class="mark" lang="ko">
 	<span class="vh">한</span>
 	<svg class="jamo jamo-h" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-		<path d="M8.5 7.5h18" />
-		<circle cx="17.5" cy="19" r="8.2" />
+		<text x="24" y="40" text-anchor="middle">한</text>
 	</svg>
 	<svg class="jamo jamo-a" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-		<path d="M32.5 6v26.5" />
-		<path d="M32.5 16.5h10" />
+		<text x="24" y="40" text-anchor="middle">한</text>
 	</svg>
 	<svg class="jamo jamo-n" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-		<path d="M8.5 34.5v8h31" />
+		<text x="24" y="40" text-anchor="middle">한</text>
 	</svg>
 </span>
 
@@ -17,8 +15,8 @@
 	.mark {
 		position: relative;
 		display: inline-grid;
-		inline-size: 1.15rem;
-		block-size: 1.15rem;
+		inline-size: 1.25rem;
+		block-size: 1.25rem;
 		color: var(--accent);
 		line-height: 1;
 		overflow: visible;
@@ -32,96 +30,96 @@
 		display: block;
 	}
 
-	.jamo path,
-	.jamo circle {
-		fill: none;
-		stroke: currentColor;
-		stroke-width: 4.4;
-		stroke-linecap: round;
-		stroke-linejoin: round;
+	.jamo text {
+		fill: currentColor;
+		font-family: var(--hangul);
+		font-size: 40px;
+		font-weight: 500;
+		font-style: normal;
 	}
 
+	/* Slice 한 into ㅎ (top-left), ㅏ (right), ㄴ (bottom) so each SVG can wiggle alone. */
 	.jamo-h {
-		transform-origin: 36% 36%;
+		clip-path: inset(0 36% 32% 0);
+		transform-origin: 32% 34%;
 	}
 	.jamo-a {
-		transform-origin: 74% 38%;
+		clip-path: inset(0 0 30% 58%);
+		transform-origin: 78% 38%;
 	}
 	.jamo-n {
-		transform-origin: 50% 84%;
+		clip-path: inset(64% 0 0 0);
+		transform-origin: 50% 86%;
 	}
 
-	@media (hover: hover) {
-		:global(a.brand:hover) .jamo-h {
-			animation: wiggle-h 640ms var(--ease-in-out) infinite;
-		}
-		:global(a.brand:hover) .jamo-a {
-			animation: wiggle-a 640ms var(--ease-in-out) 80ms infinite;
-		}
-		:global(a.brand:hover) .jamo-n {
-			animation: wiggle-n 640ms var(--ease-in-out) 160ms infinite;
-		}
-	}
-
+	.mark:hover .jamo-h,
+	:global(a.brand:hover) .jamo-h,
 	:global(a.brand:focus-visible) .jamo-h {
-		animation: wiggle-h 640ms var(--ease-in-out) infinite;
+		animation: han-wiggle-h 640ms var(--ease-in-out) infinite;
 	}
+	.mark:hover .jamo-a,
+	:global(a.brand:hover) .jamo-a,
 	:global(a.brand:focus-visible) .jamo-a {
-		animation: wiggle-a 640ms var(--ease-in-out) 80ms infinite;
+		animation: han-wiggle-a 640ms var(--ease-in-out) 80ms infinite;
 	}
+	.mark:hover .jamo-n,
+	:global(a.brand:hover) .jamo-n,
 	:global(a.brand:focus-visible) .jamo-n {
-		animation: wiggle-n 640ms var(--ease-in-out) 160ms infinite;
+		animation: han-wiggle-n 640ms var(--ease-in-out) 160ms infinite;
 	}
 
-	@keyframes wiggle-h {
+	@keyframes -global-han-wiggle-h {
 		0%,
 		100% {
 			transform: rotate(0deg) translate(0, 0);
 		}
 		25% {
-			transform: rotate(8deg) translate(0.2px, -0.6px);
+			transform: rotate(22deg) translate(1.5px, -3px);
 		}
 		55% {
-			transform: rotate(-7deg) translate(-0.3px, 0.3px);
+			transform: rotate(-18deg) translate(-2px, 1.5px);
 		}
 		80% {
-			transform: rotate(3deg) translate(0.1px, -0.2px);
+			transform: rotate(8deg) translate(1px, -1px);
 		}
 	}
 
-	@keyframes wiggle-a {
+	@keyframes -global-han-wiggle-a {
 		0%,
 		100% {
 			transform: rotate(0deg) translate(0, 0);
 		}
 		20% {
-			transform: rotate(-7deg) translate(0.4px, 0.2px);
+			transform: rotate(-20deg) translate(2.5px, 1px);
 		}
 		50% {
-			transform: rotate(9deg) translate(-0.2px, -0.5px);
+			transform: rotate(24deg) translate(-1.5px, -3px);
 		}
 		75% {
-			transform: rotate(-4deg) translate(0.2px, 0.15px);
+			transform: rotate(-10deg) translate(1px, 0.8px);
 		}
 	}
 
-	@keyframes wiggle-n {
+	@keyframes -global-han-wiggle-n {
 		0%,
 		100% {
 			transform: rotate(0deg) translateX(0);
 		}
 		30% {
-			transform: rotate(6deg) translateX(0.7px);
+			transform: rotate(16deg) translateX(4px);
 		}
 		60% {
-			transform: rotate(-8deg) translateX(-0.6px);
+			transform: rotate(-20deg) translateX(-3.5px);
 		}
 		85% {
-			transform: rotate(3deg) translateX(0.25px);
+			transform: rotate(8deg) translateX(1.5px);
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		.mark:hover .jamo-h,
+		.mark:hover .jamo-a,
+		.mark:hover .jamo-n,
 		:global(a.brand:hover) .jamo-h,
 		:global(a.brand:hover) .jamo-a,
 		:global(a.brand:hover) .jamo-n,
@@ -130,6 +128,7 @@
 		:global(a.brand:focus-visible) .jamo-n {
 			animation: none;
 		}
+		.mark:hover,
 		:global(a.brand:hover) .mark,
 		:global(a.brand:focus-visible) .mark {
 			color: var(--ink);

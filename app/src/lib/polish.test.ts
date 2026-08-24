@@ -903,7 +903,7 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
-		expect(layout).toMatch(/class="brand"/);
+		expect(layout).toMatch(/class=\{\['brand'/);
 		expect(layout).not.toMatch(/aria-label="Korean 한"/);
 		expect(layout).toMatch(/<BrandMark/);
 		expect(brandMark).toMatch(/class="mark" lang="ko"/);
