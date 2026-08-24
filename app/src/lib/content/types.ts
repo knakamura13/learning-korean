@@ -14,7 +14,7 @@ export interface StageItem {
 }
 
 interface BaseStep {
-	/** Small label above the instruction, e.g. "Act 2 · build it". */
+	/** Small label above the instruction, e.g. "build it" or "2 of 5". */
 	act?: string;
 	/** The instruction. Inline HTML allowed for jamo spans and emphasis. */
 	do: string;

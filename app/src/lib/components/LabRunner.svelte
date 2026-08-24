@@ -44,6 +44,7 @@
 	import KoText from './KoText.svelte';
 	import FlagButton from './FlagButton.svelte';
 	import { conceptsForStep } from '$lib/domain/labStepConcepts';
+	import { formatStepEyebrow } from '$lib/content/formatStepEyebrow';
 
 	let { lab }: { lab: Lab } = $props();
 
@@ -372,7 +373,7 @@
 				<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true"><KoText text={promptLive} /></p>
 				{#key index}
 					<div class="prompt" bind:this={cardEl} in:fly={motion({ y: 10, duration: 260 })}>
-						{#if step.act}<p class="eyebrow">{step.act}</p>{/if}
+						{#if step.act}<p class="eyebrow">{formatStepEyebrow(step.act)}</p>{/if}
 						<h2 class="do">{@html labHtml(step.do)}</h2>
 						{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
 					</div>
