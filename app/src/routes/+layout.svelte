@@ -163,6 +163,12 @@
 	{/if}
 	{@render children()}
 </main>
+
+{#if !healthz}
+<footer class="site-foot">
+	<p>Interactive labs for reading Korean.</p>
+</footer>
+{/if}
 </div>
 
 <style>
@@ -186,6 +192,20 @@
 	main {
 		flex: 1 1 auto;
 		position: relative;
+	}
+
+	.site-foot {
+		padding: var(--s4) max(var(--s4), env(safe-area-inset-left))
+			max(var(--s5), env(safe-area-inset-bottom)) max(var(--s4), env(safe-area-inset-right));
+		border-top: 1px solid var(--rule);
+		color: var(--ink-faint);
+		font-size: 0.78rem;
+		text-align: center;
+	}
+	.site-foot p {
+		margin: 0;
+		max-width: var(--shell);
+		margin-inline: auto;
 	}
 
 	.storage-warn {
