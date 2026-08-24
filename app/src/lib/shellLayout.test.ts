@@ -83,6 +83,14 @@ describe('shell layout source contracts', () => {
 		expect(styleBlock(reference)).toMatch(/grid-template-areas:\s*'head'\s*'rail'\s*'main'/);
 	});
 
+	it('nav tabs keep a 1px border in both states so selecting one does not shift neighbors', () => {
+		const css = styleBlock(layout);
+		expect(css).toMatch(/nav a\s*\{[^}]*border:\s*1px solid transparent/s);
+		expect(css).toMatch(/nav a\s*\{[^}]*border-block-end:\s*(?:none|0)/s);
+		expect(css).toMatch(/nav a\.active\s*\{[^}]*border-color:\s*var\(--rule\)/s);
+		expect(css).not.toMatch(/nav a\.active\s*\{[^}]*\bborder:\s*1px solid/s);
+	});
+
 	it('desktop rails sit with the page h1 at rest and tuck under the header when sticky', () => {
 		expect(appCss).toMatch(/\.shell\s*\{[^}]*padding-top:\s*var\(--s6\)/s);
 		expect(styleBlock(home)).toMatch(/h1\s*\{[^}]*margin:\s*var\(--s2\) 0 var\(--s3\)/s);
