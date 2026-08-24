@@ -1,16 +1,25 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 import LabSwitcher from './LabSwitcher.svelte';
 import { LABS } from '$lib/content';
 
 let instance: ReturnType<typeof mount> | undefined;
 
+beforeEach(() => {
+	// requestModalClose skips the backdrop fade when motion is reduced.
+	vi.stubGlobal(
+		'matchMedia',
+		vi.fn(() => ({ matches: true }) as MediaQueryList)
+	);
+});
+
 afterEach(() => {
 	if (instance) unmount(instance);
 	instance = undefined;
 	document.body.innerHTML = '';
 	localStorage.clear();
+	vi.unstubAllGlobals();
 });
 
 function render(currentId: string) {
