@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { fly } from 'svelte/transition';
-	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
+	import { attachModalDialog, requestModalClose } from '$lib/a11y/attachModalDialog';
 	import { motion } from '$lib/a11y/motion';
 	import type { LockedLabPopoverCopy } from '$lib/domain/lockedLab';
 
@@ -19,14 +19,25 @@
 		onSkip: () => void;
 	} = $props();
 
+	let dialogEl = $state<HTMLDialogElement | null>(null);
+
 	function attachLockedDialog(node: HTMLDialogElement) {
+		dialogEl = node;
 		const stopModal = attachModalDialog(node, onDismiss);
 		queueMicrotask(() => node.querySelector<HTMLElement>('a.btn, button')?.focus());
-		return stopModal;
+		return () => {
+			dialogEl = null;
+			stopModal();
+		};
+	}
+
+	function dismiss() {
+		if (dialogEl) requestModalClose(dialogEl, onDismiss);
+		else onDismiss();
 	}
 
 	function onBackdropPointerDown(e: PointerEvent) {
-		if (e.target === e.currentTarget) onDismiss();
+		if (e.target === e.currentTarget) dismiss();
 	}
 </script>
 
@@ -41,7 +52,7 @@
 >
 	<div class="sheet-head">
 		<h2 id="locked-lab-pop-title">{copy.title}</h2>
-		<button type="button" class="close" aria-label="Close" onclick={onDismiss}>
+		<button type="button" class="close" aria-label="Close" onclick={dismiss}>
 			<span aria-hidden="true">×</span>
 		</button>
 	</div>
@@ -55,7 +66,7 @@
 			href={resolve('/lab/[id]', { id: skipId })}
 			onclick={onSkip}
 		>{copy.skipLabel}</a>
-		<button class="btn ghost" type="button" onclick={onDismiss}>{copy.dismissLabel}</button>
+		<button class="btn ghost" type="button" onclick={dismiss}>{copy.dismissLabel}</button>
 	</div>
 </dialog>
 

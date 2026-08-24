@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it, vi } from 'vitest';
-import { attachModalDialog } from './attachModalDialog';
+import { attachModalDialog, requestModalClose } from './attachModalDialog';
 
 describe('attachModalDialog', () => {
 	it('falls back to the open attribute when showModal is missing', () => {
@@ -54,5 +54,21 @@ describe('attachModalDialog', () => {
 
 		expect(document.activeElement).toBe(opener);
 		opener.remove();
+	});
+
+	it('defers onCancel until requestModalClose finishes under reduced motion', () => {
+		vi.stubGlobal(
+			'matchMedia',
+			vi.fn(() => ({ matches: true }) as MediaQueryList)
+		);
+		const node = document.createElement('dialog');
+		node.setAttribute('open', '');
+		Object.defineProperty(node, 'open', { value: true, configurable: true });
+		const onCancel = vi.fn();
+		attachModalDialog(node, onCancel);
+		requestModalClose(node, onCancel);
+		expect(onCancel).toHaveBeenCalledOnce();
+		expect(node.hasAttribute('open')).toBe(false);
+		vi.unstubAllGlobals();
 	});
 });

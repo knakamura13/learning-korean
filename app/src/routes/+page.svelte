@@ -111,16 +111,9 @@
 		if (!lockedOpen) return;
 		progress.openLab(lockedOpen);
 	}
-
-	function onWindowKey(e: KeyboardEvent) {
-		if (e.key !== 'Escape' || !lockedOpen) return;
-		e.preventDefault();
-		closeLocked();
-	}
 </script>
 
 <svelte:head><title>Korean — labs and review</title></svelte:head>
-<svelte:window onkeydown={onWindowKey} />
 
 <div class="with-rail">
 	<div class="shell">
