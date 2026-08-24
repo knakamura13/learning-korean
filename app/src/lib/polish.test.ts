@@ -785,6 +785,9 @@ describe('polish audit regressions', () => {
 			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*flex-wrap:\s*wrap/s
 		);
 		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*justify-content:\s*space-between/s
+		);
+		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*\}\s*nav \{[^}]*flex:\s*1 0 100%/s
 		);
 		expect(styleBlock(layout)).not.toMatch(/overflow-x:\s*auto/);

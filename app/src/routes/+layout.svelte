@@ -406,6 +406,7 @@
 			height: auto;
 			min-height: 48px;
 			flex-wrap: wrap;
+			justify-content: space-between;
 			row-gap: 0;
 		}
 		nav {
