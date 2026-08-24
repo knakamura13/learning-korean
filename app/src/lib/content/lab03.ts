@@ -14,10 +14,18 @@ export const lab03: Lab = {
 		summary:
 			'Twenty-one written vowels, and you built every compound from parts you already had. You also found the rule that says which pairs are even possible, and learned that four of the eleven have quietly collapsed into two sounds. Next lab: batchim — what happens when a consonant moves to the bottom of the block.'
 	},
+	phases: [
+		{ title: 'Compounds built from ㅗ', count: 5 },
+		{ title: 'Compounds built from ㅜ', count: 4 },
+		{ title: 'Three compound spellings, one sound', count: 2 },
+		{ title: 'Wrapping vowels put the consonant in the corner', count: 2 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- Compounds built from ㅗ ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · the first rule',
 			do: 'A vowel you know, and a new one. What was added?',
 			stage: [
 				{ glyph: 'ㅏ', caption: 'a' },
@@ -39,7 +47,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'fusion',
-			act: 'Act 1 · fuse it',
 			do: 'Fuse the two pieces that make <em>ae</em>.',
 			hint: 'The vowel you just saw. Pick its two parts.',
 			target: 'ㅐ',
@@ -51,7 +58,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'fusion',
-			act: 'Act 1 · fuse it',
 			do: 'Same rule. Fuse the two pieces that make <em>e</em>.',
 			hint: 'This time start from ㅓ. Pick its two parts.',
 			target: 'ㅔ',
@@ -63,7 +69,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · the good news',
 			do: 'You just built <span class="jamo">ㅐ</span> and <span class="jamo">ㅔ</span> from different parts. Now, what is the good news?',
 			stage: [{ glyph: 'ㅐ' }, { glyph: 'ㅔ' }],
 			vs: 'vs',
@@ -80,7 +85,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'fusion',
-			act: 'Act 1 · the glide survives',
 			do: 'The y-glide from Lab 02 still works. Fuse <em>ye</em>.',
 			hint: 'Start from the glide version of ㅓ.',
 			target: 'ㅖ',
@@ -90,9 +94,10 @@ export const lab03: Lab = {
 			teach:
 				'<p><span class="jamo">ㅕ</span> + <span class="jamo">ㅣ</span> = <span class="jamo">ㅖ</span>. The glide rides along untouched.</p><p>Same move gives <span class="jamo">ㅑ</span> + <span class="jamo">ㅣ</span> = <span class="jamo">ㅒ</span>.</p>'
 		},
+
+		/* ---- Compounds built from ㅜ ---- */
 		{
 			type: 'fusion',
-			act: 'Act 2 · the second rule',
 			do: 'New move: put a <strong>round</strong> vowel first. Fuse <em>wa</em>.',
 			hint: 'ㅗ leading, and something bright after it.',
 			target: 'ㅘ',
@@ -104,7 +109,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'fusion',
-			act: 'Act 2 · the dark twin',
 			do: 'Now the dark version. Fuse <em>wo</em>.',
 			target: 'ㅝ',
 			targetName: 'wo',
@@ -115,7 +119,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · why not',
 			do: 'Try it in your head: <span class="jamo">ㅗ</span>+<span class="jamo">ㅓ</span> is not a Korean vowel. What rules it out?',
 			stage: [
 				{ glyph: 'ㅗ', caption: 'bright' },
@@ -136,7 +139,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'fusion',
-			act: 'Act 2 · w plus i',
 			do: 'Both rules at once. Fuse <em>wi</em>.',
 			target: 'ㅟ',
 			targetName: 'wi',
@@ -145,11 +147,12 @@ export const lab03: Lab = {
 			teach:
 				'<p><span class="jamo">ㅜ</span> + <span class="jamo">ㅣ</span> = <span class="jamo">ㅟ</span>. Round vowel in front → w; <span class="jamo">ㅣ</span> on the end → closed.</p><p><span class="jamo">ㅗ</span> + <span class="jamo">ㅣ</span> gives you <span class="jamo">ㅚ</span> the same way.</p>'
 		},
+
+		/* ---- Three compound spellings, one sound ---- */
 		{
 			type: 'fusion',
-			act: 'Act 3 · two layers deep',
 			do: 'This one takes a compound as its <em>second</em> piece. Fuse <em>wae</em>.',
-			hint: 'A round vowel in front, and one of the vowels you built in Act 1 behind it.',
+			hint: 'A round vowel in front, and ㅐ behind it.',
 			target: 'ㅙ',
 			targetName: 'wae',
 			first: ['ㅗ', 'ㅜ', 'ㅏ'],
@@ -159,7 +162,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 3 · the payoff',
 			do: 'Three different spellings: <span class="jamo">ㅙ ㅚ ㅞ</span>. How many different <em>sounds</em>?',
 			stage: [{ glyph: 'ㅙ' }, { glyph: 'ㅚ' }, { glyph: 'ㅞ' }],
 			options: ['1', '2', '3', '4'],
@@ -168,9 +170,10 @@ export const lab03: Lab = {
 			teach:
 				'<p>One. All three are said <span class="rom">we</span> in modern speech.</p><p>So the eleven compounds you just built are really about seven sounds. Twenty-one written vowels, roughly seventeen spoken ones. Your ear has less work than your eye — which is the opposite of what beginners fear.</p>'
 		},
+
+		/* ---- Wrapping vowels put the consonant in the corner ---- */
 		{
 			type: 'assemble',
-			act: 'Act 4 · a new block shape',
 			do: 'Compounds change how the block is laid out. Build <em>gwa</em>.',
 			hint: 'ㅘ is neither tall nor wide — watch where the consonant lands.',
 			target: '과',
@@ -182,7 +185,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'assemble',
-			act: 'Act 4 · a new block shape',
 			do: 'One more wrapper, opening with the silent placeholder. Build <em>wi</em>.',
 			target: '위',
 			targetName: 'wi',
@@ -191,9 +193,10 @@ export const lab03: Lab = {
 			teach:
 				'<p><span class="hg">위</span> — it means <em>above / on top of</em>, and it is a word you will meet constantly.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 5 · read it cold',
 			do: 'Two blocks. The first one is that odd fusion of the two bare strokes.',
 			blocks: [
 				{ block: '의', reading: 'ui' },
@@ -206,7 +209,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 5 · read it cold',
 			do: 'Your new wrapping vowel, in the wild.',
 			blocks: [
 				{ block: '과', reading: 'gwa' },
@@ -219,7 +221,6 @@ export const lab03: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 5 · last one',
 			do: 'One of the three merged spellings. Read it anyway.',
 			blocks: [
 				{ block: '회', reading: 'hoe' },

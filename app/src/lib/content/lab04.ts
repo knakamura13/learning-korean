@@ -14,10 +14,17 @@ export const lab04: Lab = {
 		summary:
 			'The bottom slot was the last structural piece of the writing system. You built 김 and 박, read 한국 and 한글, and learned why sixteen different letters make only seven sounds down there. Next lab: the eleven clusters — two consonants sharing one bottom slot, and the rule for which one wins.'
 	},
+	phases: [
+		{ title: 'A third slot opens under the vowel', count: 3 },
+		{ title: 'Sixteen batchim letters make seven sounds', count: 6 },
+		{ title: 'Build the two most common surnames', count: 2 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- A third slot opens under the vowel ---- */
 		{
 			type: 'assemble',
-			act: 'Act 1 · a slot opens',
 			do: 'There is a third slot under the block now. Build <em>gang</em>.',
 			hint: 'ㄱ on top, ㅏ beside it, and something underneath.',
 			target: '강',
@@ -30,7 +37,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'assemble',
-			act: 'Act 1 · a slot opens',
 			do: 'Same consonant twice — once on top, once underneath. Build <em>bap</em>.',
 			target: '밥',
 			targetName: 'bap · cooked rice, a meal',
@@ -42,7 +48,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · unreleased',
 			do: 'Say English <em>cup</em>, then Korean <span class="hg">밥</span>. Your hand in front of your mouth. What does Korean do differently at the end?',
 			stage: [{ glyph: '밥' }],
 			options: [
@@ -57,9 +62,10 @@ export const lab04: Lab = {
 			teach:
 				'<p>Korean final stops are <strong>unreleased</strong>: the air is cut off and held, never let go.</p><p>Releasing them is the single most recognizable foreign-accent marker in Korean. Costs nothing to fix now, costs years later.</p>'
 		},
+
+		/* ---- Sixteen batchim letters make seven sounds ---- */
 		{
 			type: 'choice',
-			act: 'Act 2 · the collapse',
 			do: 'Three different words, three different bottom letters. How many different <em>sounds</em> do they end with?',
 			stage: [
 				{ glyph: '낫', caption: 'sickle' },
@@ -74,7 +80,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · call it',
 			do: '<span class="hg">옷</span> means <em>clothes</em>. Which of the seven sounds does it actually end with?',
 			stage: [{ glyph: '옷' }],
 			options: ['ㄷ', 'ㄱ', 'ㅂ', 'ㄴ'],
@@ -84,7 +89,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · call it',
 			do: '<span class="hg">부엌</span> means <em>kitchen</em>. What does that last block really end with?',
 			stage: [{ glyph: '부엌' }],
 			options: ['ㄱ', 'ㄷ', 'ㅂ', 'ㅇ'],
@@ -94,7 +98,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · call it',
 			do: '<span class="hg">앞</span> means <em>front</em>. Last one — what does it end with?',
 			stage: [{ glyph: '앞' }],
 			options: ['ㅂ', 'ㄷ', 'ㄱ', 'ㅁ'],
@@ -104,7 +107,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · the number',
 			do: 'Sixteen different consonants can sit in that bottom slot. How many sounds do they make between them?',
 			options: ['5', '6', '7', '9'],
 			answer: 2,
@@ -114,7 +116,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'assemble',
-			act: 'Act 2 · build a flattened one',
 			do: 'Build <em>bat</em> — a field. Use the letter that <em>looks</em> like a t, not the one that sounds like it.',
 			hint: 'The aspirated ㅌ. It will not sound aspirated down there.',
 			target: '밭',
@@ -125,9 +126,10 @@ export const lab04: Lab = {
 			teach:
 				'<p><span class="hg">밭</span> is spelled with <span class="jamo">ㅌ</span> but pronounced <span class="hg">[받]</span>.</p><p>The spelling is not wrong — it is preserving the word’s identity, so that when a vowel follows, the real <span class="jamo">ㅌ</span> comes back. That is a later problem. For now: read it, flatten it.</p>'
 		},
+
+		/* ---- Build the two most common surnames ---- */
 		{
 			type: 'assemble',
-			act: 'Act 3 · names',
 			do: 'The most common surname in Korea. Build <em>gim</em>.',
 			hint: 'You will see it romanized as "Kim".',
 			target: '김',
@@ -140,7 +142,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'assemble',
-			act: 'Act 3 · names',
 			do: 'Second most common. Build <em>bak</em> — you will see it written "Park".',
 			target: '박',
 			targetName: 'Park · Bak',
@@ -150,9 +151,10 @@ export const lab04: Lab = {
 			teach:
 				'<p><span class="hg">박</span>. There is no <em>r</em> anywhere in it — "Park" is an English spelling convention, not a transcription.</p><p>You can now read the two most common surnames in Korea, plus <span class="hg">정</span>, <span class="hg">강</span>, <span class="hg">임</span> and most others, because they are all just consonant + vowel + batchim.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 4 · read it cold',
 			do: 'You built the first block two cards ago.',
 			blocks: [
 				{ block: '김', reading: 'gim' },
@@ -165,7 +167,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 4 · read it cold',
 			do: 'Two blocks, two batchim. One of them is the flattening kind.',
 			blocks: [
 				{ block: '한', reading: 'han' },
@@ -178,7 +179,6 @@ export const lab04: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 4 · the last one',
 			do: 'Same first block. New second block, ending in ㄹ.',
 			blocks: [
 				{ block: '한', reading: 'han' },

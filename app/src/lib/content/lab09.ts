@@ -14,10 +14,17 @@ export const lab09: Lab = {
 		summary:
 			'Direct ㄴ·ㄹ contact flows to ㄹㄹ in either order; a lead ㄹ after ㅁ/ㅇ yields to ㄴ. With that, all the drilled sound changes are yours — only palatalization stays reference-only. Next stop: names, and real text.'
 	},
+	phases: [
+		{ title: 'When ㄴ meets ㄹ, both are pronounced ㄹ', count: 5 },
+		{ title: 'When ㄹ meets ㄴ, both are pronounced ㄹ', count: 4 },
+		{ title: 'ㄹ after a nasal becomes ㄴ', count: 4 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- When ㄴ meets ㄹ, both are pronounced ㄹ ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · the mismatch',
 			do: 'The old kingdom\'s name. What does the ㄴ do?',
 			stage: [
 				{ glyph: '신라', caption: 'as written' },
@@ -37,7 +44,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · why',
 			do: 'Say <em>n</em>, then flick into <em>r</em>, fast, ten times. Why does Korean refuse it?',
 			options: [
 				'Both letters live on the same ridge; the flap wins',
@@ -52,7 +58,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 2 · let it flow',
 			do: 'ㄴ meets ㄹ. Operate the junction.',
 			word: '신라',
 			gloss: 'Silla, the old kingdom',
@@ -60,7 +65,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 2 · let it flow',
 			do: 'A word you will text people. Operate the junction.',
 			word: '연락',
 			gloss: 'contact, getting in touch',
@@ -69,15 +73,15 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 2 · let it flow',
 			do: 'Same junction, everyday word. Operate it.',
 			word: '편리',
 			gloss: 'convenience',
 			teach: '<p><span class="hg">[펼리]</span>. Convenience stores earn the name.</p>'
 		},
+
+		/* ---- When ㄹ meets ㄴ, both are pronounced ㄹ ---- */
 		{
 			type: 'choice',
-			act: 'Act 3 · the other order',
 			do: 'Now the ㄹ comes first. What happens to the ㄴ of <span class="hg">날</span>… wait — of <span class="hg">설날</span>?',
 			stage: [
 				{ glyph: '설날', caption: 'as written' },
@@ -97,7 +101,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 3 · let it flow',
 			do: 'ㄹ first this time. Operate the junction.',
 			word: '설날',
 			gloss: 'Lunar New Year’s Day',
@@ -105,7 +108,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 3 · let it flow',
 			do: 'Same order, indoor voice. Operate the junction.',
 			word: '실내',
 			gloss: 'indoors',
@@ -113,7 +115,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 3 · name it',
 			do: 'In one sentence, lateralization is…',
 			options: [
 				'ㄴ touching ㄹ comes out as a long ㄹㄹ',
@@ -126,9 +127,10 @@ export const lab09: Lab = {
 			teach:
 				'<p><strong>유음화</strong> — "becoming liquid". Direct contact, either order, and the ridge holds the flap.</p>'
 		},
+
+		/* ---- ㄹ after a nasal becomes ㄴ ---- */
 		{
 			type: 'choice',
-			act: 'Act 4 · the wall',
 			do: 'Different first letter now. Why doesn\'t this one flow?',
 			stage: [
 				{ glyph: '심리', caption: 'as written' },
@@ -148,7 +150,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 4 · make it yield',
 			do: 'A lead ㄹ behind the wall. Operate the junction.',
 			word: '심리',
 			gloss: 'psychology',
@@ -156,7 +157,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 4 · make it yield',
 			do: 'A Seoul street you will walk. Operate the junction.',
 			word: '종로',
 			gloss: 'Jongno, a Seoul district',
@@ -165,15 +165,15 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'flow',
-			act: 'Act 4 · make it yield',
 			do: 'Something to order with dinner. Operate the junction.',
 			word: '음료수',
 			gloss: 'a beverage',
 			teach: '<p><span class="hg">[음뇨수]</span>. Menus everywhere.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'flow',
-			act: 'Act 5 · Stay sharp',
 			do: 'Careful — look at what follows the ㄹ before you touch anything.',
 			word: '물이',
 			gloss: 'the water (subject)',
@@ -182,7 +182,6 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 5 · flow vs yield',
 			do: 'Both words put ㄹ at a junction. Why do they part ways?',
 			stage: [{ glyph: '신라' }, { glyph: '심리' }],
 			vs: 'vs',
@@ -199,8 +198,7 @@ export const lab09: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · the last card',
-			do: 'You made this yield in Act 4… at presidential scale. Read it as a word.',
+			do: 'Read it as a word.',
 			blocks: [
 				{ block: '대', reading: 'dae' },
 				{ block: '통', reading: 'tong' },

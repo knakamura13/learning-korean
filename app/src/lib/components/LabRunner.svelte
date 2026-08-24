@@ -44,7 +44,7 @@
 	import KoText from './KoText.svelte';
 	import FlagButton from './FlagButton.svelte';
 	import { conceptsForStep } from '$lib/domain/labStepConcepts';
-	import { formatStepEyebrow } from '$lib/content/formatStepEyebrow';
+	import { phaseAt } from '$lib/domain/labPhase';
 
 	let { lab }: { lab: Lab } = $props();
 
@@ -368,12 +368,13 @@
 					{index}
 					{outcomes}
 					{furthest}
+					phases={lab.phases}
 					onJump={jumpTo}
 				/>
 				<p class="vh" data-prompt-live aria-live="polite" aria-atomic="true"><KoText text={promptLive} /></p>
 				{#key index}
 					<div class="prompt" bind:this={cardEl} in:fly={motion({ y: 10, duration: 260 })}>
-						{#if step.act}<p class="eyebrow">{formatStepEyebrow(step.act)}</p>{/if}
+						<p class="phase-title">{phaseAt(lab.phases, index).title}</p>
 						<h2 class="do">{@html labHtml(step.do)}</h2>
 						{#if step.hint}<p class="hint">{@html labHtml(step.hint)}</p>{/if}
 					</div>
@@ -509,6 +510,17 @@
 	.loading .muted { margin: var(--s2) 0 0; }
 
 	.prompt { min-width: 0; }
+
+	.phase-title {
+		font-family: var(--sans);
+		font-size: 0.85rem;
+		font-weight: 600;
+		letter-spacing: normal;
+		text-transform: none;
+		color: var(--accent);
+		line-height: 1.35;
+		margin: 0 0 var(--s2);
+	}
 
 	.do {
 		font-family: var(--sans);

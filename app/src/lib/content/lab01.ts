@@ -13,11 +13,17 @@ export const lab01: Lab = {
 		summary:
 			'You never memorized a consonant chart. You found five shapes in your own mouth, worked out what a stroke and a doubling mean, built letters from them, and read Korean words nobody taught you. Next lab: vowels — three strokes, one rule, twenty-one letters.'
 	},
+	phases: [
+		{ title: 'Find the five shapes', count: 5 },
+		{ title: 'A stroke adds a puff of air', count: 5 },
+		{ title: 'Doubling makes a tense consonant', count: 2 },
+		{ title: 'Where the consonant sits in the block', count: 2 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
-		/* ---- Act 1: find the five shapes ---- */
+		/* ---- Find the five shapes ---- */
 		{
 			type: 'mouth',
-			act: 'Act 1 · 1 of 5',
 			do: 'Say <em>mmm</em>. Hold it.',
 			hint: 'Something in your mouth is completely closed. Click where.',
 			zone: 'labial',
@@ -27,7 +33,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'mouth',
-			act: 'Act 1 · 2 of 5',
 			do: 'Say <em>g</em>, as in <em>go</em>.',
 			hint: 'Where does the air get blocked? It is further back than you think.',
 			solved: [{ zone: 'labial', jamo: 'ㅁ' }],
@@ -40,7 +45,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'mouth',
-			act: 'Act 1 · 3 of 5',
 			do: 'Say <em>n</em>. Freeze your tongue where it lands.',
 			hint: 'The tip is touching something.',
 			solved: [
@@ -54,7 +58,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'mouth',
-			act: 'Act 1 · 4 of 5',
 			do: 'Say <em>sss</em>, like a leak.',
 			hint: 'Nothing closes. Air is squeezing through a narrow gap — where?',
 			solved: [
@@ -69,7 +72,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'mouth',
-			act: 'Act 1 · 5 of 5',
 			do: 'Say <em>ahhh</em>, like at the doctor.',
 			hint: 'Nothing in your mouth blocks anything at all. So where is this one made?',
 			solved: [
@@ -84,10 +86,9 @@ export const lab01: Lab = {
 				'<p>The throat, wide open. <span class="jamo">ㅇ</span> is that circle.</p><p>It is the odd one out: on top of a syllable it is <em>silent</em>, just holding the slot open. You will meet it doing real work later.</p>'
 		},
 
-		/* ---- Act 2: derive the rules ---- */
+		/* ---- A stroke adds a puff of air ---- */
 		{
 			type: 'choice',
-			act: 'Act 2 · the pattern',
 			do: 'Five sounds, five places, five shapes. So what does a Hangul consonant’s shape actually encode?',
 			stage: [{ glyph: 'ㅁ' }, { glyph: 'ㄱ' }, { glyph: 'ㄴ' }, { glyph: 'ㅅ' }, { glyph: 'ㅇ' }],
 			options: [
@@ -105,7 +106,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · rule one',
 			do: 'Here is a letter you know, and a letter you don’t. What changed?',
 			stage: [
 				{ glyph: 'ㄱ', caption: 'you know this' },
@@ -125,7 +125,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · rule one',
 			do: 'Hold your palm in front of your mouth. Say <em>g</em>, then <em>k</em>. What does the added stroke encode?',
 			stage: [
 				{ glyph: 'ㄱ', caption: 'g' },
@@ -139,10 +138,8 @@ export const lab01: Lab = {
 				'<p>You felt it. <strong>Add a stroke, add breath</strong> — the sound becomes <em>aspirated</em>.</p><p>That is rule one, and it is the whole rule. Time to use it.</p>'
 		},
 
-		/* ---- Act 3: build with rule one ---- */
 		{
 			type: 'build',
-			act: 'Act 3 · build it',
 			do: 'Start from <span class="jamo">ㄴ</span>. Reach the puffed <em>t</em>.',
 			hint: 'Two presses. Watch what appears in between — that one is a real letter too.',
 			start: 'ㄴ',
@@ -153,7 +150,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'build',
-			act: 'Act 3 · build it',
 			do: 'Same rule, the lip family. Start from <span class="jamo">ㅁ</span>, reach the puffed <em>p</em>.',
 			start: 'ㅁ',
 			target: 'ㅍ',
@@ -162,10 +158,9 @@ export const lab01: Lab = {
 				'<p><span class="jamo">ㅁ</span> → <span class="jamo">ㅂ</span> (<em>b</em>) → <span class="jamo">ㅍ</span> (<em>p</em>).</p><p>You can watch the breath being drawn onto the letter.</p>'
 		},
 
-		/* ---- Act 4: derive rule two ---- */
+		/* ---- Doubling makes a tense consonant ---- */
 		{
 			type: 'choice',
-			act: 'Act 4 · rule two',
 			do: 'Different move this time. What was done to <span class="jamo">ㅂ</span>?',
 			stage: [{ glyph: 'ㅂ' }, { glyph: 'ㅃ' }],
 			vs: '→',
@@ -182,7 +177,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'build',
-			act: 'Act 4 · both rules',
 			do: 'Now combine them. From <span class="jamo">ㅅ</span>, reach the tense <em>jj</em>.',
 			hint: 'One stroke, then one doubling. Undo is there if you overshoot.',
 			start: 'ㅅ',
@@ -192,10 +186,9 @@ export const lab01: Lab = {
 				'<p><span class="jamo">ㅅ</span> → <span class="jamo">ㅈ</span> → <span class="jamo">ㅉ</span>. Two rules, stacked.</p><p>That is the entire consonant system. Nineteen letters, five shapes, two operations — and you were never handed a chart.</p>'
 		},
 
-		/* ---- Act 5: assemble blocks ---- */
+		/* ---- Where the consonant sits in the block ---- */
 		{
 			type: 'assemble',
-			act: 'Act 5 · stack them',
 			do: 'Two new pieces: <span class="jamo">ㅏ</span> says <em>a</em>, <span class="jamo">ㅗ</span> says <em>o</em>. Build <em>ba</em>.',
 			hint: 'Korean packs each syllable into one square block. Pick a consonant, pick a vowel.',
 			target: '바',
@@ -207,7 +200,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'assemble',
-			act: 'Act 5 · stack them',
 			do: 'Now build <em>so</em> — and watch where the consonant goes this time.',
 			target: '소',
 			targetName: 'so',
@@ -217,10 +209,9 @@ export const lab01: Lab = {
 				'<p><span class="hg">소</span> stacks <em>vertically</em>. <span class="jamo">ㅗ</span> is a wide vowel, so the consonant goes on top.</p><p>Tall vowel → consonant beside it. Wide vowel → consonant above it. That is the whole layout rule.</p>'
 		},
 
-		/* ---- Act 6: read cold ---- */
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
 			do: 'Nobody has told you this word. Sound out each block, then tap it to check.',
 			blocks: [
 				{ block: '피', reading: 'pi' },
@@ -233,7 +224,6 @@ export const lab01: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
 			do: 'Again. Watch the middle block — it starts with that circle.',
 			blocks: [
 				{ block: '사', reading: 'sa' },
@@ -243,11 +233,10 @@ export const lab01: Lab = {
 			options: ['sauna', 'salsa', 'samba', 'sagas'],
 			answer: 0,
 			teach:
-				'<p><span class="hg">우</span> is <span class="jamo">ㅇ</span> + <span class="jamo">ㅜ</span>, and says only <em>u</em>.</p><p>There is your silent placeholder from Act 1, doing its real job: every block needs a consonant slot filled, so a vowel-initial syllable borrows the throat circle to hold it open.</p>'
+				'<p><span class="hg">우</span> is <span class="jamo">ㅇ</span> + <span class="jamo">ㅜ</span>, and says only <em>u</em>.</p><p>There is your silent placeholder, doing its real job: every block needs a consonant slot filled, so a vowel-initial syllable borrows the throat circle to hold it open.</p>'
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · last one',
 			do: 'One plain letter, one aspirated. Both of them you built yourself.',
 			blocks: [
 				{ block: '기', reading: 'gi' },
@@ -256,7 +245,7 @@ export const lab01: Lab = {
 			options: ['guitar', 'guides', 'gators', 'gutter'],
 			answer: 0,
 			teach:
-				'<p><strong>gi-ta</strong>. <span class="jamo">ㄱ</span> plain, <span class="jamo">ㅌ</span> aspirated — the letter you derived in Act 3.</p><p>Loanwords are the beginner’s gift: Korean spells them phonetically, so decoding letters unlocks thousands of words you already know.</p>'
+				'<p><strong>gi-ta</strong>. <span class="jamo">ㄱ</span> plain, <span class="jamo">ㅌ</span> aspirated — the ㅌ you built by adding a stroke.</p><p>Loanwords are the beginner’s gift: Korean spells them phonetically, so decoding letters unlocks thousands of words you already know.</p>'
 		}
 	]
 };

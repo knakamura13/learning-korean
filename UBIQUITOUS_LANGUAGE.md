@@ -9,6 +9,7 @@ not repeated here; this file covers the words we use to talk about the app itsel
 | --------------- | ------------------------------------------------------------------------------------------- | ------------------------------------ |
 | **Lab**         | A single-sitting teaching unit that makes the learner derive one rule                        | Lesson, module, chapter, course unit |
 | **Action card** | One screen inside a lab that demands an action, where explanation appears only as feedback   | Card, slide, exercise, question      |
+| **Phase**       | A named teaching job inside a lab, one chapter title, two or more consecutive action cards   | Act, Part, Section, block (block is a syllable) |
 | **Step type**   | The interaction kind an action card uses — `mouth`, `choice`, `assemble`, `liaison`, `read`  | Widget, component, activity          |
 | **Derive**      | Reaching a rule by acting on material rather than being told it                              | Discover, explore, learn             |
 | **Reference**   | The scannable prose-and-table surface, exempt from the action-card rule                      | Docs, guide, notes, cheat sheet      |
@@ -47,7 +48,8 @@ not repeated here; this file covers the words we use to talk about the app itsel
 
 ## Relationships
 
-- A **Lab** contains many **Action cards** and unlocks exactly one **Tier**
+- A **Lab** contains ordered **Phases** and unlocks exactly one **Tier**
+- A **Phase** contains consecutive **Action cards**
 - A **Tier** contains many **Deck cards**; a **Deck card** belongs to exactly one **Tier**
 - **Review** schedules **Deck cards**; a **Mill** generates its own items and schedules none
 - A **Mill** may run only after the **Lab** that derives its rule is complete

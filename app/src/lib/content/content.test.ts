@@ -438,3 +438,28 @@ describe('flow steps agree with the phonology', () => {
 		expect(flowAction('물이')).toEqual({ type: 'stay' });
 	});
 });
+
+describe('lab phases', () => {
+	it('covers every action card with counts of at least two', () => {
+		for (const lab of LABS) {
+			const total = lab.phases.reduce((n, phase) => n + phase.count, 0);
+			expect(total, lab.id).toBe(lab.steps.length);
+			for (const phase of lab.phases) {
+				expect(phase.count, `${lab.id} ${phase.title}`).toBeGreaterThanOrEqual(2);
+				expect(phase.title, lab.id).toBeTruthy();
+			}
+			expect(lab.phases.at(-1)?.title, lab.id).toBe('Read from the letters alone');
+		}
+	});
+
+	it('does not keep per-card act labels or learner-facing Act', () => {
+		for (const { lab, step, i } of ALL_STEPS) {
+			expect(step, where(lab, i)).not.toHaveProperty('act');
+			for (const field of ['do', 'hint', 'teach', 'miss'] as const) {
+				const text = step[field];
+				if (!text) continue;
+				expect(text, `${where(lab, i)} ${field}`).not.toMatch(/\bAct\b/);
+			}
+		}
+	});
+});

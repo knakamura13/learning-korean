@@ -14,10 +14,18 @@ export const lab05: Lab = {
 		summary:
 			'Every letter, every compound, every slot. From here nothing new gets added to the page — what changes is how the page sounds when letters meet each other. Next: liaison, the single rule that does the most to make spoken Korean match what you can already read.'
 	},
+	phases: [
+		{ title: 'Most clusters pronounce the first letter', count: 4 },
+		{ title: 'Three clusters drop ㄹ', count: 3 },
+		{ title: 'Clusters with ㅎ make the next consonant aspirated', count: 2 },
+		{ title: 'Two verb stems break the cluster rules', count: 2 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- Most clusters pronounce the first letter ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · a crowded slot',
 			do: 'Look at the bottom of the first block. How many consonants are down there?',
 			stage: [{ glyph: '없다', caption: 'to not exist' }],
 			options: ['1', '2', '3', '4'],
@@ -27,7 +35,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'cluster',
-			act: 'Act 1 · which one wins',
 			do: 'Make the call.',
 			word: '없다',
 			cluster: 'ㅄ',
@@ -38,7 +45,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'cluster',
-			act: 'Act 1 · again',
 			do: 'Same shape, different letters.',
 			word: '몫',
 			cluster: 'ㄳ',
@@ -48,7 +54,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · name the pattern',
 			do: 'In both <span class="hg">없다</span> and <span class="hg">몫</span>, which of the two letters was pronounced?',
 			stage: [{ glyph: 'ㅄ' }, { glyph: 'ㄳ' }],
 			options: ['The first one', 'The second one', 'The louder one', 'The taller one'],
@@ -56,9 +61,10 @@ export const lab05: Lab = {
 			teach:
 				'<p><strong>Rule A: the first letter wins.</strong> That covers six of the eleven clusters — <span class="jamo">ㄳ ㄵ ㄼ ㄽ ㄾ ㅄ</span>.</p><p>Now the awkward part.</p>'
 		},
+
+		/* ---- Three clusters drop ㄹ ---- */
 		{
 			type: 'cluster',
-			act: 'Act 2 · the other rule',
 			do: 'This one does not follow Rule A. Pick what you actually hear.',
 			word: '읽다',
 			cluster: 'ㄺ',
@@ -69,7 +75,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'cluster',
-			act: 'Act 2 · the other rule',
 			do: 'Same family. Which one survives?',
 			word: '삶',
 			cluster: 'ㄻ',
@@ -80,7 +85,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 2 · the honest answer',
 			do: '<span class="jamo">ㄼ</span> keeps its ㄹ, but <span class="jamo">ㄺ</span> drops it. Both start with ㄹ. So what decides it?',
 			stage: [
 				{ glyph: 'ㄼ', caption: 'says ㄹ' },
@@ -99,9 +103,10 @@ export const lab05: Lab = {
 			teach:
 				'<p>There is no derivable rule. <span class="jamo">ㄺ ㄻ ㄿ</span> take the second letter; the other eight take the first. That is a list.</p><p>This is the one place in Hangul where the system stops being generative and you simply learn eleven facts. It is also why these eleven are in Review — spaced repetition exists precisely for material like this.</p>'
 		},
+
+		/* ---- Clusters with ㅎ make the next consonant aspirated ---- */
 		{
 			type: 'cluster',
-			act: 'Act 3 · when ㅎ is involved',
 			do: 'Which letter survives here?',
 			word: '많다',
 			cluster: 'ㄶ',
@@ -112,7 +117,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'cluster',
-			act: 'Act 3 · same trick',
 			do: 'Predict both parts: which letter survives, and what happens to the ㄷ after it.',
 			word: '싫다',
 			cluster: 'ㅀ',
@@ -121,9 +125,10 @@ export const lab05: Lab = {
 			teach:
 				'<p><span class="jamo">ㄹ</span> survives, and the <span class="jamo">ㅎ</span> aspirates the <span class="jamo">ㄷ</span> into <span class="jamo">ㅌ</span> again.</p><p>Both ㅎ-clusters behave identically: drop the ㅎ from the slot, spend it on the next consonant.</p>'
 		},
+
+		/* ---- Two verb stems break the cluster rules ---- */
 		{
 			type: 'choice',
-			act: 'Act 4 · the famous exception',
 			do: '<span class="hg">밟다</span> means <em>to step on</em>. Rule A says <span class="jamo">ㄼ</span> keeps its ㄹ, so this should be [발따]. What is it actually?',
 			stage: [{ glyph: '밟다' }],
 			options: ['[밥따]', '[발따]', '[발타]', '[밥타]'],
@@ -133,7 +138,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 4 · the other exception',
 			do: '<span class="hg">읽고</span> is <em>read-and</em>. Rule B says <span class="jamo">ㄺ</span> gives ㄱ, so [익꼬]. But before a ㄱ, a verb stem flips. What is it?',
 			stage: [{ glyph: '읽고' }],
 			options: ['[일꼬]', '[익꼬]', '[일고]', '[익고]'],
@@ -142,9 +146,10 @@ export const lab05: Lab = {
 			teach:
 				'<p><span class="hg">[일꼬]</span>. When <span class="jamo">ㄺ</span> is the end of a <strong>verb stem</strong> and the next sound is <span class="jamo">ㄱ</span>, Rule B inverts and <span class="jamo">ㄹ</span> survives.</p><p>Compare <span class="hg">맑게</span> → <span class="hg">[말께]</span>. Watch what this does to the very next card.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 5 · read it cold',
 			do: 'Same ㄺ cluster as 읽고 — but this is a noun, not a verb stem.',
 			blocks: [
 				{ block: '닭', reading: 'dak' },
@@ -158,7 +163,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 5 · read it cold',
 			do: 'Rule A cluster. Read it, then flatten it.',
 			blocks: [
 				{ block: '여', reading: 'yeo' },
@@ -171,7 +175,6 @@ export const lab05: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 5 · the last card',
 			do: 'One more Rule A cluster, and then you are done with the writing system.',
 			blocks: [
 				{ block: '앉', reading: 'an' },

@@ -14,10 +14,17 @@ export const lab06: Lab = {
 		summary:
 			'A batchim plus a placeholder ㅇ is not a mystery any more: the letter jumps, unless it is already ng. Clusters split instead of sacrificing a letter. Isolation flattening reverses. Lab 07 takes the other neighbor: a stop that tenses, or a stop that becomes a nasal.'
 	},
+	phases: [
+		{ title: 'A batchim fills the next empty ㅇ', count: 8 },
+		{ title: 'A cluster splits when a vowel follows', count: 3 },
+		{ title: 'ㅅ moves and becomes ㅆ', count: 2 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- A batchim fills the next empty ㅇ ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · the mismatch',
 			do: 'You can read this. Spoken Korean says the thing on the right. What happened to the ㄱ?',
 			stage: [
 				{ glyph: '한국어', caption: 'as written' },
@@ -37,7 +44,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · the hole',
 			do: 'Why was <span class="hg">어</span> the hole that <span class="jamo">ㄱ</span> could fall into?',
 			stage: [{ glyph: '국' }, { glyph: '어' }],
 			vs: '+',
@@ -55,7 +61,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 2 · do the jump',
 			do: 'A batchim, then a placeholder. Make the jump.',
 			word: '음악',
 			gloss: 'music',
@@ -64,7 +69,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 2 · identity',
 			do: 'Lab 04 flattened this to <span class="hg">[옫]</span> in isolation. A vowel follows now. Jump the letter that is actually written.',
 			word: '옷이',
 			gloss: 'clothes + subject particle',
@@ -73,7 +77,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 2 · identity',
 			do: 'Same story, different letter. Lab 04 built this word.',
 			word: '밭에',
 			gloss: 'in the field',
@@ -82,7 +85,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 2 · identity',
 			do: 'The k-ish family. Jump what is written, not what isolation said.',
 			word: '부엌에',
 			gloss: 'in the kitchen',
@@ -91,7 +93,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 3 · name the rule',
 			do: 'In one sentence, liaison is…',
 			options: [
 				"A batchim fills the next block's empty ㅇ",
@@ -106,16 +107,16 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 3 · the ㅇ exception',
 			do: 'Last letter of <span class="hg">강</span> is <span class="jamo">ㅇ</span>. Jump, or stay?',
 			word: '강이',
 			gloss: 'river + subject particle',
 			teach:
 				'<p>Stay. <span class="hg">[강이]</span>, not <span class="hg">[가이]</span>.</p><p>That <span class="jamo">ㅇ</span> is already a sound — <span class="rom">ng</span>. Move it into the next onset and it becomes the silent placeholder, and the ng vanishes. Same letter, two jobs; only the placeholder is a hole.</p>'
 		},
+
+		/* ---- A cluster splits when a vowel follows ---- */
 		{
 			type: 'choice',
-			act: 'Act 4 · predict the split',
 			do: '<span class="hg">읽다</span> is <span class="hg">[익따]</span> — Rule B, only ㄱ survives. <span class="hg">읽어요</span> has a vowel after the cluster. What happens?',
 			stage: [
 				{ glyph: '읽다', caption: '[익따]' },
@@ -135,7 +136,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 4 · split it',
 			do: 'Make the split.',
 			word: '읽어요',
 			gloss: 'to read (polite)',
@@ -144,16 +144,16 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'liaison',
-			act: 'Act 4 · split it',
 			do: 'Lab 05\'s <span class="hg">앉다</span> was <span class="hg">[안따]</span>. Same cluster, now a vowel.',
 			word: '앉아',
 			gloss: 'sit (informal)',
 			teach:
 				'<p><span class="hg">[안자]</span>. <span class="jamo">ㄴ</span> stays; <span class="jamo">ㅈ</span> jumps.</p><p>Compare <span class="hg">앉다</span>, where <span class="jamo">ㅈ</span> was thrown away and <span class="hg">다</span> tensed. Same spelling, different neighbor, different spoken form.</p>'
 		},
+
+		/* ---- ㅅ moves and becomes ㅆ ---- */
 		{
 			type: 'choice',
-			act: 'Act 5 · the ㅅ clause',
 			do: 'Article 14 has one extra clause: when the jumper is ㅅ, it tenses. <span class="hg">없어</span> is…',
 			stage: [{ glyph: '없어' }],
 			options: ['[업써]', '[업서]', '[업더]', '[언서]'],
@@ -165,7 +165,6 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 5 · not this rule',
 			do: '<span class="hg">좋아요</span> looks like <span class="jamo">ㅎ</span> should jump into <span class="hg">아</span>. What actually happens?',
 			stage: [{ glyph: '좋아요' }],
 			options: [
@@ -179,9 +178,10 @@ export const lab06: Lab = {
 			teach:
 				'<p><span class="hg">[조아요]</span> is what you will hear, and it is not liaison. Batchim <span class="jamo">ㅎ</span> before a vowel drops (표준 발음법 Article 12).</p><p>Do not cram it into this rule. Later labs take the rest one at a time.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
 			do: 'Nobody has told you this word today. Sound out each block, then tap it to check.',
 			blocks: [
 				{ block: '한', reading: 'han' },
@@ -195,8 +195,7 @@ export const lab06: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
-			do: 'You jumped this one in Act 2. Now read it as a phrase.',
+			do: 'Read it as a phrase.',
 			blocks: [
 				{ block: '부', reading: 'bu' },
 				{ block: '엌', reading: 'eok' },
@@ -205,11 +204,10 @@ export const lab06: Lab = {
 			options: ['in the kitchen', 'in the hallway', 'in the bathroom', 'in the basement'],
 			answer: 0,
 			teach:
-				'<p><strong>bu-eok-e</strong>, said <span class="hg">[부어케]</span>.</p><p>The <span class="jamo">ㅋ</span> you restored in Act 2, in a phrase you might actually text.</p>'
+				'<p><strong>bu-eok-e</strong>, said <span class="hg">[부어케]</span>.</p><p>The <span class="jamo">ㅋ</span> you restored, in a phrase you might actually text.</p>'
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · the last card',
 			do: 'Particle <span class="hg">을</span> marks the object. Read it, then flatten it.',
 			blocks: [
 				{ block: '한', reading: 'han' },

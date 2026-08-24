@@ -56,6 +56,7 @@ const lab: Lab = {
 	minutes: 1,
 	unlocks: 'none',
 	finish: { title: 'Done', summary: 'Finished.' },
+	phases: [{ title: 'Read from the letters alone', count: 2 }],
 	steps: [
 		{
 			type: 'choice',
@@ -128,6 +129,7 @@ describe('LabRunner card-change focus', () => {
 		const hangulLab: Lab = {
 			...lab,
 			id: 'hangul-prompt-lab',
+			phases: [{ title: 'Read from the letters alone', count: 1 }],
 			steps: [
 				{
 					type: 'choice',

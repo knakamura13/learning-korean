@@ -14,10 +14,18 @@ export const lab08: Lab = {
 		summary:
 			'ㅎ touching ㄱ/ㄷ/ㅈ — from either side — fuses into ㅋ/ㅌ/ㅊ. ㅎ before a vowel is not said at all, and ㄶ/ㅀ liaise their survivor. Next: what ㄹ does to its neighbors — the last drilled sound change.'
 	},
+	phases: [
+		{ title: 'ㅎ plus a stop becomes aspirated', count: 4 },
+		{ title: 'A stop plus ㅎ becomes aspirated', count: 4 },
+		{ title: 'ㅎ before a vowel is not pronounced', count: 4 },
+		{ title: 'The next letter decides what ㅎ does', count: 2 },
+		{ title: 'Read from the letters alone', count: 2 },
+	],
 	steps: [
+
+		/* ---- ㅎ plus a stop becomes aspirated ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · the mismatch',
 			do: 'You can read this. Spoken Korean says something shorter. What happened?',
 			stage: [
 				{ glyph: '좋다', caption: 'as written' },
@@ -37,7 +45,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · you knew this',
 			do: 'Lab 01 built <span class="jamo">ㅌ</span> from <span class="jamo">ㄷ</span> by adding a stroke. What did that stroke mean?',
 			options: [
 				'A puff of breath added to the stop',
@@ -53,7 +60,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 2 · aspirate it',
 			do: 'An ㅎ batchim, then plain <span class="jamo">ㄱ</span>. Operate the junction.',
 			word: '좋고',
 			gloss: 'good, and…',
@@ -62,16 +68,16 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 2 · aspirate it',
 			do: 'Lab 05 said ㅎ-clusters spend their ㅎ. Operate the junction.',
 			word: '많다',
 			gloss: 'to be many',
 			teach:
 				'<p><span class="hg">[만타]</span>. <span class="jamo">ㄶ</span> keeps its <span class="jamo">ㄴ</span> in the slot and spends the <span class="jamo">ㅎ</span> on <span class="jamo">ㄷ</span> → <span class="jamo">ㅌ</span>. Lab 05 promised this lab.</p>'
 		},
+
+		/* ---- A stop plus ㅎ becomes aspirated ---- */
 		{
 			type: 'choice',
-			act: 'Act 3 · the other side',
 			do: 'This time the ㅎ is on the <em>right</em>. Who aspirates?',
 			stage: [
 				{ glyph: '축하', caption: 'as written' },
@@ -91,7 +97,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 3 · aspirate it',
 			do: 'A stop batchim, then an ㅎ lead. Operate the junction.',
 			word: '입학',
 			gloss: 'school admission',
@@ -100,7 +105,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 3 · aspirate it',
 			do: 'Lab 04 flattened this batchim already. Operate the junction.',
 			word: '못하다',
 			gloss: 'to be unable to',
@@ -109,7 +113,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 3 · name it',
 			do: 'In one sentence, aspiration is…',
 			options: [
 				'ㅎ and a plain stop fusing into one aspirate',
@@ -122,9 +125,10 @@ export const lab08: Lab = {
 			teach:
 				'<p><strong>격음화</strong>. Either order, same fusion: the puff and the stop become the stop\'s aspirated twin. Article 12.</p>'
 		},
+
+		/* ---- ㅎ before a vowel is not pronounced ---- */
 		{
 			type: 'choice',
-			act: 'Act 4 · before a vowel',
 			do: 'Now the neighbor is a vowel. What happened to the ㅎ?',
 			stage: [
 				{ glyph: '좋아요', caption: 'as written' },
@@ -145,7 +149,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 4 · delete it',
 			do: 'An ㅎ batchim, then a vowel. Operate the junction.',
 			word: '좋아요',
 			gloss: 'it is good',
@@ -153,7 +156,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 4 · delete it',
 			do: 'A cluster this time. Operate the junction.',
 			word: '많아',
 			gloss: 'there are many',
@@ -162,16 +164,16 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'hmerge',
-			act: 'Act 4 · delete it',
 			do: 'Same cluster family, ㄹ survivor. Operate the junction.',
 			word: '싫어',
 			gloss: 'I don’t want to',
 			teach:
 				'<p><span class="hg">[시러]</span>. <span class="jamo">ㅀ</span> drops its <span class="jamo">ㅎ</span>; <span class="jamo">ㄹ</span> jumps. A word you will hear daily.</p>'
 		},
+
+		/* ---- The next letter decides what ㅎ does ---- */
 		{
 			type: 'hmerge',
-			act: 'Act 5 · Stay sharp',
 			do: 'Careful — read the junction before you touch it.',
 			word: '학교',
 			gloss: 'school',
@@ -180,7 +182,6 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 5 · one letter, two exits',
 			do: 'Same ㅎ batchim in both. Why do they part ways?',
 			stage: [{ glyph: '좋고' }, { glyph: '좋아요' }],
 			vs: 'vs',
@@ -195,10 +196,11 @@ export const lab08: Lab = {
 			teach:
 				'<p>The neighbor decides, exactly like Lab 07. Consonant → fuse. Vowel → vanish. <span class="jamo">ㅎ</span> never survives a junction as written.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
-			do: 'You fused this in Act 3. Now read it as a word.',
+			do: 'Read it as a word.',
 			blocks: [
 				{ block: '축', reading: 'chuk' },
 				{ block: '하', reading: 'ha' }
@@ -210,8 +212,7 @@ export const lab08: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · the last card',
-			do: 'You deleted this in Act 4. Now read it as a phrase.',
+			do: 'Read it as a phrase.',
 			blocks: [
 				{ block: '좋', reading: 'jot' },
 				{ block: '아', reading: 'a' },

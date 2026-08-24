@@ -14,10 +14,16 @@ export const lab07: Lab = {
 		summary:
 			'A ㄱ/ㄷ/ㅂ batchim tenses a following plain ㄱ/ㄷ/ㅂ/ㅅ/ㅈ, and becomes ㅇ/ㄴ/ㅁ before ㄴ/ㅁ. Same junction, different neighbor. Next: ㅎ — aspiration and ㅎ-deletion, the letter Lab 06 refused to cram into liaison.'
 	},
+	phases: [
+		{ title: 'A stop makes the next plain consonant tense', count: 8 },
+		{ title: 'A stop is pronounced through the nose before ㄴ or ㅁ', count: 5 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- A stop makes the next plain consonant tense ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · the mismatch',
 			do: 'You can read this. Spoken Korean tenses a letter. Which one, and how?',
 			stage: [
 				{ glyph: '학교', caption: 'as written' },
@@ -37,7 +43,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · why a stop',
 			do: 'Why did <span class="hg">교</span>\'s <span class="jamo">ㄱ</span> tense, instead of jumping or vanishing?',
 			stage: [{ glyph: '학' }, { glyph: '교' }],
 			vs: '+',
@@ -56,7 +61,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 2 · tense it',
 			do: 'Two plain stops. Operate the junction.',
 			word: '학교',
 			gloss: 'school',
@@ -65,7 +69,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 2 · tense it',
 			do: 'A verb stem plus <span class="hg">다</span>. Operate the junction.',
 			word: '먹다',
 			gloss: 'to eat',
@@ -74,7 +77,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 2 · tense it',
 			do: 'Same rule, different pair. Operate the junction.',
 			word: '잡지',
 			gloss: 'magazine',
@@ -83,7 +85,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 2 · tense it',
 			do: 'A word on every street. Operate the junction.',
 			word: '식당',
 			gloss: 'restaurant',
@@ -92,7 +93,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 3 · name it',
 			do: 'In one sentence, tensification is…',
 			options: [
 				'After a stop, the next plain consonant tenses',
@@ -107,16 +107,16 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 3 · Stay',
 			do: '<span class="hg">한</span> ends in <span class="jamo">ㄴ</span>. Operate the junction.',
 			word: '한국',
 			gloss: 'Korea',
 			teach:
 				'<p><span class="hg">[한국]</span>, not <span class="hg">[한꾹]</span>. <span class="hg">한</span> ends in <span class="jamo">ㄴ</span>, not a stop. Tensification does not fire.</p><p>The rule is picky about <em>which</em> letter closes the first block.</p>'
 		},
+
+		/* ---- A stop is pronounced through the nose before ㄴ or ㅁ ---- */
 		{
 			type: 'choice',
-			act: 'Act 4 · the other neighbor',
 			do: 'Same kind of junction, different next letter. What happened to <span class="jamo">ㅂ</span>?',
 			stage: [
 				{ glyph: '입니다', caption: 'as written' },
@@ -136,7 +136,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 4 · the other neighbor',
 			do: '<span class="jamo">ㄱ</span>/<span class="jamo">ㄷ</span>/<span class="jamo">ㅂ</span> before <span class="jamo">ㄴ</span> or <span class="jamo">ㅁ</span> become…',
 			options: [
 				'Stops become nasals before ㄴ and ㅁ',
@@ -152,7 +151,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 5 · nasalize it',
 			do: 'A stop, then <span class="jamo">ㅁ</span>. Operate the junction.',
 			word: '국물',
 			gloss: 'broth',
@@ -161,7 +159,6 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 5 · nasalize it',
 			do: 'The polite copula. Operate the junction.',
 			word: '입니다',
 			gloss: 'it is, polite',
@@ -170,16 +167,16 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'contact',
-			act: 'Act 5 · nasalize it',
 			do: '<span class="jamo">ㄱ</span> before <span class="jamo">ㄴ</span>. Operate the junction.',
 			word: '학년',
 			gloss: 'school year',
 			teach:
 				'<p><span class="hg">[항년]</span>. <span class="jamo">ㄱ</span> before <span class="jamo">ㄴ</span> becomes <span class="jamo">ㅇ</span>. Names and school words do this constantly.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'choice',
-			act: 'Act 6 · one junction',
 			do: 'Both start with <span class="hg">국</span>-class <span class="jamo">ㄱ</span>. Why do they split?',
 			stage: [
 				{ glyph: '학교' },
@@ -199,8 +196,7 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
-			do: 'You tensed this in Act 2. Now read it as a word.',
+			do: 'Read it as a word.',
 			blocks: [
 				{ block: '학', reading: 'hak' },
 				{ block: '교', reading: 'gyo' }
@@ -212,8 +208,7 @@ export const lab07: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · the last card',
-			do: 'You nasalized this in Act 5. Now read it as a phrase.',
+			do: 'Read it as a phrase.',
 			blocks: [
 				{ block: '입', reading: 'ip' },
 				{ block: '니', reading: 'ni' },
