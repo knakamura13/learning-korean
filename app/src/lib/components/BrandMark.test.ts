@@ -27,9 +27,10 @@ describe('BrandMark', () => {
 		expect(css).toMatch(/@keyframes -global-han-wiggle-a/);
 		expect(css).toMatch(/@keyframes -global-han-wiggle-n/);
 		expect(css).toMatch(/:global\(a\.brand:hover\) \.jamo-h/);
-		expect(css).toMatch(/han-wiggle-a 1\.1s var\(--ease-in-out\) 90ms infinite/);
-		expect(css).toMatch(/han-wiggle-n 1\.1s var\(--ease-in-out\) 180ms infinite/);
-		expect(css).toMatch(/clip-path:\s*inset\(0 0 42% 61%\)/);
+		expect(css).toMatch(/han-wiggle-a 720ms var\(--ease-in-out\) 70ms infinite/);
+		expect(css).toMatch(/han-wiggle-n 720ms var\(--ease-in-out\) 140ms infinite/);
+		expect(css).toMatch(/rotate\(7deg\)/);
+		expect(css).toMatch(/rotate\(-6\.5deg\)/);
 		expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
 		expect(css).toMatch(/animation:\s*none/);
 		expect(css).toMatch(/color:\s*var\(--ink\)/);

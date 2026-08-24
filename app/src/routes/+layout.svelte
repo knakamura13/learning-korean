@@ -276,17 +276,17 @@
 	.brand:hover :global(.jamo-h),
 	.brand.wiggling :global(.jamo-h),
 	.brand:focus-visible :global(.jamo-h) {
-		animation: han-wiggle-h 1.1s var(--ease-in-out) infinite;
+		animation: han-wiggle-h 720ms var(--ease-in-out) infinite;
 	}
 	.brand:hover :global(.jamo-a),
 	.brand.wiggling :global(.jamo-a),
 	.brand:focus-visible :global(.jamo-a) {
-		animation: han-wiggle-a 1.1s var(--ease-in-out) 90ms infinite;
+		animation: han-wiggle-a 720ms var(--ease-in-out) 70ms infinite;
 	}
 	.brand:hover :global(.jamo-n),
 	.brand.wiggling :global(.jamo-n),
 	.brand:focus-visible :global(.jamo-n) {
-		animation: han-wiggle-n 1.1s var(--ease-in-out) 180ms infinite;
+		animation: han-wiggle-n 720ms var(--ease-in-out) 140ms infinite;
 	}
 
 	.name {

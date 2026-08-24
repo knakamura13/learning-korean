@@ -79,17 +79,17 @@
 	.mark:hover .jamo-h,
 	:global(a.brand:hover) .jamo-h,
 	:global(a.brand:focus-visible) .jamo-h {
-		animation: han-wiggle-h 1.1s var(--ease-in-out) infinite;
+		animation: han-wiggle-h 720ms var(--ease-in-out) infinite;
 	}
 	.mark:hover .jamo-a,
 	:global(a.brand:hover) .jamo-a,
 	:global(a.brand:focus-visible) .jamo-a {
-		animation: han-wiggle-a 1.1s var(--ease-in-out) 90ms infinite;
+		animation: han-wiggle-a 720ms var(--ease-in-out) 70ms infinite;
 	}
 	.mark:hover .jamo-n,
 	:global(a.brand:hover) .jamo-n,
 	:global(a.brand:focus-visible) .jamo-n {
-		animation: han-wiggle-n 1.1s var(--ease-in-out) 180ms infinite;
+		animation: han-wiggle-n 720ms var(--ease-in-out) 140ms infinite;
 	}
 
 	@keyframes -global-han-wiggle-h {
@@ -97,8 +97,11 @@
 		100% {
 			transform: rotate(0deg);
 		}
-		50% {
-			transform: rotate(2.4deg) translate(0.2px, -0.35px);
+		25% {
+			transform: rotate(7deg) translate(0.6px, -0.9px);
+		}
+		75% {
+			transform: rotate(-5.5deg) translate(-0.5px, 0.4px);
 		}
 	}
 
@@ -107,8 +110,11 @@
 		100% {
 			transform: rotate(0deg);
 		}
-		50% {
-			transform: rotate(-2.2deg) translate(0.3px, 0.15px);
+		25% {
+			transform: rotate(-6.5deg) translate(0.8px, 0.3px);
+		}
+		75% {
+			transform: rotate(6deg) translate(-0.6px, -0.7px);
 		}
 	}
 
@@ -117,8 +123,11 @@
 		100% {
 			transform: translateX(0);
 		}
-		50% {
-			transform: rotate(1.8deg) translateX(0.4px);
+		25% {
+			transform: rotate(5deg) translateX(1.1px);
+		}
+		75% {
+			transform: rotate(-6deg) translateX(-1px);
 		}
 	}
 
