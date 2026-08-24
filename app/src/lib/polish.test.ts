@@ -124,8 +124,12 @@ describe('polish audit regressions', () => {
 		expect(lockedLabPopover).toMatch(/from '\$lib\/a11y\/attachModalDialog'/);
 		expect(lockedLabPopover).not.toMatch(/role="dialog"/);
 		expect(lockedLabPopover).not.toMatch(/e\.key !== 'Tab'/);
-		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop\s*\{[^}]*inset:\s*unset/s);
+		expect(lockedLabPopover).toMatch(/aria-label="Close"/);
+		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop\s*\{[^}]*inset:\s*0/s);
 		expect(styleBlock(lockedLabPopover)).toMatch(/\.pop::backdrop/);
+		expect(styleBlock(lockedLabPopover)).toMatch(
+			/@media\s*\(max-width:\s*40rem\)\s*\{[^}]*\.pop\s*\{[^}]*inset:\s*auto 0 0 0/s
+		);
 	});
 
 	it('keeps rail hover cards as positioned divs so cursor-follow can stay', () => {
@@ -508,7 +512,7 @@ describe('polish audit regressions', () => {
 		expect(home).toMatch(/type="button"/);
 		expect(home).toMatch(/class="lab card ahead"/);
 		expect(home).toMatch(/LockedLabPopover/);
-		expect(home).toMatch(/placeClickPopover/);
+		expect(home).not.toMatch(/placeClickPopover/);
 		expect(home).toMatch(/class="lock"/);
 		expect(labPreview).toMatch(/class="btn ghost"/);
 		expect(labPreview).toMatch(/model\.priorActionLabel/);
@@ -535,6 +539,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).toMatch(/\.brand\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-width:\s*44px/s);
 		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(layout)).toMatch(/nav a\s*\{[^}]*justify-content:\s*center/s);
 	});
 
 	it('collapses every animation and transition under prefers-reduced-motion', () => {

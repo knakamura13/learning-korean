@@ -86,6 +86,7 @@ export function mergeSrsState(a: SrsState, b: SrsState): SrsState {
 		version: 1,
 		unlocked: unionIds(a.unlocked, b.unlocked),
 		openedLabs: unionIds(a.openedLabs, b.openedLabs),
+		flagged: unionIds(a.flagged, b.flagged),
 		cards,
 		days,
 		newDate: pin.date,

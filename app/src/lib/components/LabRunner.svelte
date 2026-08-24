@@ -42,6 +42,8 @@
 	import LabSpread from './shell/LabSpread.svelte';
 	import LabPipRail from './LabPipRail.svelte';
 	import KoText from './KoText.svelte';
+	import FlagButton from './FlagButton.svelte';
+	import { conceptsForStep } from '$lib/domain/labStepConcepts';
 
 	let { lab }: { lab: Lab } = $props();
 
@@ -72,6 +74,8 @@
 	/** Gate for the review handoff: is there anything in the next sitting? */
 	const dueNow = $derived(progress.stats.sitting);
 	const promptLive = $derived(step.do.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+	const stepConcepts = $derived(conceptsForStep(step, [lab.unlocks]));
+	const stepFlagged = $derived(progress.areFlagged(stepConcepts));
 	const verdictLive = $derived.by(() => {
 		if (!feedback) return '';
 		const label =
@@ -430,21 +434,29 @@
 									data-tone={feedback.tone}
 									in:fade={motion({ duration: 180 })}
 								>
-									<span class="verdict">
-										{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
-									</span>
+									<div class="fb-head">
+										<span class="verdict">
+											{feedback.tone === 'right' ? 'Yes' : feedback.blocking ? 'Try again' : 'Not quite'}
+										</span>
+										{#if stepConcepts.length > 0}
+											<FlagButton
+												active={stepFlagged}
+												onclick={() => progress.toggleFlagged(stepConcepts)}
+											/>
+										{/if}
+									</div>
 									{@html labHtml(feedback.html)}
 								</div>
 							{/if}
 
 							{#if settled}
 								<div class="foot" in:fade={motion({ duration: 160 })}>
+									<span class="kb">or press Enter</span>
 									<button
 										class="btn"
 										use:focusWhen={{ active: true, preventScroll: true }}
 										onclick={next}
 									>{isLast ? 'Finish' : 'Next'}</button>
-									<span class="kb">or press Enter</span>
 								</div>
 							{/if}
 						</div>
@@ -561,7 +573,19 @@
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
+		margin-bottom: 0;
+	}
+	.fb-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--s2);
 		margin-bottom: var(--s1);
+	}
+	.fb-head :global(.flag-btn) {
+		width: 36px;
+		height: 36px;
+		margin: calc(-1 * var(--s1)) calc(-1 * var(--s2)) 0 0;
 	}
 	.fb[data-tone='right'] .verdict { color: var(--good); }
 	.fb[data-tone='wrong'] .verdict { color: var(--bad); }
@@ -578,11 +602,12 @@
 		margin-top: var(--s4);
 		display: flex;
 		align-items: center;
+		justify-content: flex-end;
 		gap: var(--s3);
 		flex-wrap: wrap;
 	}
 
-	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-inline-start: auto; }
+	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-inline-end: auto; }
 
 	@media (pointer: coarse) {
 		.kb { display: none; }

@@ -75,6 +75,8 @@ export interface SrsState {
 	unlocked: string[];
 	/** Lab ids granted skip-ahead access without finishing the prerequisite. */
 	openedLabs: string[];
+	/** Deck card ids the learner bookmarked for revisit; also pulled into Review. */
+	flagged: string[];
 	cards: Record<string, CardState>;
 	/** Reviews per ISO date, for streaks. */
 	days: Record<string, number>;
@@ -105,6 +107,7 @@ export function emptyState(): SrsState {
 		version: 1,
 		unlocked: [],
 		openedLabs: [],
+		flagged: [],
 		cards: {},
 		days: {},
 		newDate: '',
@@ -204,6 +207,7 @@ export function reviveState(raw: unknown): SrsState {
 		version: 1,
 		unlocked: Array.isArray(s.unlocked) ? s.unlocked.filter((x) => typeof x === 'string') : [],
 		openedLabs: Array.isArray(s.openedLabs) ? s.openedLabs.filter((x) => typeof x === 'string') : [],
+		flagged: Array.isArray(s.flagged) ? s.flagged.filter((id) => typeof id === 'string') : [],
 		cards: reviveCards(s.cards),
 		days: reviveDays(s.days),
 		newDate: typeof s.newDate === 'string' ? s.newDate : '',
@@ -248,6 +252,7 @@ export function isSrsBackup(raw: unknown): boolean {
 	if (version !== 1) return false;
 	if (!isStringArray(s.unlocked)) return false;
 	if (s.openedLabs !== undefined && !isStringArray(s.openedLabs)) return false;
+	if (s.flagged !== undefined && !isStringArray(s.flagged)) return false;
 	if (s.newIds !== undefined && !isStringArray(s.newIds)) return false;
 	if (s.vocabNewIds !== undefined && !isStringArray(s.vocabNewIds)) return false;
 	if (!s.cards || typeof s.cards !== 'object' || Array.isArray(s.cards)) return false;
@@ -301,6 +306,59 @@ export function openLab(state: SrsState, labId: string): SrsState {
 
 export function isOpened(state: SrsState, labId: string): boolean {
 	return state.openedLabs.includes(labId);
+}
+
+export function isFlagged(state: SrsState, cardId: string): boolean {
+	return state.flagged.includes(cardId);
+}
+
+/**
+ * Bookmark deck cards for revisit. Flagging pulls them into Review by setting
+ * `due` to now (and introducing an unseen card into the schedule when the
+ * tier is already unlocked). Unflagging clears the bookmark only — schedule
+ * stays where the learner left it.
+ */
+export function setFlagged(
+	state: SrsState,
+	cardIds: readonly string[],
+	flag: boolean,
+	now: number,
+	deck: readonly SchedulableCard[] = []
+): SrsState {
+	if (cardIds.length === 0) return state;
+	const flagged = new Set(state.flagged);
+	let cards = state.cards;
+	let changed = false;
+
+	for (const id of cardIds) {
+		if (!id) continue;
+		if (flag) {
+			if (!flagged.has(id)) {
+				flagged.add(id);
+				changed = true;
+			}
+			const prev = cards[id];
+			if (prev) {
+				if (prev.due > now) {
+					if (cards === state.cards) cards = { ...cards };
+					cards[id] = { ...prev, due: now };
+					changed = true;
+				}
+			} else {
+				const tier = deck.find((c) => c.id === id)?.tier;
+				if (tier && isUnlocked(state, tier)) {
+					if (cards === state.cards) cards = { ...cards };
+					cards[id] = { ease: EASE_START, ivl: 0, reps: 0, lapses: 0, due: now };
+					changed = true;
+				}
+			}
+		} else if (flagged.delete(id)) {
+			changed = true;
+		}
+	}
+
+	if (!changed) return state;
+	return { ...state, flagged: [...flagged], cards };
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
@@ -439,12 +497,19 @@ function splitQueue<T extends SchedulableCard>(
 ): { reviews: T[]; fresh: T[] } {
 	const reviews: T[] = [];
 	const fresh: T[] = [];
+	const flagged = new Set(state.flagged);
 	for (const card of pool(state, deck)) {
 		const st = state.cards[card.id];
 		if (!st) fresh.push(card);
-		else if (st.due <= now) reviews.push(card);
+		else if (st.due <= now || flagged.has(card.id)) reviews.push(card);
 	}
-	reviews.sort((a, b) => state.cards[a.id].due - state.cards[b.id].due);
+	// Bookmarked cards lead the sitting so revisit intent is not buried.
+	reviews.sort((a, b) => {
+		const af = flagged.has(a.id) ? 0 : 1;
+		const bf = flagged.has(b.id) ? 0 : 1;
+		if (af !== bf) return af - bf;
+		return state.cards[a.id].due - state.cards[b.id].due;
+	});
 	return { reviews, fresh };
 }
 
@@ -677,6 +742,7 @@ export function stats<T extends SchedulableCard>(
 
 	let seen = 0, mature = 0, young = 0, dueNow = 0, lapsing = 0;
 	let scriptUnseen = 0, vocabUnseen = 0;
+	const flagged = new Set(state.flagged);
 	for (const card of available) {
 		const st = state.cards[card.id];
 		if (!st) {
@@ -687,7 +753,7 @@ export function stats<T extends SchedulableCard>(
 		seen++;
 		if (st.ivl >= MATURE_DAYS) mature++;
 		else young++;
-		if (st.due <= now) dueNow++;
+		if (st.due <= now || flagged.has(card.id)) dueNow++;
 		if (st.lapses >= 3) lapsing++;
 	}
 
