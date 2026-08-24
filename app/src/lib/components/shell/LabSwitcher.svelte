@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
+	import { attachModalDialog, requestModalClose } from '$lib/a11y/attachModalDialog';
 	import { LABS } from '$lib/content';
 	import { courseNavView, requiredLab, toCourseLab } from '$lib/domain/courseNav';
 	import { labPreviewModels } from '$lib/domain/labPreview';
@@ -15,6 +15,7 @@
 
 	let ready = $state(false);
 	let open = $state(false);
+	let sheetEl = $state<HTMLDialogElement | null>(null);
 
 	onMount(() => {
 		ready = true;
@@ -34,6 +35,20 @@
 		labPreviewModels(course, standfirsts, navView, (requires) => requiredLab(course, requires))
 	);
 	const current = $derived(items.find((item) => item.id === currentId) ?? items[0]);
+
+	function attachSheet(node: HTMLDialogElement) {
+		sheetEl = node;
+		const stopModal = attachModalDialog(node, () => (open = false));
+		return () => {
+			sheetEl = null;
+			stopModal();
+		};
+	}
+
+	function closeSheet() {
+		if (sheetEl) requestModalClose(sheetEl, () => (open = false));
+		else open = false;
+	}
 </script>
 
 <!-- Phone/tablet stand-in for the ≥72rem lab index rail: same models, one tap. -->
@@ -56,7 +71,7 @@
 		<dialog
 			class="sheet"
 			aria-labelledby="lab-switcher-heading"
-			{@attach (node: HTMLDialogElement) => attachModalDialog(node, () => (open = false))}
+			{@attach attachSheet}
 		>
 			<h2 id="lab-switcher-heading">Labs</h2>
 			<ol>
@@ -80,7 +95,7 @@
 					</li>
 				{/each}
 			</ol>
-			<button type="button" class="btn ghost close" onclick={() => (open = false)}>Close</button>
+			<button type="button" class="btn ghost close" onclick={closeSheet}>Close</button>
 		</dialog>
 	{/if}
 </div>

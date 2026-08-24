@@ -547,6 +547,13 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(
 			/@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\*, \*::before, \*::after\s*\{[^}]*animation-duration:\s*0\.01ms !important;[^}]*animation-iteration-count:\s*1 !important;[^}]*transition-duration:\s*0\.01ms !important/s
 		);
+		// Dialog backdrop sits outside the * collapse; it gets its own reduce rule.
+		expect(appCss).toMatch(
+			/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*dialog::backdrop\s*\{[^}]*transition:\s*none/s
+		);
+		expect(appCss).toMatch(/dialog::backdrop\s*\{[^}]*opacity:\s*0/s);
+		expect(appCss).toMatch(/dialog\[data-closing\]::backdrop\s*\{[^}]*opacity:\s*0/s);
+		expect(appCss).toMatch(/@starting-style\s*\{[^}]*dialog\[open\]::backdrop/s);
 		// Svelte in:/out: compile to WAAPI (element.animate) — CSS cannot
 		// collapse them. Durations must flow through motion().
 		const transitionSources = [
