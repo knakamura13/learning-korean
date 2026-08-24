@@ -1,8 +1,13 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import layout from '../routes/+layout.svelte?raw';
 import home from '../routes/+page.svelte?raw';
 import labPage from '../routes/lab/[id]/+page.svelte?raw';
 import reference from '../routes/reference/+page.svelte?raw';
+import labIndexRail from './components/shell/LabIndexRail.svelte?raw';
+import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
+
+const appCss = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
 
 function styleBlock(markup: string): string {
 	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
@@ -76,5 +81,34 @@ describe('shell layout source contracts', () => {
 		expect(reference).toMatch(/\.with-rail \.page\s*\{[^}]*grid-area:\s*main/);
 		expect(reference).toMatch(/\.with-rail :global\(\.ref-index\)\s*\{[^}]*grid-area:\s*rail/);
 		expect(styleBlock(reference)).toMatch(/grid-template-areas:\s*'head'\s*'rail'\s*'main'/);
+	});
+
+	it('desktop rails sit with the page h1 at rest and tuck under the header when sticky', () => {
+		expect(appCss).toMatch(/\.shell\s*\{[^}]*padding-top:\s*var\(--s6\)/s);
+		expect(styleBlock(home)).toMatch(/h1\s*\{[^}]*margin:\s*var\(--s2\) 0 var\(--s3\)/s);
+		expect(styleBlock(reference)).toMatch(/h1\s*\{[^}]*margin:\s*var\(--s2\) 0 var\(--s3\)/s);
+
+		const labRail = styleBlock(labIndexRail);
+		expect(labRail).toMatch(
+			/@media \(min-width: 72rem\) \{[\s\S]*?\.lab-index\s*\{[^}]*margin-block-start:\s*calc\(var\(--s6\) \+ var\(--s2\)\)/
+		);
+		expect(labRail).toMatch(
+			/@media \(min-width: 72rem\) \{[\s\S]*?\.lab-index\s*\{[^}]*inset-block-start:\s*calc\(2\.75rem \+ 4px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/
+		);
+		expect(labRail).not.toMatch(
+			/@media \(min-width: 72rem\) \{[\s\S]*?\.lab-index\s*\{[^}]*padding-block-start:\s*var\(--s6\)/
+		);
+
+		const refRail = styleBlock(referenceIndexRail);
+		expect(styleBlock(reference)).toMatch(/\.with-rail\s*\{[^}]*padding-top:\s*var\(--s6\)/s);
+		expect(refRail).toMatch(
+			/@media \(min-width: 72rem\) \{[\s\S]*?\.ref-index\s*\{[^}]*margin-block-start:\s*var\(--s2\)/
+		);
+		expect(refRail).not.toMatch(
+			/@media \(min-width: 72rem\) \{[\s\S]*?\.ref-index\s*\{[^}]*margin-block-start:\s*var\(--s6\)/
+		);
+		expect(refRail).toMatch(
+			/@media \(min-width: 72rem\) \{[\s\S]*?\.ref-index\s*\{[^}]*inset-block-start:\s*calc\(2\.75rem \+ 4px \+ env\(safe-area-inset-top\) \+ var\(--s3\)\)/
+		);
 	});
 });

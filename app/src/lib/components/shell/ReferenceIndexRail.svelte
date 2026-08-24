@@ -188,7 +188,9 @@
 		.ref-index {
 			inset-block-start: calc(2.75rem + 4px + env(safe-area-inset-top) + var(--s3));
 			align-self: start;
+			/* Parent .with-rail already has padding-top: s6. Add h1 top margin only. */
 			margin: 0;
+			margin-block-start: var(--s2);
 			padding: 0;
 			background: transparent;
 			backdrop-filter: none;
