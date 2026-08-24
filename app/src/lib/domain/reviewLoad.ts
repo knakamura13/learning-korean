@@ -9,9 +9,9 @@
  * whose governing constraint is a ten-minute sitting.
  *
  * So: `Stats.sitting` is the commitment and leads; `Stats.backlog` is context
- * and follows, with the reason it is held back. The nav badge, the Home
- * pile, the Review strip and the lab finish card all take their wording from
- * here so the four of them cannot drift apart again.
+ * and follows, with the reason it is held back. The nav badge, the Labs due
+ * chip, the Review pile CTA / strip and the lab finish card all take their
+ * wording from here so they cannot drift apart again.
  */
 
 import { DEFAULT_REVIEW_PER_SITTING, type Stats } from './srs';

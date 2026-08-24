@@ -721,7 +721,7 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	});
 }
 
-/** Home deck row label: locked vs not-started vs seen/size. */
+/** Mastery row label: locked vs not-started vs seen/size. */
 export function tierCountLabel(row: Pick<TierReviewProgress, 'unlocked' | 'seen' | 'size'>): string {
 	if (!row.unlocked) return 'locked';
 	if (row.seen === 0) return `${row.size} not started`;

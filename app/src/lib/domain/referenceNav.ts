@@ -5,6 +5,12 @@
  */
 export const REFERENCE_SECTIONS = [
 	{
+		id: 'vocabulary',
+		nav: 'Vocabulary',
+		title: 'Vocabulary',
+		covers: 'Word packs that open after Lab 05 — meaning and pronunciation lanes.'
+	},
+	{
 		id: 'consonants',
 		nav: 'Consonants',
 		title: '19 consonants',

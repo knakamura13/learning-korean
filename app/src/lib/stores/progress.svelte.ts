@@ -158,13 +158,13 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 			commit(next);
 		},
 
-		/** Per-tier progress for the dashboard. */
+		/** Per-tier progress for the Settings mastery snapshot. */
 		get tierProgress() {
 			const rows = tierReviewProgress(state, DECK, TIERS);
 			return TIERS.map((tier, i) => ({ ...tier, ...rows[i] }));
 		},
 
-		/** Per-pack progress for the home Vocabulary section. */
+		/** Per-pack progress for the Reference Vocabulary section. */
 		get vocabProgress() {
 			const rows = tierReviewProgress(state, DECK, VOCAB_TIERS);
 			return VOCAB_TIERS.map((tier, i) => ({ ...tier, ...rows[i] }));

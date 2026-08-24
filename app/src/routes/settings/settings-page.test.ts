@@ -69,6 +69,7 @@ describe('Settings page — Appearance', () => {
 
 		const root = render();
 		expect(root.querySelector('h1')?.textContent?.trim()).toBe('Settings');
+		expect(root.querySelector('.progress h2')?.textContent?.trim()).toBe('Progress');
 		expect(root.querySelector('.appearance h2')?.textContent?.trim()).toBe('Appearance');
 	});
 

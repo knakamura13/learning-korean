@@ -145,10 +145,9 @@ export type ReviewPileView = {
 };
 
 /**
- * Home Review pile: do not paint six locked rows and a color legend before
- * any family has unlocked. Both counts are 0 until progress has been read.
- *
- * The CTA quotes `sitting`, never the whole pile — see `reviewLoad.ts`.
+ * Review pile gate: do not treat families as unlocked before progress is read.
+ * Both counts are 0 until then. The CTA quotes `sitting`, never the whole
+ * pile — see `reviewLoad.ts`.
  */
 export function reviewPileView(
 	ready: boolean,

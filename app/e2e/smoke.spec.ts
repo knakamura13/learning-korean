@@ -72,23 +72,27 @@ test('review with unlocked progress starts a sitting', async ({ page }) => {
 });
 
 /**
- * The cross-surface regression: the nav badge, the Home CTA and the sitting
- * itself each named a different number. A returning learner saw 19 in two
- * places and got 10 cards. Only a real browser can watch all three at once.
+ * The cross-surface regression: the nav badge, the Review pile CTA and the
+ * sitting itself each named a different number. A returning learner saw 19 in
+ * two places and got 10 cards. Only a real browser can watch all three at once.
  */
 test('a returning learner is promised the sitting, not the pile', async ({ page }) => {
 	await seedGuestState(page, lapsedSrsDoc());
 
 	await page.goto('/');
-	const cta = page.getByRole('link', { name: /^Review 10 cards/ });
-	await expect(cta).toBeVisible();
-	await expect(page.getByText(/9 more are waiting/)).toBeVisible();
-	// The pile total must not be the promise anywhere on the page.
-	await expect(page.getByRole('link', { name: /Review 19/ })).toHaveCount(0);
+	const chip = page.getByRole('link', { name: /^Review 10 cards/ });
+	await expect(chip).toBeVisible();
+	await expect(chip).toHaveText(/10 due → Review/);
 
 	const badge = page.locator('.badge-n');
 	await expect(badge).toHaveText('10');
 	await expect(page.getByRole('link', { name: /Review, 10 cards in this sitting/ })).toBeVisible();
+
+	await chip.click();
+	const cta = page.getByRole('button', { name: /^Review 10 cards/ });
+	await expect(cta).toBeVisible();
+	await expect(page.getByText(/9 more are waiting/)).toBeVisible();
+	await expect(page.getByRole('button', { name: /Review 19/ })).toHaveCount(0);
 
 	await cta.click();
 	await expect(page.getByRole('progressbar', { name: 'Review progress' })).toHaveAttribute(

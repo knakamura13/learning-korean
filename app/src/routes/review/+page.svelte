@@ -38,6 +38,7 @@
 	let input = $state<HTMLInputElement | undefined>();
 	let blockAnswerEl = $state<HTMLDivElement | undefined>();
 	let ready = $state(false);
+	let begun = $state(false);
 	let emptyHint = $state(false);
 	let blockTrial = $state<ComposeTrial | null>(null);
 
@@ -78,7 +79,8 @@
 			unlocked: stats.unlocked,
 			sittingLength: queue.length,
 			index,
-			remainingDue: stats.queue
+			remainingDue: stats.queue,
+			begun
 		})
 	);
 	const inSession = $derived(body === 'sitting');
@@ -92,17 +94,28 @@
 
 	onMount(() => {
 		progress.tick();
-		start();
+		prepareQueue();
 		ready = true;
 	});
 
-	function start() {
+	function prepareQueue() {
 		progress.tick();
 		queue = progress.queue;
 		index = 0;
 		shown = 0;
 		right = 0;
-		reset();
+		typed = '';
+		answered = false;
+		verdict = null;
+		emptyHint = false;
+		blockTrial = null;
+		sittingNew = false;
+	}
+
+	function start() {
+		prepareQueue();
+		begun = queue.length > 0;
+		if (begun) reset();
 	}
 
 	async function reset() {
@@ -226,6 +239,17 @@
 
 	{#if chrome.showStats}
 		<div class="load">
+			{#if body === 'pile'}
+				<div class="sec-row">
+					<h2 id="sec-review-heading" class="sec">Review pile</h2>
+					<button type="button" class="btn" onclick={start} aria-label={load.actionAria}>
+						{load.action}
+					</button>
+				</div>
+				{#if load.backlogNote}
+					<p class="backlog-note">{load.backlogNote}</p>
+				{/if}
+			{/if}
 			<div class="strip" role="region" aria-label="Review session statistics">
 				<div class="stat" class:hot={stats.sitting > 0}>
 					<b>{stats.sitting}</b><span>this sitting</span>
@@ -234,7 +258,7 @@
 				<div class="stat"><b>{stats.seen}</b><span>reviewed</span></div>
 				<div class="stat"><b>{stats.streak}</b><span>day streak</span></div>
 			</div>
-			{#if load.backlogNote}
+			{#if body !== 'pile' && load.backlogNote}
 				<p class="backlog-note">{load.backlogNote}</p>
 			{/if}
 		</div>
@@ -438,6 +462,25 @@
 
 	.load { margin-bottom: var(--s5); }
 
+	.sec-row {
+		display: flex;
+		align-items: center;
+		gap: var(--s3);
+		flex-wrap: wrap;
+		margin: 0 0 var(--s3);
+		min-height: 44px;
+	}
+	.sec-row .sec {
+		margin: 0;
+		font-family: var(--display);
+		font-style: italic;
+		font-size: 1.15rem;
+		font-weight: 400;
+		letter-spacing: -0.015em;
+		text-transform: none;
+		color: var(--ink);
+	}
+
 	.strip {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
@@ -450,6 +493,10 @@
 		font-size: 0.82rem;
 		line-height: 1.55;
 		color: var(--ink-soft);
+	}
+	.sec-row + .backlog-note {
+		margin-top: calc(var(--s2) * -1);
+		margin-bottom: var(--s3);
 	}
 
 	@media (min-width: 40rem) {

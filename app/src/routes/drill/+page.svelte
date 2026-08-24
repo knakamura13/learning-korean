@@ -219,7 +219,14 @@
 		</div>
 	{:else if eligible}
 		<div class="card empty">
-			<button class="btn" type="button" onclick={start}>Start 60-second round</button>
+			<p class="idle-copy">
+				{#if lane === 'blocks'}
+					One minute of unfamiliar syllable blocks. The number is your median time.
+				{:else}
+					One minute of sound-change prompts. The number is your median time.
+				{/if}
+			</p>
+			<button class="btn" type="button" onclick={start}>Start a round</button>
 		</div>
 	{/if}
 </div>
@@ -343,7 +350,13 @@
 		margin-bottom: var(--s2);
 		color: var(--ink);
 	}
-	.empty p:not(.median) {
+	.empty p:not(.median):not(.idle-copy) {
+		color: var(--ink);
+		font-size: 0.92rem;
+		max-width: 28rem;
+		margin: 0 auto var(--s4);
+	}
+	.idle-copy {
 		color: var(--ink);
 		font-size: 0.92rem;
 		max-width: 28rem;

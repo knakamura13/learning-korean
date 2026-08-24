@@ -32,7 +32,7 @@ describe('drill page source contracts', () => {
 	});
 
 	it('has idle and done copy', () => {
-		expect(src).toMatch(/Start 60-second round/);
+		expect(src).toMatch(/Start a round/);
 		expect(src).toMatch(/Another round/);
 		expect(src).toMatch(/median/);
 	});
