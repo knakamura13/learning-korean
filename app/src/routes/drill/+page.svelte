@@ -148,7 +148,6 @@
 
 <div class="shell narrow">
 	<header class="head" class:compact={running}>
-		<p class="eyebrow">Timed drill</p>
 		<h1>{lane === 'blocks' ? 'Block sprint' : 'Sound-change mill'}</h1>
 		{#if ready && !running}
 			<div class="lanes" role="group" aria-label="Drill lanes">

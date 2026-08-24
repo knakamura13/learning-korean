@@ -136,7 +136,6 @@
 <div class="with-rail">
 	<div class="shell">
 	<header class="head">
-		<p class="eyebrow">Reference</p>
 		<h1>Every letter and rule</h1>
 		<p class="lede">
 			Generated from the same module the labs run on, so it cannot drift from what the app

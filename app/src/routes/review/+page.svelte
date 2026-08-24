@@ -214,7 +214,6 @@
 
 <div class="shell narrow">
 	<header class="head" class:compact={inSession}>
-		<p class="eyebrow">Spaced repetition</p>
 		<h1>Daily Review</h1>
 		{#if chrome.showStandfirst}
 			<p class="standfirst">

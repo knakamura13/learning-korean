@@ -925,6 +925,26 @@ describe('polish audit regressions', () => {
 		expect(home).not.toMatch(/pile-empty loading-copy/);
 	});
 
+	it('orients with italic titles and purpose lines, not all-caps page eyebrows', () => {
+		expect(home).toMatch(/Read Korean from first principles/);
+		expect(home).toMatch(/Interactive labs that make you derive the writing system/);
+		expect(home).not.toMatch(/class="eyebrow"/);
+		expect(home).not.toMatch(/>한글</);
+		expect(review).toMatch(/Daily Review/);
+		expect(review).toMatch(/Type the sound/);
+		expect(review).not.toMatch(/class="eyebrow"/);
+		expect(review).not.toMatch(/Spaced repetition/);
+		expect(drill).toMatch(/Block sprint/);
+		expect(drill).not.toMatch(/class="eyebrow"/);
+		expect(drill).not.toMatch(/Timed drill/);
+		expect(reference).toMatch(/Every letter and rule/);
+		expect(reference).toMatch(/Generated from the same module/);
+		expect(reference).not.toMatch(/class="eyebrow"/);
+		expect(reference).not.toMatch(/<p class="eyebrow">Reference<\/p>/);
+		expect(settingsPage).toMatch(/<h1>Settings<\/h1>/);
+		expect(settingsPage).not.toMatch(/class="eyebrow"/);
+	});
+
 	it('does not ship fascicle journal words in UI chrome', () => {
 		const chrome = layout + home + sitting + labPage + labIndexRail + labPreview + review + settingsPage;
 		expect(chrome).not.toMatch(/Colophon/);
