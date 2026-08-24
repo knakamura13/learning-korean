@@ -32,6 +32,7 @@ async function collectWaapiDurations(page: import('@playwright/test').Page) {
 async function runReviewVerdict(page: import('@playwright/test').Page) {
 	await seedGuestState(page, lapsedSrsDoc());
 	await page.goto('/review');
+	await page.getByRole('button', { name: /^Review 10 cards/ }).click();
 	await page.locator('.card.review').waitFor();
 	const answer = page.locator('#review-answer');
 	if (await answer.isVisible()) {
