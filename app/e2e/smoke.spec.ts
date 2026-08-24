@@ -66,7 +66,8 @@ test('a first lab card is interactive and a wrong pick does not advance', async 
 test('review with unlocked progress starts a sitting', async ({ page }) => {
 	await seedGuestState(page);
 	await page.goto('/review');
-	// Review auto-starts when cards are available: progress bar + typed answer.
+	// Review lands on the pile first; the CTA starts the sitting.
+	await page.getByRole('button', { name: /^Review \d+ cards?/ }).click();
 	await expect(page.getByRole('progressbar', { name: 'Review progress' })).toBeVisible();
 	await expect(page.getByRole('textbox').first()).toBeVisible();
 });
