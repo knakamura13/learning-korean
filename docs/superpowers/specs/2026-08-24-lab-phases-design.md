@@ -2,7 +2,8 @@
 
 **Date:** 2026-08-24
 **Status:** ready to implement (written spec pending review)
-**Issue:** [#164](https://github.com/knakamura13/learning-korean/issues/164)
+**Issue:** [#169](https://github.com/knakamura13/learning-korean/issues/169)
+**Supersedes:** [#164](https://github.com/knakamura13/learning-korean/issues/164) (research spike)
 **Interim:** [#165](https://github.com/knakamura13/learning-korean/pull/165) already strips `Act N ·` at display time. This spec replaces that stopgap.
 
 ## Problem
