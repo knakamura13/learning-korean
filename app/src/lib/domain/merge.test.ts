@@ -110,6 +110,12 @@ describe('mergeSrsState — unlocks, days, pin', () => {
 		expect(mergeSrsState(b, a).unlocked.sort()).toEqual(merged.unlocked.slice().sort());
 	});
 
+	it('unions flagged card ids', () => {
+		const a = docWith({ flagged: ['c0', 'c1'] });
+		const b = docWith({ flagged: ['c1', 'c2'] });
+		expect(mergeSrsState(a, b).flagged).toEqual(['c0', 'c1', 'c2']);
+	});
+
 	it('takes the max per day, never the sum', () => {
 		const a = docWith({ days: { '2026-03-01': 10, '2026-03-02': 3 } });
 		const b = docWith({ days: { '2026-03-01': 4, '2026-03-03': 7 } });

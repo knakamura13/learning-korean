@@ -5,7 +5,7 @@ import {
 	emptyState, reviveState, decodeStoredState, isSrsBackup, parseImportedBackup,
 	unlock, isUnlocked, grade, gradeFromAttempt, attemptSpeed,
 	due, pinNewForDay, nextDueAt, stats, streak, weakest, isoDay,
-	tierCountLabel, tierReviewProgress,
+	tierCountLabel, tierReviewProgress, setFlagged, isFlagged,
 	type SrsState, type SchedulableCard
 } from './srs';
 
@@ -167,6 +167,14 @@ describe('backup validation', () => {
 		expect(isSrsBackup({ version: 1, unlocked: [1, 2], cards: {} })).toBe(false);
 		expect(isSrsBackup({ version: 1, unlocked: [], openedLabs: [0], cards: {} })).toBe(false);
 		expect(isSrsBackup({ version: 1, unlocked: [], cards: {}, newIds: [1] })).toBe(false);
+		expect(isSrsBackup({ version: 1, unlocked: [], cards: {}, flagged: [1] })).toBe(false);
+	});
+
+	it('revives missing flagged as empty and keeps string ids', () => {
+		expect(reviveState({ version: 1, unlocked: [], cards: {} }).flagged).toEqual([]);
+		expect(
+			reviveState({ version: 1, unlocked: [], cards: {}, flagged: ['c0', 9, 'c1'] }).flagged
+		).toEqual(['c0', 'c1']);
 	});
 
 	it('parseImportedBackup fails closed on invalid input', () => {
@@ -698,5 +706,38 @@ describe('vocabulary track', () => {
 		expect(legacy.vocabNewDate).toBe('');
 		expect(legacy.vocabNewCount).toBe(0);
 		expect(legacy.vocabNewIds).toEqual([]);
+	});
+});
+
+describe('flagged cards', () => {
+	it('bookmarks an unlocked card and pulls it into the due sitting', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		s = grade(s, 'c0', GOOD, T0).state;
+		const later = T0 + 60_000;
+		expect(s.cards.c0.due).toBeGreaterThan(later);
+		expect(due(s, deck, later, { shuffle: noShuffle }).map((c) => c.id)).not.toContain('c0');
+
+		s = setFlagged(s, ['c0'], true, later, deck);
+		expect(isFlagged(s, 'c0')).toBe(true);
+		expect(s.cards.c0.due).toBe(later);
+		expect(due(s, deck, later, { shuffle: noShuffle })[0]?.id).toBe('c0');
+	});
+
+	it('unflag clears the bookmark without wiping the schedule', () => {
+		let s = unlock(emptyState(), ['lab01']);
+		s = setFlagged(s, ['c0'], true, T0, deck);
+		const dueAt = s.cards.c0.due;
+		s = setFlagged(s, ['c0'], false, T0, deck);
+		expect(isFlagged(s, 'c0')).toBe(false);
+		expect(s.cards.c0.due).toBe(dueAt);
+	});
+
+	it('stores a flag before unlock and materializes after setFlagged when unlocked', () => {
+		let s = setFlagged(emptyState(), ['c0'], true, T0, deck);
+		expect(s.flagged).toEqual(['c0']);
+		expect(s.cards.c0).toBeUndefined();
+		s = unlock(s, ['lab01']);
+		s = setFlagged(s, s.flagged, true, T0, deck);
+		expect(s.cards.c0.due).toBe(T0);
 	});
 });

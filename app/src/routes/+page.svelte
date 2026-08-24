@@ -10,7 +10,7 @@
 		reviewPileView,
 		toCourseLab
 	} from '$lib/domain/courseNav';
-	import { lockedLabPopoverCopy, placeClickPopover, popoverPadWithSafeArea } from '$lib/domain/lockedLab';
+	import { lockedLabPopoverCopy } from '$lib/domain/lockedLab';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
 	import { TIERS } from '$lib/domain/deck';
 	import { DEFAULT_VOCAB_NEW_PER_DAY } from '$lib/domain/srs';
@@ -26,28 +26,11 @@
 	// and deck-tier counts until the client has ticked, so we never flash
 	// empty or stored values into static HTML.
 	let ready = $state(false);
-	let lockedOpen = $state<{ labId: string; x: number; y: number } | null>(null);
-	let panelSize = $state({ w: 320, h: 220 });
-	let viewport = $state({ w: 1200, h: 800 });
-	let safePad = $state(popoverPadWithSafeArea());
+	let lockedOpen = $state<string | null>(null);
 
 	onMount(() => {
 		progress.tick();
 		ready = true;
-		const sync = () => {
-			viewport = { w: window.innerWidth, h: window.innerHeight };
-			const cs = getComputedStyle(document.documentElement);
-			const px = (name: string) => parseFloat(cs.getPropertyValue(name)) || 0;
-			safePad = popoverPadWithSafeArea({
-				top: px('--safe-top'),
-				right: px('--safe-right'),
-				bottom: px('--safe-bottom'),
-				left: px('--safe-left')
-			});
-		};
-		sync();
-		window.addEventListener('resize', sync);
-		return () => window.removeEventListener('resize', sync);
 	});
 
 	const stats = $derived(progress.stats);
@@ -95,7 +78,7 @@
 	const lockedLab = $derived.by(() => {
 		const open = lockedOpen;
 		if (!open) return null;
-		return LABS.find((item) => item.id === open.labId) ?? null;
+		return LABS.find((item) => item.id === open) ?? null;
 	});
 	const lockedPrior = $derived(lockedLab ? requiredLab(course, lockedLab.requires) : null);
 	const lockedCopy = $derived(
@@ -106,20 +89,9 @@
 				)
 			: null
 	);
-	const lockedPlacement = $derived(
-		lockedOpen ? placeClickPopover(lockedOpen, panelSize, viewport, safePad) : null
-	);
 
-	function openLocked(e: MouseEvent, labId: string) {
-		const node = e.currentTarget;
-		let x = e.clientX;
-		let y = e.clientY;
-		if (x === 0 && y === 0 && node instanceof HTMLElement) {
-			const box = node.getBoundingClientRect();
-			x = box.left + Math.min(48, box.width / 2);
-			y = box.top + Math.min(48, box.height / 2);
-		}
-		lockedOpen = { labId, x, y };
+	function openLocked(labId: string) {
+		lockedOpen = labId;
 	}
 
 	function dismissLocked() {
@@ -127,7 +99,7 @@
 	}
 
 	function closeLocked() {
-		const id = lockedOpen?.labId;
+		const id = lockedOpen;
 		dismissLocked();
 		if (!id) return;
 		queueMicrotask(() =>
@@ -137,17 +109,7 @@
 
 	function skipLocked() {
 		if (!lockedOpen) return;
-		progress.openLab(lockedOpen.labId);
-	}
-
-	function onWindowPointerDown(e: PointerEvent) {
-		if (!lockedOpen) return;
-		const target = e.target;
-		if (!(target instanceof Node)) return;
-		const pop = document.getElementById('locked-lab-pop');
-		if (pop?.contains(target)) return;
-		if (target instanceof Element && target.closest('button.lab.ahead')) return;
-		dismissLocked();
+		progress.openLab(lockedOpen);
 	}
 
 	function onWindowKey(e: KeyboardEvent) {
@@ -158,7 +120,7 @@
 </script>
 
 <svelte:head><title>Korean — labs and review</title></svelte:head>
-<svelte:window onpointerdown={onWindowPointerDown} onkeydown={onWindowKey} />
+<svelte:window onkeydown={onWindowKey} />
 
 <div class="with-rail">
 	<div class="shell">
@@ -187,9 +149,9 @@
 						data-lab-id={lab.id}
 						aria-labelledby="lab-{lab.id}-title"
 						aria-haspopup="dialog"
-						aria-expanded={lockedOpen?.labId === lab.id}
-						aria-controls={lockedOpen?.labId === lab.id ? 'locked-lab-pop' : undefined}
-						onclick={(e) => openLocked(e, lab.id)}
+						aria-expanded={lockedOpen === lab.id}
+						aria-controls={lockedOpen === lab.id ? 'locked-lab-pop' : undefined}
+						onclick={() => openLocked(lab.id)}
 					>
 						<div class="num" aria-hidden="true">{pad(lab.number)}</div>
 						<div class="body">
@@ -391,17 +353,13 @@
 	</section>
 	</div>
 	<LabIndexRail />
-	{#if lockedOpen && lockedCopy && lockedPlacement && lockedLab}
+	{#if lockedOpen && lockedCopy && lockedLab}
 		<LockedLabPopover
 			copy={lockedCopy}
-			placement={lockedPlacement}
 			priorId={lockedPrior?.id ?? null}
 			skipId={lockedLab.id}
 			onDismiss={closeLocked}
 			onSkip={skipLocked}
-			onMeasure={(size) => {
-				panelSize = size;
-			}}
 		/>
 	{/if}
 </div>

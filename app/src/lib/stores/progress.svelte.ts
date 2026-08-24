@@ -9,7 +9,7 @@
 import { browser } from '$app/environment';
 import {
 	emptyState, decodeStoredState, parseImportedBackup, unlock as unlockTiers, isUnlocked,
-	openLab as openLabAccess, isOpened,
+	openLab as openLabAccess, isOpened, isFlagged as cardIsFlagged, setFlagged,
 	grade as gradeCard, due as dueCards, pinNewForDay, nextDueAt, stats as computeStats,
 	weakest as weakestCards, gradeFromAttempt, tierReviewProgress, reviveState, trackOfTier,
 	DEFAULT_NEW_PER_DAY, DEFAULT_REVIEW_PER_SITTING,
@@ -129,6 +129,35 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 			commit(next);
 		},
 
+		isFlagged(cardId: string) {
+			return cardIsFlagged(state, cardId);
+		},
+
+		/** True when every listed card id is currently bookmarked. */
+		areFlagged(cardIds: readonly string[]) {
+			return cardIds.length > 0 && cardIds.every((id) => cardIsFlagged(state, id));
+		},
+
+		/**
+		 * Bookmark review concepts. Flagging marks them due now so Review
+		 * surfaces them; unflagging clears the bookmark only.
+		 */
+		flagCards(cardIds: readonly string[], flag = true) {
+			now = Date.now();
+			const next = setFlagged(state, cardIds, flag, now, DECK);
+			if (next === state) return;
+			commit(next);
+		},
+
+		toggleFlagged(cardIds: readonly string[]) {
+			if (cardIds.length === 0) return;
+			const allOn = cardIds.every((id) => cardIsFlagged(state, id));
+			now = Date.now();
+			const next = setFlagged(state, cardIds, !allOn, now, DECK);
+			if (next === state) return;
+			commit(next);
+		},
+
 		/** Per-tier progress for the dashboard. */
 		get tierProgress() {
 			const rows = tierReviewProgress(state, DECK, TIERS);
@@ -144,8 +173,11 @@ export function createProgress(store: Storage = browser ? browserStorage(SRS_STO
 		/** Returns how many cards this actually released. */
 		unlock(tiers: string[]): number {
 			const before = state.unlocked.length;
-			const next = unlockTiers(state, tiers);
+			let next = unlockTiers(state, tiers);
 			if (next === state) return 0;
+			now = Date.now();
+			// Materialize bookmarked concepts that just became eligible for Review.
+			next = setFlagged(next, next.flagged, true, now, DECK);
 			if (!commit(next)) return 0;
 			persistPin();
 			return tiers

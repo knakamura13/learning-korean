@@ -1,42 +1,28 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { fly } from 'svelte/transition';
 	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
-	import type { LockedLabPopoverCopy, PopoverPlacement } from '$lib/domain/lockedLab';
+	import { motion } from '$lib/a11y/motion';
+	import type { LockedLabPopoverCopy } from '$lib/domain/lockedLab';
 
 	let {
 		copy,
-		placement,
 		priorId,
 		skipId,
 		onDismiss,
-		onSkip,
-		onMeasure
+		onSkip
 	}: {
 		copy: LockedLabPopoverCopy;
-		placement: PopoverPlacement;
 		priorId: string | null;
 		skipId: string;
 		onDismiss: () => void;
 		onSkip: () => void;
-		onMeasure?: (size: { w: number; h: number }) => void;
 	} = $props();
 
-	function reportSize(node: HTMLElement) {
-		const notify = () => onMeasure?.({ w: node.offsetWidth, h: node.offsetHeight });
-		const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(notify) : null;
-		ro?.observe(node);
-		notify();
-		queueMicrotask(() => node.querySelector<HTMLElement>('a.btn, button')?.focus());
-		return () => ro?.disconnect();
-	}
-
 	function attachLockedDialog(node: HTMLDialogElement) {
-		const stopMeasure = reportSize(node);
 		const stopModal = attachModalDialog(node, onDismiss);
-		return () => {
-			stopModal();
-			stopMeasure();
-		};
+		queueMicrotask(() => node.querySelector<HTMLElement>('a.btn, button')?.focus());
+		return stopModal;
 	}
 
 	function onBackdropPointerDown(e: PointerEvent) {
@@ -47,15 +33,18 @@
 <dialog
 	id="locked-lab-pop"
 	class="pop"
-	style:--pop-x="{placement.left}px"
-	style:--pop-y="{placement.top}px"
 	aria-labelledby="locked-lab-pop-title"
 	aria-describedby="locked-lab-pop-body"
 	{@attach attachLockedDialog}
 	onpointerdown={onBackdropPointerDown}
+	in:fly={motion({ y: 28, duration: 220 })}
 >
-	<p class="eyebrow">Locked</p>
-	<h2 id="locked-lab-pop-title">{copy.title}</h2>
+	<div class="sheet-head">
+		<h2 id="locked-lab-pop-title">{copy.title}</h2>
+		<button type="button" class="close" aria-label="Close" onclick={onDismiss}>
+			<span aria-hidden="true">×</span>
+		</button>
+	</div>
 	<p class="lead" id="locked-lab-pop-body">{copy.body}</p>
 	<div class="actions">
 		{#if priorId && copy.priorLabel}
@@ -73,12 +62,13 @@
 <style>
 	.pop {
 		position: fixed;
-		inset: unset;
-		inset-inline-start: var(--pop-x);
-		inset-block-start: var(--pop-y);
-		margin: 0;
+		inset: 0;
+		margin: auto;
 		z-index: 7;
 		width: var(--popover-max);
+		max-width: calc(100% - 2rem);
+		height: fit-content;
+		max-height: min(90dvh, 36rem);
 		padding: var(--s4);
 		background: var(--paper-raised);
 		border: 1px solid var(--rule-strong);
@@ -86,17 +76,52 @@
 		box-shadow: var(--shadow-2);
 		color: var(--ink);
 		overscroll-behavior: contain;
+		overflow: auto;
 	}
 	.pop::backdrop {
 		background: color-mix(in srgb, var(--ink) 35%, transparent);
 	}
 
-	h2 {
+	.sheet-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--s3);
+		margin-bottom: var(--s2);
+	}
+
+	.close {
+		appearance: none;
+		display: inline-grid;
+		place-items: center;
+		flex: 0 0 auto;
+		width: 44px;
+		height: 44px;
+		margin: calc(-1 * var(--s2)) calc(-1 * var(--s2)) 0 0;
+		padding: 0;
+		border: 0;
+		border-radius: var(--r-md);
+		background: transparent;
+		color: var(--ink-soft);
+		font-size: 1.6rem;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.close:hover,
+	.close:focus-visible {
+		color: var(--ink);
+		background: var(--paper-sunk);
+	}
+
+	.sheet-head h2 {
 		font-family: var(--display);
 		font-style: italic;
 		font-size: 1.15rem;
 		font-weight: 400;
-		margin: 0 0 var(--s2);
+		margin: 0;
+		padding-block-start: 0.35rem;
+		min-width: 0;
+		flex: 1 1 auto;
 	}
 
 	.lead {
@@ -117,6 +142,20 @@
 		width: 100%;
 	}
 
+	/* Phones: bottom sheet, not tap-anchored or mid-screen floating. */
+	@media (max-width: 40rem) {
+		.pop {
+			inset: auto 0 0 0;
+			margin: 0;
+			width: 100%;
+			max-width: none;
+			max-height: min(88dvh, 34rem);
+			padding-bottom: max(var(--s4), env(safe-area-inset-bottom));
+			border-radius: var(--r-md) var(--r-md) 0 0;
+			border-bottom: 0;
+		}
+	}
+
 	@media (forced-colors: active) {
 		.pop {
 			background: Canvas;
@@ -126,6 +165,9 @@
 		}
 		.pop::backdrop {
 			background: Canvas;
+		}
+		.close {
+			color: ButtonText;
 		}
 	}
 </style>

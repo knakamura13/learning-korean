@@ -9,6 +9,7 @@
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import ReviewCompose from '$lib/components/ReviewCompose.svelte';
+	import FlagButton from '$lib/components/FlagButton.svelte';
 	import type { AudioSlot } from '$lib/audio/letters';
 	import { TIERS, checkAnswer, type Card } from '$lib/domain/deck';
 	import { attemptSpeed } from '$lib/domain/srs';
@@ -66,6 +67,7 @@
 	const pronCard = $derived(card?.kind === 'pron');
 	const blockCard = $derived(card?.kind === 'block');
 	const reviewSlot = $derived(card ? reviewAudioSlot(card.kind) : null);
+	const cardFlagged = $derived(card ? progress.isFlagged(card.id) : false);
 	const stats = $derived(progress.stats);
 	const load = $derived(reviewLoadCopy(stats, progress.studyPrefs.reviewsPerSitting));
 	const unlockedTiers = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
@@ -359,10 +361,10 @@
 									emptyHint = false;
 								}}
 							/>
-							<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
 							{#if answered}
 								<span class="kb">or press Enter</span>
 							{/if}
+							<button class="btn" type="submit" use:focusWhen={answered}>{answered ? 'Next' : 'Check'}</button>
 						</div>
 						{#if emptyHint}
 							<p id="empty-hint" class="empty-hint" role="status">
@@ -378,8 +380,10 @@
 							<ReviewCompose trial={blockTrial} onPick={pickCompose} disabled={answered} />
 						{/key}
 						{#if answered}
-							<button class="btn" type="button" use:focusWhen={answered} onclick={next}>Next</button>
-							<span class="kb">or press Enter</span>
+							<div class="foot">
+								<span class="kb">or press Enter</span>
+								<button class="btn" type="button" use:focusWhen={answered} onclick={next}>Next</button>
+							</div>
 						{/if}
 					</div>
 				{/if}
@@ -390,7 +394,15 @@
 						data-tone={verdict.ok ? 'right' : 'wrong'}
 						in:fade={motion({ duration: 150 })}
 					>
-						<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
+						<div class="fb-head">
+							<span class="v">{verdict.ok ? `Correct · ${verdict.speed}` : 'Missed'}</span>
+							{#if card}
+								<FlagButton
+									active={cardFlagged}
+									onclick={() => progress.toggleFlagged([card.id])}
+								/>
+							{/if}
+						</div>
 						<span class="ans">
 							{#if blockCard}
 								<span lang="ko">{card.front}</span> · {card.answers[0]}
@@ -533,22 +545,44 @@
 		min-height: 44px;
 	}
 
+	.foot {
+		margin-top: var(--s2);
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--s3);
+		flex-wrap: wrap;
+	}
+	.kb { font-size: 0.7rem; color: var(--ink-faint); margin-inline-end: auto; }
+
+	@media (pointer: coarse) {
+		.kb { display: none; }
+	}
+
 	.answer-controls {
 		display: flex;
 		align-items: stretch;
 		gap: var(--s2);
 	}
 
-	.answer-controls .in {
-		flex: 1 1 auto;
-		min-width: 0;
-		width: auto;
+	.answer-controls .kb {
+		align-self: center;
+		margin-inline-end: 0;
+		order: 2;
 	}
 
 	.answer-controls .btn {
 		flex: 0 0 auto;
 		align-self: stretch;
 		height: auto;
+		order: 3;
+	}
+
+	.answer-controls .in {
+		flex: 1 1 auto;
+		min-width: 0;
+		width: auto;
+		order: 1;
 	}
 
 	@media (max-width: 36rem) {
@@ -624,7 +658,19 @@
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
+		margin-bottom: 0;
+	}
+	.fb-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--s2);
 		margin-bottom: var(--s1);
+	}
+	.fb-head :global(.flag-btn) {
+		width: 36px;
+		height: 36px;
+		margin: calc(-1 * var(--s1)) calc(-1 * var(--s2)) 0 0;
 	}
 	.fb[data-tone='right'] .v { color: var(--good); }
 	.fb[data-tone='wrong'] .v { color: var(--bad); }
