@@ -17,6 +17,36 @@ for (const route of ROUTES) {
 	});
 }
 
+test('selecting a main nav tab does not shift tab boxes', async ({ page }) => {
+	const nav = page.getByRole('navigation', { name: 'Main navigation' });
+	await page.goto('/');
+	await expect(nav.getByRole('link').first()).toBeVisible();
+
+	const before = await nav.getByRole('link').evaluateAll((links) =>
+		links.map((el) => {
+			const box = el.getBoundingClientRect();
+			return { text: (el.textContent ?? '').replace(/\d+/g, '').trim(), x: box.x, width: box.width };
+		})
+	);
+
+	await nav.getByRole('link', { name: 'Review', exact: true }).click();
+	await expect(page).toHaveURL(/\/review\/?$/);
+
+	const after = await nav.getByRole('link').evaluateAll((links) =>
+		links.map((el) => {
+			const box = el.getBoundingClientRect();
+			return { text: (el.textContent ?? '').replace(/\d+/g, '').trim(), x: box.x, width: box.width };
+		})
+	);
+
+	expect(after).toHaveLength(before.length);
+	for (let i = 0; i < before.length; i++) {
+		expect(after[i].text).toBe(before[i].text);
+		expect(Math.abs(after[i].x - before[i].x)).toBeLessThan(0.5);
+		expect(Math.abs(after[i].width - before[i].width)).toBeLessThan(0.5);
+	}
+});
+
 test('home shows all ten labs with Lab 01 as the entry point', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.getByText('start here')).toBeVisible();

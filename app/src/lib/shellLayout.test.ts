@@ -77,4 +77,12 @@ describe('shell layout source contracts', () => {
 		expect(reference).toMatch(/\.with-rail :global\(\.ref-index\)\s*\{[^}]*grid-area:\s*rail/);
 		expect(styleBlock(reference)).toMatch(/grid-template-areas:\s*'head'\s*'rail'\s*'main'/);
 	});
+
+	it('nav tabs keep a 1px border in both states so selecting one does not shift neighbors', () => {
+		const css = styleBlock(layout);
+		expect(css).toMatch(/nav a\s*\{[^}]*border:\s*1px solid transparent/s);
+		expect(css).toMatch(/nav a\s*\{[^}]*border-block-end:\s*(?:none|0)/s);
+		expect(css).toMatch(/nav a\.active\s*\{[^}]*border-color:\s*var\(--rule\)/s);
+		expect(css).not.toMatch(/nav a\.active\s*\{[^}]*\bborder:\s*1px solid/s);
+	});
 });

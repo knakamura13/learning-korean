@@ -307,6 +307,11 @@
 		min-width: 44px;
 		min-height: 44px;
 		padding: 0 0.75rem;
+		/* Reserve the folder-tab stroke so .active only changes paint, not box size. */
+		border: 1px solid transparent;
+		border-block-end: none;
+		margin-block-end: -1px;
+		padding-block-end: 1px;
 		border-radius: 0;
 		font-size: 0.84rem;
 		text-decoration: none;
@@ -320,12 +325,9 @@
 	nav a.active {
 		color: var(--accent);
 		background: var(--paper);
-		border: 1px solid var(--rule);
-		border-block-end: none;
+		border-color: var(--rule);
 		border-start-start-radius: var(--tab-r);
 		border-start-end-radius: var(--tab-r);
-		margin-block-end: -1px;
-		padding-block-end: 1px;
 		z-index: 1;
 	}
 	nav a.active::before,
