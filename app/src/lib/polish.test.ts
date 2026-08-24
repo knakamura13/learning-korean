@@ -1123,6 +1123,13 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(vowelStep)).not.toMatch(/\.label\s*\{[^}]*font-size:\s*0\.62rem/s);
 	});
 
+	it('keeps phase titles in sentence case, not the uppercase eyebrow', () => {
+		expect(styleBlock(labRunner)).toMatch(/\.phase-title\s*\{[^}]*text-transform:\s*none/s);
+		expect(styleBlock(labRunner)).not.toMatch(/\.phase-title\s*\{[^}]*text-transform:\s*uppercase/s);
+		expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*text-transform:\s*uppercase/s);
+	});
+
 	it('keeps phone header tab hit boxes from sharing a 0.1rem gutter', () => {
 		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\) \{\s*\.inner \{[^}]*\}\s*nav \{\s*gap:\s*0\.35rem/s
@@ -1219,7 +1226,7 @@ describe('polish audit regressions', () => {
 	it('keeps pip-rail attach in sitting chrome without freezing LabRunner import paths', () => {
 		expect(sitting).toMatch(/attachPipRail/);
 		expect(sitting).toMatch(/attachModalDialog/);
-		expect(labPipRail).toMatch(/aria-label="Lab card navigation"/);
+		expect(labPipRail).toMatch(/aria-label="Lab card navigation, \{/);
 		expect(styleBlock(labRunner)).not.toMatch(/\.pip\s*\{/);
 	});
 

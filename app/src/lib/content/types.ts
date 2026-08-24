@@ -14,8 +14,6 @@ export interface StageItem {
 }
 
 interface BaseStep {
-	/** Small label above the instruction, e.g. "build it" or "2 of 5". */
-	act?: string;
 	/** The instruction. Inline HTML allowed for jamo spans and emphasis. */
 	do: string;
 	/** One line of setup under the instruction. */
@@ -24,6 +22,12 @@ interface BaseStep {
 	teach: string;
 	/** Shown after a wrong answer as a retry hint. Must not name the answer. */
 	miss?: string;
+}
+
+/** A named teaching job: consecutive action cards that share one chapter title. */
+export interface LabPhase {
+	title: string;
+	count: number;
 }
 
 /** Click the place in the vocal tract where a sound is made. */
@@ -155,5 +159,7 @@ export interface Lab {
 	/** Lab id that should be finished first, if any. */
 	requires?: string;
 	finish: { title: string; summary: string };
+	/** Named teaching jobs. Counts are consecutive action cards; they must sum to `steps.length`. */
+	phases: LabPhase[];
 	steps: Step[];
 }

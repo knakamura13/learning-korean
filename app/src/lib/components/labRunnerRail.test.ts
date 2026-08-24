@@ -27,9 +27,21 @@ describe('LabPipRail', () => {
 	});
 
 	it('owns the numbered rail so LabRunner does not', () => {
-		expect(labPipRail).toMatch(/aria-label="Lab card navigation"/);
+		expect(labPipRail).toMatch(/aria-label="Lab card navigation, \{/);
 		expect(labPipRail).toMatch(/attachPipRail/);
 		expect(styleBlock(labRunner)).not.toMatch(/\.pip\s*\{/);
 		expect(styleBlock(labRunner)).not.toMatch(/\.rail\s*\{/);
+	});
+
+	it('names the rail with the active phase and marks other-phase pips', () => {
+		expect(labPipRail).toMatch(/aria-label="Lab card navigation, \{/);
+		expect(labPipRail).toMatch(/data-phase=\{/);
+		expect(labPipRail).toMatch(/cardInActivePhase/);
+		expect(labPipRail).toMatch(/opacity:\s*0\.4/);
+		expect(labPipRail).toMatch(/\[data-phase='other'\][^{]*\{[^}]*GrayText/s);
+		expect(labRunner).toMatch(/class="phase-title"/);
+		expect(labRunner).toMatch(/phaseAt\(lab\.phases,\s*index\)/);
+		expect(labRunner).not.toMatch(/formatStepEyebrow/);
+		expect(labRunner).not.toMatch(/step\.act/);
 	});
 });

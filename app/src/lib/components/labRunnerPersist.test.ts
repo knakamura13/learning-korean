@@ -56,6 +56,7 @@ const lab: Lab = {
 	minutes: 1,
 	unlocks: 'lab01',
 	finish: { title: 'Done', summary: 'Finished.' },
+	phases: [{ title: 'Read from the letters alone', count: 1 }],
 	steps: [
 		{
 			type: 'choice',
@@ -96,6 +97,7 @@ describe('LabRunner persist and unlock', () => {
 	it('resumes a mid-sitting after remount', async () => {
 		const twoStep: Lab = {
 			...lab,
+			phases: [{ title: 'Read from the letters alone', count: 2 }],
 			steps: [
 				lab.steps[0],
 				{

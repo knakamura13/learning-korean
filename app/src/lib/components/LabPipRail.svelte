@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { attachPipRail } from '$lib/components/labRunnerPipRail.svelte';
+	import type { LabPhase } from '$lib/content/types';
+	import { cardInActivePhase, phaseAt } from '$lib/domain/labPhase';
 	import { pipIsJumpTarget, pipKind, pipLabel, type CardOutcome } from '$lib/domain/pipState';
 
 	let {
@@ -7,12 +9,14 @@
 		index,
 		outcomes,
 		furthest,
+		phases,
 		onJump
 	}: {
 		stepCount: number;
 		index: number;
 		outcomes: (CardOutcome | null)[];
 		furthest: number;
+		phases: LabPhase[];
 		onJump: (i: number) => void;
 	} = $props();
 
@@ -28,18 +32,20 @@
 	);
 </script>
 
-<nav class="rail-wrap" aria-label="Lab card navigation">
+<nav class="rail-wrap" aria-label="Lab card navigation, {phaseAt(phases, index).title}">
 	<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
 		<ol class="rail" {@attach keepSelectedVisible}>
 			{#each { length: stepCount }, i (i)}
 				{@const kind = pipKind(i, outcomes, furthest)}
 				{@const selected = i === index}
+				{@const inPhase = cardInActivePhase(phases, i, index)}
 				<li>
 					{#if pipIsJumpTarget(kind) || selected}
 						<button
 							type="button"
 							class="pip"
 							data-kind={kind}
+							data-phase={inPhase ? 'current' : 'other'}
 							data-selected={selected || undefined}
 							aria-current={selected ? 'step' : undefined}
 							aria-label={pipLabel(kind, i + 1, selected)}
@@ -48,7 +54,7 @@
 							<span class="pip-n">{i + 1}</span>
 						</button>
 					{:else}
-						<span class="pip" data-kind={kind}>
+						<span class="pip" data-kind={kind} data-phase={inPhase ? 'current' : 'other'}>
 							<span class="pip-n" aria-hidden="true">{i + 1}</span>
 							<span class="vh">{pipLabel(kind, i + 1)}</span>
 						</span>
@@ -250,6 +256,7 @@
 	}
 	.pip[data-kind='upcoming'] { font-weight: 500; }
 	.pip-n { position: relative; z-index: 1; }
+	.pip[data-phase='other'] { opacity: 0.4; }
 
 	button.pip:not([data-selected]):not(:focus-visible):hover::before {
 		transform: scale(1.03);
@@ -298,6 +305,14 @@
 		.pip[data-kind='wrong']::before { background: Canvas; border-color: ButtonText; }
 		.pip[data-selected]::before,
 		button.pip:focus-visible::before { border-color: ButtonText; }
+		.pip[data-phase='other'] {
+			opacity: 1;
+			color: GrayText;
+		}
+		.pip[data-phase='other']::before {
+			background: Canvas;
+			border-color: GrayText;
+		}
 	}
 
 	.where {

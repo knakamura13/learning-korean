@@ -14,10 +14,19 @@ export const lab02: Lab = {
 		summary:
 			'Two strokes, a tick, and a count. You never learned a vowel chart — you operated the rule that generates one, then read three real Korean words with it. Next lab: the eleven compound vowels, which are just these ten fused in pairs — and four of them have quietly merged.'
 	},
+	phases: [
+		{ title: 'Vowels are a long stroke and a tick', count: 2 },
+		{ title: 'Build the four one-tick vowels', count: 4 },
+		{ title: 'A second tick adds a y-glide', count: 3 },
+		{ title: 'The vowel with no tick, and the rounded o', count: 2 },
+		{ title: 'Build a tall block and a wide block', count: 2 },
+		{ title: 'Read from the letters alone', count: 3 },
+	],
 	steps: [
+
+		/* ---- Vowels are a long stroke and a tick ---- */
 		{
 			type: 'choice',
-			act: 'Act 1 · the pattern',
 			do: 'Four Korean vowels. Ignore what they sound like — what do all four share?',
 			stage: [{ glyph: 'ㅏ' }, { glyph: 'ㅓ' }, { glyph: 'ㅗ' }, { glyph: 'ㅜ' }],
 			options: [
@@ -33,7 +42,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 1 · the two strokes',
 			do: 'There are only two long strokes. In the 1443 design one means <em>earth</em> and one means <em>a standing person</em>. Which one is earth?',
 			stage: [{ glyph: 'ㅣ' }, { glyph: 'ㅡ' }],
 			options: ['ㅡ', 'ㅣ'],
@@ -42,9 +50,10 @@ export const lab02: Lab = {
 			teach:
 				'<p><span class="jamo">ㅡ</span> is flat, like the horizon — earth. <span class="jamo">ㅣ</span> stands upright — a person.</p><p>The tick was originally a dot meaning <em>heaven</em>. Earth, person, heaven: the whole vowel system is those three marks combined.</p>'
 		},
+
+		/* ---- Build the four one-tick vowels ---- */
 		{
 			type: 'vowel',
-			act: 'Act 2 · build it',
 			do: 'Build <em>a</em> — the vowel in <em>father</em>.',
 			hint: 'Standing person, one tick, on the right.',
 			target: 'ㅏ',
@@ -54,7 +63,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'vowel',
-			act: 'Act 2 · build it',
 			do: 'Same stroke, same single tick — put it on the other side.',
 			target: 'ㅓ',
 			targetName: 'eo',
@@ -63,7 +71,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'vowel',
-			act: 'Act 2 · the other stroke',
 			do: 'Switch to the earth stroke. One tick, sitting on top.',
 			target: 'ㅗ',
 			targetName: 'o',
@@ -72,16 +79,16 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'vowel',
-			act: 'Act 2 · the other stroke',
 			do: 'Now drop the tick below the line.',
 			target: 'ㅜ',
 			targetName: 'u',
 			teach:
 				'<p><span class="jamo">ㅜ</span> — <em>oo</em>, as in <em>moon</em>.</p><p>Four vowels, one stroke each, one tick each. Two more rules and you have all ten.</p>'
 		},
+
+		/* ---- A second tick adds a y-glide ---- */
 		{
 			type: 'choice',
-			act: 'Act 3 · rule two',
 			do: 'A new vowel appears next to one you just built. What changed?',
 			stage: [
 				{ glyph: 'ㅏ', caption: 'a' },
@@ -101,7 +108,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 3 · rule two',
 			do: '<span class="jamo">ㅏ</span> is <em>a</em>. <span class="jamo">ㅑ</span> is <em>ya</em>. The second tick adds…',
 			stage: [{ glyph: 'ㅏ' }, { glyph: 'ㅑ' }],
 			vs: '+',
@@ -117,7 +123,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'vowel',
-			act: 'Act 3 · apply it',
 			do: 'Use the rule you just found. Build <em>yo</em>.',
 			hint: 'Which stroke gives you o? Now give it the glide.',
 			target: 'ㅛ',
@@ -125,9 +130,10 @@ export const lab02: Lab = {
 			teach:
 				'<p><span class="jamo">ㅛ</span> — earth stroke, two ticks, on top.</p><p>You derived that one instead of memorizing it. The same move gives you <span class="jamo">ㅑ</span>, <span class="jamo">ㅕ</span> and <span class="jamo">ㅠ</span> whenever you need them.</p>'
 		},
+
+		/* ---- The vowel with no tick, and the rounded o ---- */
 		{
 			type: 'vowel',
-			act: 'Act 4 · no tick at all',
 			do: 'The two long strokes are vowels by themselves. Build the bare earth stroke.',
 			hint: 'Just the earth stroke — no ticks.',
 			target: 'ㅡ',
@@ -137,7 +143,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'choice',
-			act: 'Act 4 · the trap',
 			do: 'These two are the pair English speakers confuse for years. Which one is made with <strong>rounded</strong> lips?',
 			stage: [
 				{ glyph: 'ㅓ', caption: 'eo' },
@@ -150,9 +155,10 @@ export const lab02: Lab = {
 			teach:
 				'<p><span class="jamo">ㅗ</span> is rounded. <span class="jamo">ㅓ</span> is not — despite both being romanized with an "o" in them.</p><p>This single confusion causes more misheard Korean than any other vowel problem. Worth over-practicing.</p>'
 		},
+
+		/* ---- Build a tall block and a wide block ---- */
 		{
 			type: 'assemble',
-			act: 'Act 5 · into blocks',
 			do: 'Back into syllables. Build <em>na</em>.',
 			hint: 'Remember: the vowel’s shape decides where the consonant goes.',
 			target: '나',
@@ -164,7 +170,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'assemble',
-			act: 'Act 5 · into blocks',
 			do: 'Now a wide vowel. Build <em>nu</em>.',
 			target: '누',
 			targetName: 'nu',
@@ -173,9 +178,10 @@ export const lab02: Lab = {
 			teach:
 				'<p><span class="hg">누</span> stacks vertically, because <span class="jamo">ㅜ</span> is wide.</p><p>Tall vowel → consonant beside. Wide vowel → consonant above. The vowel decides, every time.</p>'
 		},
+
+		/* ---- Read from the letters alone ---- */
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
 			do: 'Real Korean now, not loanwords. Sound out each block, then tap to check.',
 			blocks: [
 				{ block: '우', reading: 'u' },
@@ -188,7 +194,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · read it cold',
 			do: 'Three blocks. Every letter is one you have built.',
 			blocks: [
 				{ block: '어', reading: 'eo' },
@@ -202,7 +207,6 @@ export const lab02: Lab = {
 		},
 		{
 			type: 'read',
-			act: 'Act 6 · last one',
 			do: 'One glide, one wide vowel.',
 			blocks: [
 				{ block: '야', reading: 'ya' },
