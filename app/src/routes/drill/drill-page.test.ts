@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import src from './+page.svelte?raw';
 
 describe('drill page source contracts', () => {
-	it('titles Block sprint / Timed drill', () => {
+	it('titles Block sprint without a Timed drill eyebrow', () => {
 		expect(src).toMatch(/Block sprint/);
-		expect(src).toMatch(/Timed drill/);
+		expect(src).not.toMatch(/Timed drill/);
+		expect(src).not.toMatch(/class="eyebrow"/);
 	});
 
 	it('uses the sprint domain and does not write the Review schedule', () => {
