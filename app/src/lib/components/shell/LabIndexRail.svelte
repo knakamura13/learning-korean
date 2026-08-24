@@ -240,6 +240,8 @@
 			display: block;
 			position: sticky;
 			inset-block-start: calc(2.75rem + 4px + env(safe-area-inset-top) + var(--s3));
+			/* Rest: match .shell padding-top plus page h1 top margin. Sticky inset stays header-only. */
+			margin-block-start: calc(var(--s6) + var(--s2));
 			align-self: start;
 			z-index: 4;
 			width: 56px;
