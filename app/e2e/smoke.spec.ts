@@ -25,23 +25,25 @@ test('selecting a main nav tab does not shift tab boxes', async ({ page }) => {
 	const before = await nav.getByRole('link').evaluateAll((links) =>
 		links.map((el) => {
 			const box = el.getBoundingClientRect();
-			return { text: (el.textContent ?? '').replace(/\d+/g, '').trim(), x: box.x, width: box.width };
+			return { href: el.getAttribute('href') ?? '', x: box.x, width: box.width };
 		})
 	);
 
-	await nav.getByRole('link', { name: 'Review', exact: true }).click();
+	// Visible label is "Review"; the trailing `w` lives in a span so the
+	// accessible name is "Revie w". Match the path instead of the name.
+	await nav.locator('a[href$="review"]').click();
 	await expect(page).toHaveURL(/\/review\/?$/);
 
 	const after = await nav.getByRole('link').evaluateAll((links) =>
 		links.map((el) => {
 			const box = el.getBoundingClientRect();
-			return { text: (el.textContent ?? '').replace(/\d+/g, '').trim(), x: box.x, width: box.width };
+			return { href: el.getAttribute('href') ?? '', x: box.x, width: box.width };
 		})
 	);
 
 	expect(after).toHaveLength(before.length);
 	for (let i = 0; i < before.length; i++) {
-		expect(after[i].text).toBe(before[i].text);
+		expect(after[i].href).toBe(before[i].href);
 		expect(Math.abs(after[i].x - before[i].x)).toBeLessThan(0.5);
 		expect(Math.abs(after[i].width - before[i].width)).toBeLessThan(0.5);
 	}
