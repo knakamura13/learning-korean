@@ -14,7 +14,7 @@ describe('BrandMark', () => {
 	it('splits 한 into three independent jamo SVGs', () => {
 		expect(src).toMatch(/class="mark" lang="ko"/);
 		expect(src).toMatch(/class="vh">한</);
-		expect(src.match(/<svg class="jamo /g)?.length).toBe(3);
+		expect(src.match(/<svg /g)?.length).toBe(3);
 		expect(src).toMatch(/jamo-h/);
 		expect(src).toMatch(/jamo-a/);
 		expect(src).toMatch(/jamo-n/);
@@ -27,8 +27,9 @@ describe('BrandMark', () => {
 		expect(css).toMatch(/@keyframes -global-han-wiggle-a/);
 		expect(css).toMatch(/@keyframes -global-han-wiggle-n/);
 		expect(css).toMatch(/:global\(a\.brand:hover\) \.jamo-h/);
-		expect(css).toMatch(/han-wiggle-a 640ms var\(--ease-in-out\) 80ms infinite/);
-		expect(css).toMatch(/han-wiggle-n 640ms var\(--ease-in-out\) 160ms infinite/);
+		expect(css).toMatch(/han-wiggle-a 1\.1s var\(--ease-in-out\) 90ms infinite/);
+		expect(css).toMatch(/han-wiggle-n 1\.1s var\(--ease-in-out\) 180ms infinite/);
+		expect(css).toMatch(/clip-path:\s*inset\(0 0 42% 61%\)/);
 		expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
 		expect(css).toMatch(/animation:\s*none/);
 		expect(css).toMatch(/color:\s*var\(--ink\)/);

@@ -1,22 +1,28 @@
 <span class="mark" lang="ko">
 	<span class="vh">한</span>
-	<svg class="jamo jamo-h" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-		<text x="24" y="40" text-anchor="middle">한</text>
-	</svg>
-	<svg class="jamo jamo-a" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-		<text x="24" y="40" text-anchor="middle">한</text>
-	</svg>
-	<svg class="jamo jamo-n" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-		<text x="24" y="40" text-anchor="middle">한</text>
-	</svg>
+	<span class="jamo jamo-h">
+		<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+			<text x="24" y="40" text-anchor="middle">한</text>
+		</svg>
+	</span>
+	<span class="jamo jamo-a">
+		<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+			<text x="24" y="40" text-anchor="middle">한</text>
+		</svg>
+	</span>
+	<span class="jamo jamo-n">
+		<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+			<text x="24" y="40" text-anchor="middle">한</text>
+		</svg>
+	</span>
 </span>
 
 <style>
 	.mark {
 		position: relative;
 		display: inline-grid;
-		inline-size: 1.25rem;
-		block-size: 1.25rem;
+		inline-size: 1.15rem;
+		block-size: 1.15rem;
 		color: var(--accent);
 		line-height: 1;
 		overflow: visible;
@@ -30,6 +36,13 @@
 		display: block;
 	}
 
+	.jamo svg {
+		display: block;
+		inline-size: 100%;
+		block-size: 100%;
+		overflow: visible;
+	}
+
 	.jamo text {
 		fill: currentColor;
 		font-family: var(--hangul);
@@ -38,81 +51,74 @@
 		font-style: normal;
 	}
 
-	/* Slice 한 into ㅎ (top-left), ㅏ (right), ㄴ (bottom) so each SVG can wiggle alone. */
+	/*
+	  Partition 한 so ㅎ's loop stays only on the ㅎ slice. A looser ㅏ
+	  clip used to keep a second copy of that loop, which read as a period
+	  once the slices moved.
+	*/
+	.jamo-h svg {
+		clip-path: inset(0 39% 42% 0);
+	}
+	.jamo-a svg {
+		clip-path: inset(0 0 42% 61%);
+	}
+	.jamo-n svg {
+		clip-path: inset(58% 0 0 0);
+	}
+
 	.jamo-h {
-		clip-path: inset(0 36% 32% 0);
-		transform-origin: 32% 34%;
+		transform-origin: 30% 32%;
 	}
 	.jamo-a {
-		clip-path: inset(0 0 30% 58%);
-		transform-origin: 78% 38%;
+		transform-origin: 80% 36%;
 	}
 	.jamo-n {
-		clip-path: inset(64% 0 0 0);
-		transform-origin: 50% 86%;
+		transform-origin: 50% 84%;
 	}
 
 	.mark:hover .jamo-h,
 	:global(a.brand:hover) .jamo-h,
 	:global(a.brand:focus-visible) .jamo-h {
-		animation: han-wiggle-h 640ms var(--ease-in-out) infinite;
+		animation: han-wiggle-h 1.1s var(--ease-in-out) infinite;
 	}
 	.mark:hover .jamo-a,
 	:global(a.brand:hover) .jamo-a,
 	:global(a.brand:focus-visible) .jamo-a {
-		animation: han-wiggle-a 640ms var(--ease-in-out) 80ms infinite;
+		animation: han-wiggle-a 1.1s var(--ease-in-out) 90ms infinite;
 	}
 	.mark:hover .jamo-n,
 	:global(a.brand:hover) .jamo-n,
 	:global(a.brand:focus-visible) .jamo-n {
-		animation: han-wiggle-n 640ms var(--ease-in-out) 160ms infinite;
+		animation: han-wiggle-n 1.1s var(--ease-in-out) 180ms infinite;
 	}
 
 	@keyframes -global-han-wiggle-h {
 		0%,
 		100% {
-			transform: rotate(0deg) translate(0, 0);
+			transform: rotate(0deg);
 		}
-		25% {
-			transform: rotate(22deg) translate(1.5px, -3px);
-		}
-		55% {
-			transform: rotate(-18deg) translate(-2px, 1.5px);
-		}
-		80% {
-			transform: rotate(8deg) translate(1px, -1px);
+		50% {
+			transform: rotate(2.4deg) translate(0.2px, -0.35px);
 		}
 	}
 
 	@keyframes -global-han-wiggle-a {
 		0%,
 		100% {
-			transform: rotate(0deg) translate(0, 0);
-		}
-		20% {
-			transform: rotate(-20deg) translate(2.5px, 1px);
+			transform: rotate(0deg);
 		}
 		50% {
-			transform: rotate(24deg) translate(-1.5px, -3px);
-		}
-		75% {
-			transform: rotate(-10deg) translate(1px, 0.8px);
+			transform: rotate(-2.2deg) translate(0.3px, 0.15px);
 		}
 	}
 
 	@keyframes -global-han-wiggle-n {
 		0%,
 		100% {
-			transform: rotate(0deg) translateX(0);
+			transform: translateX(0);
 		}
-		30% {
-			transform: rotate(16deg) translateX(4px);
-		}
-		60% {
-			transform: rotate(-20deg) translateX(-3.5px);
-		}
-		85% {
-			transform: rotate(8deg) translateX(1.5px);
+		50% {
+			transform: rotate(1.8deg) translateX(0.4px);
 		}
 	}
 
