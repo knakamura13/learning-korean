@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import PlayButton from '$lib/components/PlayButton.svelte';
 	import KoText from '$lib/components/KoText.svelte';
+	import VocabPacks from '$lib/components/VocabPacks.svelte';
 	import ReferenceIndexRail from '$lib/components/shell/ReferenceIndexRail.svelte';
 	import {
 		LEADS, VOWELS, REPRESENTATIVE, CLUSTERS, SOUND_CHANGES, BLOCK_LAYOUTS,
@@ -16,6 +18,7 @@
 		shouldReleaseJumpPin,
 		type SectionHit
 	} from '$lib/domain/referenceNav';
+	import { progress } from '$lib/stores/progress.svelte';
 
 	/** The five families, rebuilt from the derivation map rather than listed. */
 	const FAMILIES = BASE_SHAPES.map((base) => ({
@@ -46,6 +49,15 @@
 	let activeSection = $state<string | null>(null);
 	let pinnedSection = $state<string | null>(null);
 	let lastHits: SectionHit[] = [];
+	let ready = $state(false);
+
+	const packs = $derived(progress.vocabProgress);
+	const vocabOpenable = $derived(progress.isUnlocked('lab05'));
+
+	onMount(() => {
+		progress.tick();
+		ready = true;
+	});
 
 	$effect(() => {
 		const hits = new Map<string, SectionHit>();
@@ -149,6 +161,8 @@
 	</header>
 
 	<div class="page">
+	<VocabPacks {packs} {ready} openable={vocabOpenable} />
+
 	<section id="consonants" aria-labelledby="sec-consonants-heading">
 		<h2 id="sec-consonants-heading" class="sec" tabindex="-1">19 consonants</h2>
 		<ul class="grid">

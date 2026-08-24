@@ -7,24 +7,18 @@
 		courseNavView,
 		labCardState,
 		requiredLab,
-		reviewPileView,
 		toCourseLab
 	} from '$lib/domain/courseNav';
 	import { lockedLabPopoverCopy } from '$lib/domain/lockedLab';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
-	import { TIERS } from '$lib/domain/deck';
-	import { DEFAULT_VOCAB_NEW_PER_DAY } from '$lib/domain/srs';
-	import { sprintMissingLab } from '$lib/domain/sprint';
 	import { labSession } from '$lib/stores/labSession.svelte';
-	import { tierCountLabel } from '$lib/domain/srs';
 	import { progress } from '$lib/stores/progress.svelte';
 	import LabIndexRail from '$lib/components/shell/LabIndexRail.svelte';
 	import LockedLabPopover from '$lib/components/shell/LockedLabPopover.svelte';
 	import KoText from '$lib/components/KoText.svelte';
 
 	// Prerendered HTML has no stored progress. Gate completion badges
-	// and deck-tier counts until the client has ticked, so we never flash
-	// empty or stored values into static HTML.
+	// until the client has ticked, so we never flash stored values into static HTML.
 	let ready = $state(false);
 	let lockedOpen = $state<string | null>(null);
 
@@ -33,18 +27,10 @@
 		ready = true;
 	});
 
-	const stats = $derived(progress.stats);
-	const tiers = $derived(progress.tierProgress);
 	const sessions = $derived(labSession.all);
 	const course = LABS.map(toCourseLab);
-	const unlockedTiers = $derived(TIERS.map((t) => t.id).filter((tier) => progress.isUnlocked(tier)));
-	const sprintMissing = $derived(sprintMissingLab(unlockedTiers));
-	const packs = $derived(progress.vocabProgress);
-	const vocabOpenable = $derived(progress.isUnlocked('lab05'));
-
-	function openPack(id: string) {
-		progress.unlock([id]);
-	}
+	const sitting = $derived(progress.stats.sitting);
+	const load = $derived(reviewLoadCopy(progress.stats, progress.studyPrefs.reviewsPerSitting));
 
 	const navView = $derived.by(() =>
 		courseNavView({
@@ -56,20 +42,7 @@
 		})
 	);
 
-	const pile = $derived(
-		reviewPileView(
-			navView.ready,
-			tiers.filter((tier) => tier.unlocked).length,
-			stats.sitting,
-			stats.backlog
-		)
-	);
-	const load = $derived(reviewLoadCopy(pile, progress.studyPrefs.reviewsPerSitting));
 	const labsDone = $derived(courseComplete(course, navView));
-
-	function pct(part: number, whole: number) {
-		return whole === 0 ? 0 : Math.round((part / whole) * 100);
-	}
 
 	function pad(n: number) {
 		return String(n).padStart(2, '0');
@@ -111,9 +84,16 @@
 		if (!lockedOpen) return;
 		progress.openLab(lockedOpen);
 	}
+
+	function onWindowKey(e: KeyboardEvent) {
+		if (e.key !== 'Escape' || !lockedOpen) return;
+		e.preventDefault();
+		closeLocked();
+	}
 </script>
 
-<svelte:head><title>Korean — labs and review</title></svelte:head>
+<svelte:head><title>Korean — labs</title></svelte:head>
+<svelte:window onkeydown={onWindowKey} />
 
 <div class="with-rail">
 	<div class="shell">
@@ -122,6 +102,13 @@
 		<p class="lede">
 			Interactive labs that make you derive the writing system rather than memorize it.
 		</p>
+		{#if ready && sitting > 0}
+			<p class="due-line">
+				<a class="due-chip" href={resolve('/review')} aria-label={load.actionAria}>
+					{sitting} due → Review
+				</a>
+			</p>
+		{/if}
 	</header>
 
 	<section aria-labelledby="sec-labs-heading">
@@ -214,135 +201,6 @@
 			{/each}
 		</div>
 	</section>
-
-	<section aria-labelledby="sec-review-heading">
-		<div class="sec-row">
-			<h2 id="sec-review-heading" class="sec">Review pile</h2>
-			{#if pile.body === 'progress' && pile.sitting > 0}
-				<a class="btn" href={resolve('/review')} aria-label={load.actionAria}>{load.action}</a>
-			{/if}
-		</div>
-		{#if load.backlogNote}
-			<p class="backlog-note">{load.backlogNote}</p>
-		{/if}
-		<div
-			class="tiers card"
-			role="region"
-			aria-busy={pile.body === 'loading'}
-			aria-label="Review pile by letter family"
-		>
-			{#if pile.body === 'loading'}
-				<div class="pile-skel" aria-hidden="true">
-					{#each tiers as tier (tier.id)}
-						<div class="tier skel-row">
-							<span class="nm"><span class="skel line-ph"></span></span>
-							<span class="track"></span>
-							<span class="ct"><span class="skel line-ph short"></span></span>
-						</div>
-					{/each}
-				</div>
-			{:else if pile.body === 'empty'}
-				<p class="pile-empty">
-					Letters land here after you finish a lab. Lab 01 unlocks {tiers[0]?.size ?? 19} consonants.
-				</p>
-			{:else}
-				{#each tiers as tier (tier.id)}
-					{@const pctMature = pct(tier.mature, tier.size)}
-					{@const pctYoung = pct(tier.young, tier.size)}
-					{@const pctUnseen = pct(tier.unseen, tier.size)}
-					<div
-						class="tier"
-						class:locked={!tier.unlocked}
-						role="group"
-						aria-label="{tier.label}: {tier.unlocked ? `${tier.mature} mastered, ${tier.young} learning, ${tier.unseen} not started (${tier.size} total)` : 'locked'}"
-					>
-						<span class="nm"><KoText text={tier.label} /></span>
-						<span class="track" aria-hidden="true">
-							{#if tier.unlocked}
-								<span class="m" style="width:{pctMature}%" title="{tier.mature} mastered ({pctMature}%)"></span>
-								<span class="y" style="width:{pctYoung}%" title="{tier.young} learning ({pctYoung}%)"></span>
-								<span class="n" style="width:{pctUnseen}%" title="{tier.unseen} not started ({pctUnseen}%)"></span>
-							{/if}
-						</span>
-						<span class="ct" aria-hidden="true">{tierCountLabel(tier)}</span>
-					</div>
-				{/each}
-				<p class="legend" aria-hidden="true">
-					<i class="sw m"></i> mastered (21+ day gap)
-					<i class="sw y"></i> learning
-					<i class="sw n"></i> not started
-				</p>
-			{/if}
-		</div>
-	</section>
-
-	<section aria-labelledby="sec-vocab-heading">
-		<h2 id="sec-vocab-heading" class="sec">Vocabulary</h2>
-		{#if !ready}
-			<p class="pile-empty">Loading packs…</p>
-		{:else if !vocabOpenable}
-			<p class="pile-empty">
-				Word packs open after Lab 05 — real words use the whole letter inventory,
-				clusters included.
-			</p>
-		{:else}
-			<p class="pile-empty">
-				Real words, two lanes: meaning, and — where the spelling lies — pronunciation.
-				Words trickle in at {DEFAULT_VOCAB_NEW_PER_DAY} a day, beside the letters, never instead of them.
-			</p>
-			<div class="tiers card" role="region" aria-label="Vocabulary packs">
-				{#each packs as pack (pack.id)}
-					{@const pctMature = pct(pack.mature, pack.size)}
-					{@const pctYoung = pct(pack.young, pack.size)}
-					{@const pctUnseen = pct(pack.unseen, pack.size)}
-					<div
-						class="tier"
-						class:locked={!pack.unlocked}
-						role="group"
-						aria-label="{pack.label}: {pack.unlocked
-							? `${pack.mature} mastered, ${pack.young} learning, ${pack.unseen} not started (${pack.size} total)`
-							: 'not opened yet'}"
-					>
-						<span class="nm"><KoText text={pack.label} /></span>
-						<span class="track" aria-hidden="true">
-							{#if pack.unlocked}
-								<span class="m" style="width:{pctMature}%"></span>
-								<span class="y" style="width:{pctYoung}%"></span>
-								<span class="n" style="width:{pctUnseen}%"></span>
-							{/if}
-						</span>
-						{#if pack.unlocked}
-							<span class="ct" aria-hidden="true">{tierCountLabel(pack)}</span>
-						{:else}
-							<button type="button" class="btn ghost open-pack" onclick={() => openPack(pack.id)}>
-								Open · {pack.size} cards
-							</button>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		{/if}
-	</section>
-
-	<section class="sprint" aria-labelledby="sec-sprint-heading">
-		<h2 id="sec-sprint-heading" class="sec">Block sprint</h2>
-		{#if !ready}
-			<p class="pile-empty">Loading drill…</p>
-		{:else if sprintMissing}
-			<p class="pile-empty">
-				Finish Lab {String(sprintMissing.number).padStart(2, '0')} to unlock the sprint.
-				It only uses letters you have already derived.
-			</p>
-			<a class="btn" href={resolve('/lab/[id]', { id: sprintMissing.id })}>
-				Go to Lab {String(sprintMissing.number).padStart(2, '0')}
-			</a>
-		{:else}
-			<p class="pile-empty">
-				One minute of unfamiliar syllable blocks. The number is your median time.
-			</p>
-			<a class="btn" href={resolve('/drill')}>Start a round</a>
-		{/if}
-	</section>
 	</div>
 	<LabIndexRail />
 	{#if lockedOpen && lockedCopy && lockedLab}
@@ -390,6 +248,33 @@
 	}
 	.lede { color: var(--ink-soft); font-size: 1rem; line-height: 1.65; }
 
+	.due-line {
+		margin: var(--s3) 0 0;
+	}
+	.due-chip {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0.35rem 0.85rem;
+		border-radius: var(--r-pill);
+		border: 1px solid color-mix(in srgb, var(--rose) 35%, transparent);
+		background: var(--rose-soft);
+		color: var(--rose);
+		font-size: 0.84rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: border-color var(--fast) var(--ease), filter var(--fast) var(--ease);
+	}
+	.due-chip:hover {
+		border-color: var(--rose);
+		filter: brightness(1.05);
+	}
+	.due-chip:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
+
 	.sec {
 		font-family: var(--display);
 		font-style: italic;
@@ -407,25 +292,6 @@
 		font-size: 0.92rem;
 		line-height: 1.55;
 		color: var(--ink-soft);
-	}
-
-	.sec-row {
-		display: flex;
-		align-items: center;
-		gap: var(--s3);
-		flex-wrap: wrap;
-		margin: 0 0 var(--s3);
-		min-height: 44px;
-	}
-	.sec-row .sec { margin: 0; }
-
-	/* Backlog is context for the CTA above it, not a headline of its own. */
-	.backlog-note {
-		margin: calc(var(--s2) * -1) 0 var(--s3);
-		font-size: 0.82rem;
-		line-height: 1.55;
-		color: var(--ink-soft);
-		max-width: 36rem;
 	}
 
 	section { margin-bottom: var(--s7); }
@@ -563,91 +429,6 @@
 		color: var(--ink-soft);
 	}
 
-	.tiers { padding: var(--s4); }
-
-	.pile-empty {
-		margin: 0;
-		font-size: 0.88rem;
-		line-height: 1.55;
-		color: var(--ink-soft);
-		max-width: 32rem;
-	}
-	.pile-skel {
-		min-height: 16rem;
-	}
-	.sprint .pile-empty {
-		margin-block-end: var(--s3);
-	}
-	.pile-skel .line-ph {
-		width: 7rem;
-		max-width: 90%;
-	}
-	.pile-skel .line-ph.short {
-		width: 4.5rem;
-	}
-	.skel-row .track {
-		background: var(--paper-sunk);
-	}
-
-	.tier {
-		display: flex;
-		align-items: center;
-		gap: var(--s3);
-		padding: var(--s2) 0;
-		border-bottom: 1px solid var(--rule);
-		font-size: 0.82rem;
-	}
-	.tier:last-of-type { border-bottom: none; }
-	.tier.locked { color: var(--ink-faint); }
-
-	.nm { flex: 0 0 9rem; }
-	.track {
-		flex: 1 1 auto;
-		height: 8px;
-		background: var(--rule);
-		border-radius: 4px;
-		overflow: hidden;
-		display: flex;
-	}
-	.track .m { background: var(--good); }
-	.track .y { background: var(--accent); }
-	.track .n { background: var(--rule-strong); }
-	.ct {
-		flex: 0 0 auto;
-		min-width: 8ch;
-		text-align: end;
-		font-family: var(--mono);
-		font-size: 0.72rem;
-		color: var(--ink-faint);
-		font-variant-numeric: tabular-nums;
-	}
-
-	.open-pack {
-		flex: 0 0 auto;
-		font-size: 0.78rem;
-		white-space: nowrap;
-	}
-
-	.legend {
-		margin: var(--s3) 0 0;
-		font-size: 0.75rem;
-		color: var(--ink-faint);
-		display: flex;
-		gap: var(--s4);
-		flex-wrap: wrap;
-		align-items: center;
-	}
-	.sw {
-		display: inline-block;
-		width: 0.6rem;
-		height: 0.6rem;
-		border-radius: 2px;
-		margin-inline-end: var(--s1);
-	}
-	.sw.m { background: var(--good); }
-	.sw.y { background: var(--accent); }
-	.sw.n { background: var(--rule-strong); }
-
 	@media (forced-colors: active) {
 		.lab.now {
 			background: Highlight;
@@ -666,13 +447,6 @@
 			border-color: HighlightText;
 		}
 		.lab.resume { border-color: Highlight; }
-		.track { background: Canvas; }
-		.track .m { background: Highlight; }
-		.track .y { background: ButtonText; }
-		.track .n { background: GrayText; }
-		.sw.m { background: Highlight; }
-		.sw.y { background: ButtonText; }
-		.sw.n { background: GrayText; }
 		.chip-status.wait {
 			color: GrayText;
 			border-color: GrayText;
@@ -681,26 +455,10 @@
 			color: LinkText;
 			border-color: LinkText;
 		}
-	}
-
-	@media (max-width: 40rem) {
-		.tier {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) auto;
-			grid-template-areas:
-				'nm ct'
-				'track track';
-			column-gap: var(--s2);
-			row-gap: var(--s1);
-			align-items: baseline;
+		.due-chip {
+			background: Canvas;
+			color: LinkText;
+			border-color: LinkText;
 		}
-		.nm {
-			grid-area: nm;
-			flex: none;
-			min-width: 0;
-		}
-		.ct { grid-area: ct; min-width: 0; }
-		.track { grid-area: track; width: 100%; }
 	}
-
 </style>

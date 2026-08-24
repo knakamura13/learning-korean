@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import AccountSection from '$lib/components/AccountSection.svelte';
 	import LookPicker from '$lib/components/LookPicker.svelte';
+	import MasterySnapshot from '$lib/components/MasterySnapshot.svelte';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import ProgressReset from '$lib/components/ProgressReset.svelte';
 	import { applyImportedBackup, wrapExport } from '$lib/domain/backup';
@@ -11,10 +12,14 @@
 
 	/** Cleared when look/color localStorage writes fail this visit (Backup note). */
 	let appearanceSaved = $state(true);
+	let ready = $state(false);
 
 	onMount(() => {
 		progress.tick();
+		ready = true;
 	});
+
+	const tiers = $derived(progress.tierProgress);
 
 	function exportJson(): string {
 		return wrapExport(progress.export(), labSession.snapshot);
@@ -35,6 +40,18 @@
 	<header class="head">
 		<h1>Settings</h1>
 	</header>
+
+	<section class="progress" aria-labelledby="progress-heading">
+		<h2 id="progress-heading">Progress</h2>
+		<p class="progress-note">
+			Mastery across letter families. Green stretches mean a 21-day gap is holding.
+		</p>
+		<MasterySnapshot
+			{tiers}
+			{ready}
+			emptyCopy="Letters land here after you finish a lab. Lab 01 unlocks consonants."
+		/>
+	</section>
 
 	<section class="appearance" aria-labelledby="appearance-heading">
 		<h2 id="appearance-heading">Appearance</h2>
@@ -92,6 +109,14 @@
 		color: var(--ink);
 	}
 
+	.progress,
+	.appearance,
+	.backup {
+		margin-block-end: var(--s7);
+	}
+
+	.progress h2,
+	.progress h2,
 	.appearance h2,
 	.backup h2 {
 		margin: 0 0 var(--s4);
@@ -101,8 +126,16 @@
 		color: var(--ink);
 	}
 
+	.progress-note {
+		font-size: 0.82rem;
+		color: var(--ink-soft);
+		line-height: 1.55;
+		margin: 0 0 var(--s4);
+		max-width: var(--measure);
+	}
+
 	#backup {
-		margin-block-start: var(--s7);
+		margin-block-start: 0;
 		scroll-margin-block-start: calc(48px + env(safe-area-inset-top) + 0.75rem);
 	}
 

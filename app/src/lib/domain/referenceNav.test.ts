@@ -14,6 +14,7 @@ describe('reference jump list', () => {
 	it('covers every long-page heading with a short chip label', () => {
 		const ids = REFERENCE_SECTIONS.map((s) => s.id);
 		expect(ids).toEqual([
+			'vocabulary',
 			'consonants',
 			'simple-vowels',
 			'compound-vowels',
@@ -41,10 +42,10 @@ describe('reference jump list', () => {
 			expect(preview.covers).not.toMatch(/\.\.\./);
 			expect(JSON.stringify(preview)).not.toMatch(/title=/);
 		}
-		expect(referencePreviewModel(REFERENCE_SECTIONS[0]).title).toMatch(/19 consonants/i);
-		expect(referencePreviewModel(REFERENCE_SECTIONS[0]).covers).toMatch(/lead|consonant/i);
-		expect(referencePreviewModel(REFERENCE_SECTIONS[3]).title).toMatch(/batchim/i);
-		expect(referencePreviewModel(REFERENCE_SECTIONS[7]).covers).toMatch(/sound change|pronunciation/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[1]).title).toMatch(/19 consonants/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[1]).covers).toMatch(/lead|consonant/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[4]).title).toMatch(/batchim/i);
+		expect(referencePreviewModel(REFERENCE_SECTIONS[8]).covers).toMatch(/sound change|pronunciation/i);
 	});
 
 	it('prefers the intersecting section nearest the header', () => {

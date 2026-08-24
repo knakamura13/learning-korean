@@ -14,7 +14,13 @@ export type ReviewChrome = {
 	showStats: boolean;
 };
 
-export type ReviewBody = 'loading' | 'locked' | 'sitting' | 'check-for-more' | 'clear';
+export type ReviewBody =
+	| 'loading'
+	| 'locked'
+	| 'pile'
+	| 'sitting'
+	| 'check-for-more'
+	| 'clear';
 
 export function reviewChrome(input: {
 	ready: boolean;
@@ -30,6 +36,9 @@ export function reviewChrome(input: {
 /**
  * After a sitting, "Check for more" is only for leftover due cards.
  * Otherwise the empty state is "Review is clear" — never both.
+ *
+ * `begun` gates the Review pile CTA: due cards wait behind "Review N cards"
+ * until the learner starts the sitting (Labs no longer owns that CTA).
  */
 export function reviewBody(input: {
 	ready: boolean;
@@ -37,12 +46,14 @@ export function reviewBody(input: {
 	sittingLength: number;
 	index: number;
 	remainingDue: number;
+	begun?: boolean;
 }): ReviewBody {
 	if (!input.ready) return 'loading';
 	if (input.unlocked === 0) return 'locked';
 	const finished = input.sittingLength > 0 && input.index >= input.sittingLength;
 	if (finished) return input.remainingDue > 0 ? 'check-for-more' : 'clear';
 	if (input.sittingLength === 0) return 'clear';
+	if (!input.begun) return 'pile';
 	return 'sitting';
 }
 

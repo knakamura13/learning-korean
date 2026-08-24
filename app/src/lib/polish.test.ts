@@ -29,6 +29,8 @@ import sprintChoices from './components/SprintChoices.svelte?raw';
 import reviewCompose from './components/ReviewCompose.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
 import accountSection from './components/AccountSection.svelte?raw';
+import masterySnapshot from './components/MasterySnapshot.svelte?raw';
+import vocabPacks from './components/VocabPacks.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
 import referencePreview from './components/shell/ReferencePreview.svelte?raw';
 import viteConfig from '../../vite.config.ts?raw';
@@ -168,7 +170,8 @@ describe('polish audit regressions', () => {
 	it('tags static Hangul on home, reference, and settings with KoText', () => {
 		expect(home).toMatch(/import KoText from '\$lib\/components\/KoText\.svelte'/);
 		expect(home).toMatch(/<p><KoText text=\{lab\.standfirst\} \/><\/p>/);
-		expect(home).toMatch(/<span class="nm"><KoText text=\{tier\.label\} \/><\/span>/);
+		expect(masterySnapshot).toMatch(/<span class="nm"><KoText text=\{tier\.label\} \/><\/span>/);
+		expect(vocabPacks).toMatch(/<span class="nm"><KoText text=\{pack\.label\} \/><\/span>/);
 		expect(reference).toMatch(
 			/<span class="fin">final: <KoText text=\{batchimSound\(c\) \|\| '—'\} \/><\/span>/
 		);
@@ -237,13 +240,13 @@ describe('polish audit regressions', () => {
 		expect(sittingCss).toMatch(/\.work-skel \.mouth-ph\s*\{[^}]*min-height:\s*16rem/s);
 	});
 
-	it('dims locked home chrome without opacity on live text', () => {
+	it('dims locked Labs chrome without opacity on live text', () => {
 		const css = styleBlock(home);
 		expect(css).not.toMatch(/\.lab\.ahead\s*\{[^}]*opacity\s*:/s);
-		expect(css).not.toMatch(/\.tier\.locked\s*\{[^}]*opacity\s*:/s);
 		expect(css).toMatch(/\.lab\.ahead\s*\{[^}]*background:\s*var\(--paper-sunk\)/s);
-		expect(css).toMatch(/\.tier\.locked\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
 		expect(css).toMatch(/\.chip-status\.wait\s*\{[^}]*color:\s*var\(--warn\)/s);
+		expect(styleBlock(masterySnapshot)).not.toMatch(/\.tier\.locked\s*\{[^}]*opacity\s*:/s);
+		expect(styleBlock(masterySnapshot)).toMatch(/\.tier\.locked\s*\{[^}]*color:\s*var\(--ink-faint\)/s);
 	});
 
 	it('sizes vowel picker choices to 44px and gives picker controls hover and active', () => {
@@ -849,9 +852,11 @@ describe('polish audit regressions', () => {
 		expect(labIndexRail).toMatch(/aria-label="Labs"/);
 	});
 
-	it('gives Home a Block sprint section', () => {
-		expect(home).toMatch(/sec-sprint-heading/);
-		expect(home).toMatch(/Block sprint/);
+	it('keeps Block sprint on Drill, not Labs', () => {
+		expect(home).not.toMatch(/sec-sprint-heading/);
+		expect(home).not.toMatch(/Block sprint/);
+		expect(drill).toMatch(/Block sprint/);
+		expect(drill).toMatch(/Start a round/);
 	});
 
 	it('offers a Review-clear sprint CTA that does not write the Review schedule', () => {
@@ -905,24 +910,22 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);
 		expect(home).toMatch(/Interactive labs that make you derive the writing system/);
 		expect(home).not.toMatch(/Labs teach Hangul/);
-		expect(home).toMatch(/<h2 id="sec-review-heading" class="sec">Review pile<\/h2>/);
-		expect(home).not.toMatch(/<h2[^>]*>Deck<\/h2>/);
-		expect(home).not.toMatch(/sec-deck-heading/);
-		expect(home).toMatch(/reviewPileView/);
+		expect(home).not.toMatch(/<h2 id="sec-review-heading"/);
+		expect(home).not.toMatch(/sec-vocab-heading/);
+		expect(home).not.toMatch(/sec-sprint-heading/);
+		expect(home).toMatch(/due-chip/);
+		expect(home).toMatch(/\{sitting\} due → Review/);
 		expect(home).toMatch(/<span class="chip-status wait">/);
 		expect(home).not.toMatch(/<a[^>]*chip-status/);
 		expect(home).not.toMatch(/class="peek"/);
 		expect(home).not.toMatch(/class="lab-actions"/);
 		expect(home).toMatch(/LockedLabPopover/);
-		expect(home).toMatch(/pile\.body === 'progress' && pile\.sitting > 0/);
-		expect(home).toMatch(/Letters land here after you finish a lab/);
-		expect(home).toMatch(/class="pile-skel"/);
-		expect(home).toMatch(/class="tier skel-row"/);
+		expect(review).toMatch(/<h2 id="sec-review-heading" class="sec">Review pile<\/h2>/);
+		expect(review).toMatch(/body === 'pile'/);
+		expect(review).toMatch(/aria-label=\{load\.actionAria\}/);
+		expect(review).toMatch(/\{load\.action\}/);
 		expect(styleBlock(home)).toMatch(/\.flag\s*\{[^}]*min-height:\s*1\.6rem/s);
-		expect(styleBlock(home)).toMatch(/\.sec-row\s*\{[^}]*min-height:\s*44px/s);
-		expect(styleBlock(home)).toMatch(/\.pile-skel\s*\{[^}]*min-height:\s*16rem/s);
-		expect(styleBlock(home)).not.toMatch(/\.pile-empty\s*\{[^}]*min-height:\s*16rem/s);
-		expect(home).not.toMatch(/pile-empty loading-copy/);
+		expect(styleBlock(review)).toMatch(/\.sec-row\s*\{[^}]*min-height:\s*44px/s);
 	});
 
 	it('orients with italic titles and purpose lines, not all-caps page eyebrows', () => {
@@ -1099,7 +1102,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(slots)).toMatch(/\.slot-name\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(tray)).toMatch(/\.mark\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(home)).toMatch(/\.chip-status\s*\{[^}]*font-size:\s*0\.75rem/s);
-		expect(styleBlock(home)).toMatch(/\.legend\s*\{[^}]*font-size:\s*0\.75rem/s);
+		expect(styleBlock(masterySnapshot)).toMatch(/\.legend\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(labPreview)).toMatch(/\.chip\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(stage)).toMatch(/\.cap\s*\{[^}]*font-size:\s*0\.75rem/s);
 		expect(styleBlock(vowelStep)).toMatch(/\.label\s*\{[^}]*font-size:\s*0\.75rem/s);
@@ -1138,7 +1141,7 @@ describe('polish audit regressions', () => {
 	it('sets Settings display headings to the shipped Newsreader italic weight', () => {
 		expect(styleBlock(settingsPage)).toMatch(/\.head h1\s*\{[^}]*font-weight:\s*400/s);
 		expect(styleBlock(settingsPage)).toMatch(
-			/\.appearance h2,\s*\.backup h2\s*\{[^}]*font-weight:\s*400/s
+			/\.progress h2,\s*\.appearance h2,\s*\.backup h2\s*\{[^}]*font-weight:\s*400/s
 		);
 		expect(styleBlock(settingsPage)).not.toMatch(/font-weight:\s*600/);
 		expect(styleBlock(lookPicker)).toMatch(/legend\s*\{[^}]*font-weight:\s*400/s);
@@ -1243,10 +1246,12 @@ describe('polish audit regressions', () => {
 		expect(layout).toMatch(/const sitting = \$derived\(progress\.stats\.sitting\)/);
 		expect(layout).toMatch(/class="badge-n">\{sitting\}/);
 		expect(layout).not.toMatch(/\{queue\}<\/span>/);
-		// Home CTA and Review strip: commitment first, backlog as a quiet note.
-		expect(home).toMatch(/aria-label=\{load\.actionAria\}>\{load\.action\}/);
-		expect(home).toMatch(/\{#if load\.backlogNote\}/);
+		// Labs due chip and Review pile CTA: commitment first, backlog as a quiet note.
+		expect(home).toMatch(/aria-label=\{load\.actionAria\}/);
+		expect(home).toMatch(/\{sitting\} due → Review/);
 		expect(home).not.toMatch(/Review \{pile\.due\} due/);
+		expect(review).toMatch(/aria-label=\{load\.actionAria\}>[\s\S]*\{load\.action\}/);
+		expect(review).toMatch(/\{#if load\.backlogNote\}/);
 		expect(review).toMatch(/<b>\{stats\.sitting\}<\/b><span>this sitting<\/span>/);
 		expect(review).toMatch(/\{load\.backlogNote\}/);
 		expect(review).not.toMatch(/Check for more/);
@@ -1258,11 +1263,9 @@ describe('polish audit regressions', () => {
 		expect(labRunner).not.toMatch(/progress\.stats\.queue/);
 	});
 
-	it('renders the backlog note as secondary text on Home and Review', () => {
-		for (const css of [styleBlock(home), styleBlock(review)]) {
-			expect(css).toMatch(/\.backlog-note\s*\{[^}]*color:\s*var\(--ink-soft\)/s);
-			expect(css).toMatch(/\.backlog-note\s*\{[^}]*font-size:\s*0\.82rem/s);
-		}
+	it('renders the backlog note as secondary text on Review', () => {
+		expect(styleBlock(review)).toMatch(/\.backlog-note\s*\{[^}]*color:\s*var\(--ink-soft\)/s);
+		expect(styleBlock(review)).toMatch(/\.backlog-note\s*\{[^}]*font-size:\s*0\.82rem/s);
 		// Review keeps one owner of the gap under the strip, so the note
 		// appearing or not cannot shift the card below it.
 		expect(styleBlock(review)).toMatch(/\.load\s*\{\s*margin-bottom:\s*var\(--s5\);\s*\}/);
@@ -1346,11 +1349,20 @@ describe('issue #145 polish leftovers', () => {
 		expect(progressBackup).toMatch(/importedStatus\(false, 'too-large'\)/);
 	});
 
-	it('gives Home an all-labs-complete state and Drill an in-page end', () => {
+	it('gives Labs an all-labs-complete state and Drill an in-page end', () => {
 		expect(home).toMatch(/courseComplete/);
 		expect(home).toMatch(/Labs are done\. Review and Drill keep the inventory warm\./);
 		expect(drill).toMatch(/endRound/);
 		expect(drill).toMatch(/>End round</);
+	});
+
+	it('hosts mastery progress on Settings and vocabulary packs on Reference', () => {
+		expect(settingsPage).toMatch(/MasterySnapshot/);
+		expect(settingsPage).toMatch(/<h2 id="progress-heading">Progress<\/h2>/);
+		expect(masterySnapshot).toMatch(/mastered \(21\+ day gap\)/);
+		expect(reference).toMatch(/VocabPacks/);
+		expect(vocabPacks).toMatch(/sec-vocab-heading/);
+		expect(home).not.toMatch(/MasterySnapshot|VocabPacks|sec-vocab-heading/);
 	});
 
 	it('lets the study-pace range guard fire instead of native validation UI', () => {

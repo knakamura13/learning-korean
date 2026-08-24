@@ -70,21 +70,34 @@ describe('reviewBody', () => {
 		).toBe('locked');
 	});
 
+	it('shows the Review pile until the learner starts the sitting', () => {
+		expect(reviewBody({ ...sitting, begun: false })).toBe('pile');
+	});
+
 	it('shows the card while a sitting is underway', () => {
-		expect(reviewBody(sitting)).toBe('sitting');
+		expect(reviewBody({ ...sitting, begun: true })).toBe('sitting');
 	});
 
 	it('offers check for more only when the scheduler still has due cards', () => {
-		expect(reviewBody({ ...sitting, index: 5, remainingDue: 3 })).toBe('check-for-more');
+		expect(reviewBody({ ...sitting, index: 5, remainingDue: 3, begun: true })).toBe(
+			'check-for-more'
+		);
 	});
 
 	it('goes straight to Review is clear when the sitting is done and nothing is due', () => {
-		expect(reviewBody({ ...sitting, index: 5, remainingDue: 0 })).toBe('clear');
+		expect(reviewBody({ ...sitting, index: 5, remainingDue: 0, begun: true })).toBe('clear');
 	});
 
 	it('shows Review is clear on load when the queue is empty', () => {
 		expect(
-			reviewBody({ ready: true, unlocked: 19, sittingLength: 0, index: 0, remainingDue: 0 })
+			reviewBody({
+				ready: true,
+				unlocked: 19,
+				sittingLength: 0,
+				index: 0,
+				remainingDue: 0,
+				begun: false
+			})
 		).toBe('clear');
 	});
 });
