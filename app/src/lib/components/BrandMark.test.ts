@@ -20,7 +20,10 @@ describe('BrandMark', () => {
 		expect(src).toMatch(/jamo-n/);
 		expect(src).toMatch(/aria-hidden="true"/);
 		expect(src).toMatch(/fill="currentColor"/);
-		expect(src).toMatch(/fill-rule="evenodd"/);
+		expect(src).toMatch(/jamo-h[\s\S]*fill-rule="evenodd"/);
+		expect(src).not.toMatch(
+			/fill-rule="evenodd"[\s\S]*264\.20 0\.00H368\.88V146\.16/
+		);
 		expect(src).not.toMatch(/clip-path|clipPath/);
 		expect(src).not.toMatch(/aria-label="Korean 한"/);
 	});
