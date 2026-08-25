@@ -903,11 +903,18 @@ describe('polish audit regressions', () => {
 	});
 
 	it('keeps an English brand name on phones and marks lab sittings as Labs', () => {
-		expect(layout).toMatch(/class=\{\['brand'/);
+		expect(layout).toMatch(/class="brand"/);
 		expect(layout).not.toMatch(/aria-label="Korean 한"/);
 		expect(layout).toMatch(/<BrandMark/);
 		expect(brandMark).toMatch(/class="mark" lang="ko"/);
 		expect(brandMark).toMatch(/class="vh">한</);
+		expect(brandMark).not.toMatch(/clip-path|clipPath/);
+		expect(brandMark).toMatch(/jamo-h/);
+		expect(brandMark).toMatch(/jamo-a/);
+		expect(brandMark).toMatch(/jamo-n/);
+		expect(brandMark).toMatch(/han-nod-h 450ms ease-out 0ms 1 both/);
+		expect(brandMark).not.toMatch(/infinite/);
+		expect(layout).not.toMatch(/brandHot|wiggling|han-wiggle/);
 		expect(layout).toMatch(/pathname === '\/' \|\| page\.url\.pathname\.startsWith\('\/lab\/'\)/);
 		expect(styleBlock(layout)).not.toMatch(/\.name\s*\{[^}]*display:\s*none/s);
 		expect(home).toMatch(/Interactive labs that make you derive the writing system/);
