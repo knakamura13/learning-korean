@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import BrandMark from '$lib/components/BrandMark.svelte';
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
@@ -102,7 +103,7 @@
 	<div class="inner">
 		<a class="brand" href={resolve('/')}>
 			<span class="name">Korean</span>
-			<span class="mark" lang="ko">한</span>
+			<BrandMark />
 		</a>
 		<nav aria-label="Main navigation">
 			{#each nav as item (item.href)}
@@ -249,13 +250,6 @@
 		text-decoration: none;
 		color: var(--ink);
 		font-weight: 400;
-	}
-
-	.mark {
-		font-family: var(--hangul);
-		font-size: 1.15rem;
-		color: var(--accent);
-		line-height: 1;
 	}
 
 	.name {
