@@ -12,7 +12,7 @@
 
 - No `clip-path` on the mark.
 - Every glyph contour used exactly once.
-- One-shot 450ms nod, ~5–6° / ~1px, stagger 0 / 60 / 120ms.
+- One-shot 450ms nod, ~5–6° / ~1px, stagger 0 / 100 / 200ms.
 - No `brandHot`. No mixed `aria-label="Korean 한"`.
 - Reduced motion: no nod; color `--ink`.
 

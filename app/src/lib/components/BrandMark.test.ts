@@ -37,8 +37,8 @@ describe('BrandMark', () => {
 		expect(css).toMatch(/:global\(a\.brand:hover\) \.jamo-h/);
 		expect(css).toMatch(/:global\(a\.brand:focus-visible\) \.jamo-h/);
 		expect(css).toMatch(/han-nod-h 450ms ease-out 0ms 1 both/);
-		expect(css).toMatch(/han-nod-a 450ms ease-out 60ms 1 both/);
-		expect(css).toMatch(/han-nod-n 450ms ease-out 120ms 1 both/);
+		expect(css).toMatch(/han-nod-a 450ms ease-out 100ms 1 both/);
+		expect(css).toMatch(/han-nod-n 450ms ease-out 200ms 1 both/);
 		expect(css).toMatch(/transform-box:\s*fill-box/);
 		expect(css).toMatch(/transform-origin:\s*center/);
 		expect(css).toMatch(/rotate\(5\.5deg\) translateY\(-1px\)/);

@@ -10,7 +10,7 @@
 - Source glyph is Noto Sans KR weight 500, character `한` (U+D55C), from the same family as `--hangul`.
 - One SVG, three `<g>`s (`jamo-h`, `jamo-a`, `jamo-n`). Every closed contour of the glyph is assigned to exactly one group. A contour that is a hole inside another contour stays with its parent so ㅎ’s loop cannot be drawn twice.
 - Paths are committed in `BrandMark`. Runtime does not read the webfont for the mark.
-- Hover / `:focus-visible` on `a.brand` plays a **one-shot** nod: ~5–6°, ~1px, 450ms, ease-out, back to rest. ㅎ first, ㅏ ~60ms later, ㄴ ~120ms later. Not infinite.
+- Hover / `:focus-visible` on `a.brand` plays a **one-shot** nod: ~5–6°, ~1px, 450ms, ease-out, back to rest. ㅎ first, ㅏ 100ms later, ㄴ 200ms later. Not infinite.
 - `prefers-reduced-motion: reduce`: no transform animation; mark color shifts toward `--ink`.
 - Forced colors: `LinkText`.
 - SVG `aria-hidden="true"`. Visually hidden `한` with `lang="ko"`. No `aria-label="Korean 한"`.

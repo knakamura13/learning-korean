@@ -58,11 +58,11 @@
 		}
 		:global(a.brand:hover) .jamo-a,
 		:global(a.brand:focus-visible) .jamo-a {
-			animation: han-nod-a 450ms ease-out 60ms 1 both;
+			animation: han-nod-a 450ms ease-out 100ms 1 both;
 		}
 		:global(a.brand:hover) .jamo-n,
 		:global(a.brand:focus-visible) .jamo-n {
-			animation: han-nod-n 450ms ease-out 120ms 1 both;
+			animation: han-nod-n 450ms ease-out 200ms 1 both;
 		}
 	}
 
