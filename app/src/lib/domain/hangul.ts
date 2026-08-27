@@ -33,16 +33,21 @@ export type Lead = (typeof LEADS)[number];
 export type Vowel = (typeof VOWELS)[number];
 export type Final = (typeof FINALS)[number];
 
+// Pre-built maps for O(1) index lookup in compose() to avoid repeated linear Array.prototype.indexOf scans
+const LEAD_MAP = new Map<string, number>(LEADS.map((x, i) => [x, i]));
+const VOWEL_MAP = new Map<string, number>(VOWELS.map((x, i) => [x, i]));
+const FINAL_MAP = new Map<string, number>(FINALS.map((x, i) => [x, i]));
+
 const SYL_BASE = 0xac00;
 const SYL_LAST = 0xd7a3;
 
 /** Compose a syllable block. Returns '' if the pieces are not valid. */
 export function compose(lead: string, vowel: string, final = ''): string {
-	const l = LEADS.indexOf(lead as Lead);
-	const v = VOWELS.indexOf(vowel as Vowel);
-	if (l < 0 || v < 0) return '';
-	const t = final ? FINALS.indexOf(final as Final) : 0;
-	if (t < 0) return '';
+	const l = LEAD_MAP.get(lead);
+	const v = VOWEL_MAP.get(vowel);
+	if (l === undefined || v === undefined) return '';
+	const t = final ? FINAL_MAP.get(final) : 0;
+	if (t === undefined) return '';
 	return String.fromCharCode(SYL_BASE + (l * 21 + v) * 28 + t);
 }
 
@@ -159,6 +164,11 @@ const FUSIONS: Record<string, string> = {
 	'ㅡ+ㅣ': 'ㅢ'
 };
 
+// Pre-computed inverse lookup for fusionParts() to avoid O(N) iteration and string splitting on every lookup
+const FUSION_PARTS_MAP: Record<string, [string, string]> = Object.fromEntries(
+	Object.entries(FUSIONS).map(([key, value]) => [value, key.split('+') as [string, string]])
+);
+
 /** Fuse two vowels into a compound. '' when no such vowel exists. */
 export function fuse(a: string, b: string): string {
 	if (!a || !b) return '';
@@ -167,13 +177,7 @@ export function fuse(a: string, b: string): string {
 
 /** The parts a compound vowel is built from, or null if it is not a compound. */
 export function fusionParts(compound: string): [string, string] | null {
-	for (const [key, value] of Object.entries(FUSIONS)) {
-		if (value === compound) {
-			const [a, b] = key.split('+');
-			return [a, b];
-		}
-	}
-	return null;
+	return FUSION_PARTS_MAP[compound] ?? null;
 }
 
 /**
