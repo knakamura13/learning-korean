@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { toastStore } from '$lib/stores/toast.svelte';
+
 	let {
 		active = false,
 		disabled = false,
-		label = 'Flag for review',
+		label = 'Bookmark for review',
 		onclick
 	}: {
 		active?: boolean;
@@ -10,6 +12,15 @@
 		label?: string;
 		onclick: () => void;
 	} = $props();
+
+	function handleClick() {
+		onclick();
+		if (active) {
+			toastStore.show('Bookmark removed');
+		} else {
+			toastStore.show('Bookmarked — cards added to Daily Review');
+		}
+	}
 </script>
 
 <button
@@ -18,22 +29,22 @@
 	class:active
 	{disabled}
 	aria-pressed={active}
-	aria-label={active ? 'Remove review flag' : label}
-	title={active ? 'Remove review flag' : label}
-	{onclick}
+	aria-label={active ? 'Remove bookmark' : label}
+	title={active ? 'Remove bookmark' : label}
+	onclick={handleClick}
 >
 	<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
 		{#if active}
 			<path
-				d="M3.5 1.5v13M3.5 1.5h7.2l-1.4 2.6 1.4 2.6H3.5"
+				d="M3.5 1.5h9a1 1 0 0 1 1 1v12l-5.5-3.5L2.5 14.5v-12a1 1 0 0 1 1-1z"
 				fill="currentColor"
 				stroke="currentColor"
-				stroke-width="1.4"
+				stroke-width="1.2"
 				stroke-linejoin="round"
 			/>
 		{:else}
 			<path
-				d="M3.5 1.5v13M3.5 1.5h7.2l-1.4 2.6 1.4 2.6H3.5"
+				d="M3.5 1.5h9a1 1 0 0 1 1 1v12l-5.5-3.5L2.5 14.5v-12a1 1 0 0 1 1-1z"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="1.4"

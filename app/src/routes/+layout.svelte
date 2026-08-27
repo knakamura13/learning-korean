@@ -12,6 +12,7 @@
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { session } from '$lib/stores/session.svelte';
 	import { applyLook, readLookId, readThemePref, subscribeSystemTheme } from '$lib/theme';
+	import ToastContainer from '$lib/components/ToastContainer.svelte';
 
 	let { children } = $props();
 
@@ -168,6 +169,7 @@
 {#if !healthz}
 <footer class="vh">Site footer</footer>
 {/if}
+<ToastContainer />
 </div>
 
 <style>
