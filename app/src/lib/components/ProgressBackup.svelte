@@ -179,8 +179,7 @@
 		max-width: 36rem;
 		width: min(36rem, calc(100% - 2rem));
 		border-radius: var(--r-md);
-		border: none;
-		border-inline-start: 3px solid var(--warn);
+		border: 1px solid var(--rule-strong);
 		background: var(--warn-soft);
 		color: inherit;
 		font-size: 0.87rem;
@@ -199,16 +198,16 @@
 		border-radius: var(--r-sm);
 		font-size: 0.85rem;
 		line-height: 1.5;
-		border-inline-start: 3px solid var(--rule-strong);
+		border: 1px solid var(--rule-strong);
 		background: var(--paper-sunk);
 	}
-	.status[data-tone='right'] { border-inline-start-color: var(--good); background: var(--good-soft); color: var(--good); }
-	.status[data-tone='wrong'] { border-inline-start-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+	.status[data-tone='right'] { background: var(--good-soft); color: var(--good); }
+	.status[data-tone='wrong'] { background: var(--bad-soft); color: var(--bad); }
 
 	@media (forced-colors: active) {
-		.confirm { background: Canvas; border-inline-start-color: ButtonText; }
-		.status { background: Canvas; border-inline-start-color: ButtonBorder; }
-		.status[data-tone='right'] { border-inline-start-color: Highlight; color: CanvasText; }
-		.status[data-tone='wrong'] { border-inline-start-color: ButtonText; color: CanvasText; }
+		.confirm { background: Canvas; border-color: ButtonText; }
+		.status { background: Canvas; border-color: ButtonBorder; }
+		.status[data-tone='right'] { border-color: Highlight; color: CanvasText; }
+		.status[data-tone='wrong'] { border-color: ButtonText; color: CanvasText; }
 	}
 </style>

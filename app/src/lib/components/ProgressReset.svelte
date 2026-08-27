@@ -65,8 +65,7 @@
 		max-width: 36rem;
 		width: min(36rem, calc(100% - 2rem));
 		border-radius: var(--r-md);
-		border: none;
-		border-inline-start: 3px solid var(--warn);
+		border: 1px solid var(--rule-strong);
 		background: var(--warn-soft);
 		color: inherit;
 		font-size: 0.87rem;
@@ -85,13 +84,13 @@
 		border-radius: var(--r-sm);
 		font-size: 0.85rem;
 		line-height: 1.5;
-		border-inline-start: 3px solid var(--good);
+		border: 1px solid var(--rule-strong);
 		background: var(--good-soft);
 		color: var(--good);
 	}
 
 	@media (forced-colors: active) {
-		.confirm { background: Canvas; border-inline-start-color: ButtonText; }
-		.status { background: Canvas; border-inline-start-color: Highlight; color: CanvasText; }
+		.confirm { background: Canvas; border-color: ButtonText; }
+		.status { background: Canvas; border-color: Highlight; color: CanvasText; }
 	}
 </style>
