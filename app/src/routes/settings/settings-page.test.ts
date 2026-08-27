@@ -65,6 +65,8 @@ describe('Settings page — Appearance', () => {
 	it('sets document title Settings and shows Appearance chrome', () => {
 		expect(src).toMatch(/<title>Settings<\/title>/);
 		expect(src).toMatch(/max-width:\s*var\(--shell\)/);
+		expect(src).toMatch(/max-width:\s*var\(--measure\)/);
+		expect(src).toMatch(/class="file-actions"/);
 		expect(src).not.toMatch(/shell\.narrow|\.shell\.narrow|class="shell narrow"/);
 
 		const root = render();
@@ -121,10 +123,13 @@ describe('Settings page — Backup', () => {
 		expect(src).toMatch(/progress\.reset\(\)/);
 		expect(src).toMatch(/labSession\.reset\(\)/);
 		expect(src).toMatch(/id="reset"/);
+		expect(src).toMatch(/class="file-actions"/);
 		expect(src).toMatch(/wrapExport\(progress\.export\(\), labSession\.snapshot\)/);
 		expect(src).toMatch(/applyImportedBackup/);
 		expect(src).toMatch(/labSession\.replaceAll\(plan\.sessions\)/);
 		expect(src).toMatch(/Your progress lives only in this browser/);
+		expect(src).toMatch(/session\.status === 'signed-in'/);
+		expect(src).toMatch(/A file backup still matters/);
 		expect(src).toMatch(/as a precaution\./);
 		expect(src).toMatch(/right now, since this browser will not keep it for you\./);
 		expect(src).toMatch(/Saved progress could not be read/);

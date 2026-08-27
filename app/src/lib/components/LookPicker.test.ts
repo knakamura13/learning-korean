@@ -118,6 +118,10 @@ describe('LookPicker structure', () => {
 		expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
 		expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+		expect(css).toMatch(/max-width:\s*var\(--measure\)/);
+		expect(css).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+		expect(css).toMatch(/repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+		expect(css).not.toMatch(/grid-template-columns:\s*1fr 1fr/);
 	});
 });
 

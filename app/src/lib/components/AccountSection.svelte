@@ -154,7 +154,9 @@
 	}
 
 	#account {
-		margin-block-start: var(--s7);
+		margin-block-start: 0;
+		margin-block-end: var(--s7);
+		max-width: var(--measure);
 		scroll-margin-block-start: calc(48px + env(safe-area-inset-top) + 0.75rem);
 	}
 
@@ -167,13 +169,17 @@
 	}
 	.note strong { color: var(--ink); font-weight: 600; }
 
-	.prefs { margin-block-end: var(--s3); }
+	.prefs {
+		display: grid;
+		justify-items: start;
+		gap: var(--s3);
+		margin-block-end: var(--s3);
+	}
 
 	.fields {
 		display: flex;
 		gap: var(--s4);
 		flex-wrap: wrap;
-		margin-block-end: var(--s3);
 	}
 
 	.fields label {
