@@ -35,14 +35,41 @@ export function revealAdvanceIntoView(
 ): void {
 	if (!node) return;
 	const bottom = options.viewportBottom ?? viewportBottom();
+	const padding = 32;
 	const slack = 12;
-	if (node.getBoundingClientRect().bottom <= bottom - slack) return;
+	const rect = node.getBoundingClientRect();
+	if (rect.bottom <= bottom - padding - slack) return;
+
 	const reduce = options.prefersReducedMotion ?? prefersReducedMotion();
-	node.scrollIntoView({
-		behavior: reduce ? 'auto' : 'smooth',
-		block: 'end',
-		inline: 'nearest'
-	});
+
+	// Check if node is inside a scrollable container (e.g. .spread-col on desktop wide layout)
+	let container: HTMLElement | null = null;
+	let parent = node.parentElement;
+	while (parent && parent !== document.body && parent !== document.documentElement) {
+		const overflowY = typeof window !== 'undefined' ? window.getComputedStyle(parent).overflowY : '';
+		if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+			container = parent;
+			break;
+		}
+		parent = parent.parentElement;
+	}
+
+	if (container) {
+		const containerRect = container.getBoundingClientRect();
+		const extra = rect.bottom + padding - containerRect.bottom;
+		if (extra > 0) {
+			container.scrollBy({
+				top: extra,
+				behavior: reduce ? 'auto' : 'smooth'
+			});
+		}
+	} else if (typeof window !== 'undefined') {
+		const targetScrollY = window.scrollY + (rect.bottom + padding - bottom);
+		window.scrollTo({
+			top: Math.max(0, targetScrollY),
+			behavior: reduce ? 'auto' : 'smooth'
+		});
+	}
 }
 
 /** Svelte action: reveal on mount (and if `shouldReveal` later becomes true). */
