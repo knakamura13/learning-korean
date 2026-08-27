@@ -76,8 +76,19 @@ html[data-theme='dark'] { color-scheme: dark; }
 }
 
 /* Native <dialog> backdrop: ease in/out instead of popping on showModal/close.
-   Tint stays on component ::backdrop rules; this layer only animates opacity.
+   Tint stays on component ::backdrop rules; this layer animates opacity & transform.
    ::backdrop is outside the global * reduced-motion collapse above. */
+dialog {
+	transition:
+		opacity var(--med) var(--ease),
+		transform var(--med) var(--ease);
+}
+
+dialog[data-closing] {
+	opacity: 0;
+	transform: translateY(16px);
+}
+
 dialog::backdrop {
 	opacity: 0;
 	transition:
@@ -101,6 +112,7 @@ dialog[data-closing]::backdrop {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	dialog,
 	dialog::backdrop {
 		transition: none;
 		opacity: 1;

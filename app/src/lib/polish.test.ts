@@ -551,10 +551,11 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(
 			/@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\*, \*::before, \*::after\s*\{[^}]*animation-duration:\s*0\.01ms !important;[^}]*animation-iteration-count:\s*1 !important;[^}]*transition-duration:\s*0\.01ms !important/s
 		);
-		// Dialog backdrop sits outside the * collapse; it gets its own reduce rule.
+		// Dialog and backdrop get their own reduce rules.
 		expect(appCss).toMatch(
-			/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*dialog::backdrop\s*\{[^}]*transition:\s*none/s
+			/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*dialog,\s*dialog::backdrop\s*\{[^}]*transition:\s*none/s
 		);
+		expect(appCss).toMatch(/dialog\[data-closing\]\s*\{[^}]*opacity:\s*0;[^}]*transform:\s*translateY\(16px\)/s);
 		expect(appCss).toMatch(/dialog::backdrop\s*\{[^}]*opacity:\s*0/s);
 		expect(appCss).toMatch(/dialog\[data-closing\]::backdrop\s*\{[^}]*opacity:\s*0/s);
 		expect(appCss).toMatch(/@starting-style\s*\{[^}]*dialog\[open\]::backdrop/s);
