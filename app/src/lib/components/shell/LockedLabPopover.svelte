@@ -52,7 +52,7 @@
 >
 	<div class="sheet-head">
 		<h2 id="locked-lab-pop-title">{copy.title}</h2>
-		<button type="button" class="close" aria-label="Close" onclick={dismiss}>
+		<button type="button" class="close" aria-label="Close" title="Close" onclick={dismiss}>
 			<span aria-hidden="true">×</span>
 		</button>
 	</div>
