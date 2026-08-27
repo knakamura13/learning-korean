@@ -690,13 +690,13 @@
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
 		border-radius: var(--r-md);
-		border-inline-start: 3px solid var(--rule-strong);
+		border: 1px solid var(--rule-strong);
 		background: var(--paper-sunk);
 		font-size: 0.87rem;
 		line-height: 1.6;
 	}
-	.fb[data-tone='right'] { border-inline-start-color: var(--good); background: var(--good-soft); }
-	.fb[data-tone='wrong'] { border-inline-start-color: var(--bad); background: var(--bad-soft); }
+	.fb[data-tone='right'] { background: var(--good-soft); }
+	.fb[data-tone='wrong'] { background: var(--bad-soft); }
 
 	.v {
 		display: block;
@@ -738,10 +738,10 @@
 		.in.right { border-color: Highlight; background: Canvas; color: CanvasText; }
 		.in.wrong { border-color: ButtonText; background: Canvas; color: CanvasText; }
 		.ans em { color: CanvasText; }
-		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
-		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
+		.fb { background: Canvas; border-color: ButtonBorder; }
+		.fb[data-tone='right'] { background: Canvas; border-color: Highlight; }
 		.fb[data-tone='right'] .v { color: CanvasText; }
-		.fb[data-tone='wrong'] { background: Canvas; border-inline-start-color: ButtonText; }
+		.fb[data-tone='wrong'] { background: Canvas; border-color: ButtonText; }
 		.fb[data-tone='wrong'] .v { color: CanvasText; }
 	}
 

@@ -572,13 +572,13 @@
 		margin-top: var(--s4);
 		padding: var(--s3) var(--s4);
 		border-radius: var(--r-md);
-		border-inline-start: 3px solid var(--rule-strong);
+		border: 1px solid var(--rule-strong);
 		background: var(--paper-sunk);
 		font-size: 0.9rem;
 		line-height: 1.6;
 	}
-	.fb[data-tone='right'] { border-inline-start-color: var(--good); background: var(--good-soft); }
-	.fb[data-tone='wrong'] { border-inline-start-color: var(--bad); background: var(--bad-soft); }
+	.fb[data-tone='right'] { background: var(--good-soft); }
+	.fb[data-tone='wrong'] { background: var(--bad-soft); }
 
 	.verdict {
 		display: block;
@@ -604,9 +604,9 @@
 	.fb[data-tone='wrong'] .verdict { color: var(--bad); }
 
 	@media (forced-colors: active) {
-		.fb { background: Canvas; border-inline-start-color: ButtonBorder; }
-		.fb[data-tone='right'] { background: Canvas; border-inline-start-color: Highlight; }
-		.fb[data-tone='wrong'] { background: Canvas; border-inline-start-color: ButtonText; }
+		.fb { background: Canvas; border-color: ButtonBorder; }
+		.fb[data-tone='right'] { background: Canvas; border-color: Highlight; }
+		.fb[data-tone='wrong'] { background: Canvas; border-color: ButtonText; }
 		.fb[data-tone='right'] .verdict { color: CanvasText; }
 		.fb[data-tone='wrong'] .verdict { color: CanvasText; }
 	}
