@@ -60,19 +60,34 @@
 
 	.toast-close {
 		appearance: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 32px;
+		min-height: 32px;
+		padding: 0;
 		border: none;
+		border-radius: var(--r-sm);
 		background: transparent;
 		color: var(--ink-faint);
 		font-size: 0.85rem;
 		cursor: pointer;
-		padding: var(--s1);
-		margin: calc(-1 * var(--s1));
-		border-radius: var(--r-sm);
 		line-height: 1;
 		flex: 0 0 auto;
+		transition:
+			color var(--fast) var(--ease),
+			background var(--fast) var(--ease);
 	}
 
 	.toast-close:hover {
+		color: var(--ink);
+		background: var(--paper-sunk);
+	}
+
+	.toast-close:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 		color: var(--ink);
 	}
 
@@ -93,6 +108,10 @@
 		}
 		.toast-close {
 			color: ButtonText;
+		}
+		.toast-close:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
 		}
 	}
 </style>
