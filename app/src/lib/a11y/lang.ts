@@ -22,40 +22,43 @@ export function splitKo(text: string): { text: string; ko: boolean }[] {
 	return parts.length ? parts : [{ text, ko: false }];
 }
 
+/** Pre-compiled patterns for single-pass HTML tokenization and tag parsing. */
+const HTML_OR_HANGUL = /<[^>]*>|[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7A3]+/g;
+const TAG_PARSER = /^<\/?([A-Za-z][A-Za-z0-9]*)\b([^>]*?)(\/)?>/;
+const LANG_KO_ATTR = /\blang\s*=\s*(["']?)ko\1/i;
+const VOID_TAGS = new Set(['br', 'img', 'hr', 'input', 'meta', 'link', 'wbr']);
+
 /**
  * Wrap Hangul runs in `lang="ko"` so screen readers and fonts treat them as
  * Korean inside an `lang="en"` document. Skips text already inside `lang="ko"`
  * and characters that sit in a tag (attributes).
+ *
+ * Optimized to O(N) by single-pass token replacement, tracking tag depth and
+ * attributes in a single traversal instead of re-scanning previous tags on each match.
  */
 export function withLangKo(html: string): string {
-	HANGUL_RUN.lastIndex = 0;
-	return html.replace(HANGUL_RUN, (run, offset: number) => {
-		const before = html.slice(0, offset);
-		const lastLt = before.lastIndexOf('<');
-		const lastGt = before.lastIndexOf('>');
-		if (lastLt > lastGt) return run;
-		if (langKoDepth(before) > 0) return run;
-		return `<span lang="ko">${run}</span>`;
+	let depth = 0;
+	HTML_OR_HANGUL.lastIndex = 0;
+	return html.replace(HTML_OR_HANGUL, (token) => {
+		if (token.charCodeAt(0) === 60 /* '<' */) {
+			const match = TAG_PARSER.exec(token);
+			if (match) {
+				const name = match[1].toLowerCase();
+				const closing = token.startsWith('</');
+				const selfClosing = Boolean(match[3]) || VOID_TAGS.has(name);
+				if (closing) {
+					depth = Math.max(0, depth - 1);
+				} else if (!selfClosing) {
+					if (LANG_KO_ATTR.test(match[2])) {
+						depth += 1;
+					} else if (depth > 0) {
+						depth += 1;
+					}
+				}
+			}
+			return token;
+		}
+		if (depth > 0) return token;
+		return `<span lang="ko">${token}</span>`;
 	});
 }
-
-function langKoDepth(before: string): number {
-	const tagRe = /<\/?([A-Za-z][A-Za-z0-9]*)\b([^>]*?)(\/)?>/g;
-	let depth = 0;
-	let match: RegExpExecArray | null;
-	while ((match = tagRe.exec(before))) {
-		const name = match[1].toLowerCase();
-		const closing = match[0].startsWith('</');
-		const selfClosing = Boolean(match[3]) || VOID_TAGS.has(name);
-		if (closing) {
-			depth = Math.max(0, depth - 1);
-			continue;
-		}
-		if (selfClosing) continue;
-		if (/\blang\s*=\s*(["']?)ko\1/i.test(match[2])) depth += 1;
-		else if (depth > 0) depth += 1;
-	}
-	return depth;
-}
-
-const VOID_TAGS = new Set(['br', 'img', 'hr', 'input', 'meta', 'link', 'wbr']);
