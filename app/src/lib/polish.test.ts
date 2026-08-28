@@ -638,6 +638,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labSwitcher)).toMatch(/--focus-ring/);
 		expect(styleBlock(labSwitcher)).toMatch(/forced-colors:\s*active/);
 		expect(labPage).toMatch(/LabSwitcher/);
+		expect(vocabPacks).toMatch(/\.open-pack:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/s);
 	});
 
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
