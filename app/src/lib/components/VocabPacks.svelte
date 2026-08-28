@@ -157,8 +157,17 @@
 		font-size: 0.78rem;
 		white-space: nowrap;
 	}
+	.open-pack:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
 
 	@media (forced-colors: active) {
+		.open-pack:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
+		}
 		.track {
 			background: Canvas;
 		}
