@@ -105,9 +105,11 @@ export function derivations(letter: string): Derivation[] {
 	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
 }
 
+const BASE_SHAPE_SET = new Set<string>(BASE_SHAPES);
+
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
+	if (BASE_SHAPE_SET.has(letter)) return letter;
 	for (const [from, ops] of Object.entries(DERIVE)) {
 		for (const target of Object.values(ops)) {
 			if (target === letter) return baseShapeOf(from);
@@ -271,37 +273,32 @@ export function clusterRule(final: string): ClusterRule | null {
  * when it jumps; other tensification is out of scope.
  */
 export function applyLiaison(word: string): string {
-	const chars = [...word];
-	if (chars.length === 0) return word;
-	const parts = chars.map((ch) => decompose(ch));
-	if (parts.some((p) => p === null)) return word;
-
-	const out = parts.map((p) => ({ ...p! }));
-	for (let i = 0; i < out.length - 1; i++) {
-		const cur = out[i];
-		const next = out[i + 1];
-		if (!cur.final || next.lead !== 'ㅇ') continue;
-		if (cur.final === 'ㅇ' || cur.final === 'ㅎ') continue;
-		const cluster = clusterParts(cur.final);
-		if (cluster) {
-			if (cluster[1] === 'ㅎ') continue;
-			cur.final = cluster[0];
-			next.lead = cluster[1] === 'ㅅ' ? 'ㅆ' : cluster[1];
-		} else {
-			next.lead = cur.final;
-			cur.final = '';
+	return mapSyllables(word, (out) => {
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (!cur.final || next.lead !== 'ㅇ') continue;
+			if (cur.final === 'ㅇ' || cur.final === 'ㅎ') continue;
+			const cluster = clusterParts(cur.final);
+			if (cluster) {
+				if (cluster[1] === 'ㅎ') continue;
+				cur.final = cluster[0];
+				next.lead = cluster[1] === 'ㅅ' ? 'ㅆ' : cluster[1];
+			} else {
+				next.lead = cur.final;
+				cur.final = '';
+			}
 		}
-	}
-	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+	});
 }
 
 /** Written batchim letters that could jump (cluster members, not tensed ㅆ). */
 export function liaisonSources(word: string): string[] {
-	const parts = [...word].map((ch) => decompose(ch));
+	const len = word.length;
 	const sources: string[] = [];
-	for (let i = 0; i < parts.length - 1; i++) {
-		const cur = parts[i];
-		const next = parts[i + 1];
+	for (let i = 0; i < len - 1; i++) {
+		const cur = decompose(word[i]);
+		const next = decompose(word[i + 1]);
 		if (!cur || !next || !cur.final || next.lead !== 'ㅇ') continue;
 		if (cur.final === 'ㅎ') continue;
 		const cluster = clusterParts(cur.final);
@@ -319,12 +316,12 @@ export type LiaisonAction = { type: 'stay' } | { type: 'move'; jamo: string };
 
 /** The one tap the widget should accept for this written word. */
 export function liaisonAction(word: string): LiaisonAction {
-	if (applyLiaison(word) === word) return { type: 'stay' };
-	const before = [...word].map((ch) => decompose(ch));
-	const after = [...applyLiaison(word)].map((ch) => decompose(ch));
-	for (let i = 0; i < before.length; i++) {
-		const a = before[i];
-		const b = after[i];
+	const applied = applyLiaison(word);
+	if (applied === word) return { type: 'stay' };
+	const len = word.length;
+	for (let i = 0; i < len; i++) {
+		const a = decompose(word[i]);
+		const b = decompose(applied[i]);
 		if (!a || !b || a.final === b.final) continue;
 		const parts = clusterParts(a.final);
 		if (parts) return { type: 'move', jamo: parts[1] };
@@ -355,14 +352,23 @@ function skipContactJunction(cur: { lead: string; vowel: string; final: string }
 	return false;
 }
 
-function mapSyllables(word: string, fn: (out: { lead: string; vowel: string; final: string }[]) => void): string {
-	const chars = [...word];
-	if (chars.length === 0) return word;
-	const parts = chars.map((ch) => decompose(ch));
-	if (parts.some((p) => p === null)) return word;
-	const out = parts.map((p) => ({ ...p! }));
+// Fast syllable mapper avoiding string spreads, array copies, and intermediate closures
+function mapSyllables(word: string, fn: (out: Decomposed[]) => void): string {
+	const len = word.length;
+	if (len === 0) return word;
+	const out: Decomposed[] = new Array(len);
+	for (let i = 0; i < len; i++) {
+		const p = decompose(word[i]);
+		if (p === null) return word;
+		out[i] = { lead: p.lead, vowel: p.vowel, final: p.final };
+	}
 	fn(out);
-	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+	let res = '';
+	for (let i = 0; i < len; i++) {
+		const p = out[i];
+		res += compose(p.lead, p.vowel, p.final);
+	}
+	return res;
 }
 
 /**
@@ -618,11 +624,16 @@ export function romanizeSyllable(ch: string): string {
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
 export function romanizeWord(word: string): string {
-	const chars = [...word];
-	if (chars.length === 0) return '';
-	const parts = chars.map((ch) => romanizeSyllable(ch));
-	if (parts.some((p) => p === '')) return '';
-	return parts.join('-');
+	const len = word.length;
+	if (len === 0) return '';
+	let res = '';
+	for (let i = 0; i < len; i++) {
+		const r = romanizeSyllable(word[i]);
+		if (r === '') return '';
+		if (i > 0) res += '-';
+		res += r;
+	}
+	return res;
 }
 
 /* ------------------------------------------------------------------ *
