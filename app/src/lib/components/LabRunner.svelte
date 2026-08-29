@@ -626,6 +626,31 @@
 		.kb { display: none; }
 	}
 
+	@media (max-width: 40rem) {
+		.head {
+			margin: 0;
+		}
+		.head .eyebrow,
+		.head .standfirst {
+			display: none;
+		}
+		.head h1 {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			padding: 0;
+			margin: -1px;
+			overflow: hidden;
+			clip: rect(0, 0, 0, 0);
+			white-space: nowrap;
+			border: 0;
+		}
+		.do {
+			font-size: 1.1rem;
+			line-height: 1.34;
+		}
+	}
+
 	/* --- finish --- */
 	.finish {
 		padding: var(--s7) var(--s5);

@@ -683,6 +683,26 @@ describe('polish audit regressions', () => {
 		);
 	});
 
+	it('hides duplicate lab title chrome on compact sitting and keeps a document h1', () => {
+		expect(labRunner).toMatch(/<h1>\{lab\.title\}<\/h1>/);
+		const css = styleBlock(labRunner);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.head\s*\{[^}]*margin:\s*0/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.head \.eyebrow,\s*\.head \.standfirst\s*\{[^}]*display:\s*none/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.head h1\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.do\s*\{[^}]*font-size:\s*1\.1rem/s
+		);
+		expect(css).toMatch(
+			/\.do\s*\{[^}]*font-size:\s*clamp\(1\.15rem, 1\.15rem \+ [^,]+, 1\.45rem\)/s
+		);
+	});
+
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
 		const css = styleBlock(reference);
 		expect(css).toMatch(
