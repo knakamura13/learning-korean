@@ -88,6 +88,23 @@ test('the lab page shows the right lab navigation for the viewport', async ({ pa
 	}
 });
 
+test('compact lab sitting opens main destinations from the sitting-nav', async ({ page }, testInfo) => {
+	test.skip(testInfo.project.name !== 'mobile', 'compact sitting is the phone band');
+	await page.goto('/lab/0001');
+	const trigger = page.getByRole('button', { name: 'Main navigation' });
+	await expect(trigger).toBeVisible();
+	await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0);
+	await trigger.click();
+	const sheet = page.locator('dialog.sitting-sheet');
+	await expect(sheet).toBeVisible();
+	await expect(sheet.getByRole('link', { name: 'Labs' })).toBeVisible();
+	await expect(sheet.locator('a[href$="review"]')).toBeVisible();
+	await expect(sheet.getByRole('link', { name: 'Drill' })).toBeVisible();
+	await expect(sheet.getByRole('link', { name: 'Reference' })).toBeVisible();
+	await sheet.locator('a[href$="review"]').click();
+	await expect(page).toHaveURL(/\/review\/?$/);
+});
+
 test('a first lab card is interactive and a wrong pick does not advance', async ({ page }) => {
 	await page.goto('/lab/0001');
 	// Card 1 of Lab 01 always renders an action well with at least one control.

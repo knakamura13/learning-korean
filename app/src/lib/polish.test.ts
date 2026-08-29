@@ -26,6 +26,7 @@ import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
 import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
 import labSwitcher from './components/shell/LabSwitcher.svelte?raw';
+import sittingNav from './components/shell/SittingNav.svelte?raw';
 import sprintChoices from './components/SprintChoices.svelte?raw';
 import reviewCompose from './components/ReviewCompose.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
@@ -306,6 +307,7 @@ describe('polish audit regressions', () => {
 			labIndexRail,
 			labPreview,
 			labSpread,
+			sittingNav,
 			referenceIndexRail,
 			referencePreview
 		];
@@ -640,6 +642,25 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labSwitcher)).toMatch(/--focus-ring/);
 		expect(styleBlock(labSwitcher)).toMatch(/forced-colors:\s*active/);
 		expect(labPage).toMatch(/LabSwitcher/);
+	});
+
+	it('puts compact lab destinations in a sitting-nav dialog, not a second tab row', () => {
+		expect(layout).toMatch(/SittingNav/);
+		expect(sittingNav).toMatch(/aria-label="Main navigation"/);
+		expect(sittingNav).toMatch(/attachModalDialog/);
+		expect(sittingNav).toMatch(/aria-haspopup="dialog"/);
+		expect(styleBlock(sittingNav)).toMatch(/\.trigger\s*\{[^}]*min-width:\s*44px/s);
+		expect(styleBlock(sittingNav)).toMatch(/\.trigger\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(sittingNav)).toMatch(/\.sitting-sheet a\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(sittingNav)).toMatch(/forced-colors:\s*active/);
+		expect(sittingNav).not.toMatch(/hamburger/i);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route nav\s*\{[^}]*display:\s*none/s
+		);
+		expect(styleBlock(sittingNav)).toMatch(/\.sitting-nav\s*\{[^}]*display:\s*none/s);
+		expect(styleBlock(sittingNav)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.sitting-nav\s*\{[^}]*display:\s*block/s
+		);
 	});
 
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {

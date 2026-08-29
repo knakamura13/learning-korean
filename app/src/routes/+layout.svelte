@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
+	import SittingNav from '$lib/components/shell/SittingNav.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
 	import { OG_IMAGE_ALT, pageCanonical, pageShareTitle, SITE_DESCRIPTION, siteAsset } from '$lib/site';
@@ -106,6 +107,9 @@
 			<span class="name">Korean</span>
 			<BrandMark />
 		</a>
+		{#if labRoute}
+			<SittingNav items={nav} sitting={sitting} reviewAria={load.navAria} />
+		{/if}
 		<nav aria-label="Main navigation">
 			{#each nav as item (item.href)}
 				{@const isActive = item.href === '/'
@@ -434,6 +438,9 @@
 		}
 		.bar.lab-route .inner {
 			flex-wrap: nowrap;
+		}
+		.bar.lab-route nav {
+			display: none;
 		}
 	}
 
