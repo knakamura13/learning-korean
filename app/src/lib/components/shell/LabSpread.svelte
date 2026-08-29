@@ -67,6 +67,32 @@
 		border-radius: var(--r-sm);
 	}
 
+	@media (max-width: 40rem) {
+		.spread:not(.solo) {
+			display: flex;
+			flex-direction: column;
+			gap: var(--s3);
+			min-height: calc(100svh - var(--sitting-bar-block, 48px) - var(--shell-pad-top, var(--s5)) - var(--shell-pad-bottom, var(--s7)));
+		}
+
+		.spread:not(.solo) .article {
+			flex: 0 0 auto;
+		}
+		.spread:not(.solo) .spread-col {
+			display: contents;
+		}
+		.spread:not(.solo) .well {
+			flex: 1 1 auto;
+			min-height: 0;
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			padding: var(--s3);
+		}
+		.spread:not(.solo) .after {
+			flex: 0 0 auto;
+		}
+	}
+
 	@media (min-width: 72rem) {
 		.spread {
 			grid-template-columns: minmax(0, var(--measure)) minmax(280px, 1fr);
