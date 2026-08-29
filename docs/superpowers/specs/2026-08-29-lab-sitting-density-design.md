@@ -1,7 +1,7 @@
 # Lab sitting density (portrait phones)
 
 **Date:** 2026-08-29
-**Status:** ready to implement (written spec pending review)
+**Status:** approved; implement
 **Amends:** [2026-08-24-lab-phases-design.md](2026-08-24-lab-phases-design.md) (visible lab `h1` on compact sitting)
 **Related:** [2026-08-18-solo-sitting-layout-design.md](2026-08-18-solo-sitting-layout-design.md) (wide unpaired finish; unchanged)
 
