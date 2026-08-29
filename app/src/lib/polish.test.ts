@@ -1305,6 +1305,29 @@ describe('polish audit regressions', () => {
 		expect(appCss).toMatch(/\.warn\s*\{[^}]*border:\s*1px solid var\(--bad\)/s);
 	});
 
+	it('keeps compact lab sitting to one header row and tighter shell padding', () => {
+		expect(layout).toMatch(/class=\{\['frame', \{ 'lab-route': labRoute \}\]\}/);
+		const layoutCss = styleBlock(layout);
+		expect(layoutCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route \.inner\s*\{[^}]*flex-wrap:\s*nowrap/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-bar-block:\s*calc\(48px \+ env\(safe-area-inset-top/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-chrome:\s*9rem/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-top:\s*var\(--s3\)/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-bottom:\s*max\(var\(--s3\), env\(safe-area-inset-bottom\)\)/s
+		);
+		expect(styleBlock(layout)).not.toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route \.name\s*\{[^}]*display:\s*none/s
+		);
+	});
+
 	it('keeps issue #143 a11y follow-ups: wrap, forced-colors specificity, focus return', () => {
 		expect(styleBlock(drill)).toMatch(/\.lanes\s*\{[^}]*flex-wrap:\s*wrap/s);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*wrap/s);

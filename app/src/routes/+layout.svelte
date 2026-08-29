@@ -98,7 +98,7 @@
 
 <a class="skip" href="#main" onclick={skipToMain}>Skip to content</a>
 
-<div class="frame">
+<div class={['frame', { 'lab-route': labRoute }]}>
 {#if !healthz}
 <header class={['bar', { 'lab-route': labRoute }]}>
 	<div class="inner">
@@ -431,6 +431,9 @@
 		}
 		.badge-n {
 			display: none;
+		}
+		.bar.lab-route .inner {
+			flex-wrap: nowrap;
 		}
 	}
 
