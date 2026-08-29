@@ -73,6 +73,18 @@ describe('Settings page — Appearance', () => {
 		expect(root.querySelector('h1')?.textContent?.trim()).toBe('Settings');
 		expect(root.querySelector('.progress h2')?.textContent?.trim()).toBe('Progress');
 		expect(root.querySelector('.appearance h2')?.textContent?.trim()).toBe('Appearance');
+		expect(root.querySelector('#review-pace')).toBeNull();
+		expect(root.querySelector('#review-heading')).toBeNull();
+	});
+
+	it('places Review between Progress and Appearance in the page source', () => {
+		expect(src).toMatch(/<ReviewPace \/>/);
+		const progressAt = src.indexOf('id="progress-heading"');
+		const reviewAt = src.indexOf('<ReviewPace />');
+		const appearanceAt = src.indexOf('id="appearance-heading"');
+		expect(progressAt).toBeGreaterThan(-1);
+		expect(reviewAt).toBeGreaterThan(progressAt);
+		expect(appearanceAt).toBeGreaterThan(reviewAt);
 	});
 
 	it('lists four locked look names and summaries plus Color radios', () => {

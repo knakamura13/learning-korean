@@ -3,45 +3,11 @@
 	import { focusWhen } from '$lib/a11y/shortcuts';
 	import { attachModalDialog } from '$lib/a11y/attachModalDialog';
 	import { session } from '$lib/stores/session.svelte';
-	import { progress } from '$lib/stores/progress.svelte';
 
-	let newPerDay = $state(progress.studyPrefs.newPerDay);
-	let reviewsPerSitting = $state(progress.studyPrefs.reviewsPerSitting);
-	let prefsStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
 	let confirmingDelete = $state(false);
 	let deleteStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
-	let saving = $state(false);
 
 	const authFailed = $derived(page.url.searchParams.get('auth') === 'failed');
-
-	// Refresh the steppers when /api/me lands account pacing after mount.
-	$effect(() => {
-		newPerDay = progress.studyPrefs.newPerDay;
-		reviewsPerSitting = progress.studyPrefs.reviewsPerSitting;
-	});
-
-	async function savePrefs(event: SubmitEvent) {
-		event.preventDefault();
-		prefsStatus = null;
-		const next = { newPerDay: Math.trunc(newPerDay), reviewsPerSitting: Math.trunc(reviewsPerSitting) };
-		if (
-			!Number.isInteger(next.newPerDay) ||
-			!Number.isInteger(next.reviewsPerSitting) ||
-			next.newPerDay < 0 ||
-			next.newPerDay > 50 ||
-			next.reviewsPerSitting < 1 ||
-			next.reviewsPerSitting > 100
-		) {
-			prefsStatus = { tone: 'wrong', message: 'New cards 0–50 and reviews 1–100.' };
-			return;
-		}
-		saving = true;
-		const ok = await session.savePrefs(next);
-		saving = false;
-		prefsStatus = ok
-			? { tone: 'right', message: 'Study pace saved to your account.' }
-			: { tone: 'wrong', message: 'Could not save — check your connection and try again.' };
-	}
 
 	async function confirmDelete() {
 		confirmingDelete = false;
@@ -80,25 +46,6 @@
 				Signed in as <strong>{session.user?.email}</strong>. Progress syncs to your account and
 				follows you to any signed-in device.
 			</p>
-
-			<form class="prefs" novalidate onsubmit={savePrefs}>
-				<div class="fields">
-					<label>
-						<span>New cards per day</span>
-						<input type="number" min="0" max="50" step="1" bind:value={newPerDay} />
-					</label>
-					<label>
-						<span>Reviews per sitting</span>
-						<input type="number" min="1" max="100" step="1" bind:value={reviewsPerSitting} />
-					</label>
-				</div>
-				<button type="submit" class="btn" disabled={saving}>Save study pace</button>
-			</form>
-			{#if prefsStatus}
-				<p class="status" data-tone={prefsStatus.tone} role="status" aria-live="polite">
-					{prefsStatus.message}
-				</p>
-			{/if}
 
 			<div class="actions">
 				<button type="button" class="btn ghost" onclick={() => void session.signOut()}>
@@ -169,49 +116,10 @@
 	}
 	.note strong { color: var(--ink); font-weight: 600; }
 
-	.prefs {
-		display: grid;
-		justify-items: start;
-		gap: var(--s3);
-		margin-block-end: var(--s3);
-	}
-
-	.fields {
-		display: flex;
-		gap: var(--s4);
-		flex-wrap: wrap;
-	}
-
-	.fields label {
-		display: flex;
-		flex-direction: column;
-		gap: var(--s1);
-		font-size: 0.78rem;
-		color: var(--ink-soft);
-	}
-
-	.fields input {
-		inline-size: 7.5rem;
-		min-block-size: 44px;
-		padding: var(--s1) var(--s2);
-		font: inherit;
-		font-variant-numeric: tabular-nums;
-		color: var(--ink);
-		background: var(--paper-raised);
-		border: 1px solid var(--rule-strong);
-		border-radius: var(--r-sm);
-	}
-	.fields input:focus-visible {
-		outline: 2px solid var(--paper);
-		outline-offset: 2px;
-		box-shadow: var(--focus-ring);
-	}
-
 	.actions {
 		display: flex;
 		gap: var(--s2);
 		flex-wrap: wrap;
-		margin-block-start: var(--s3);
 	}
 
 	.danger { color: var(--rose); }
@@ -253,6 +161,5 @@
 	@media (forced-colors: active) {
 		.confirm { background: Canvas; border-color: ButtonText; }
 		.status { background: Canvas; border-color: Highlight; color: CanvasText; }
-		.fields input { border-color: ButtonBorder; }
 	}
 </style>

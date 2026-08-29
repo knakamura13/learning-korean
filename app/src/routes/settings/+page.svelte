@@ -5,6 +5,7 @@
 	import MasterySnapshot from '$lib/components/MasterySnapshot.svelte';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import ProgressReset from '$lib/components/ProgressReset.svelte';
+	import ReviewPace from '$lib/components/ReviewPace.svelte';
 	import { applyImportedBackup, wrapExport } from '$lib/domain/backup';
 	import { labSession, LAB_STEP_COUNTS } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -52,6 +53,8 @@
 			emptyCopy="Letters land here after you finish a lab. Lab 01 unlocks consonants."
 		/>
 	</section>
+
+	<ReviewPace />
 
 	<section class="appearance" aria-labelledby="appearance-heading">
 		<h2 id="appearance-heading">Appearance</h2>

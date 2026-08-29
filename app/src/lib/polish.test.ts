@@ -30,6 +30,7 @@ import sprintChoices from './components/SprintChoices.svelte?raw';
 import reviewCompose from './components/ReviewCompose.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
 import accountSection from './components/AccountSection.svelte?raw';
+import reviewPace from './components/ReviewPace.svelte?raw';
 import masterySnapshot from './components/MasterySnapshot.svelte?raw';
 import vocabPacks from './components/VocabPacks.svelte?raw';
 import referenceIndexRail from './components/shell/ReferenceIndexRail.svelte?raw';
@@ -294,6 +295,7 @@ describe('polish audit regressions', () => {
 			labRunnerPipRail,
 			progressBackup,
 			settingsPage,
+			reviewPace,
 			layout,
 			home,
 			review,
@@ -721,7 +723,7 @@ describe('polish audit regressions', () => {
 	it('uses --focus-ring only as box-shadow, never as outline', () => {
 		// --focus-ring is a multi-layer box-shadow token, not an outline shorthand.
 		expect(appCss).not.toMatch(/outline:\s*var\(--focus-ring\)/);
-		for (const source of [accountSection, labSwitcher]) {
+		for (const source of [reviewPace, labSwitcher]) {
 			const css = styleBlock(source);
 			expect(css).not.toMatch(/outline:\s*var\(--focus-ring\)/);
 			expect(css).toMatch(/outline:\s*2px solid var\(--paper\)/);
@@ -1376,6 +1378,10 @@ describe('issue #145 polish leftovers', () => {
 	it('hosts mastery progress on Settings and vocabulary packs on Reference', () => {
 		expect(settingsPage).toMatch(/MasterySnapshot/);
 		expect(settingsPage).toMatch(/<h2 id="progress-heading">Progress<\/h2>/);
+		expect(settingsPage).toMatch(/<ReviewPace \/>/);
+		expect(reviewPace).toMatch(/<h2 id="review-heading">Review<\/h2>/);
+		expect(settingsPage.indexOf('progress-heading')).toBeLessThan(settingsPage.indexOf('<ReviewPace'));
+		expect(settingsPage.indexOf('<ReviewPace')).toBeLessThan(settingsPage.indexOf('appearance-heading'));
 		expect(masterySnapshot).toMatch(/mastered \(21\+ day gap\)/);
 		expect(reference).toMatch(/VocabPacks/);
 		expect(vocabPacks).toMatch(/sec-vocab-heading/);
@@ -1383,9 +1389,10 @@ describe('issue #145 polish leftovers', () => {
 	});
 
 	it('lets the study-pace range guard fire instead of native validation UI', () => {
-		expect(accountSection).toMatch(/<form class="prefs" novalidate/);
-		expect(accountSection).toMatch(/New cards 0–50 and reviews 1–100\./);
+		expect(reviewPace).toMatch(/<form class="prefs" novalidate/);
+		expect(reviewPace).toMatch(/New cards 0–50 and reviews 1–100\./);
 		expect(accountSection).toMatch(/deleteStatus\.tone/);
+		expect(accountSection).not.toMatch(/Save study pace/);
 	});
 
 	it('separates storage-warning actions, noindexes /healthz, and matches OG titles to the page', () => {
