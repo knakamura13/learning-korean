@@ -69,10 +69,11 @@ test('a fresh visitor sees honest empty states on review and drill', async ({ pa
 
 test('the lab page shows the right lab navigation for the viewport', async ({ page }, testInfo) => {
 	await page.goto('/lab/0001');
-	const switcher = page.locator('.switcher .trigger');
 	const rail = page.locator('.lab-index');
 	if (testInfo.project.name === 'mobile') {
+		const switcher = page.locator('.switcher.bar .trigger');
 		await expect(switcher).toBeVisible();
+		await expect(page.locator('.switcher.page')).toBeHidden();
 		await expect(rail).toBeHidden();
 		await switcher.click();
 		const sheet = page.locator('dialog.sheet');
@@ -83,7 +84,7 @@ test('the lab page shows the right lab navigation for the viewport', async ({ pa
 		await expect(page).toHaveURL(/\/lab\/0002$/);
 		await expect(page.locator('dialog.sheet')).toBeHidden();
 	} else {
-		await expect(switcher).toBeHidden();
+		await expect(page.locator('.switcher .trigger')).toBeHidden();
 		await expect(rail).toBeVisible();
 	}
 });

@@ -36,7 +36,7 @@
 
 <div class="with-rail">
 	<div class="shell sitting">
-	<LabSwitcher currentId={lab.id} />
+	<LabSwitcher currentId={lab.id} variant="page" />
 	{#if gated && prior}
 		<aside class="gate card">
 			<strong>Lab {String(prior.number).padStart(2, '0')} comes first.</strong>

@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import SettingsLink from '$lib/components/SettingsLink.svelte';
+	import LabSwitcher from '$lib/components/shell/LabSwitcher.svelte';
 	import SittingNav from '$lib/components/shell/SittingNav.svelte';
 	import { armSkipLanding, disarmSkipLanding } from '$lib/a11y/skipLanding';
 	import { reviewLoadCopy } from '$lib/domain/reviewLoad';
@@ -43,6 +44,11 @@
 	const sitting = $derived(progress.stats.sitting);
 	const load = $derived(reviewLoadCopy(progress.stats, progress.studyPrefs.reviewsPerSitting));
 	const labRoute = $derived(page.url.pathname.startsWith('/lab/'));
+	const labId = $derived(
+		typeof page.params.id === 'string' && page.url.pathname.includes('/lab/')
+			? page.params.id
+			: ''
+	);
 	const healthz = $derived(
 		page.url.pathname === '/healthz' || page.url.pathname === '/healthz/'
 	);
@@ -107,6 +113,9 @@
 			<span class="name">Korean</span>
 			<BrandMark />
 		</a>
+		{#if labRoute && labId}
+			<LabSwitcher currentId={labId} variant="bar" />
+		{/if}
 		{#if labRoute}
 			<SittingNav items={nav} sitting={sitting} reviewAria={load.navAria} />
 		{/if}
@@ -438,6 +447,10 @@
 		}
 		.bar.lab-route .inner {
 			flex-wrap: nowrap;
+		}
+		.bar.lab-route .inner :global(.switcher.bar) {
+			flex: 1 1 auto;
+			min-width: 0;
 		}
 		.bar.lab-route nav {
 			display: none;

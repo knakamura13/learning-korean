@@ -644,6 +644,23 @@ describe('polish audit regressions', () => {
 		expect(labPage).toMatch(/LabSwitcher/);
 	});
 
+	it('mounts a bar lab switcher on compact sitting and hides the page switcher', () => {
+		expect(layout).toMatch(/LabSwitcher/);
+		expect(layout).toMatch(/variant="bar"/);
+		expect(labPage).toMatch(/variant="page"/);
+		expect(labSwitcher).toMatch(/variant\s*=\s*'page'/);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.switcher\.page\s*\{[^}]*display:\s*none/s
+		);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/\.switcher\.bar\s*\{[^}]*display:\s*none/s
+		);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.switcher\.bar\s*\{[^}]*display:\s*flex/s
+		);
+		expect(styleBlock(labSwitcher)).toMatch(/\.trigger\s*\{[^}]*min-height:\s*44px/s);
+	});
+
 	it('puts compact lab destinations in a sitting-nav dialog, not a second tab row', () => {
 		expect(layout).toMatch(/SittingNav/);
 		expect(sittingNav).toMatch(/aria-label="Main navigation"/);
