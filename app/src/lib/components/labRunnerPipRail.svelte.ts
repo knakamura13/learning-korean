@@ -14,24 +14,42 @@ import {
 
 export function attachPipRail(
 	getIndex: () => number,
+	getFurthest: () => number,
 	setFades: (left: boolean, right: boolean) => void
 ) {
 	return (node: HTMLOListElement) => {
+		function getMaxScroll(): number {
+			const furthestIdx = getFurthest();
+			const items = node.children;
+			let furthestRightEdge: number | undefined;
+			if (items.length > 0 && furthestIdx >= 0 && furthestIdx < items.length) {
+				const item = items[furthestIdx] as HTMLElement;
+				furthestRightEdge = item.offsetLeft + item.offsetWidth;
+			}
+			return pipRailMaxScroll(node.scrollWidth, node.clientWidth, furthestRightEdge);
+		}
+
 		function applyFades() {
-			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
+			const max = getMaxScroll();
+			if (node.scrollLeft > max) {
+				node.scrollLeft = max;
+			}
 			const fades = pipRailEdgeFades(node.scrollLeft, max);
 			setFades(fades.left, fades.right);
 		}
 
 		function scrollSelected() {
+			const max = getMaxScroll();
 			const pip = node.querySelector<HTMLElement>('[data-selected]');
 			if (!pip) {
+				if (node.scrollLeft > max) {
+					node.scrollLeft = max;
+				}
 				applyFades();
 				return;
 			}
 			const pipRect = pip.getBoundingClientRect();
 			const railRect = node.getBoundingClientRect();
-			const max = pipRailMaxScroll(node.scrollWidth, node.clientWidth);
 			const first = node.querySelector('li');
 			const stride = first?.getBoundingClientRect().width ?? 0;
 			const startPad = first?.offsetLeft ?? 0;

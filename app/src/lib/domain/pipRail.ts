@@ -12,8 +12,17 @@
 
 const EDGE_SLOP = 8;
 
-export function pipRailMaxScroll(scrollWidth: number, clientWidth: number): number {
-	return Math.max(0, scrollWidth - clientWidth);
+export function pipRailMaxScroll(
+	scrollWidth: number,
+	clientWidth: number,
+	furthestRightEdge?: number
+): number {
+	const rawMax = Math.max(0, scrollWidth - clientWidth);
+	if (furthestRightEdge !== undefined && Number.isFinite(furthestRightEdge)) {
+		const furthestMax = Math.max(0, furthestRightEdge - clientWidth);
+		return Math.max(0, Math.min(rawMax, furthestMax));
+	}
+	return rawMax;
 }
 
 export function pipRailEdgeFades(

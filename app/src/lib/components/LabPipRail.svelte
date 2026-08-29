@@ -25,6 +25,7 @@
 
 	const keepSelectedVisible = attachPipRail(
 		() => index,
+		() => furthest,
 		(left, right) => {
 			fadeLeft = left;
 			fadeRight = right;
