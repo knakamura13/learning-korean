@@ -31,12 +31,14 @@
 			fadeRight = right;
 		}
 	);
+
+	const visibleCount = $derived(Math.min(stepCount, furthest + 1));
 </script>
 
 <nav class="rail-wrap" aria-label="Lab card navigation, {phaseAt(phases, index).title}">
 	<div class={['rail-clip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}>
 		<ol class="rail" {@attach keepSelectedVisible}>
-			{#each { length: stepCount }, i (i)}
+			{#each { length: visibleCount }, i (i)}
 				{@const kind = pipKind(i, outcomes, furthest)}
 				{@const selected = i === index}
 				{@const inPhase = cardInActivePhase(phases, i, index)}
