@@ -84,7 +84,10 @@ test('the lab page shows the right lab navigation for the viewport', async ({ pa
 		await expect(page).toHaveURL(/\/lab\/0002$/);
 		await expect(page.locator('dialog.sheet')).toBeHidden();
 	} else {
-		await expect(page.locator('.switcher .trigger')).toBeHidden();
+		// Two LabSwitcher mounts (`bar` + `page`) exist in the DOM; the ≥72rem
+		// rail breakpoint hides both via CSS, so each must be checked by itself.
+		await expect(page.locator('.switcher.bar .trigger')).toBeHidden();
+		await expect(page.locator('.switcher.page .trigger')).toBeHidden();
 		await expect(rail).toBeVisible();
 	}
 });
