@@ -5,6 +5,7 @@
 	import MasterySnapshot from '$lib/components/MasterySnapshot.svelte';
 	import ProgressBackup from '$lib/components/ProgressBackup.svelte';
 	import ProgressReset from '$lib/components/ProgressReset.svelte';
+	import ReviewPace from '$lib/components/ReviewPace.svelte';
 	import { applyImportedBackup, wrapExport } from '$lib/domain/backup';
 	import { labSession, LAB_STEP_COUNTS } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
@@ -53,6 +54,8 @@
 		/>
 	</section>
 
+	<ReviewPace />
+
 	<section class="appearance" aria-labelledby="appearance-heading">
 		<h2 id="appearance-heading">Appearance</h2>
 		<LookPicker onPersistFail={() => (appearanceSaved = false)} />
@@ -67,6 +70,11 @@
 				{#if progress.corrupt || labSession.corrupt}
 					Saved progress could not be read. Back it up now — reviews will not overwrite it
 					until you restore or reset.
+				{:else if session.status === 'signed-in'}
+					A file backup still matters: it survives a reset, a lost session, or a browser that
+					is not signed in{progress.durable && labSession.durable
+						? '.'
+						: ' — and this browser will not keep a local copy.'}
 				{:else}
 					Your progress lives only in this browser. Back it up before switching browsers or
 					devices, clearing site data, or resetting this one — {progress.durable &&
@@ -78,14 +86,16 @@
 					This browser did not save your look or color.
 				{/if}
 			</p>
-			<ProgressBackup {exportJson} {importJson} />
-			<div id="reset">
-				<ProgressReset
-					onReset={() => {
-						progress.reset();
-						labSession.reset();
-					}}
-				/>
+			<div class="file-actions">
+				<ProgressBackup {exportJson} {importJson} />
+				<div id="reset">
+					<ProgressReset
+						onReset={() => {
+							progress.reset();
+							labSession.reset();
+						}}
+					/>
+				</div>
 			</div>
 		</section>
 	{/if}
@@ -94,6 +104,8 @@
 <style>
 	.shell {
 		max-width: var(--shell);
+		min-width: 0;
+		width: 100%;
 	}
 
 	.head {
@@ -113,6 +125,8 @@
 	.appearance,
 	.backup {
 		margin-block-end: var(--s7);
+		max-width: var(--measure);
+		min-width: 0;
 	}
 
 	.progress h2,
@@ -132,6 +146,18 @@
 		line-height: 1.55;
 		margin: 0 0 var(--s4);
 		max-width: var(--measure);
+	}
+
+	.file-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: var(--s2);
+	}
+
+	.file-actions :global(.backup),
+	.file-actions :global(.reset) {
+		margin-top: 0;
 	}
 
 	#backup {

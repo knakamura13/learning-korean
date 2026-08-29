@@ -126,6 +126,8 @@
 	.picker {
 		display: grid;
 		gap: var(--s6);
+		min-width: 0;
+		max-width: var(--measure);
 	}
 
 	fieldset {
@@ -148,12 +150,14 @@
 	.look-grid {
 		display: grid;
 		gap: var(--s3);
-		grid-template-columns: 1fr;
+		width: 100%;
+		min-width: 0;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	@media (min-width: 40rem) {
 		.look-grid {
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 
