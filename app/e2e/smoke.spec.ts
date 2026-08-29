@@ -69,10 +69,11 @@ test('a fresh visitor sees honest empty states on review and drill', async ({ pa
 
 test('the lab page shows the right lab navigation for the viewport', async ({ page }, testInfo) => {
 	await page.goto('/lab/0001');
-	const switcher = page.locator('.switcher .trigger');
 	const rail = page.locator('.lab-index');
 	if (testInfo.project.name === 'mobile') {
+		const switcher = page.locator('.switcher.bar .trigger');
 		await expect(switcher).toBeVisible();
+		await expect(page.locator('.switcher.page')).toBeHidden();
 		await expect(rail).toBeHidden();
 		await switcher.click();
 		const sheet = page.locator('dialog.sheet');
@@ -83,9 +84,29 @@ test('the lab page shows the right lab navigation for the viewport', async ({ pa
 		await expect(page).toHaveURL(/\/lab\/0002$/);
 		await expect(page.locator('dialog.sheet')).toBeHidden();
 	} else {
-		await expect(switcher).toBeHidden();
+		// Two LabSwitcher mounts (`bar` + `page`) exist in the DOM; the ≥72rem
+		// rail breakpoint hides both via CSS, so each must be checked by itself.
+		await expect(page.locator('.switcher.bar .trigger')).toBeHidden();
+		await expect(page.locator('.switcher.page .trigger')).toBeHidden();
 		await expect(rail).toBeVisible();
 	}
+});
+
+test('compact lab sitting opens main destinations from the sitting-nav', async ({ page }, testInfo) => {
+	test.skip(testInfo.project.name !== 'mobile', 'compact sitting is the phone band');
+	await page.goto('/lab/0001');
+	const trigger = page.getByRole('button', { name: 'Main navigation' });
+	await expect(trigger).toBeVisible();
+	await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0);
+	await trigger.click();
+	const sheet = page.locator('dialog.sitting-sheet');
+	await expect(sheet).toBeVisible();
+	await expect(sheet.getByRole('link', { name: 'Labs' })).toBeVisible();
+	await expect(sheet.locator('a[href$="review"]')).toBeVisible();
+	await expect(sheet.getByRole('link', { name: 'Drill' })).toBeVisible();
+	await expect(sheet.getByRole('link', { name: 'Reference' })).toBeVisible();
+	await sheet.locator('a[href$="review"]').click();
+	await expect(page).toHaveURL(/\/review\/?$/);
 });
 
 test('a first lab card is interactive and a wrong pick does not advance', async ({ page }) => {

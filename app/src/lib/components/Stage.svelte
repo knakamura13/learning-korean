@@ -94,4 +94,10 @@
 		.stage.md .glyph { font-size: 2.3rem; }
 		.stage { gap: var(--s4); }
 	}
+
+	@media (max-width: 40rem) {
+		.stage {
+			padding: var(--s3) 0 var(--s4);
+		}
+	}
 </style>

@@ -26,7 +26,7 @@ A stranger on Lab 01 card 2 (`Say mmm. Hold it.`) cannot tell they are collectin
   4. It is not a door into the next job (mismatch → operate) and not a caption on the last one (name it / Stay).
 - Phase titles are chapter titles: clear alone, not catchphrases, no jargon verbs (`jump`, `tense`, `aspirate` as verbs).
 - Hangul in titles: one already-known letter as the subject, or two already-known letters for a contact rule. No cluster glyphs, no jamo lists, no Hangul words.
-- One progress story: lab `h1` stays, `Card N of M` stays, leftover per-card subtitles die, no within-phase `2 of 5`.
+- One progress story: lab `h1` stays, `Card N of M` stays, leftover per-card subtitles die, no within-phase `2 of 5`. **Compact sitting exception:** on lab routes at `max-width: 40rem`, the visible title is the sitting-bar switcher and the in-progress `h1` is visually hidden. See [2026-08-29-lab-sitting-density-design.md](2026-08-29-lab-sitting-density-design.md).
 - Phone and desktop are equal. No extra pip width (no gaps). Forced-colors and `prefers-reduced-motion` keep working.
 - `#165`’s `formatStepEyebrow` goes away with the `act` field. Do not keep a display-time Act stripper.
 
@@ -79,7 +79,7 @@ Author comments in lab files may read `/* ---- Find the five shapes ---- */`. Th
 
 ### Surfaces
 
-**Header (unchanged).** `Lab 01 · ~9 minutes` stays `.eyebrow`. Compact head still drops the standfirst after card 1. Lab `h1` stays the lab title on every card.
+**Header.** `Lab 01 · ~9 minutes` stays `.eyebrow` on mid and wide sittings. Compact head still drops the standfirst after card 1 on those sittings. Lab `h1` stays the visible lab title on mid and wide. **Compact sitting** (`/lab/` + `max-width: 40rem`) hides the eyebrow and standfirst, keeps `h1` as `.vh`, and shows the title in the sitting-bar switcher. See [2026-08-29-lab-sitting-density-design.md](2026-08-29-lab-sitting-density-design.md).
 
 **Pip rail.** Still numbered 1..N. Still `Card {n} of {total}`. Jump rules unchanged (`pipState.ts`). `LabPipRail` takes `phases` (or `activeStart` / `activeEnd`) and marks each pip `data-phase="current" | "other"`. Current-phase pips keep today’s styling. Other-phase pips use `opacity: 0.4`. The selected pip is always current-phase and never dimmed.
 
@@ -272,7 +272,7 @@ After these edits, no `do` / `hint` / `teach` / `miss` string in `app/src/lib/co
 - `content.test.ts`: for every lab in `LABS`, `phases.reduce((n, p) => n + p.count, 0) === steps.length`; every `count >= 2`; last phase title is `Read from the letters alone`; no `act` on any step; `/\bAct\b/` does not match `do`, `hint`, `teach`, or `miss`.
 - Component: `LabRunner` prompt contains `.phase-title` with the current title and does not call `formatStepEyebrow`. `LabPipRail` sets `data-phase="other"` on a pip outside the current bounds (Lab 01 card 1: pips 6–17 are other).
 - Delete `formatStepEyebrow` tests with the module.
-- `polish.test.ts`: `.phase-title` is not `text-transform: uppercase`. Existing `.eyebrow` contract for the lab header is unchanged.
+- `polish.test.ts`: `.phase-title` is not `text-transform: uppercase`. `.eyebrow` contract for the lab header stays on mid and wide sittings. Compact sitting hides it (see sitting-density spec).
 
 ## Out of scope
 

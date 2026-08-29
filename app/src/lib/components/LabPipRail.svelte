@@ -330,4 +330,10 @@
 		white-space: nowrap;
 		text-align: end;
 	}
+
+	@media (max-width: 40rem) {
+		.rail-wrap {
+			margin-bottom: var(--s2);
+		}
+	}
 </style>

@@ -26,6 +26,7 @@ import labPreview from './components/shell/LabPreview.svelte?raw';
 import labSpread from './components/shell/LabSpread.svelte?raw';
 import lockedLabPopover from './components/shell/LockedLabPopover.svelte?raw';
 import labSwitcher from './components/shell/LabSwitcher.svelte?raw';
+import sittingNav from './components/shell/SittingNav.svelte?raw';
 import sprintChoices from './components/SprintChoices.svelte?raw';
 import reviewCompose from './components/ReviewCompose.svelte?raw';
 import lookPicker from './components/LookPicker.svelte?raw';
@@ -306,6 +307,7 @@ describe('polish audit regressions', () => {
 			labIndexRail,
 			labPreview,
 			labSpread,
+			sittingNav,
 			referenceIndexRail,
 			referencePreview
 		];
@@ -640,6 +642,65 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labSwitcher)).toMatch(/--focus-ring/);
 		expect(styleBlock(labSwitcher)).toMatch(/forced-colors:\s*active/);
 		expect(labPage).toMatch(/LabSwitcher/);
+	});
+
+	it('mounts a bar lab switcher on compact sitting and hides the page switcher', () => {
+		expect(layout).toMatch(/LabSwitcher/);
+		expect(layout).toMatch(/variant="bar"/);
+		expect(labPage).toMatch(/variant="page"/);
+		expect(labSwitcher).toMatch(/variant\s*=\s*'page'/);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.switcher\.page\s*\{[^}]*display:\s*none/s
+		);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/\.switcher\.bar\s*\{[^}]*display:\s*none/s
+		);
+		expect(styleBlock(labSwitcher)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.switcher\.bar\s*\{[^}]*display:\s*flex/s
+		);
+		expect(styleBlock(labSwitcher)).toMatch(/\.trigger\s*\{[^}]*min-height:\s*44px/s);
+	});
+
+	it('puts compact lab destinations in a sitting-nav dialog, not a second tab row', () => {
+		expect(layout).toMatch(/SittingNav/);
+		expect(sittingNav).toMatch(/aria-label="Main navigation"/);
+		expect(sittingNav).toMatch(/attachModalDialog/);
+		expect(sittingNav).toMatch(/aria-haspopup="dialog"/);
+		expect(styleBlock(sittingNav)).toMatch(/\.trigger\s*\{[^}]*min-width:\s*44px/s);
+		expect(styleBlock(sittingNav)).toMatch(/\.trigger\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(sittingNav)).toMatch(/\.sitting-sheet a\s*\{[^}]*min-height:\s*44px/s);
+		expect(styleBlock(sittingNav)).toMatch(/forced-colors:\s*active/);
+		expect(styleBlock(sittingNav)).toMatch(
+			/@media \(forced-colors:\s*active\)[\s\S]*?\.trigger\s*\{[^}]*ButtonBorder/s
+		);
+		expect(sittingNav).not.toMatch(/hamburger/i);
+		expect(styleBlock(layout)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route nav\s*\{[^}]*display:\s*none/s
+		);
+		expect(styleBlock(sittingNav)).toMatch(/\.sitting-nav\s*\{[^}]*display:\s*none/s);
+		expect(styleBlock(sittingNav)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.sitting-nav\s*\{[^}]*display:\s*block/s
+		);
+	});
+
+	it('hides duplicate lab title chrome on compact sitting and keeps a document h1', () => {
+		expect(labRunner).toMatch(/<h1>\{lab\.title\}<\/h1>/);
+		const css = styleBlock(labRunner);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.head,\s*\.head\.compact\s*\{[^}]*margin:\s*0/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.head \.eyebrow,\s*\.head \.standfirst\s*\{[^}]*display:\s*none/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.head h1,\s*\.head\.compact h1\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.do\s*\{[^}]*font-size:\s*1\.1rem/s
+		);
+		expect(css).toMatch(
+			/\.do\s*\{[^}]*font-size:\s*clamp\(1\.15rem, 1\.15rem \+ [^,]+, 1\.45rem\)/s
+		);
 	});
 
 	it('leaves enough scroll room so Dictionary Order can sit under the sticky header', () => {
@@ -1303,6 +1364,53 @@ describe('polish audit regressions', () => {
 		expect(review).not.toMatch(/Saved progress could not be read\./);
 		expect(review).not.toMatch(/Progress will not be saved\./);
 		expect(appCss).toMatch(/\.warn\s*\{[^}]*border:\s*1px solid var\(--bad\)/s);
+	});
+
+	it('keeps compact lab sitting to one header row and tighter shell padding', () => {
+		expect(layout).toMatch(/class=\{\['frame', \{ 'lab-route': labRoute \}\]\}/);
+		const layoutCss = styleBlock(layout);
+		expect(layoutCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route \.inner\s*\{[^}]*flex-wrap:\s*nowrap/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-bar-block:\s*calc\(48px \+ 1px \+ env\(safe-area-inset-top/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-chrome:\s*9rem/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--shell-pad-top:\s*var\(--s3\)/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--shell-pad-bottom:\s*max\(var\(--s3\), env\(safe-area-inset-bottom\)\)/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-top:\s*var\(--shell-pad-top\)/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-bottom:\s*var\(--shell-pad-bottom\)/s
+		);
+		expect(styleBlock(layout)).not.toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route \.name\s*\{[^}]*display:\s*none/s
+		);
+	});
+
+	it('tightens compact sitting pip, stage, vowel dock, and mouth skeleton', () => {
+		expect(styleBlock(labPipRail)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.rail-wrap\s*\{[^}]*margin-bottom:\s*var\(--s2\)/s
+		);
+		expect(styleBlock(stage)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.stage\s*\{[^}]*padding:\s*var\(--s3\) 0 var\(--s4\)/s
+		);
+		expect(styleBlock(vowelStep)).toMatch(/100svh - var\(--sitting-chrome, 14rem\)/);
+		expect(sittingCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.work-skel \.mouth-ph\s*\{[^}]*min-height:\s*8rem/s
+		);
+		expect(sittingCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.work-skel \.mouth-ph\s*\{[^}]*aspect-ratio:\s*auto/s
+		);
+		expect(styleBlock(labPipRail)).toMatch(/min-width:\s*44px/);
+		expect(styleBlock(labPipRail)).toMatch(/min-height:\s*44px/);
 	});
 
 	it('keeps issue #143 a11y follow-ups: wrap, forced-colors specificity, focus return', () => {
