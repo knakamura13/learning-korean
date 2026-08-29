@@ -189,7 +189,10 @@
 	}
 
 	@media (forced-colors: active) {
-		.trigger { color: ButtonText; }
+		.trigger {
+			color: ButtonText;
+			border: 1px solid ButtonBorder;
+		}
 		.sitting-sheet {
 			background: Canvas;
 			color: CanvasText;

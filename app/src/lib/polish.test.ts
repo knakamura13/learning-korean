@@ -653,6 +653,9 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(sittingNav)).toMatch(/\.trigger\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(sittingNav)).toMatch(/\.sitting-sheet a\s*\{[^}]*min-height:\s*44px/s);
 		expect(styleBlock(sittingNav)).toMatch(/forced-colors:\s*active/);
+		expect(styleBlock(sittingNav)).toMatch(
+			/@media \(forced-colors:\s*active\)[\s\S]*?\.trigger\s*\{[^}]*ButtonBorder/s
+		);
 		expect(sittingNav).not.toMatch(/hamburger/i);
 		expect(styleBlock(layout)).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route nav\s*\{[^}]*display:\s*none/s
