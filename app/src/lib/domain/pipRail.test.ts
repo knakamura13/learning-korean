@@ -15,6 +15,17 @@ describe('pipRailMaxScroll', () => {
 	it('is the leftover width when the rail overflows', () => {
 		expect(pipRailMaxScroll(500, 320)).toBe(180);
 	});
+
+	it('clamps max scroll to the right edge of the furthest unlocked card', () => {
+		// total scrollWidth = 1000, clientWidth = 300
+		// furthest card right edge = 450 (e.g. card 6)
+		// max scroll allowed should be 450 - 300 = 150 (not 700)
+		expect(pipRailMaxScroll(1000, 300, 450)).toBe(150);
+	});
+
+	it('returns 0 if furthest right edge is less than clientWidth', () => {
+		expect(pipRailMaxScroll(1000, 300, 200)).toBe(0);
+	});
 });
 
 describe('pipRailEdgeFades', () => {
