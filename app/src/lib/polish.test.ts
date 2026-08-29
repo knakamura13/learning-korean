@@ -1373,16 +1373,22 @@ describe('polish audit regressions', () => {
 			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route \.inner\s*\{[^}]*flex-wrap:\s*nowrap/s
 		);
 		expect(appCss).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-bar-block:\s*calc\(48px \+ env\(safe-area-inset-top/s
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-bar-block:\s*calc\(48px \+ 1px \+ env\(safe-area-inset-top/s
 		);
 		expect(appCss).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--sitting-chrome:\s*9rem/s
 		);
 		expect(appCss).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-top:\s*var\(--s3\)/s
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--shell-pad-top:\s*var\(--s3\)/s
 		);
 		expect(appCss).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-bottom:\s*max\(var\(--s3\), env\(safe-area-inset-bottom\)\)/s
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route\s*\{[^}]*--shell-pad-bottom:\s*max\(var\(--s3\), env\(safe-area-inset-bottom\)\)/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-top:\s*var\(--shell-pad-top\)/s
+		);
+		expect(appCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.frame\.lab-route \.shell\s*\{[^}]*padding-bottom:\s*var\(--shell-pad-bottom\)/s
 		);
 		expect(styleBlock(layout)).not.toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.bar\.lab-route \.name\s*\{[^}]*display:\s*none/s
