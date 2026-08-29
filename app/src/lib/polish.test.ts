@@ -687,13 +687,13 @@ describe('polish audit regressions', () => {
 		expect(labRunner).toMatch(/<h1>\{lab\.title\}<\/h1>/);
 		const css = styleBlock(labRunner);
 		expect(css).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.head\s*\{[^}]*margin:\s*0/s
+			/@media \(max-width: 40rem\)[\s\S]*\.head,\s*\.head\.compact\s*\{[^}]*margin:\s*0/s
 		);
 		expect(css).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.head \.eyebrow,\s*\.head \.standfirst\s*\{[^}]*display:\s*none/s
 		);
 		expect(css).toMatch(
-			/@media \(max-width: 40rem\)[\s\S]*\.head h1\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/s
+			/@media \(max-width: 40rem\)[\s\S]*\.head h1,\s*\.head\.compact h1\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/s
 		);
 		expect(css).toMatch(
 			/@media \(max-width: 40rem\)[\s\S]*\.do\s*\{[^}]*font-size:\s*1\.1rem/s

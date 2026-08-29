@@ -627,14 +627,16 @@
 	}
 
 	@media (max-width: 40rem) {
-		.head {
+		.head,
+		.head.compact {
 			margin: 0;
 		}
 		.head .eyebrow,
 		.head .standfirst {
 			display: none;
 		}
-		.head h1 {
+		.head h1,
+		.head.compact h1 {
 			position: absolute;
 			width: 1px;
 			height: 1px;
