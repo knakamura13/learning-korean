@@ -4,7 +4,14 @@
 import { mount, unmount } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import FlagButton from './FlagButton.svelte';
+import flagButtonRaw from './FlagButton.svelte?raw';
 import { toastStore } from '$lib/stores/toast.svelte';
+
+function styleBlock(markup: string): string {
+	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
+	if (!match) throw new Error('FlagButton.svelte has no style block');
+	return match[1];
+}
 
 describe('FlagButton', () => {
 	beforeEach(() => {
@@ -69,6 +76,13 @@ describe('FlagButton', () => {
 
 		unmount(app);
 		host.remove();
+	});
+
+	it('has accessible focus-visible ring styles and forced-colors rules', () => {
+		const css = styleBlock(flagButtonRaw);
+		expect(css).toMatch(/\.flag-btn:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/s);
+		expect(css).toMatch(/\.flag-btn:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--paper\)/s);
+		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
 	});
 
 	it('triggers removal toast message when unbookmarking active button', () => {
