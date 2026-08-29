@@ -651,6 +651,10 @@
 			font-size: 1.1rem;
 			line-height: 1.34;
 		}
+		.work-skel .mouth-ph {
+			min-height: 8rem;
+			aspect-ratio: auto;
+		}
 	}
 
 	/* --- finish --- */

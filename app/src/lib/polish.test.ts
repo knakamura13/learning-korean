@@ -1389,6 +1389,24 @@ describe('polish audit regressions', () => {
 		);
 	});
 
+	it('tightens compact sitting pip, stage, vowel dock, and mouth skeleton', () => {
+		expect(styleBlock(labPipRail)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.rail-wrap\s*\{[^}]*margin-bottom:\s*var\(--s2\)/s
+		);
+		expect(styleBlock(stage)).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.stage\s*\{[^}]*padding:\s*var\(--s3\) 0 var\(--s4\)/s
+		);
+		expect(styleBlock(vowelStep)).toMatch(/100svh - var\(--sitting-chrome, 14rem\)/);
+		expect(sittingCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.work-skel \.mouth-ph\s*\{[^}]*min-height:\s*8rem/s
+		);
+		expect(sittingCss).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.work-skel \.mouth-ph\s*\{[^}]*aspect-ratio:\s*auto/s
+		);
+		expect(styleBlock(labPipRail)).toMatch(/min-width:\s*44px/);
+		expect(styleBlock(labPipRail)).toMatch(/min-height:\s*44px/);
+	});
+
 	it('keeps issue #143 a11y follow-ups: wrap, forced-colors specificity, focus return', () => {
 		expect(styleBlock(drill)).toMatch(/\.lanes\s*\{[^}]*flex-wrap:\s*wrap/s);
 		expect(styleBlock(layout)).toMatch(/nav\s*\{[^}]*flex-wrap:\s*wrap/s);
