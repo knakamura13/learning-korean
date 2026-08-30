@@ -411,8 +411,17 @@ export const TIERS: Tier[] = [
 	{ id: 'lab10', label: 'Names', lab: '0010', size: names.length }
 ];
 
+// Pre-index cards by tier for O(1) lookup performance
+const CARDS_BY_TIER: Record<string, Card[]> = {};
+for (const card of DECK) {
+	if (!CARDS_BY_TIER[card.tier]) {
+		CARDS_BY_TIER[card.tier] = [];
+	}
+	CARDS_BY_TIER[card.tier].push(card);
+}
+
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return (CARDS_BY_TIER[tier] ?? []).slice();
 }
 
 /**
