@@ -268,6 +268,20 @@ export const VOCAB_PACKS: VocabPack[] = [
 	}
 ];
 
+// Pre-index words by pack for O(1) lookup performance
+const WORDS_BY_PACK: Record<PackId, WordEntry[]> = {
+	'vocab-names': [],
+	'vocab-food': [],
+	'vocab-phrases': [],
+	'vocab-places': [],
+	'vocab-time': [],
+	'vocab-verbs': [],
+	'vocab-feelings': []
+};
+for (const word of WORDS) {
+	WORDS_BY_PACK[word.pack].push(word);
+}
+
 export function wordsOfPack(pack: PackId): WordEntry[] {
-	return WORDS.filter((word) => word.pack === pack);
+	return (WORDS_BY_PACK[pack] ?? []).slice();
 }
