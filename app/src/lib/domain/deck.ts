@@ -126,7 +126,7 @@ const FINAL_NOTES: Record<string, string> = {
 	'ㅋ': 'Neutralizes to [ㄱ] — aspiration is a top-of-block luxury.',
 	'ㄴ': 'Stays n.',
 	'ㄷ': 'Unreleased t — the largest group.',
-	'ㅅ': 'Neutralizes to [ㄷ]. This is why 낫 and 낮 sound identical.',
+	'ㅅ': 'Neutralizes to [ㄷ]. This is why 낫 (nat, "sickle") and 낮 (nat, "daytime") sound identical.',
 	'ㅆ': 'Neutralizes to [ㄷ].',
 	'ㅈ': 'Neutralizes to [ㄷ].',
 	'ㅊ': 'Neutralizes to [ㄷ].',
@@ -150,17 +150,17 @@ const batchim: Card[] = Object.keys(FINAL_NOTES).map((jamo) =>
 
 /* ---------- tier lab05: the 11 clusters ---------- */
 const CLUSTER_NOTES: Record<string, string> = {
-	'ㄳ': 'First letter wins. 몫 → [목].',
-	'ㄵ': 'First letter wins. 앉다 → [안따].',
-	'ㄶ': 'ㅎ leaves the slot but aspirates what follows. 많다 → [만타].',
-	'ㄺ': 'SECOND letter wins. 읽다 → [익따]. Exception: a verb stem before ㄱ → [ㄹ].',
-	'ㄻ': 'Second letter wins. 삶 → [삼].',
-	'ㄼ': 'First letter wins. 여덟 → [여덜]. Exception: 밟다 → [밥따].',
-	'ㄽ': 'First letter wins. 외곬 → [외골].',
-	'ㄾ': 'First letter wins. 핥다 → [할따].',
-	'ㄿ': 'Second letter wins. 읊다 → [읍따].',
-	'ㅀ': 'ㅎ leaves the slot but aspirates what follows. 싫다 → [실타].',
-	'ㅄ': 'First letter wins. 없다 → [업따].'
+	'ㄳ': 'First letter wins. 몫 (mok, "share") → [목] (mok).',
+	'ㄵ': 'First letter wins. 앉다 (anj-da, "to sit") → [안따] (an-tta).',
+	'ㄶ': 'ㅎ leaves the slot but aspirates what follows. 많다 (man-ta, "to be many") → [만타] (man-ta).',
+	'ㄺ': 'SECOND letter wins. 읽다 (ik-da, "to read") → [익따] (ik-tta). Exception: a verb stem before ㄱ → [ㄹ].',
+	'ㄻ': 'Second letter wins. 삶 (sam, "life") → [삼] (sam).',
+	'ㄼ': 'First letter wins. 여덟 (yeo-deol, "eight") → [여덜] (yeo-deol). Exception: 밟다 (bap-da, "to step on") → [밥따] (bap-tta).',
+	'ㄽ': 'First letter wins. 외곬 (oe-gol, "single path") → [외골] (oe-gol).',
+	'ㄾ': 'First letter wins. 핥다 (halt-da, "to lick") → [할따] (hal-tta).',
+	'ㄿ': 'Second letter wins. 읊다 (eup-da, "to recite") → [읍따] (eup-tta).',
+	'ㅀ': 'ㅎ leaves the slot but aspirates what follows. 싫다 (sil-ta, "to dislike") → [실타] (sil-ta).',
+	'ㅄ': 'First letter wins. 없다 (eop-da, "to not exist") → [업따] (eop-tta).'
 };
 
 const clusters: Card[] = Object.keys(CLUSTER_NOTES).map((jamo) =>
@@ -174,16 +174,16 @@ const clusters: Card[] = Object.keys(CLUSTER_NOTES).map((jamo) =>
 /* ---------- tier lab06: liaison (written word → spoken form) ---------- */
 
 const LIAISON_NOTES: Record<string, string> = {
-	'한국어': 'ㄱ jumps into the placeholder. han-guk-eo is the spelling; [한구거] is the sound.',
-	'음악': 'ㅁ would rather be an onset than an unreleased stop: [으막].',
-	'옷이': 'Isolation flattened ㅅ to ㄷ. A vowel brings ㅅ back: [오시], not [오디].',
-	'밭에': 'ㅌ comes back as ㅌ: [바테]. 밭이 palatalizes later — that is not this card.',
-	'부엌에': 'ㅋ comes back as ㅋ, not ㄱ: [부어케].',
-	'강이': 'ㅇ-batchim is already ng. Moving it would silence it. [강이], not [가이].',
-	'읽어요': 'Cluster splits: ㄹ stays, ㄱ jumps. [일거요]. Rule B was isolation only.',
-	'앉아': '앉다 threw ㅈ away. Here it jumps: [안자].',
-	'없어': 'ㅂ stays; ㅅ jumps and tenses. [업써]. Article 14 just says so.',
-	'한글을': 'Particle 을. ㄹ jumps: [한그를].'
+	'한국어': 'ㄱ jumps into the placeholder. han-guk-eo is the spelling; [한구거] (han-gu-geo) is the sound.',
+	'음악': 'ㅁ would rather be an onset than an unreleased stop: [으막] (eu-mag).',
+	'옷이': 'Isolation flattened ㅅ to ㄷ. A vowel brings ㅅ back: [오시] (o-si), not [오디] (o-di).',
+	'밭에': 'ㅌ comes back as ㅌ: [바테] (ba-te). 밭이 (bat-i) palatalizes later — that is not this card.',
+	'부엌에': 'ㅋ comes back as ㅋ, not ㄱ: [부어케] (bu-eo-ke).',
+	'강이': 'ㅇ-batchim is already ng. Moving it would silence it: [강이] (gang-i), not [가이] (ga-i).',
+	'읽어요': 'Cluster splits: ㄹ stays, ㄱ jumps: [일거요] (il-geo-yo). Rule B was isolation only.',
+	'앉아': '앉다 (anj-da, "to sit") threw ㅈ away. Here it jumps: [안자] (an-ja).',
+	'없어': 'ㅂ stays; ㅅ jumps and tenses: [업써] (eop-sseo).',
+	'한글을': 'Particle 을 (eul). ㄹ jumps: [한그를] (han-geu-reul).'
 };
 
 const liaison: Card[] = Object.keys(LIAISON_NOTES).map((written) => {
@@ -202,16 +202,16 @@ const liaison: Card[] = Object.keys(LIAISON_NOTES).map((written) => {
 /* ---------- tier lab07: tensification and nasalization ---------- */
 
 const CONTACT_NOTES: Record<string, string> = {
-	'학교': 'A stop then ㄱ tenses the next letter: [학꾜].',
-	'먹다': 'A stop then ㄷ tenses: [먹따].',
-	'잡지': 'A stop then ㅈ tenses: [잡찌].',
-	'식당': 'A stop then ㄷ tenses: [식땅].',
-	'국밥': 'A stop then ㅂ tenses: [국빱].',
-	'국물': 'ㄱ before ㅁ becomes ㅇ: [궁물].',
-	'입니다': 'ㅂ before ㄴ becomes ㅁ: [임니다].',
-	'학년': 'ㄱ before ㄴ becomes ㅇ: [항년].',
-	'닫는': 'ㄷ before ㄴ becomes ㄴ: [단는].',
-	'밥물': 'ㅂ before ㅁ becomes ㅁ: [밤물].'
+	'학교': 'A stop then ㄱ tenses the next letter: [학꾜] (hak-kkyo).',
+	'먹다': 'A stop then ㄷ tenses: [먹따] (meok-tta).',
+	'잡지': 'A stop then ㅈ tenses: [잡찌] (jap-jji).',
+	'식당': 'A stop then ㄷ tenses: [식땅] (sik-ttang).',
+	'국밥': 'A stop then ㅂ tenses: [국빱] (guk-ppap).',
+	'국물': 'ㄱ before ㅁ becomes ㅇ: [궁물] (gung-mul).',
+	'입니다': 'ㅂ before ㄴ becomes ㅁ: [임니다] (im-ni-da).',
+	'학년': 'ㄱ before ㄴ becomes ㅇ: [항년] (hang-nyeon).',
+	'닫는': 'ㄷ before ㄴ becomes ㄴ: [단는] (dan-neun).',
+	'밥물': 'ㅂ before ㅁ becomes ㅁ: [밤물] (bam-mul).'
 };
 
 const contact: Card[] = Object.keys(CONTACT_NOTES).map((written) => {
@@ -232,16 +232,16 @@ const contact: Card[] = Object.keys(CONTACT_NOTES).map((written) => {
 /* ---------- tier lab08: ㅎ at the junction ---------- */
 
 const HMERGE_NOTES: Record<string, string> = {
-	'좋고': 'ㅎ hands its puff to ㄱ: [조코].',
-	'좋다': 'ㅎ + ㄷ fuse into ㅌ: [조타].',
-	'놓지': 'ㅎ + ㅈ fuse into ㅊ: [노치].',
-	'많다': 'ㄶ keeps ㄴ and spends its ㅎ on ㄷ: [만타].',
-	'싫다': 'ㅀ keeps ㄹ and spends its ㅎ on ㄷ: [실타].',
-	'축하': 'The stop fuses forward into ㅋ: [추카].',
-	'입학': 'ㅂ + ㅎ fuse into ㅍ: [이팍].',
-	'못하다': 'ㅅ neutralizes to [ㄷ] first, then fuses into ㅌ: [모타다].',
-	'좋아요': 'ㅎ before a vowel is simply not said: [조아요].',
-	'많아': 'The ㅎ dies and ㄴ makes the jump: [마나].'
+	'좋고': 'ㅎ hands its puff to ㄱ: [조코] (jo-ko).',
+	'좋다': 'ㅎ + ㄷ fuse into ㅌ: [조타] (jo-ta).',
+	'놓지': 'ㅎ + ㅈ fuse into ㅊ: [노치] (no-chi).',
+	'많다': 'ㄶ keeps ㄴ and spends its ㅎ on ㄷ: [만타] (man-ta).',
+	'싫다': 'ㅀ keeps ㄹ and spends its ㅎ on ㄷ: [실타] (sil-ta).',
+	'축하': 'The stop fuses forward into ㅋ: [추카] (chu-ka).',
+	'입학': 'ㅂ + ㅎ fuse into ㅍ: [이팍] (i-pak).',
+	'못하다': 'ㅅ neutralizes to [ㄷ] first, then fuses into ㅌ: [모타다] (mo-ta-da).',
+	'좋아요': 'ㅎ before a vowel is simply not said: [조아요] (jo-a-yo).',
+	'많아': 'The ㅎ dies and ㄴ makes the jump: [마나] (ma-na).'
 };
 
 const hmerge: Card[] = Object.keys(HMERGE_NOTES).map((written) => {
@@ -260,16 +260,16 @@ const hmerge: Card[] = Object.keys(HMERGE_NOTES).map((written) => {
 /* ---------- tier lab09: ㄹ at the junction ---------- */
 
 const FLOW_NOTES: Record<string, string> = {
-	'신라': 'ㄴ meets ㄹ and flows: [실라].',
-	'한라산': 'Same flow inside the mountain\'s name: [할라산].',
-	'연락': 'ㄴ + ㄹ flows: [열락]. 연락해 — text me.',
-	'편리': 'ㄴ + ㄹ flows: [펼리].',
-	'설날': 'ㄹ first, same outcome: [설랄].',
-	'실내': 'ㄹ + ㄴ flows: [실래].',
-	'심리': 'Behind the ㅁ wall the ㄹ yields: [심니].',
-	'종로': 'Behind the ㅇ wall: [종노] — hence the Jongno signage.',
-	'음료수': 'ㅁ then ㄹ: the ㄹ yields to ㄴ: [음뇨수].',
-	'대통령': 'ㅇ then ㄹ: [대통녕].'
+	'신라': 'ㄴ meets ㄹ and flows: [실라] (sil-la).',
+	'한라산': 'Same flow inside the mountain\'s name: [할라산] (hal-la-san).',
+	'연락': 'ㄴ + ㄹ flows: [열락] (yeol-lak). 연락해 (yeol-lak-hae) — text me.',
+	'편리': 'ㄴ + ㄹ flows: [펼리] (pyeol-li).',
+	'설날': 'ㄹ first, same outcome: [설랄] (seol-lal).',
+	'실내': 'ㄹ + ㄴ flows: [실래] (sil-lae).',
+	'심리': 'Behind the ㅁ wall the ㄹ yields: [심니] (sim-ni).',
+	'종로': 'Behind the ㅇ wall: [종노] (jong-no) — hence the Jongno signage.',
+	'음료수': 'ㅁ then ㄹ: the ㄹ yields to ㄴ: [음뇨수] (eum-nyo-su).',
+	'대통령': 'ㅇ then ㄹ: [대통녕] (dae-tong-nyeong).'
 };
 
 /** Lead-ㄹ blocks romanize with r; the assimilated l-l spelling is accepted too. */
@@ -301,15 +301,15 @@ const flow: Card[] = Object.keys(FLOW_NOTES).map((written) => {
  */
 const NAME_NOTES: Record<string, string> = {
 	'김민준': 'A nasal batchim, then plain consonants: nothing fires. Most names read as written.',
-	'박은지': 'The surname\'s ㄱ jumps into 은: [바근지].',
-	'박보검': 'A stop then ㅂ tenses: [박뽀검].',
-	'박서준': 'A stop then ㅅ tenses: [박써준].',
-	'박나래': 'ㄱ before ㄴ nasalizes: [방나래].',
-	'김백현': 'ㄱ + ㅎ fuse into ㅋ: [김배켠].',
-	'하늘아': 'The vocative hands ㄹ a vowel to jump into: [하느라].',
-	'민준아': 'Calling 민준 — the ㄴ jumps: [민주나].',
+	'박은지': 'The surname\'s ㄱ jumps into 은: [바근지] (ba-geun-ji).',
+	'박보검': 'A stop then ㅂ tenses: [박뽀검] (bak-ppo-geom).',
+	'박서준': 'A stop then ㅅ tenses: [박써준] (bak-sseo-jun).',
+	'박나래': 'ㄱ before ㄴ nasalizes: [방나래] (bang-na-rae).',
+	'김백현': 'ㄱ + ㅎ fuse into ㅋ: [김배켠] (gim-bae-kyeon).',
+	'하늘아': 'The vocative hands ㄹ a vowel to jump into: [하느라] (ha-neu-ra).',
+	'민준아': 'Calling 민준 (min-jun) — the ㄴ jumps: [민주나] (min-ju-na).',
 	'지우야': '야 after a vowel: no batchim, nothing to move.',
-	'고객님': 'The honorific\'s ㄴ nasalizes the ㄱ: [고갱님].'
+	'고객님': 'The honorific\'s ㄴ nasalizes the ㄱ: [고갱님] (go-gaeng-nim).'
 };
 
 const names: Card[] = Object.keys(NAME_NOTES).map((written) => {
