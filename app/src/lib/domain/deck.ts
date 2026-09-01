@@ -387,9 +387,15 @@ export const DECK: Card[] = [
 	...vocabMeaning, ...vocabPron
 ];
 
-export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
-	DECK.map((c) => [c.id, c])
-);
+export const CARDS_BY_ID: Record<string, Card> = {};
+export const CARDS_BY_TIER: Record<string, Card[]> = {};
+export const CARDS_BY_FRONT: Record<string, Card[]> = {};
+
+for (const c of DECK) {
+	CARDS_BY_ID[c.id] = c;
+	(CARDS_BY_TIER[c.tier] ??= []).push(c);
+	(CARDS_BY_FRONT[c.front] ??= []).push(c);
+}
 
 export interface Tier {
 	id: string;
@@ -400,10 +406,10 @@ export interface Tier {
 
 export const TIERS: Tier[] = [
 	{ id: 'lab01', label: 'Consonants', lab: '0001', size: consonants.length },
-	{ id: 'lab02', label: 'Vowels · blocks', lab: '0002', size: vowels.length + blockCatalog.filter((c) => c.tier === 'lab02').length },
-	{ id: 'lab03', label: 'Compounds · blocks', lab: '0003', size: compounds.length + construction.length + blockCatalog.filter((c) => c.tier === 'lab03').length },
-	{ id: 'lab04', label: 'Batchim · blocks', lab: '0004', size: batchim.length + blockCatalog.filter((c) => c.tier === 'lab04').length },
-	{ id: 'lab05', label: 'Clusters · blocks', lab: '0005', size: clusters.length + blockCatalog.filter((c) => c.tier === 'lab05').length },
+	{ id: 'lab02', label: 'Vowels · blocks', lab: '0002', size: CARDS_BY_TIER['lab02']?.length ?? 0 },
+	{ id: 'lab03', label: 'Compounds · blocks', lab: '0003', size: CARDS_BY_TIER['lab03']?.length ?? 0 },
+	{ id: 'lab04', label: 'Batchim · blocks', lab: '0004', size: CARDS_BY_TIER['lab04']?.length ?? 0 },
+	{ id: 'lab05', label: 'Clusters · blocks', lab: '0005', size: CARDS_BY_TIER['lab05']?.length ?? 0 },
 	{ id: 'lab06', label: 'Liaison', lab: '0006', size: liaison.length },
 	{ id: 'lab07', label: 'Stops', lab: '0007', size: contact.length },
 	{ id: 'lab08', label: 'ㅎ merges', lab: '0008', size: hmerge.length },
@@ -412,7 +418,7 @@ export const TIERS: Tier[] = [
 ];
 
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return CARDS_BY_TIER[tier] ?? [];
 }
 
 /**
