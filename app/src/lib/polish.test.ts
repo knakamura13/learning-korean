@@ -109,7 +109,7 @@ describe('polish audit regressions', () => {
 			{ source: labRunner, destructive: />\s*Start over\s*</ },
 			{ source: progressReset, destructive: />\s*Clear progress\s*</ },
 			{ source: progressBackup, destructive: />\s*\{busy \? 'Restoring…' : 'Replace progress'\}\s*</ },
-			{ source: accountSection, destructive: />\s*Delete account\s*</ }
+			{ source: accountSection, destructive: />\s*\{deleting \? 'Deleting…' : 'Delete account'\}\s*</ }
 		];
 		for (const { source, destructive } of cases) {
 			const dialog = source.match(/<dialog\b[\s\S]*?<\/dialog>/)?.[0] ?? '';
