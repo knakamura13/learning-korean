@@ -5,13 +5,16 @@
 	import { session } from '$lib/stores/session.svelte';
 
 	let confirmingDelete = $state(false);
+	let deleting = $state(false);
 	let deleteStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
 
 	const authFailed = $derived(page.url.searchParams.get('auth') === 'failed');
 
 	async function confirmDelete() {
-		confirmingDelete = false;
+		deleting = true;
 		const ok = await session.deleteAccount();
+		deleting = false;
+		confirmingDelete = false;
 		deleteStatus = ok
 			? {
 					tone: 'right',
@@ -70,13 +73,14 @@
 						<button
 							type="button"
 							class="btn ghost"
+							disabled={deleting}
 							use:focusWhen={true}
 							onclick={() => (confirmingDelete = false)}
 						>
 							Cancel
 						</button>
-						<button type="button" class="btn" onclick={() => void confirmDelete()}>
-							Delete account
+						<button type="button" class="btn" disabled={deleting} onclick={() => void confirmDelete()}>
+							{deleting ? 'Deleting…' : 'Delete account'}
 						</button>
 					</div>
 				</dialog>

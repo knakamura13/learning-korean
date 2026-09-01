@@ -52,7 +52,9 @@
 					<input type="number" min="1" max="100" step="1" bind:value={reviewsPerSitting} />
 				</label>
 			</div>
-			<button type="submit" class="btn" disabled={saving}>Save study pace</button>
+			<button type="submit" class="btn" disabled={saving}>
+				{saving ? 'Saving…' : 'Save study pace'}
+			</button>
 		</form>
 		{#if prefsStatus}
 			<p class="status" data-tone={prefsStatus.tone} role="status" aria-live="polite">
