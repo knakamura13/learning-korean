@@ -6,7 +6,7 @@
  */
 
 import type { Step } from '$lib/content/types';
-import { DECK } from './deck';
+import { CARDS_BY_FRONT, DECK } from './deck';
 
 const HANGUL = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7A3]+/g;
 
@@ -78,12 +78,17 @@ export function conceptsForStep(step: Step, preferredTier: readonly string[] = [
 	if (glyphs.size === 0) return [];
 
 	const preferred = new Set(preferredTier);
-	const matches = DECK.filter((card) => glyphs.has(card.front));
+	const matches = [];
+	for (const g of glyphs) {
+		const cards = CARDS_BY_FRONT[g];
+		if (cards) matches.push(...cards);
+	}
+
 	if (matches.length === 0) {
 		// Longer fronts (words) that contain a taught cluster, or vice versa.
-		const loose = DECK.filter(
-			(card) =>
-				[...glyphs].some((g) => g.length > 0 && (card.front.includes(g) || g.includes(card.front)))
+		const glyphList = [...glyphs].filter((g) => g.length > 0);
+		const loose = DECK.filter((card) =>
+			glyphList.some((g) => card.front.includes(g) || g.includes(card.front))
 		);
 		return rank(loose, preferred);
 	}
