@@ -104,6 +104,36 @@ export function shuffled<T>(items: readonly T[], rng: Rng): T[] {
 
 const MAX_TRIAL_ATTEMPTS = 40;
 
+// Cache unique block readings grouped by reading length per pool array reference.
+// This avoids re-scanning and re-romanizing the entire inventory (up to 11,172 blocks)
+// up to 40 times on every trial generation in Sprint mode (O(1) lookup vs O(N)).
+const POOL_READINGS_CACHE = new WeakMap<readonly string[], Map<number, string[]>>();
+
+function getPoolReadingsByLength(pool: readonly string[]): Map<number, string[]> {
+	let cached = POOL_READINGS_CACHE.get(pool);
+	if (!cached) {
+		cached = new Map<number, string[]>();
+		const seenByLength = new Map<number, Set<string>>();
+		for (let i = 0; i < pool.length; i++) {
+			const reading = romanizeSyllable(pool[i]);
+			if (!reading) continue;
+			const len = reading.length;
+			let set = seenByLength.get(len);
+			if (!set) {
+				set = new Set<string>();
+				seenByLength.set(len, set);
+				cached.set(len, []);
+			}
+			if (!set.has(reading)) {
+				set.add(reading);
+				cached.get(len)!.push(reading);
+			}
+		}
+		POOL_READINGS_CACHE.set(pool, cached);
+	}
+	return cached;
+}
+
 function optionsForBlock(
 	block: string,
 	pool: readonly string[],
@@ -111,17 +141,15 @@ function optionsForBlock(
 ): { options: string[]; answerIndex: number } | null {
 	const answer = romanizeSyllable(block);
 	if (!answer) return null;
-	const distractors = new Set<string>();
-	for (const other of pool) {
-		if (other === block) continue;
-		const reading = romanizeSyllable(other);
-		if (reading && reading !== answer && reading.length === answer.length) {
-			distractors.add(reading);
-		}
-	}
-	if (distractors.size < OPTION_COUNT - 1) return null;
+
+	const byLength = getPoolReadingsByLength(pool);
+	const sameLengthReadings = byLength.get(answer.length);
+	if (!sameLengthReadings) return null;
+
+	const available = sameLengthReadings.filter((r) => r !== answer);
+	if (available.length < OPTION_COUNT - 1) return null;
+
 	const picked: string[] = [];
-	const available = [...distractors];
 	while (picked.length < OPTION_COUNT - 1 && available.length > 0) {
 		const index = pickIndex(available.length, rng);
 		picked.push(available.splice(index, 1)[0]);
