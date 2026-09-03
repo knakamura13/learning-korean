@@ -111,6 +111,7 @@ describe('polish audit regressions', () => {
 			{ source: progressBackup, destructive: />\s*\{busy \? 'Restoring…' : 'Replace progress'\}\s*</ },
 			{ source: accountSection, destructive: />\s*Delete account\s*</ }
 		];
+		expect(accountSection).toMatch(/aria-haspopup="dialog"/);
 		for (const { source, destructive } of cases) {
 			const dialog = source.match(/<dialog\b[\s\S]*?<\/dialog>/)?.[0] ?? '';
 			expect(dialog.length).toBeGreaterThan(0);

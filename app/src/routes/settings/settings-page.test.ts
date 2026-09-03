@@ -77,6 +77,10 @@ describe('Settings page — Appearance', () => {
 		expect(root.querySelector('#review-heading')).toBeNull();
 	});
 
+	it('mounts AccountSection on the settings page', () => {
+		expect(src).toMatch(/AccountSection/);
+	});
+
 	it('places Review between Progress and Appearance in the page source', () => {
 		expect(src).toMatch(/<ReviewPace \/>/);
 		const progressAt = src.indexOf('id="progress-heading"');
