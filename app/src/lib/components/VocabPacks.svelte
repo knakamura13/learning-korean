@@ -55,9 +55,21 @@
 					<span class="nm"><KoText text={pack.label} /></span>
 					<span class="track" aria-hidden="true">
 						{#if pack.unlocked}
-							<span class="m" style="width:{pctMature}%"></span>
-							<span class="y" style="width:{pctYoung}%"></span>
-							<span class="n" style="width:{pctUnseen}%"></span>
+							<span
+								class="m"
+								style="width:{pctMature}%"
+								title="{pack.mature} mastered ({pctMature}%)"
+							></span>
+							<span
+								class="y"
+								style="width:{pctYoung}%"
+								title="{pack.young} learning ({pctYoung}%)"
+							></span>
+							<span
+								class="n"
+								style="width:{pctUnseen}%"
+								title="{pack.unseen} not started ({pctUnseen}%)"
+							></span>
 						{/if}
 					</span>
 					{#if pack.unlocked}
@@ -69,6 +81,11 @@
 					{/if}
 				</div>
 			{/each}
+			<p class="legend" aria-hidden="true">
+				<i class="sw m"></i> mastered
+				<i class="sw y"></i> learning
+				<i class="sw n"></i> not started
+			</p>
 		</div>
 	{/if}
 </section>
@@ -158,6 +175,36 @@
 		white-space: nowrap;
 	}
 
+	.legend {
+		margin: var(--s3) 0 0;
+		font-size: 0.75rem;
+		color: var(--ink-faint);
+		display: flex;
+		gap: var(--s4);
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.sw {
+		display: inline-block;
+		width: 0.6rem;
+		height: 0.6rem;
+		border-radius: 2px;
+		margin-inline-end: var(--s1);
+	}
+
+	.sw.m {
+		background: var(--good);
+	}
+
+	.sw.y {
+		background: var(--accent);
+	}
+
+	.sw.n {
+		background: var(--rule-strong);
+	}
+
 	@media (forced-colors: active) {
 		.track {
 			background: Canvas;
@@ -169,6 +216,15 @@
 			background: ButtonText;
 		}
 		.track .n {
+			background: GrayText;
+		}
+		.sw.m {
+			background: Highlight;
+		}
+		.sw.y {
+			background: ButtonText;
+		}
+		.sw.n {
 			background: GrayText;
 		}
 	}
