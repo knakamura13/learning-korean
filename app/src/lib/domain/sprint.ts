@@ -104,6 +104,39 @@ export function shuffled<T>(items: readonly T[], rng: Rng): T[] {
 
 const MAX_TRIAL_ATTEMPTS = 40;
 
+/** Cache readings grouped by string length for a given pool array reference. */
+const POOL_READINGS_CACHE = new WeakMap<
+	readonly string[],
+	Map<number, string[]>
+>();
+
+function getReadingsByLength(pool: readonly string[]): Map<number, string[]> {
+	let byLength = POOL_READINGS_CACHE.get(pool);
+	if (byLength) return byLength;
+
+	byLength = new Map<number, string[]>();
+	const lengthSets = new Map<number, Set<string>>();
+
+	for (const block of pool) {
+		const reading = romanizeSyllable(block);
+		if (!reading) continue;
+		const len = reading.length;
+		let set = lengthSets.get(len);
+		if (!set) {
+			set = new Set<string>();
+			lengthSets.set(len, set);
+		}
+		set.add(reading);
+	}
+
+	for (const [len, set] of lengthSets.entries()) {
+		byLength.set(len, Array.from(set));
+	}
+
+	POOL_READINGS_CACHE.set(pool, byLength);
+	return byLength;
+}
+
 function optionsForBlock(
 	block: string,
 	pool: readonly string[],
@@ -111,22 +144,22 @@ function optionsForBlock(
 ): { options: string[]; answerIndex: number } | null {
 	const answer = romanizeSyllable(block);
 	if (!answer) return null;
-	const distractors = new Set<string>();
-	for (const other of pool) {
-		if (other === block) continue;
-		const reading = romanizeSyllable(other);
-		if (reading && reading !== answer && reading.length === answer.length) {
-			distractors.add(reading);
-		}
-	}
-	if (distractors.size < OPTION_COUNT - 1) return null;
+
+	const byLength = getReadingsByLength(pool);
+	const candidates = byLength.get(answer.length);
+	if (!candidates) return null;
+
+	const available = candidates.filter((reading) => reading !== answer);
+	if (available.length < OPTION_COUNT - 1) return null;
+
 	const picked: string[] = [];
-	const available = [...distractors];
-	while (picked.length < OPTION_COUNT - 1 && available.length > 0) {
-		const index = pickIndex(available.length, rng);
-		picked.push(available.splice(index, 1)[0]);
+	const poolCopy = [...available];
+	while (picked.length < OPTION_COUNT - 1 && poolCopy.length > 0) {
+		const index = pickIndex(poolCopy.length, rng);
+		picked.push(poolCopy.splice(index, 1)[0]);
 	}
 	if (picked.length < OPTION_COUNT - 1) return null;
+
 	const options = shuffled([answer, ...picked], rng);
 	return { options, answerIndex: options.indexOf(answer) };
 }
