@@ -17,6 +17,7 @@
 				type="button"
 				class="toast-close"
 				aria-label="Dismiss message"
+				title="Dismiss message"
 				onclick={() => toastStore.dismiss(toast.id)}
 			>
 				✕
