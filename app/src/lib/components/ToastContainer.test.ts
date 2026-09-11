@@ -50,6 +50,7 @@ describe('ToastContainer', () => {
 		const closeButton = host.querySelector<HTMLButtonElement>('.toast-close');
 		expect(closeButton).not.toBeNull();
 		expect(closeButton?.getAttribute('aria-label')).toBe('Dismiss message');
+		expect(closeButton?.getAttribute('title')).toBe('Dismiss message');
 
 		unmount(app);
 		host.remove();
