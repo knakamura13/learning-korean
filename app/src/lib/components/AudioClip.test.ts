@@ -34,6 +34,27 @@ describe('AudioClip', () => {
 		expect(button!.textContent).toMatch(/Couldn't play/);
 		expect(button!.querySelector('[lang="ko"]')?.textContent).toBe('ㄱ');
 		expect(button!.getAttribute('aria-label')).toBeNull();
+		expect(button!.getAttribute('title')).toBe('Audio unavailable');
+
+		unmount(app);
+		host.remove();
+	});
+
+	it('provides a descriptive title attribute for hovering over the play button', () => {
+		const host = document.createElement('div');
+		document.body.appendChild(host);
+		const app = mount(AudioClip, {
+			target: host,
+			props: {
+				jamo: 'ㄱ',
+				opus: '/audio/consonants/g.opus',
+				mp3: '/audio/consonants/g.mp3'
+			}
+		});
+
+		const button = host.querySelector('button');
+		expect(button).not.toBeNull();
+		expect(button!.getAttribute('title')).toBe('Play audio for ㄱ');
 
 		unmount(app);
 		host.remove();
