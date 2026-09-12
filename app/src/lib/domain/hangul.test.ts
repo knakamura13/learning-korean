@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
 	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS, SOUND_CHANGES,
-	GANADA_CONSONANTS, GANADA_VOWELS,
+	GANADA_CONSONANTS, GANADA_VOWELS, BASE_SHAPES,
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
 	applyTensification, applyNasalization, applyContact, contactAction,
 	applyAspiration, applyHDeletion, applyHMerge, hMergeAction,
 	applyLateralization, applyRToN, applyFlow, flowAction,
-	romanizeSyllable, romanizeWord, jamoReading
+	romanizeSyllable, romanizeWord, jamoReading, baseShapeOf
 } from './hangul';
 
 describe('syllable composition', () => {
@@ -343,6 +343,36 @@ describe('jamoReading', () => {
 		expect(jamoReading('', 'vowel')).toBe('');
 		expect(jamoReading('ㄱ', 'vowel')).toBe('');
 		expect(jamoReading('ㅕ', 'lead')).toBe('');
+	});
+});
+
+describe('consonant derivation and base shape', () => {
+	it('maps every derived lead back to its articulator base shape', () => {
+		expect(baseShapeOf('ㄱ')).toBe('ㄱ');
+		expect(baseShapeOf('ㅋ')).toBe('ㄱ');
+		expect(baseShapeOf('ㄲ')).toBe('ㄱ');
+		expect(baseShapeOf('ㄴ')).toBe('ㄴ');
+		expect(baseShapeOf('ㄷ')).toBe('ㄴ');
+		expect(baseShapeOf('ㅌ')).toBe('ㄴ');
+		expect(baseShapeOf('ㄸ')).toBe('ㄴ');
+		expect(baseShapeOf('ㅁ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅂ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅍ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅃ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅅ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅈ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅊ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅉ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅆ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅇ')).toBe('ㅇ');
+		expect(baseShapeOf('ㅎ')).toBe('ㅇ');
+	});
+
+	it('returns empty string for non-consonant letters or un-derived leads like ㄹ', () => {
+		expect(baseShapeOf('ㄹ')).toBe('');
+		expect(baseShapeOf('ㅏ')).toBe('');
+		expect(baseShapeOf('')).toBe('');
+		expect(baseShapeOf('a')).toBe('');
 	});
 });
 
