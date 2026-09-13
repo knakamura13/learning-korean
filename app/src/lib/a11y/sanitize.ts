@@ -30,6 +30,8 @@ function ensureClassHook() {
 /** Strip anything lab HTML does not use. `lang="ko"` and jamo/hg/rom classes stay. */
 export function sanitizeLabHtml(html: string): string {
 	if (typeof window === 'undefined') return html;
+	// Fast path: pure plain text without tags doesn't contain active HTML/scripts
+	if (!html.includes('<')) return html;
 	ensureClassHook();
 	return DOMPurify.sanitize(html, CONFIG);
 }
