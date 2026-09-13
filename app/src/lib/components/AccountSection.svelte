@@ -75,7 +75,7 @@
 						>
 							Cancel
 						</button>
-						<button type="button" class="btn" onclick={() => void confirmDelete()}>
+						<button type="button" class="btn danger" onclick={() => void confirmDelete()}>
 							Delete account
 						</button>
 					</div>
@@ -122,7 +122,6 @@
 		flex-wrap: wrap;
 	}
 
-	.danger { color: var(--rose); }
 
 	.confirm {
 		margin-top: var(--s3);
