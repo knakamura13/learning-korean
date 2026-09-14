@@ -105,15 +105,30 @@ export function derivations(letter: string): Derivation[] {
 	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
 }
 
-/** The base shape a consonant ultimately comes from, following derivations back. */
-export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-	for (const [from, ops] of Object.entries(DERIVE)) {
-		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
+// Pre-computed map for baseShapeOf() to avoid nested object iterations on every call
+const BASE_SHAPE_MAP: Record<string, string> = {};
+for (const base of BASE_SHAPES) {
+	BASE_SHAPE_MAP[base] = base;
+}
+
+function fillBaseShapes(letter: string, root: string) {
+	const entry = DERIVE[letter];
+	if (!entry) return;
+	for (const target of Object.values(entry)) {
+		if (target) {
+			BASE_SHAPE_MAP[target] = root;
+			fillBaseShapes(target, root);
 		}
 	}
-	return '';
+}
+
+for (const base of BASE_SHAPES) {
+	fillBaseShapes(base, base);
+}
+
+/** The base shape a consonant ultimately comes from, following derivations back. */
+export function baseShapeOf(letter: string): string {
+	return BASE_SHAPE_MAP[letter] ?? '';
 }
 
 /* ------------------------------------------------------------------ *
@@ -190,9 +205,16 @@ export const VOWEL_MERGERS: string[][] = [
 	['ㅙ', 'ㅚ', 'ㅞ']
 ];
 
+// Pre-computed map for O(1) mergedWith() lookups
+const MERGED_WITH_MAP: Record<string, string[]> = {};
+for (const group of VOWEL_MERGERS) {
+	for (const v of group) {
+		MERGED_WITH_MAP[v] = group.filter((x) => x !== v);
+	}
+}
+
 export function mergedWith(v: string): string[] {
-	const group = VOWEL_MERGERS.find((g) => g.includes(v));
-	return group ? group.filter((x) => x !== v) : [];
+	return MERGED_WITH_MAP[v] ?? [];
 }
 
 /* ------------------------------------------------------------------ *
