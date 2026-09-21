@@ -27,6 +27,11 @@ function ensureClassHook() {
 	});
 }
 
+// Memoization cache for sanitized lab HTML strings to eliminate redundant DOM parsing
+// and node traversal by DOMPurify and regex processing by withLangKo on identical lab copy strings.
+const LAB_HTML_CACHE = new Map<string, string>();
+const MAX_CACHE_SIZE = 1000;
+
 /** Strip anything lab HTML does not use. `lang="ko"` and jamo/hg/rom classes stay. */
 export function sanitizeLabHtml(html: string): string {
 	if (typeof window === 'undefined') return html;
@@ -36,5 +41,17 @@ export function sanitizeLabHtml(html: string): string {
 
 /** Wrap Hangul, then sanitize — the only string that should reach `{@html}`. */
 export function labHtml(html: string): string {
-	return sanitizeLabHtml(withLangKo(html));
+	if (typeof window === 'undefined') return withLangKo(html);
+	const cached = LAB_HTML_CACHE.get(html);
+	if (cached !== undefined) return cached;
+
+	const result = sanitizeLabHtml(withLangKo(html));
+
+	// FIFO eviction to cap memory footprint
+	if (LAB_HTML_CACHE.size >= MAX_CACHE_SIZE) {
+		const firstKey = LAB_HTML_CACHE.keys().next().value;
+		if (firstKey !== undefined) LAB_HTML_CACHE.delete(firstKey);
+	}
+	LAB_HTML_CACHE.set(html, result);
+	return result;
 }
