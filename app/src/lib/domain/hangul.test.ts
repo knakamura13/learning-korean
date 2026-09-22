@@ -1,15 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import {
 	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS, SOUND_CHANGES,
-	GANADA_CONSONANTS, GANADA_VOWELS,
+	GANADA_CONSONANTS, GANADA_VOWELS, BASE_SHAPES,
 	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
+	baseShapeOf, derivations,
 	applyLiaison, liaisonSources, liaisonAction,
 	applyTensification, applyNasalization, applyContact, contactAction,
 	applyAspiration, applyHDeletion, applyHMerge, hMergeAction,
 	applyLateralization, applyRToN, applyFlow, flowAction,
 	romanizeSyllable, romanizeWord, jamoReading
 } from './hangul';
+
+describe('consonants and derivations', () => {
+	it('identifies base shapes for all consonants', () => {
+		for (const base of BASE_SHAPES) {
+			expect(baseShapeOf(base)).toBe(base);
+		}
+		expect(baseShapeOf('ㅋ')).toBe('ㄱ');
+		expect(baseShapeOf('ㄲ')).toBe('ㄱ');
+		expect(baseShapeOf('ㄷ')).toBe('ㄴ');
+		expect(baseShapeOf('ㅌ')).toBe('ㄴ');
+		expect(baseShapeOf('ㄸ')).toBe('ㄴ');
+		expect(baseShapeOf('ㅂ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅍ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅃ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅈ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅊ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅉ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅆ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅎ')).toBe('ㅇ');
+		expect(baseShapeOf('ㄹ')).toBe('');
+		expect(baseShapeOf('a')).toBe('');
+	});
+
+	it('retrieves derivations for consonants', () => {
+		expect(derivations('ㄱ')).toEqual(['stroke', 'double']);
+		expect(derivations('ㄴ')).toEqual(['stroke']);
+		expect(derivations('ㄹ')).toEqual([]);
+		expect(derivations('a')).toEqual([]);
+	});
+});
 
 describe('syllable composition', () => {
 	it('round-trips every one of the 11,172 syllable blocks', () => {

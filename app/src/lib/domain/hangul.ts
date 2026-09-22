@@ -99,21 +99,41 @@ export function derive(letter: string, op: Derivation): string {
 	return DERIVE[letter]?.[op] ?? '';
 }
 
+// Pre-computed map for O(1) derivations() lookup, avoiding Object.keys and filter on every call
+const DERIVATIONS_MAP = new Map<string, Derivation[]>();
+for (const [letter, entry] of Object.entries(DERIVE)) {
+	const keys = (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
+	DERIVATIONS_MAP.set(letter, keys);
+}
+
 export function derivations(letter: string): Derivation[] {
-	const entry = DERIVE[letter];
-	if (!entry) return [];
-	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
+	return DERIVATIONS_MAP.get(letter) ?? [];
+}
+
+// Pre-computed lookup map for O(1) base shape lookup, eliminating runtime Object.entries/values allocations and recursion
+const BASE_SHAPE_MAP = new Map<string, string>();
+
+function findBaseShape(letter: string): string {
+	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
+	for (const [from, ops] of Object.entries(DERIVE)) {
+		for (const target of Object.values(ops)) {
+			if (target === letter) return findBaseShape(from);
+		}
+	}
+	return '';
+}
+
+for (const base of BASE_SHAPES) {
+	BASE_SHAPE_MAP.set(base, base);
+}
+for (const lead of LEADS) {
+	const base = findBaseShape(lead);
+	if (base) BASE_SHAPE_MAP.set(lead, base);
 }
 
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-	for (const [from, ops] of Object.entries(DERIVE)) {
-		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
-		}
-	}
-	return '';
+	return BASE_SHAPE_MAP.get(letter) ?? '';
 }
 
 /* ------------------------------------------------------------------ *
@@ -143,8 +163,12 @@ const STROKE_TABLE: Record<string, Record<string, [string, string]>> = {
 
 export type TickSide = 'left' | 'right' | 'above' | 'below';
 
+const SIDES_I: TickSide[] = ['left', 'right'];
+const SIDES_EU: TickSide[] = ['above', 'below'];
+const SIDES_EMPTY: TickSide[] = [];
+
 export function sidesFor(base: string): TickSide[] {
-	return base === 'ㅣ' ? ['left', 'right'] : base === 'ㅡ' ? ['above', 'below'] : [];
+	return base === 'ㅣ' ? SIDES_I : base === 'ㅡ' ? SIDES_EU : SIDES_EMPTY;
 }
 
 /** Build a simple vowel. `ticks` of 0 yields the bare base stroke. */
@@ -190,9 +214,16 @@ export const VOWEL_MERGERS: string[][] = [
 	['ㅙ', 'ㅚ', 'ㅞ']
 ];
 
+// Pre-computed lookup map for O(1) mergedWith() execution, avoiding array scans and filter allocations
+const MERGED_WITH_MAP = new Map<string, string[]>();
+for (const group of VOWEL_MERGERS) {
+	for (const v of group) {
+		MERGED_WITH_MAP.set(v, group.filter((x) => x !== v));
+	}
+}
+
 export function mergedWith(v: string): string[] {
-	const group = VOWEL_MERGERS.find((g) => g.includes(v));
-	return group ? group.filter((x) => x !== v) : [];
+	return MERGED_WITH_MAP.get(v) ?? [];
 }
 
 /* ------------------------------------------------------------------ *
