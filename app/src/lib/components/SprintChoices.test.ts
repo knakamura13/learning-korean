@@ -37,4 +37,11 @@ describe('SprintChoices', () => {
 		expect(src).toMatch(/min-width:\s*44px/);
 		expect(src).toMatch(/grid-template-columns:\s*1fr 1fr/);
 	});
+
+	it('adds lang="ko" to options containing Hangul text', () => {
+		const el = render(SprintChoices, { options: ['가', 'na'], onPick: () => {} });
+		const txts = [...el.querySelectorAll<HTMLSpanElement>('span.txt')];
+		expect(txts[0].getAttribute('lang')).toBe('ko');
+		expect(txts[1].getAttribute('lang')).toBeNull();
+	});
 });
