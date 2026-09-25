@@ -23,6 +23,9 @@ describe('AudioClip', () => {
 		});
 
 		expect(host.querySelectorAll('source').length).toBe(2);
+		const initialButton = host.querySelector('button');
+		expect(initialButton?.getAttribute('title')).toBe('Play');
+
 		const audio = host.querySelector('audio');
 		expect(audio).not.toBeNull();
 		audio!.dispatchEvent(new Event('error'));
@@ -31,6 +34,7 @@ describe('AudioClip', () => {
 		const button = host.querySelector('button');
 		expect(button).not.toBeNull();
 		expect(button!.getAttribute('aria-disabled')).toBe('true');
+		expect(button!.getAttribute('title')).toBe("Couldn't play audio");
 		expect(button!.textContent).toMatch(/Couldn't play/);
 		expect(button!.querySelector('[lang="ko"]')?.textContent).toBe('ㄱ');
 		expect(button!.getAttribute('aria-label')).toBeNull();
