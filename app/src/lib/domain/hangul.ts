@@ -40,6 +40,21 @@ const FINAL_MAP = new Map<string, number>(FINALS.map((x, i) => [x, i]));
 
 const SYL_BASE = 0xac00;
 const SYL_LAST = 0xd7a3;
+const SYL_COUNT = 11172;
+
+// Pre-computed lookup array for all 11,172 valid Hangul syllable blocks (0xAC00 to 0xD7A3)
+// Eliminates repetitive object creation and math calculations during phonological parsing
+const DECOMPOSE_CACHE: ReadonlyArray<Decomposed> = (() => {
+	const table = new Array<Decomposed>(SYL_COUNT);
+	for (let code = 0; code < SYL_COUNT; code++) {
+		table[code] = Object.freeze({
+			lead: LEADS[Math.floor(code / 588)],
+			vowel: VOWELS[Math.floor((code % 588) / 28)],
+			final: FINALS[code % 28]
+		});
+	}
+	return table;
+})();
 
 /** Compose a syllable block. Returns '' if the pieces are not valid. */
 export function compose(lead: string, vowel: string, final = ''): string {
@@ -61,12 +76,8 @@ export interface Decomposed {
 export function decompose(syllable: string): Decomposed | null {
 	if (syllable.length !== 1) return null;
 	const code = syllable.charCodeAt(0) - SYL_BASE;
-	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) return null;
-	return {
-		lead: LEADS[Math.floor(code / 588)],
-		vowel: VOWELS[Math.floor((code % 588) / 28)],
-		final: FINALS[code % 28]
-	};
+	if (code < 0 || code >= SYL_COUNT) return null;
+	return DECOMPOSE_CACHE[code];
 }
 
 /** True for a composed Hangul syllable block (not a bare jamo). */
