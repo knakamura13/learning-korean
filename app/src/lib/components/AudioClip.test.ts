@@ -10,7 +10,27 @@ beforeEach(() => {
 });
 
 describe('AudioClip', () => {
-	it('keeps a disabled control after playback error', () => {
+	it('renders title tooltip in initial state', () => {
+		const host = document.createElement('div');
+		document.body.appendChild(host);
+		const app = mount(AudioClip, {
+			target: host,
+			props: {
+				jamo: 'ㄱ',
+				opus: '/audio/consonants/g.opus',
+				mp3: '/audio/consonants/g.mp3'
+			}
+		});
+
+		const button = host.querySelector('button')!;
+		expect(button).not.toBeNull();
+		expect(button.getAttribute('title')).toBe('Play audio');
+
+		unmount(app);
+		host.remove();
+	});
+
+	it('keeps a disabled control and updates title tooltip after playback error', () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 		const app = mount(AudioClip, {
@@ -31,6 +51,7 @@ describe('AudioClip', () => {
 		const button = host.querySelector('button');
 		expect(button).not.toBeNull();
 		expect(button!.getAttribute('aria-disabled')).toBe('true');
+		expect(button!.getAttribute('title')).toBe('Audio unavailable');
 		expect(button!.textContent).toMatch(/Couldn't play/);
 		expect(button!.querySelector('[lang="ko"]')?.textContent).toBe('ㄱ');
 		expect(button!.getAttribute('aria-label')).toBeNull();
