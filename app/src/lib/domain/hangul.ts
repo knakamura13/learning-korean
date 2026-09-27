@@ -57,16 +57,26 @@ export interface Decomposed {
 	final: string;
 }
 
+// Memoization cache to avoid redundant Unicode math and object creation
+const DECOMPOSE_CACHE = new Map<string, Decomposed | null>();
+
 /** Split a syllable block back into its three slots. */
 export function decompose(syllable: string): Decomposed | null {
 	if (syllable.length !== 1) return null;
+	const cached = DECOMPOSE_CACHE.get(syllable);
+	if (cached !== undefined) return cached;
 	const code = syllable.charCodeAt(0) - SYL_BASE;
-	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) return null;
-	return {
+	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) {
+		DECOMPOSE_CACHE.set(syllable, null);
+		return null;
+	}
+	const res: Decomposed = {
 		lead: LEADS[Math.floor(code / 588)],
 		vowel: VOWELS[Math.floor((code % 588) / 28)],
 		final: FINALS[code % 28]
 	};
+	DECOMPOSE_CACHE.set(syllable, res);
+	return res;
 }
 
 /** True for a composed Hangul syllable block (not a bare jamo). */
@@ -610,10 +620,18 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
+// Memoization cache to avoid redundant syllable parsing and string construction
+const ROMANIZE_CACHE = new Map<string, string>();
+
 export function romanizeSyllable(ch: string): string {
+	const cached = ROMANIZE_CACHE.get(ch);
+	if (cached !== undefined) return cached;
 	const parts = decompose(ch);
-	if (!parts) return '';
-	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	const res = parts
+		? `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`
+		: '';
+	ROMANIZE_CACHE.set(ch, res);
+	return res;
 }
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
