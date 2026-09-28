@@ -34,7 +34,18 @@ export function sanitizeLabHtml(html: string): string {
 	return DOMPurify.sanitize(html, CONFIG);
 }
 
-/** Wrap Hangul, then sanitize — the only string that should reach `{@html}`. */
+const CACHE_LIMIT = 500;
+const LAB_HTML_CACHE = new Map<string, string>();
+
+/** Wrap Hangul, then sanitize — the only string that should reach `{@html}`. Memoized for performance. */
 export function labHtml(html: string): string {
-	return sanitizeLabHtml(withLangKo(html));
+	const cached = LAB_HTML_CACHE.get(html);
+	if (cached !== undefined) return cached;
+	const sanitized = sanitizeLabHtml(withLangKo(html));
+	if (LAB_HTML_CACHE.size >= CACHE_LIMIT) {
+		const firstKey = LAB_HTML_CACHE.keys().next().value;
+		if (firstKey !== undefined) LAB_HTML_CACHE.delete(firstKey);
+	}
+	LAB_HTML_CACHE.set(html, sanitized);
+	return sanitized;
 }
