@@ -327,8 +327,12 @@ export function setFlagged(
 ): SrsState {
 	if (cardIds.length === 0) return state;
 	const flagged = new Set(state.flagged);
+	const unlockedSet = new Set(state.unlocked);
 	let cards = state.cards;
 	let changed = false;
+
+	// Optimization: lazily build an O(1) map for deck lookups instead of doing O(N) deck.find per card
+	let deckMap: Map<string, SchedulableCard> | undefined;
 
 	for (const id of cardIds) {
 		if (!id) continue;
@@ -345,8 +349,11 @@ export function setFlagged(
 					changed = true;
 				}
 			} else {
-				const tier = deck.find((c) => c.id === id)?.tier;
-				if (tier && isUnlocked(state, tier)) {
+				if (!deckMap && deck.length > 0) {
+					deckMap = new Map(deck.map((c) => [c.id, c]));
+				}
+				const tier = deckMap?.get(id)?.tier;
+				if (tier && unlockedSet.has(tier)) {
 					if (cards === state.cards) cards = { ...cards };
 					cards[id] = { ease: EASE_START, ivl: 0, reps: 0, lapses: 0, due: now };
 					changed = true;
@@ -362,7 +369,9 @@ export function setFlagged(
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
-	return deck.filter((c) => isUnlocked(state, c.tier));
+	// Optimization: O(1) tier lookup using a Set instead of array scanning
+	const unlockedSet = new Set(state.unlocked);
+	return deck.filter((c) => unlockedSet.has(c.tier));
 }
 
 /* ------------------------------------------------------------------ *
@@ -639,8 +648,11 @@ export function due<T extends SchedulableCard>(
 
 /** Epoch ms of the soonest upcoming card, or null when nothing is scheduled. */
 export function nextDueAt<T extends SchedulableCard>(state: SrsState, deck: T[]): number | null {
+	// Optimization: linear single pass over deck using Set lookup instead of allocating pool array
+	const unlockedSet = new Set(state.unlocked);
 	let soonest = Infinity;
-	for (const card of pool(state, deck)) {
+	for (const card of deck) {
+		if (!unlockedSet.has(card.tier)) continue;
 		const st = state.cards[card.id];
 		if (st && st.due < soonest) soonest = st.due;
 	}
@@ -698,8 +710,20 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
+	// Optimization: single-pass grouping of deck by tier reduces time complexity from O(T * D) to O(T + D)
+	const unlockedSet = new Set(state.unlocked);
+	const cardsByTier = new Map<string, T[]>();
+	for (const c of deck) {
+		let list = cardsByTier.get(c.tier);
+		if (!list) {
+			list = [];
+			cardsByTier.set(c.tier, list);
+		}
+		list.push(c);
+	}
+
 	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
+		const cards = cardsByTier.get(tier.id) ?? [];
 		let mature = 0;
 		let young = 0;
 		for (const c of cards) {
@@ -712,7 +736,7 @@ export function tierReviewProgress<T extends SchedulableCard>(
 		return {
 			id: tier.id,
 			size: tier.size,
-			unlocked: isUnlocked(state, tier.id),
+			unlocked: unlockedSet.has(tier.id),
 			mature,
 			young,
 			unseen: cards.length - seen,
@@ -737,13 +761,18 @@ export function stats<T extends SchedulableCard>(
 	const newPerDay = opts.newPerDay ?? DEFAULT_NEW_PER_DAY;
 	const vocabNewPerDay = opts.vocabNewPerDay ?? DEFAULT_VOCAB_NEW_PER_DAY;
 	const reviewPerSitting = opts.reviewPerSitting ?? DEFAULT_REVIEW_PER_SITTING;
-	const available = pool(state, deck);
+	const unlockedSet = new Set(state.unlocked);
 	const today = isoDay(now);
 
 	let seen = 0, mature = 0, young = 0, dueNow = 0, lapsing = 0;
 	let scriptUnseen = 0, vocabUnseen = 0;
+	let availableCount = 0;
 	const flagged = new Set(state.flagged);
-	for (const card of available) {
+
+	// Optimization: iterate deck directly with Set lookup to avoid array allocation
+	for (const card of deck) {
+		if (!unlockedSet.has(card.tier)) continue;
+		availableCount++;
 		const st = state.cards[card.id];
 		if (!st) {
 			if (trackOfTier(card.tier) === 'vocab') vocabUnseen++;
@@ -766,10 +795,10 @@ export function stats<T extends SchedulableCard>(
 	const sittingReviews = Math.min(dueNow, Math.max(0, reviewPerSitting));
 
 	return {
-		unlocked: available.length,
+		unlocked: availableCount,
 		total: deck.length,
 		seen,
-		unseen: available.length - seen,
+		unseen: availableCount - seen,
 		mature,
 		young,
 		due: dueNow,
