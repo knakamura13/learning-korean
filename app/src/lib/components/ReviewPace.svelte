@@ -45,14 +45,16 @@
 			<div class="fields">
 				<label>
 					<span>New cards per day</span>
-					<input type="number" min="0" max="50" step="1" bind:value={newPerDay} />
+					<input type="number" min="0" max="50" step="1" disabled={saving} bind:value={newPerDay} />
 				</label>
 				<label>
 					<span>Reviews per sitting</span>
-					<input type="number" min="1" max="100" step="1" bind:value={reviewsPerSitting} />
+					<input type="number" min="1" max="100" step="1" disabled={saving} bind:value={reviewsPerSitting} />
 				</label>
 			</div>
-			<button type="submit" class="btn" disabled={saving}>Save study pace</button>
+			<button type="submit" class="btn" disabled={saving}>
+				{saving ? 'Saving…' : 'Save study pace'}
+			</button>
 		</form>
 		{#if prefsStatus}
 			<p class="status" data-tone={prefsStatus.tone} role="status" aria-live="polite">
@@ -114,6 +116,10 @@
 		outline: 2px solid var(--paper);
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
+	}
+	.fields input:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.status {
