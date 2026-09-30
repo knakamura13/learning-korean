@@ -4,7 +4,14 @@
 import { mount, unmount } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import FlagButton from './FlagButton.svelte';
+import src from './FlagButton.svelte?raw';
 import { toastStore } from '$lib/stores/toast.svelte';
+
+function styleBlock(markup: string): string {
+	const match = markup.match(/<style>([\s\S]*?)<\/style>/);
+	if (!match) throw new Error('FlagButton.svelte has no style block');
+	return match[1];
+}
 
 describe('FlagButton', () => {
 	beforeEach(() => {
@@ -89,5 +96,15 @@ describe('FlagButton', () => {
 
 		unmount(app);
 		host.remove();
+	});
+
+	it('includes focus-visible ring styles and forced-colors focus state in CSS', () => {
+		const css = styleBlock(src);
+		expect(css).toMatch(/\.flag-btn:focus-visible\s*\{/);
+		expect(css).toMatch(/outline:\s*2px solid var\(--paper\);/);
+		expect(css).toMatch(/outline-offset:\s*2px;/);
+		expect(css).toMatch(/box-shadow:\s*var\(--focus-ring\);/);
+		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
+		expect(css).toMatch(/\.flag-btn:focus-visible\s*\{[^}]*outline:\s*2px solid Highlight;/s);
 	});
 });
