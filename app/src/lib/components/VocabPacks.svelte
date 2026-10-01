@@ -2,6 +2,7 @@
 	import KoText from '$lib/components/KoText.svelte';
 	import { DEFAULT_VOCAB_NEW_PER_DAY, tierCountLabel, type TierReviewProgress } from '$lib/domain/srs';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 
 	type PackRow = TierReviewProgress & { label: string };
 
@@ -19,8 +20,9 @@
 		return whole === 0 ? 0 : Math.round((part / whole) * 100);
 	}
 
-	function openPack(id: string) {
-		progress.unlock([id]);
+	function openPack(pack: PackRow) {
+		progress.unlock([pack.id]);
+		toastStore.show(`${pack.label} unlocked — cards added to Daily Review`);
 	}
 </script>
 
@@ -63,7 +65,12 @@
 					{#if pack.unlocked}
 						<span class="ct" aria-hidden="true">{tierCountLabel(pack)}</span>
 					{:else}
-						<button type="button" class="btn ghost open-pack" onclick={() => openPack(pack.id)}>
+						<button
+							type="button"
+							class="btn ghost open-pack"
+							aria-label="Open {pack.label} pack ({pack.size} cards)"
+							onclick={() => openPack(pack)}
+						>
 							Open · {pack.size} cards
 						</button>
 					{/if}
