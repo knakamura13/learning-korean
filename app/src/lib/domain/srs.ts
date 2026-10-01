@@ -362,7 +362,9 @@ export function setFlagged(
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
-	return deck.filter((c) => isUnlocked(state, c.tier));
+	// Pre-build a Set for unlocked check to avoid repeated linear array scans (O(1) lookups).
+	const unlockedSet = new Set(state.unlocked);
+	return deck.filter((c) => unlockedSet.has(c.tier));
 }
 
 /* ------------------------------------------------------------------ *
@@ -698,8 +700,20 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
+	// Group cards by tier in a single pass O(N) to avoid O(N * M) repeated deck filtering.
+	const cardsByTier = new Map<string, T[]>();
+	for (const card of deck) {
+		let list = cardsByTier.get(card.tier);
+		if (!list) {
+			list = [];
+			cardsByTier.set(card.tier, list);
+		}
+		list.push(card);
+	}
+	const unlockedSet = new Set(state.unlocked);
+
 	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
+		const cards = cardsByTier.get(tier.id) ?? [];
 		let mature = 0;
 		let young = 0;
 		for (const c of cards) {
@@ -712,7 +726,7 @@ export function tierReviewProgress<T extends SchedulableCard>(
 		return {
 			id: tier.id,
 			size: tier.size,
-			unlocked: isUnlocked(state, tier.id),
+			unlocked: unlockedSet.has(tier.id),
 			mature,
 			young,
 			unseen: cards.length - seen,
