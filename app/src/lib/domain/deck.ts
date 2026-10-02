@@ -411,8 +411,22 @@ export const TIERS: Tier[] = [
 	{ id: 'lab10', label: 'Names', lab: '0010', size: names.length }
 ];
 
+let cardsByTierMap: Map<string, Card[]> | undefined;
+
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	if (!cardsByTierMap) {
+		cardsByTierMap = new Map();
+		for (let i = 0; i < DECK.length; i++) {
+			const c = DECK[i];
+			let list = cardsByTierMap.get(c.tier);
+			if (!list) {
+				list = [];
+				cardsByTierMap.set(c.tier, list);
+			}
+			list.push(c);
+		}
+	}
+	return cardsByTierMap.get(tier) ?? [];
 }
 
 /**
