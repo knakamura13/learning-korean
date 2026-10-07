@@ -71,9 +71,24 @@
 </div>
 
 <div class="tools" role="group" aria-label="Derivation tools">
-	<button class="tool" disabled={!canStroke} onclick={() => apply('stroke')}>+ stroke</button>
-	<button class="tool" disabled={!canDouble} onclick={() => apply('double')}>× double</button>
-	<button class="tool undo" disabled={path.length < 2 || won} onclick={undo}>undo</button>
+	<button
+		class="tool"
+		disabled={!canStroke}
+		aria-label={`Add stroke to ${current}`}
+		onclick={() => apply('stroke')}>+ stroke</button
+	>
+	<button
+		class="tool"
+		disabled={!canDouble}
+		aria-label={`Double ${current}`}
+		onclick={() => apply('double')}>× double</button
+	>
+	<button
+		class="tool undo"
+		disabled={path.length < 2 || won}
+		aria-label="Undo derivation"
+		onclick={undo}>undo</button
+	>
 </div>
 
 <style>
@@ -143,6 +158,10 @@
 			background: ButtonFace;
 			color: ButtonText;
 			border-color: ButtonText;
+		}
+		.tool:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
 		}
 		.tool:disabled {
 			color: GrayText;
