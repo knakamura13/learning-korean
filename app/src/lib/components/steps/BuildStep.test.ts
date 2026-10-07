@@ -33,7 +33,8 @@ const step: BuildStepData = {
 	do: 'Add a stroke to ㄱ (k/g) to form ㅋ (k aspirated).',
 	start: 'ㄱ',
 	target: 'ㅋ',
-	targetName: 'k aspirated'
+	targetName: 'k aspirated',
+	teach: 'Strokes add breath.'
 };
 
 describe('BuildStep', () => {
@@ -77,7 +78,8 @@ describe('BuildStep', () => {
 			do: 'Derive ㄲ from ㄱ.',
 			start: 'ㄱ',
 			target: 'ㄲ',
-			targetName: 'kk double'
+			targetName: 'kk double',
+			teach: 'Doubling makes tense sound.'
 		};
 		const onSettle = vi.fn();
 		const onNudge = vi.fn();
