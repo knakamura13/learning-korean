@@ -698,8 +698,18 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
+	const cardsByTier = new Map<string, T[]>();
+	for (const c of deck) {
+		let list = cardsByTier.get(c.tier);
+		if (!list) {
+			list = [];
+			cardsByTier.set(c.tier, list);
+		}
+		list.push(c);
+	}
+
 	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
+		const cards = cardsByTier.get(tier.id) ?? [];
 		let mature = 0;
 		let young = 0;
 		for (const c of cards) {

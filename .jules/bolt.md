@@ -1,3 +1,7 @@
+## 2025-05-18 - Fixed-Size Lookup Array Memoization for Hangul Syllable Decomposition
+**Learning:** `decompose` and `romanizeSyllable` in `src/lib/domain/hangul.ts` were repeatedly called across drills, block deck builds, and review progress computations. Because the Unicode Hangul Syllables block contains exactly 11,172 code points (`0xAC00` to `0xD7A3`), a fixed-size `Array(11172)` indexed by `codePoint - 0xAC00` provides O(1) lookup with zero overhead and minimal memory footprint (~88KB), avoiding repeated math, string allocations, and object creations in hot loops.
+**Action:** For bounded code point domains (like fixed Unicode character ranges), use array offset indexing (`codePoint - baseCodePoint`) rather than hash maps or dynamic caches for maximum cache locality and zero hash lookup overhead.
+
 ## 2025-05-18 - Single-Pass HTML Scanner for Hangul Wrapping
 **Learning:** `withLangKo` in `src/lib/a11y/lang.ts` previously re-scanned the entire HTML string from index 0 on every Hangul match using a secondary regex loop to calculate `langKoDepth(before)`. For HTML containing multiple tags and Hangul runs (such as all authored lab copy), this resulted in O(N²) regex execution overhead during lab copy sanitization.
 **Action:** Use a single-pass tokenizing regex matching tags and Hangul runs in sequence while maintaining a running open-tag depth state, eliminating quadratic string slicing and regex instantiation.

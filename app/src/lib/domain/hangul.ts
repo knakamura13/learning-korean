@@ -57,16 +57,26 @@ export interface Decomposed {
 	final: string;
 }
 
-/** Split a syllable block back into its three slots. */
+// Fixed-size lookup caches for the 11,172 valid Hangul syllable blocks (0xAC00 to 0xD7A3).
+const DECOMPOSE_CACHE: (Decomposed | null)[] = new Array(SYL_LAST - SYL_BASE + 1);
+const ROMANIZE_SYLLABLE_CACHE: (string | null)[] = new Array(SYL_LAST - SYL_BASE + 1);
+
+/** Split a syllable block back into its three slots. Memoized for O(1) repeated lookups. */
 export function decompose(syllable: string): Decomposed | null {
 	if (syllable.length !== 1) return null;
 	const code = syllable.charCodeAt(0) - SYL_BASE;
-	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) return null;
-	return {
+	if (code < 0 || code > SYL_LAST - SYL_BASE) return null;
+
+	let cached = DECOMPOSE_CACHE[code];
+	if (cached !== undefined) return cached;
+
+	cached = Object.freeze({
 		lead: LEADS[Math.floor(code / 588)],
 		vowel: VOWELS[Math.floor((code % 588) / 28)],
 		final: FINALS[code % 28]
-	};
+	});
+	DECOMPOSE_CACHE[code] = cached;
+	return cached;
 }
 
 /** True for a composed Hangul syllable block (not a bare jamo). */
@@ -611,9 +621,21 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 }
 
 export function romanizeSyllable(ch: string): string {
+	if (ch.length !== 1) return '';
+	const code = ch.charCodeAt(0) - SYL_BASE;
+	if (code < 0 || code > SYL_LAST - SYL_BASE) return '';
+
+	let cached = ROMANIZE_SYLLABLE_CACHE[code];
+	if (cached !== undefined) return cached ?? '';
+
 	const parts = decompose(ch);
-	if (!parts) return '';
-	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	if (!parts) {
+		ROMANIZE_SYLLABLE_CACHE[code] = '';
+		return '';
+	}
+	cached = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	ROMANIZE_SYLLABLE_CACHE[code] = cached;
+	return cached;
 }
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
