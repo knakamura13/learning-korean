@@ -61,10 +61,10 @@ export interface Decomposed {
 export function decompose(syllable: string): Decomposed | null {
 	if (syllable.length !== 1) return null;
 	const code = syllable.charCodeAt(0) - SYL_BASE;
-	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) return null;
+	if (code < 0 || code > 11171) return null;
 	return {
-		lead: LEADS[Math.floor(code / 588)],
-		vowel: VOWELS[Math.floor((code % 588) / 28)],
+		lead: LEADS[(code / 588) | 0],
+		vowel: VOWELS[((code % 588) / 28) | 0],
 		final: FINALS[code % 28]
 	};
 }
@@ -271,28 +271,27 @@ export function clusterRule(final: string): ClusterRule | null {
  * when it jumps; other tensification is out of scope.
  */
 export function applyLiaison(word: string): string {
-	const chars = [...word];
-	if (chars.length === 0) return word;
-	const parts = chars.map((ch) => decompose(ch));
-	if (parts.some((p) => p === null)) return word;
-
-	const out = parts.map((p) => ({ ...p! }));
-	for (let i = 0; i < out.length - 1; i++) {
-		const cur = out[i];
-		const next = out[i + 1];
-		if (!cur.final || next.lead !== 'ㅇ') continue;
-		if (cur.final === 'ㅇ' || cur.final === 'ㅎ') continue;
-		const cluster = clusterParts(cur.final);
-		if (cluster) {
-			if (cluster[1] === 'ㅎ') continue;
-			cur.final = cluster[0];
-			next.lead = cluster[1] === 'ㅅ' ? 'ㅆ' : cluster[1];
-		} else {
-			next.lead = cur.final;
-			cur.final = '';
+	return mapSyllables(word, (out) => {
+		let changed = false;
+		for (let i = 0; i < out.length - 1; i++) {
+			const cur = out[i];
+			const next = out[i + 1];
+			if (!cur.final || next.lead !== 'ㅇ') continue;
+			if (cur.final === 'ㅇ' || cur.final === 'ㅎ') continue;
+			const cluster = clusterParts(cur.final);
+			if (cluster) {
+				if (cluster[1] === 'ㅎ') continue;
+				cur.final = cluster[0];
+				next.lead = cluster[1] === 'ㅅ' ? 'ㅆ' : cluster[1];
+				changed = true;
+			} else {
+				next.lead = cur.final;
+				cur.final = '';
+				changed = true;
+			}
 		}
-	}
-	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+		return changed;
+	});
 }
 
 /** Written batchim letters that could jump (cluster members, not tensed ㅆ). */
@@ -355,14 +354,26 @@ function skipContactJunction(cur: { lead: string; vowel: string; final: string }
 	return false;
 }
 
-function mapSyllables(word: string, fn: (out: { lead: string; vowel: string; final: string }[]) => void): string {
-	const chars = [...word];
-	if (chars.length === 0) return word;
-	const parts = chars.map((ch) => decompose(ch));
-	if (parts.some((p) => p === null)) return word;
-	const out = parts.map((p) => ({ ...p! }));
-	fn(out);
-	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
+function mapSyllables(word: string, fn: (out: Decomposed[]) => boolean | void): string {
+	const len = word.length;
+	if (len === 0) return word;
+	const out: Decomposed[] = new Array(len);
+	for (let i = 0; i < len; i++) {
+		const p = decompose(word[i]);
+		if (!p) return word;
+		out[i] = p;
+	}
+	const changed = fn(out);
+	if (!changed) return word;
+
+	let result = '';
+	for (let i = 0; i < len; i++) {
+		const p = out[i];
+		const s = compose(p.lead, p.vowel, p.final);
+		if (!s) return word;
+		result += s;
+	}
+	return result;
 }
 
 /**
@@ -371,6 +382,7 @@ function mapSyllables(word: string, fn: (out: { lead: string; vowel: string; fin
  */
 export function applyTensification(word: string): string {
 	return mapSyllables(word, (out) => {
+		let changed = false;
 		for (let i = 0; i < out.length - 1; i++) {
 			const cur = out[i];
 			const next = out[i + 1];
@@ -381,7 +393,9 @@ export function applyTensification(word: string): string {
 			if (!tensed) continue;
 			cur.final = stop;
 			next.lead = tensed;
+			changed = true;
 		}
+		return changed;
 	});
 }
 
@@ -391,6 +405,7 @@ export function applyTensification(word: string): string {
  */
 export function applyNasalization(word: string): string {
 	return mapSyllables(word, (out) => {
+		let changed = false;
 		for (let i = 0; i < out.length - 1; i++) {
 			const cur = out[i];
 			const next = out[i + 1];
@@ -400,7 +415,9 @@ export function applyNasalization(word: string): string {
 			const nasal = NASAL_FROM_STOP[stop];
 			if (!nasal) continue;
 			cur.final = nasal;
+			changed = true;
 		}
+		return changed;
 	});
 }
 
@@ -446,6 +463,7 @@ const H_REMAINDER: Record<string, string> = {
  */
 export function applyAspiration(word: string): string {
 	return mapSyllables(word, (out) => {
+		let changed = false;
 		for (let i = 0; i < out.length - 1; i++) {
 			const cur = out[i];
 			const next = out[i + 1];
@@ -453,6 +471,7 @@ export function applyAspiration(word: string): string {
 			if (cur.final in H_REMAINDER && next.lead in ASPIRATED_FROM_LEAD) {
 				next.lead = ASPIRATED_FROM_LEAD[next.lead];
 				cur.final = H_REMAINDER[cur.final];
+				changed = true;
 				continue;
 			}
 			if (next.lead !== 'ㅎ' || isCluster(cur.final)) continue;
@@ -461,7 +480,9 @@ export function applyAspiration(word: string): string {
 			if (!aspirated) continue;
 			next.lead = aspirated;
 			cur.final = '';
+			changed = true;
 		}
+		return changed;
 	});
 }
 
@@ -472,6 +493,7 @@ export function applyAspiration(word: string): string {
  */
 export function applyHDeletion(word: string): string {
 	return mapSyllables(word, (out) => {
+		let changed = false;
 		for (let i = 0; i < out.length - 1; i++) {
 			const cur = out[i];
 			const next = out[i + 1];
@@ -479,7 +501,9 @@ export function applyHDeletion(word: string): string {
 			const survivor = H_REMAINDER[cur.final];
 			cur.final = '';
 			if (survivor) next.lead = survivor;
+			changed = true;
 		}
+		return changed;
 	});
 }
 
@@ -510,12 +534,19 @@ const R_TO_N_HOSTS = new Set(['ㅁ', 'ㅇ']);
  */
 export function applyLateralization(word: string): string {
 	return mapSyllables(word, (out) => {
+		let changed = false;
 		for (let i = 0; i < out.length - 1; i++) {
 			const cur = out[i];
 			const next = out[i + 1];
-			if (cur.final === 'ㄴ' && next.lead === 'ㄹ') cur.final = 'ㄹ';
-			else if (cur.final === 'ㄹ' && next.lead === 'ㄴ') next.lead = 'ㄹ';
+			if (cur.final === 'ㄴ' && next.lead === 'ㄹ') {
+				cur.final = 'ㄹ';
+				changed = true;
+			} else if (cur.final === 'ㄹ' && next.lead === 'ㄴ') {
+				next.lead = 'ㄹ';
+				changed = true;
+			}
 		}
+		return changed;
 	});
 }
 
@@ -526,11 +557,16 @@ export function applyLateralization(word: string): string {
  */
 export function applyRToN(word: string): string {
 	return mapSyllables(word, (out) => {
+		let changed = false;
 		for (let i = 0; i < out.length - 1; i++) {
 			const cur = out[i];
 			const next = out[i + 1];
-			if (R_TO_N_HOSTS.has(cur.final) && next.lead === 'ㄹ') next.lead = 'ㄴ';
+			if (R_TO_N_HOSTS.has(cur.final) && next.lead === 'ㄹ') {
+				next.lead = 'ㄴ';
+				changed = true;
+			}
 		}
+		return changed;
 	});
 }
 
