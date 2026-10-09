@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
 	LEADS, VOWELS, FINALS, REPRESENTATIVE, CLUSTERS, CLUSTER_EXCEPTIONS, SOUND_CHANGES,
-	GANADA_CONSONANTS, GANADA_VOWELS,
-	compose, decompose, isSyllable, harmony, sidesFor, buildVowel,
+	GANADA_CONSONANTS, GANADA_VOWELS, BASE_SHAPES,
+	compose, decompose, isSyllable, derive, derivations, baseShapeOf, harmony, sidesFor, buildVowel,
 	fuse, fusionParts, mergedWith, batchimSound, clusterParts, clusterRule, isCluster,
 	applyLiaison, liaisonSources, liaisonAction,
 	applyTensification, applyNasalization, applyContact, contactAction,
@@ -50,6 +50,37 @@ describe('syllable composition', () => {
 		expect(decompose('가나')).toBeNull();
 		expect(isSyllable('한')).toBe(true);
 		expect(isSyllable('ㅎ')).toBe(false);
+	});
+});
+
+describe('consonants derivation and base shape', () => {
+	it('returns base shapes unchanged', () => {
+		for (const base of BASE_SHAPES) {
+			expect(baseShapeOf(base)).toBe(base);
+		}
+	});
+
+	it('maps stroke and double derived consonants to their base shape', () => {
+		expect(baseShapeOf('ㅋ')).toBe('ㄱ');
+		expect(baseShapeOf('ㄲ')).toBe('ㄱ');
+		expect(baseShapeOf('ㄷ')).toBe('ㄴ');
+		expect(baseShapeOf('ㅌ')).toBe('ㄴ');
+		expect(baseShapeOf('ㄸ')).toBe('ㄴ');
+		expect(baseShapeOf('ㅂ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅍ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅃ')).toBe('ㅁ');
+		expect(baseShapeOf('ㅈ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅊ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅉ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅆ')).toBe('ㅅ');
+		expect(baseShapeOf('ㅎ')).toBe('ㅇ');
+	});
+
+	it('returns empty string for non-consonants or unknown inputs', () => {
+		expect(baseShapeOf('ㄹ')).toBe('');
+		expect(baseShapeOf('ㅏ')).toBe('');
+		expect(baseShapeOf('a')).toBe('');
+		expect(baseShapeOf('')).toBe('');
 	});
 });
 
