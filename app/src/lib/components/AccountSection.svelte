@@ -6,12 +6,22 @@
 
 	let confirmingDelete = $state(false);
 	let deleteStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
+	let signingOut = $state(false);
+	let deleting = $state(false);
 
 	const authFailed = $derived(page.url.searchParams.get('auth') === 'failed');
 
+	async function handleSignOut() {
+		signingOut = true;
+		await session.signOut();
+		signingOut = false;
+	}
+
 	async function confirmDelete() {
-		confirmingDelete = false;
+		deleting = true;
 		const ok = await session.deleteAccount();
+		deleting = false;
+		confirmingDelete = false;
 		deleteStatus = ok
 			? {
 					tone: 'right',
@@ -48,8 +58,8 @@
 			</p>
 
 			<div class="actions">
-				<button type="button" class="btn ghost" onclick={() => void session.signOut()}>
-					Sign out
+				<button type="button" class="btn ghost" disabled={signingOut} onclick={handleSignOut}>
+					{signingOut ? 'Signing out…' : 'Sign out'}
 				</button>
 				<button type="button" class="btn ghost danger" onclick={() => (confirmingDelete = true)}>
 					Delete account…
@@ -70,13 +80,14 @@
 						<button
 							type="button"
 							class="btn ghost"
+							disabled={deleting}
 							use:focusWhen={true}
 							onclick={() => (confirmingDelete = false)}
 						>
 							Cancel
 						</button>
-						<button type="button" class="btn" onclick={() => void confirmDelete()}>
-							Delete account
+						<button type="button" class="btn" disabled={deleting} onclick={() => void confirmDelete()}>
+							{deleting ? 'Deleting…' : 'Delete account'}
 						</button>
 					</div>
 				</dialog>
