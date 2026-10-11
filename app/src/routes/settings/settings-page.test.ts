@@ -182,6 +182,27 @@ describe('Settings page — Backup', () => {
 	});
 });
 
+describe('Settings page — ReviewPace', () => {
+	it('shows Saving… on submit button when saving', async () => {
+		vi.spyOn(session, 'status', 'get').mockReturnValue('signed-in');
+		vi.spyOn(session, 'savePrefs').mockImplementation(
+			() => new Promise((resolve) => setTimeout(() => resolve(true), 100))
+		);
+
+		const root = render();
+		const form = root.querySelector<HTMLFormElement>('#review-pace form');
+		expect(form).toBeTruthy();
+
+		const submitBtn = form!.querySelector<HTMLButtonElement>('button[type="submit"]');
+		expect(submitBtn?.textContent?.trim()).toBe('Save study pace');
+
+		form!.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+		flushSync();
+
+		expect(submitBtn?.textContent?.trim()).toBe('Saving…');
+	});
+});
+
 describe('Settings backup deep link — layout and Review', () => {
 	it('layout no longer mounts SiteFooter', () => {
 		expect(layout).not.toMatch(/SiteFooter/);
