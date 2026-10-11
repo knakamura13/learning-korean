@@ -1,5 +1,6 @@
 .git
 .github
+.railway
 .worktrees
 app/node_modules
 app/.svelte-kit
