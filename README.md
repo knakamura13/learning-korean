@@ -46,7 +46,7 @@ railway config plan                    # read-only preview against the linked en
 railway config apply                   # applies the previewed changes
 ```
 
-`apply` manages the whole project, so a resource that is missing from `.railway/railway.ts` is planned for deletion. New services and databases belong in that file, not only in the dashboard. Variable values stay in Railway (`preserve()`), and the generated `*.up.railway.app` domain is not expressible in the file.
+Railway never reads this file during a deploy, so an edit or merge changes nothing live until `railway config apply` runs. Run `railway config plan` first and apply right after merging any change to it. `apply` manages the whole project, so a resource that is missing from `.railway/railway.ts` is planned for deletion. New services and databases belong in that file, not only in the dashboard. Variable values stay in Railway (`preserve()`), and the generated `*.up.railway.app` domain is not expressible in the file.
 
 ## Accounts & cross-device sync (optional)
 
