@@ -29,12 +29,24 @@ When publishing to a stable origin, set `PUBLIC_SITE_URL` (see `app/.env.example
 
 ## Deploy on Railway
 
-Connect this GitHub repo as a new Railway service. The root `Dockerfile` and `railway.toml` already point at `app/`, so leave **Root Directory** as the repository root.
+Connect this GitHub repo as a new Railway service. The root `Dockerfile` already points at `app/`, so leave **Root Directory** as the repository root. Build and deploy settings (Dockerfile builder, health check, restart policy) live in `.railway/railway.ts`, described in [Railway config as code](#railway-config-as-code).
 
 1. New project → Deploy from GitHub → `learning-korean`
 2. Settings → Networking → Generate Domain
 3. Variables: set `PUBLIC_SITE_URL` to that public origin **including `https://`**, with **no trailing slash** (today: `https://learning-korean-production.up.railway.app`). A host without a scheme is treated as https, but crawlers need an absolute URL, so prefer the full origin. The Dockerfile declares `ARG PUBLIC_SITE_URL` so Railway can pass it into `docker build` and prerender absolute OG tags. Rebuild after changing it.
 4. Runtime variables for the Node server: `ORIGIN` (same URL as `PUBLIC_SITE_URL`; required once accounts are enabled so the API's origin check sees the right host), `PORT` (Railway sets this), `PROTOCOL_HEADER`, and `HOST_HEADER`. The Dockerfile already sets the two proxy headers. `ADAPTER=node` is set at image build time in the Dockerfile — do not rely on `RAILWAY_ENVIRONMENT` for adapter selection.
+
+## Railway config as code
+
+`.railway/railway.ts` describes the whole Railway project: the app service, the Postgres database and its volume, and the app's build and deploy settings. It replaces `railway.toml`, which Railway stops reading on 2026-12-01. See [Infrastructure as Code](https://docs.railway.com/infrastructure-as-code).
+
+```bash
+cd .railway && pnpm install && cd ..   # installs the railway SDK, kept separate from the app
+railway config plan                    # read-only preview against the linked environment
+railway config apply                   # applies the previewed changes
+```
+
+`apply` manages the whole project, so a resource that is missing from `.railway/railway.ts` is planned for deletion. New services and databases belong in that file, not only in the dashboard. Variable values stay in Railway (`preserve()`), and the generated `*.up.railway.app` domain is not expressible in the file.
 
 ## Accounts & cross-device sync (optional)
 

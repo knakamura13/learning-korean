@@ -102,10 +102,19 @@ describe('license, health, and manifests', () => {
 	});
 
 	it('uses a short Railway healthcheck on /healthz', () => {
-		const railway = readFileSync(new URL('../../../railway.toml', import.meta.url), 'utf8');
-		expect(railway).toMatch(/healthcheckPath\s*=\s*"\/healthz"/);
-		expect(railway).toMatch(/healthcheckTimeout\s*=\s*30/);
+		const railway = readFileSync(new URL('../../../.railway/railway.ts', import.meta.url), 'utf8');
+		expect(railway).toMatch(/healthcheckPath:\s*'\/healthz'/);
+		expect(railway).toMatch(/healthcheckTimeout:\s*30/);
 		expect(svelteConfig).toMatch(/['"]\/healthz['"]/);
+	});
+
+	it('configures Railway in code, not the deprecated railway.toml', () => {
+		// Railway stops reading railway.toml on 2026-12-01, so a reintroduced file would be ignored silently.
+		expect(existsSync(new URL('../../../railway.toml', import.meta.url))).toBe(false);
+		const railway = readFileSync(new URL('../../../.railway/railway.ts', import.meta.url), 'utf8');
+		expect(railway).toMatch(/builder:\s*'DOCKERFILE'/);
+		expect(railway).toMatch(/restartPolicyType:\s*'ON_FAILURE'/);
+		expect(railway).toMatch(/postgres\('Postgres'/);
 	});
 
 	it('does not depend on isomorphic-dompurify', () => {
