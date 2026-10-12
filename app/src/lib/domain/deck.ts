@@ -411,8 +411,14 @@ export const TIERS: Tier[] = [
 	{ id: 'lab10', label: 'Names', lab: '0010', size: names.length }
 ];
 
+// Pre-computed tier lookup map for O(1) cardsOfTier calls
+const CARDS_BY_TIER: Record<string, Card[]> = {};
+for (const card of DECK) {
+	(CARDS_BY_TIER[card.tier] ??= []).push(card);
+}
+
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return CARDS_BY_TIER[tier] ?? [];
 }
 
 /**
