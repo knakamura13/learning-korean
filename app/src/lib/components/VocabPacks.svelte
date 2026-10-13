@@ -55,9 +55,21 @@
 					<span class="nm"><KoText text={pack.label} /></span>
 					<span class="track" aria-hidden="true">
 						{#if pack.unlocked}
-							<span class="m" style="width:{pctMature}%"></span>
-							<span class="y" style="width:{pctYoung}%"></span>
-							<span class="n" style="width:{pctUnseen}%"></span>
+							<span
+								class="m"
+								style="width:{pctMature}%"
+								title="{pack.mature} mastered ({pctMature}%)"
+							></span>
+							<span
+								class="y"
+								style="width:{pctYoung}%"
+								title="{pack.young} learning ({pctYoung}%)"
+							></span>
+							<span
+								class="n"
+								style="width:{pctUnseen}%"
+								title="{pack.unseen} not started ({pctUnseen}%)"
+							></span>
 						{/if}
 					</span>
 					{#if pack.unlocked}
