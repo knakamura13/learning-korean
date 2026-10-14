@@ -30,10 +30,31 @@ describe('AudioClip', () => {
 
 		const button = host.querySelector('button');
 		expect(button).not.toBeNull();
+		expect(button!.title).toBe("Couldn't play audio");
 		expect(button!.getAttribute('aria-disabled')).toBe('true');
 		expect(button!.textContent).toMatch(/Couldn't play/);
 		expect(button!.querySelector('[lang="ko"]')?.textContent).toBe('ㄱ');
 		expect(button!.getAttribute('aria-label')).toBeNull();
+
+		unmount(app);
+		host.remove();
+	});
+
+	it('provides a helpful tooltip title before playback', () => {
+		const host = document.createElement('div');
+		document.body.appendChild(host);
+		const app = mount(AudioClip, {
+			target: host,
+			props: {
+				jamo: 'ㄴ',
+				opus: '/audio/consonants/n.opus',
+				mp3: '/audio/consonants/n.mp3'
+			}
+		});
+
+		const button = host.querySelector('button');
+		expect(button).not.toBeNull();
+		expect(button!.title).toBe('Play audio');
 
 		unmount(app);
 		host.remove();
