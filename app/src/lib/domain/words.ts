@@ -268,6 +268,12 @@ export const VOCAB_PACKS: VocabPack[] = [
 	}
 ];
 
+// Pre-indexed lookup map for O(1) pack lookups, avoiding repeated O(N) array filtering of WORDS
+const WORDS_BY_PACK: Record<string, WordEntry[]> = WORDS.reduce((acc, word) => {
+	(acc[word.pack] ??= []).push(word);
+	return acc;
+}, {} as Record<string, WordEntry[]>);
+
 export function wordsOfPack(pack: PackId): WordEntry[] {
-	return WORDS.filter((word) => word.pack === pack);
+	return WORDS_BY_PACK[pack] ? [...WORDS_BY_PACK[pack]] : [];
 }
