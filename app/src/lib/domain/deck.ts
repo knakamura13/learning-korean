@@ -411,8 +411,20 @@ export const TIERS: Tier[] = [
 	{ id: 'lab10', label: 'Names', lab: '0010', size: names.length }
 ];
 
+/**
+ * Pre-grouped map of cards by tier for O(1) lookup in cardsOfTier,
+ * avoiding repeated linear scans across the full DECK array.
+ */
+export const CARDS_BY_TIER: Record<string, Card[]> = DECK.reduce(
+	(acc, c) => {
+		(acc[c.tier] ??= []).push(c);
+		return acc;
+	},
+	{} as Record<string, Card[]>
+);
+
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return (CARDS_BY_TIER[tier] ?? []).slice();
 }
 
 /**
