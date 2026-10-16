@@ -15,6 +15,11 @@ function railBlock(css: string): string {
 }
 
 describe('LabPipRail', () => {
+	it('renders only up to furthest + 1 pips', () => {
+		expect(labPipRail).toMatch(/visibleCount = \$derived\(Math\.min\(stepCount,\s*furthest\s*\+\s*1\)\)/);
+		expect(labPipRail).toMatch(/\{#each \{ length: visibleCount \}, i \(i\)\}/);
+	});
+
 	it('exposes a thin scrollbar at all widths and keeps 44px pip hits', () => {
 		const css = styleBlock(labPipRail);
 		const rail = railBlock(css);
