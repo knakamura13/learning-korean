@@ -291,6 +291,19 @@ button { font: inherit; color: inherit; }
 	}
 }
 
+@media (max-width: 40rem) {
+	.frame.lab-route {
+		--sitting-bar-block: calc(48px + 1px + env(safe-area-inset-top, 0px));
+		--shell-pad-top: var(--s3);
+		--shell-pad-bottom: max(var(--s3), env(safe-area-inset-bottom));
+		--sitting-chrome: 9rem;
+	}
+	.frame.lab-route .shell {
+		padding-top: var(--shell-pad-top);
+		padding-bottom: var(--shell-pad-bottom);
+	}
+}
+
 .card {
 	position: relative;
 	background: var(--paper-raised);

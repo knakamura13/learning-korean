@@ -8,7 +8,13 @@
 	import { labSession } from '$lib/stores/labSession.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
 
-	let { currentId }: { currentId: string } = $props();
+	let {
+		currentId,
+		variant = 'page'
+	}: {
+		currentId: string;
+		variant?: 'page' | 'bar';
+	} = $props();
 
 	const course = LABS.map(toCourseLab);
 	const standfirsts = Object.fromEntries(LABS.map((lab) => [lab.id, lab.standfirst]));
@@ -52,7 +58,7 @@
 </script>
 
 <!-- Phone/tablet stand-in for the ≥72rem lab index rail: same models, one tap. -->
-<div class="switcher">
+<div class={['switcher', variant]}>
 	<button
 		type="button"
 		class="trigger"
@@ -101,15 +107,29 @@
 </div>
 
 <style>
-	/* The vertical index rail owns ≥72rem; this switcher owns everything below. */
-	@media (min-width: 72rem) {
-		.switcher {
-			display: none;
-		}
-	}
-
 	.switcher {
 		margin-block-end: var(--s3);
+	}
+
+	.switcher.bar {
+		display: none;
+		margin-block-end: 0;
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+	.switcher.bar .trigger {
+		max-width: 100%;
+		background: transparent;
+		border-color: transparent;
+	}
+
+	@media (max-width: 40rem) {
+		.switcher.page {
+			display: none;
+		}
+		.switcher.bar {
+			display: flex;
+		}
 	}
 
 	.trigger {
@@ -270,6 +290,13 @@
 		}
 		.chip {
 			border: 1px solid ButtonBorder;
+		}
+	}
+
+	/* The vertical index rail owns ≥72rem; this switcher owns everything below. */
+	@media (min-width: 72rem) {
+		.switcher {
+			display: none;
 		}
 	}
 </style>

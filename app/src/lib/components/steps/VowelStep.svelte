@@ -510,7 +510,7 @@
 	.zone {
 		position: relative;
 		box-sizing: border-box;
-		width: min(100%, max(16rem, calc(100dvh - 14rem)));
+		width: min(100%, max(16rem, calc(100svh - var(--sitting-chrome, 14rem))));
 		max-width: 100%;
 		aspect-ratio: 1;
 		margin: 0 auto var(--s5);

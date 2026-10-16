@@ -250,4 +250,25 @@ describe('LabSpread source contracts', () => {
 		expect(css).toMatch(/\.spread\.solo\s*\{[^}]*max-width:\s*var\(--measure\)/s);
 		expect(css).toMatch(/\.spread\.solo\s*\{[^}]*margin-inline:\s*auto/s);
 	});
+
+	it('fills leftover svh with the well on compact sitting and keeps after outside that overflow', () => {
+		const css = styleBlock(spread);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.spread:not\(\.solo\)\s*\{[^}]*min-height:\s*calc\(100svh/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.spread:not\(\.solo\)[\s\S]*\.spread-col\s*\{[^}]*display:\s*contents/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.spread:not\(\.solo\)[\s\S]*\.well\s*\{[^}]*min-height:\s*0/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.spread:not\(\.solo\)[\s\S]*\.well\s*\{[^}]*overflow-y:\s*auto/s
+		);
+		expect(css).toMatch(
+			/@media \(max-width: 40rem\)[\s\S]*\.spread:not\(\.solo\)[\s\S]*gap:\s*var\(--s3\)/s
+		);
+		expect(css).toMatch(/\.well\s*\{[^}]*flex-shrink:\s*0/s);
+		expect(css).toMatch(/\.after\s*\{[^}]*flex-shrink:\s*0/s);
+	});
 });

@@ -24,7 +24,7 @@ function shellBeforeRail(src: string, railTag: string): boolean {
 describe('shell layout source contracts', () => {
 	it('layout has no SiteFooter; frame still fills the viewport', () => {
 		expect(layout).not.toMatch(/SiteFooter/);
-		expect(layout).toMatch(/class="frame"/);
+		expect(layout).toMatch(/class=\{\['frame'/);
 		expect(styleBlock(layout)).toMatch(/\.frame\s*\{[^}]*min-height:\s*100dvh/s);
 		expect(styleBlock(layout)).toMatch(/main\s*\{[^}]*flex:\s*1 1 auto/s);
 	});
