@@ -5,13 +5,16 @@
 	import { session } from '$lib/stores/session.svelte';
 
 	let confirmingDelete = $state(false);
+	let isDeleting = $state(false);
 	let deleteStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
 
 	const authFailed = $derived(page.url.searchParams.get('auth') === 'failed');
 
 	async function confirmDelete() {
-		confirmingDelete = false;
+		isDeleting = true;
 		const ok = await session.deleteAccount();
+		isDeleting = false;
+		confirmingDelete = false;
 		deleteStatus = ok
 			? {
 					tone: 'right',
@@ -60,7 +63,7 @@
 				<dialog
 					class="confirm"
 					aria-labelledby="delete-copy"
-					{@attach (node: HTMLDialogElement) => attachModalDialog(node, () => (confirmingDelete = false))}
+					{@attach (node: HTMLDialogElement) => attachModalDialog(node, () => !isDeleting && (confirmingDelete = false))}
 				>
 					<p id="delete-copy">
 						Delete your account and its synced copy of your progress? The deck in this browser
@@ -70,13 +73,14 @@
 						<button
 							type="button"
 							class="btn ghost"
+							disabled={isDeleting}
 							use:focusWhen={true}
 							onclick={() => (confirmingDelete = false)}
 						>
 							Cancel
 						</button>
-						<button type="button" class="btn" onclick={() => void confirmDelete()}>
-							Delete account
+						<button type="button" class="btn" disabled={isDeleting} onclick={() => void confirmDelete()}>
+							{isDeleting ? 'Deleting…' : 'Delete account'}
 						</button>
 					</div>
 				</dialog>
