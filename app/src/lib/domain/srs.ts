@@ -295,8 +295,8 @@ export function unlock(state: SrsState, tiers: string[]): SrsState {
 }
 
 export function isUnlocked(state: SrsState | ReadonlySet<string>, tier: string): boolean {
-	if (state instanceof Set) return state.has(tier);
-	return state.unlocked.includes(tier);
+	if ('unlocked' in state) return state.unlocked.includes(tier);
+	return state.has(tier);
 }
 
 /** Grant skip-ahead access to a lab without releasing its review tier. */
