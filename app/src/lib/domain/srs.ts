@@ -294,8 +294,9 @@ export function unlock(state: SrsState, tiers: string[]): SrsState {
 	return { ...state, unlocked: [...state.unlocked, ...missing] };
 }
 
-export function isUnlocked(state: SrsState, tier: string): boolean {
-	return state.unlocked.includes(tier);
+export function isUnlocked(state: SrsState | ReadonlySet<string>, tier: string): boolean {
+	if ('unlocked' in state) return state.unlocked.includes(tier);
+	return state.has(tier);
 }
 
 /** Grant skip-ahead access to a lab without releasing its review tier. */
@@ -329,6 +330,7 @@ export function setFlagged(
 	const flagged = new Set(state.flagged);
 	let cards = state.cards;
 	let changed = false;
+	let deckById: Map<string, SchedulableCard> | undefined;
 
 	for (const id of cardIds) {
 		if (!id) continue;
@@ -345,7 +347,10 @@ export function setFlagged(
 					changed = true;
 				}
 			} else {
-				const tier = deck.find((c) => c.id === id)?.tier;
+				if (!deckById) {
+					deckById = new Map(deck.map((c) => [c.id, c]));
+				}
+				const tier = deckById.get(id)?.tier;
 				if (tier && isUnlocked(state, tier)) {
 					if (cards === state.cards) cards = { ...cards };
 					cards[id] = { ease: EASE_START, ivl: 0, reps: 0, lapses: 0, due: now };
@@ -362,7 +367,9 @@ export function setFlagged(
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
-	return deck.filter((c) => isUnlocked(state, c.tier));
+	// Use Set for O(1) unlock checks per card instead of array scans
+	const unlockedSet = new Set(state.unlocked);
+	return deck.filter((c) => isUnlocked(unlockedSet, c.tier));
 }
 
 /* ------------------------------------------------------------------ *
@@ -698,8 +705,20 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
+	// Single pass over deck to group cards by tier: O(N) instead of O(T * N)
+	const cardsByTier = new Map<string, T[]>();
+	for (const card of deck) {
+		let list = cardsByTier.get(card.tier);
+		if (!list) {
+			list = [];
+			cardsByTier.set(card.tier, list);
+		}
+		list.push(card);
+	}
+	const unlockedSet = new Set(state.unlocked);
+
 	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
+		const cards = cardsByTier.get(tier.id) ?? [];
 		let mature = 0;
 		let young = 0;
 		for (const c of cards) {
@@ -712,7 +731,7 @@ export function tierReviewProgress<T extends SchedulableCard>(
 		return {
 			id: tier.id,
 			size: tier.size,
-			unlocked: isUnlocked(state, tier.id),
+			unlocked: isUnlocked(unlockedSet, tier.id),
 			mature,
 			young,
 			unseen: cards.length - seen,
