@@ -43,6 +43,7 @@
 	class:failed
 	aria-disabled={failed}
 	aria-pressed={playing}
+	aria-label="{failed ? "Couldn't play" : playing ? 'Pause' : 'Play'} {jamo}"
 	onclick={toggle}
 >
 	<span class="vh">
