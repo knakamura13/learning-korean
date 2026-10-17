@@ -294,7 +294,12 @@ export function unlock(state: SrsState, tiers: string[]): SrsState {
 	return { ...state, unlocked: [...state.unlocked, ...missing] };
 }
 
-export function isUnlocked(state: SrsState, tier: string): boolean {
+export function unlockedSet(state: SrsState): Set<string> {
+	return new Set(state.unlocked);
+}
+
+export function isUnlocked(state: SrsState | Set<string>, tier: string): boolean {
+	if (state instanceof Set) return state.has(tier);
 	return state.unlocked.includes(tier);
 }
 
@@ -362,7 +367,9 @@ export function setFlagged(
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
-	return deck.filter((c) => isUnlocked(state, c.tier));
+	// Pre-build Set for O(1) unlock checks across the deck instead of O(U) array searches
+	const unlocked = unlockedSet(state);
+	return deck.filter((c) => isUnlocked(unlocked, c.tier));
 }
 
 /* ------------------------------------------------------------------ *
@@ -698,12 +705,25 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
+	// Pre-group deck by tier in a single O(N) pass to avoid repeated O(M * N) array scans
+	const unlocked = unlockedSet(state);
+	const cardsByTier = new Map<string, T[]>();
+	for (let i = 0; i < deck.length; i++) {
+		const c = deck[i];
+		let list = cardsByTier.get(c.tier);
+		if (!list) {
+			list = [];
+			cardsByTier.set(c.tier, list);
+		}
+		list.push(c);
+	}
+
 	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
+		const cards = cardsByTier.get(tier.id) ?? [];
 		let mature = 0;
 		let young = 0;
-		for (const c of cards) {
-			const cs = state.cards[c.id];
+		for (let i = 0; i < cards.length; i++) {
+			const cs = state.cards[cards[i].id];
 			if (!cs) continue;
 			if (cs.ivl >= MATURE_DAYS) mature++;
 			else young++;
@@ -712,7 +732,7 @@ export function tierReviewProgress<T extends SchedulableCard>(
 		return {
 			id: tier.id,
 			size: tier.size,
-			unlocked: isUnlocked(state, tier.id),
+			unlocked: isUnlocked(unlocked, tier.id),
 			mature,
 			young,
 			unseen: cards.length - seen,
