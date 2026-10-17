@@ -1,3 +1,7 @@
+## 2025-05-19 - WeakMap Indexing and Array Cache for Hangul Sprint Options
+**Learning:** `optionsForBlock` in `sprint.ts` repeatedly scanned all ~11,172 inventory blocks and recalculated `romanizeSyllable` for every single block on each trial generation during the timed 60-second speed game. Combining a fixed-size O(1) syllable romanization array cache (`0xAC00`-`0xD7A3`) in `hangul.ts` with a `WeakMap<readonly string[], Map<number, string[]>>` length-bucket index in `sprint.ts` reduced 1,000 trial generations from ~2,450ms down to ~229ms (~10x speedup).
+**Action:** When generating dynamic game/quiz trials from large pool arrays, index candidate properties into length/category buckets using `WeakMap` indexed by the pool reference to preserve pure function contracts while eliminating repeated linear scans.
+
 ## 2025-05-18 - Single-Pass HTML Scanner for Hangul Wrapping
 **Learning:** `withLangKo` in `src/lib/a11y/lang.ts` previously re-scanned the entire HTML string from index 0 on every Hangul match using a secondary regex loop to calculate `langKoDepth(before)`. For HTML containing multiple tags and Hangul runs (such as all authored lab copy), this resulted in O(N²) regex execution overhead during lab copy sanitization.
 **Action:** Use a single-pass tokenizing regex matching tags and Hangul runs in sequence while maintaining a running open-tag depth state, eliminating quadratic string slicing and regex instantiation.

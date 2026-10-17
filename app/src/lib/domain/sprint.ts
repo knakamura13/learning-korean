@@ -104,6 +104,28 @@ export function shuffled<T>(items: readonly T[], rng: Rng): T[] {
 
 const MAX_TRIAL_ATTEMPTS = 40;
 
+// Caches pool blocks grouped by romanized reading length to avoid scanning full inventory on every trial
+const POOL_BY_LENGTH_CACHE = new WeakMap<readonly string[], Map<number, string[]>>();
+
+function getLengthMap(pool: readonly string[]): Map<number, string[]> {
+	let lengthMap = POOL_BY_LENGTH_CACHE.get(pool);
+	if (!lengthMap) {
+		lengthMap = new Map<number, string[]>();
+		for (const item of pool) {
+			const reading = romanizeSyllable(item);
+			if (!reading) continue;
+			let list = lengthMap.get(reading.length);
+			if (!list) {
+				list = [];
+				lengthMap.set(reading.length, list);
+			}
+			list.push(reading);
+		}
+		POOL_BY_LENGTH_CACHE.set(pool, lengthMap);
+	}
+	return lengthMap;
+}
+
 function optionsForBlock(
 	block: string,
 	pool: readonly string[],
@@ -111,11 +133,13 @@ function optionsForBlock(
 ): { options: string[]; answerIndex: number } | null {
 	const answer = romanizeSyllable(block);
 	if (!answer) return null;
+	const lengthMap = getLengthMap(pool);
+	const candidates = lengthMap.get(answer.length);
+	if (!candidates) return null;
+
 	const distractors = new Set<string>();
-	for (const other of pool) {
-		if (other === block) continue;
-		const reading = romanizeSyllable(other);
-		if (reading && reading !== answer && reading.length === answer.length) {
+	for (const reading of candidates) {
+		if (reading !== answer) {
 			distractors.add(reading);
 		}
 	}

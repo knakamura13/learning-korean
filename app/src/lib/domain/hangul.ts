@@ -610,7 +610,21 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
+// Fast O(1) lookup cache for romanized Hangul syllables (0xAC00 to 0xD7A3)
+const ROMAN_SYLLABLE_CACHE = new Array<string>(11172);
+
 export function romanizeSyllable(ch: string): string {
+	if (ch.length !== 1) return '';
+	const code = ch.charCodeAt(0) - SYL_BASE;
+	if (code >= 0 && code < 11172) {
+		const cached = ROMAN_SYLLABLE_CACHE[code];
+		if (cached !== undefined) return cached;
+		const parts = decompose(ch);
+		if (!parts) return (ROMAN_SYLLABLE_CACHE[code] = '');
+		const res = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+		ROMAN_SYLLABLE_CACHE[code] = res;
+		return res;
+	}
 	const parts = decompose(ch);
 	if (!parts) return '';
 	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
