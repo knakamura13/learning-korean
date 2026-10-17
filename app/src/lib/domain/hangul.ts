@@ -610,10 +610,21 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
+// Fast O(1) array cache indexed by Unicode syllable offset (code - 0xAC00)
+const ROMANIZED_CACHE = new Array<string>(SYL_LAST - SYL_BASE + 1);
+
 export function romanizeSyllable(ch: string): string {
-	const parts = decompose(ch);
-	if (!parts) return '';
-	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	if (ch.length !== 1) return '';
+	const code = ch.charCodeAt(0) - SYL_BASE;
+	if (code < 0 || code > SYL_LAST - SYL_BASE) return '';
+	let cached = ROMANIZED_CACHE[code];
+	if (cached === undefined) {
+		const parts = decompose(ch);
+		if (!parts) return '';
+		cached = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+		ROMANIZED_CACHE[code] = cached;
+	}
+	return cached;
 }
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
