@@ -10,10 +10,12 @@ import labPage from '../../routes/lab/[id]/+page.svelte?raw';
 import reference from '../../routes/reference/+page.svelte?raw';
 import audioClip from '../components/AudioClip.svelte?raw';
 import labDragClient from '../components/labDrag.client.ts?raw';
+import options from '../components/Options.svelte?raw';
 import progressBackup from '../components/ProgressBackup.svelte?raw';
 import reviewCompose from '../components/ReviewCompose.svelte?raw';
 import settingsLink from '../components/SettingsLink.svelte?raw';
 import slots from '../components/Slots.svelte?raw';
+import sprintChoices from '../components/SprintChoices.svelte?raw';
 import target from '../components/Target.svelte?raw';
 import tray from '../components/Tray.svelte?raw';
 import clusterStep from '../components/steps/ClusterStep.svelte?raw';
@@ -66,6 +68,8 @@ describe('a11y semantic parity (#144)', () => {
 		expect(clusterStep).not.toMatch(/aria-label="Choose consonant \{jamo\}"/);
 		expect(liaisonStep).not.toMatch(/aria-label="Move \{jamo\}"/);
 		expect(readStep).not.toMatch(/aria-label="Block \{i \+ 1\}:/);
+		expect(options).not.toMatch(/aria-label="Option \{choiceKeyLabel/);
+		expect(sprintChoices).not.toMatch(/aria-label="Option \{choiceKeyLabel/);
 	});
 
 	it('announces backup import/export from a persistent live region', () => {
