@@ -37,6 +37,9 @@ const VOID_TAGS = new Set(['br', 'img', 'hr', 'input', 'meta', 'link', 'wbr']);
  * attributes in a single traversal instead of re-scanning previous tags on each match.
  */
 export function withLangKo(html: string): string {
+	// Fast-path: Skip HTML tokenization if string contains no Hangul characters
+	if (!hasHangul(html)) return html;
+
 	let depth = 0;
 	HTML_OR_HANGUL.lastIndex = 0;
 	return html.replace(HTML_OR_HANGUL, (token) => {
