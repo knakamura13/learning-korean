@@ -61,10 +61,10 @@ export interface Decomposed {
 export function decompose(syllable: string): Decomposed | null {
 	if (syllable.length !== 1) return null;
 	const code = syllable.charCodeAt(0) - SYL_BASE;
-	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) return null;
+	if (code < 0 || code > 11171) return null;
 	return {
-		lead: LEADS[Math.floor(code / 588)],
-		vowel: VOWELS[Math.floor((code % 588) / 28)],
+		lead: LEADS[(code / 588) | 0],
+		vowel: VOWELS[((code % 588) / 28) | 0],
 		final: FINALS[code % 28]
 	};
 }
@@ -99,21 +99,48 @@ export function derive(letter: string, op: Derivation): string {
 	return DERIVE[letter]?.[op] ?? '';
 }
 
+// Pre-computed lookup map for derivations() to avoid array allocations on every call
+const DERIVATIONS_MAP = new Map<string, Derivation[]>(
+	Object.entries(DERIVE).map(([letter, entry]) => [
+		letter,
+		(Object.keys(entry) as Derivation[]).filter((k) => !!entry[k])
+	])
+);
+
 export function derivations(letter: string): Derivation[] {
-	const entry = DERIVE[letter];
-	if (!entry) return [];
-	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
+	return DERIVATIONS_MAP.get(letter) ?? [];
 }
+
+// Pre-computed lookup map for baseShapeOf() to avoid recursive object/array allocations
+const BASE_SHAPE_MAP = new Map<string, string>();
+(function initBaseShapeMap() {
+	for (const shape of BASE_SHAPES) {
+		BASE_SHAPE_MAP.set(shape, shape);
+	}
+	for (const [from, ops] of Object.entries(DERIVE)) {
+		for (const target of Object.values(ops)) {
+			if (target) {
+				let base = from;
+				while (!(BASE_SHAPES as readonly string[]).includes(base)) {
+					let parent = '';
+					for (const [pFrom, pOps] of Object.entries(DERIVE)) {
+						if (Object.values(pOps).includes(base)) {
+							parent = pFrom;
+							break;
+						}
+					}
+					if (!parent) break;
+					base = parent;
+				}
+				BASE_SHAPE_MAP.set(target, base);
+			}
+		}
+	}
+})();
 
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-	for (const [from, ops] of Object.entries(DERIVE)) {
-		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
-		}
-	}
-	return '';
+	return BASE_SHAPE_MAP.get(letter) ?? '';
 }
 
 /* ------------------------------------------------------------------ *
@@ -143,8 +170,12 @@ const STROKE_TABLE: Record<string, Record<string, [string, string]>> = {
 
 export type TickSide = 'left' | 'right' | 'above' | 'below';
 
+const SIDES_I: TickSide[] = ['left', 'right'];
+const SIDES_EU: TickSide[] = ['above', 'below'];
+const SIDES_EMPTY: TickSide[] = [];
+
 export function sidesFor(base: string): TickSide[] {
-	return base === 'ㅣ' ? ['left', 'right'] : base === 'ㅡ' ? ['above', 'below'] : [];
+	return base === 'ㅣ' ? SIDES_I : base === 'ㅡ' ? SIDES_EU : SIDES_EMPTY;
 }
 
 /** Build a simple vowel. `ticks` of 0 yields the bare base stroke. */
@@ -190,9 +221,19 @@ export const VOWEL_MERGERS: string[][] = [
 	['ㅙ', 'ㅚ', 'ㅞ']
 ];
 
+// Pre-computed map for mergedWith() to avoid O(N) array scans and filter allocations
+const MERGED_WITH_MAP = new Map<string, string[]>();
+for (const group of VOWEL_MERGERS) {
+	for (const item of group) {
+		MERGED_WITH_MAP.set(
+			item,
+			group.filter((x) => x !== item)
+		);
+	}
+}
+
 export function mergedWith(v: string): string[] {
-	const group = VOWEL_MERGERS.find((g) => g.includes(v));
-	return group ? group.filter((x) => x !== v) : [];
+	return MERGED_WITH_MAP.get(v) ?? [];
 }
 
 /* ------------------------------------------------------------------ *
@@ -276,7 +317,8 @@ export function applyLiaison(word: string): string {
 	const parts = chars.map((ch) => decompose(ch));
 	if (parts.some((p) => p === null)) return word;
 
-	const out = parts.map((p) => ({ ...p! }));
+	// decompose already returns newly allocated Decomposed objects, no need to re-clone
+	const out = parts as Decomposed[];
 	for (let i = 0; i < out.length - 1; i++) {
 		const cur = out[i];
 		const next = out[i + 1];
@@ -360,7 +402,8 @@ function mapSyllables(word: string, fn: (out: { lead: string; vowel: string; fin
 	if (chars.length === 0) return word;
 	const parts = chars.map((ch) => decompose(ch));
 	if (parts.some((p) => p === null)) return word;
-	const out = parts.map((p) => ({ ...p! }));
+	// decompose already returns newly allocated Decomposed objects, no need to re-clone
+	const out = parts as Decomposed[];
 	fn(out);
 	return out.map((p) => compose(p.lead, p.vowel, p.final)).join('');
 }
