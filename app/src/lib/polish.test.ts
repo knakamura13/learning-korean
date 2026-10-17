@@ -1493,6 +1493,9 @@ describe('issue #145 polish leftovers', () => {
 		expect(masterySnapshot).toMatch(/mastered \(21\+ day gap\)/);
 		expect(reference).toMatch(/VocabPacks/);
 		expect(vocabPacks).toMatch(/sec-vocab-heading/);
+		expect(vocabPacks).toMatch(/title="\{pack\.mature\} mastered \(\{pctMature\}%\)"/);
+		expect(vocabPacks).toMatch(/title="\{pack\.young\} learning \(\{pctYoung\}%\)"/);
+		expect(vocabPacks).toMatch(/title="\{pack\.unseen\} not started \(\{pctUnseen\}%\)"/);
 		expect(home).not.toMatch(/MasterySnapshot|VocabPacks|sec-vocab-heading/);
 	});
 
