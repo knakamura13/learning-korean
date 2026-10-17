@@ -63,7 +63,12 @@
 					{#if pack.unlocked}
 						<span class="ct" aria-hidden="true">{tierCountLabel(pack)}</span>
 					{:else}
-						<button type="button" class="btn ghost open-pack" onclick={() => openPack(pack.id)}>
+						<button
+							type="button"
+							class="btn ghost open-pack"
+							aria-label="Open {pack.label} pack"
+							onclick={() => openPack(pack.id)}
+						>
 							Open · {pack.size} cards
 						</button>
 					{/if}
