@@ -99,21 +99,36 @@ export function derive(letter: string, op: Derivation): string {
 	return DERIVE[letter]?.[op] ?? '';
 }
 
+// Precomputed derivations map to avoid O(N) key scanning and array allocations
+const DERIVATIONS_MAP: Record<string, Derivation[]> = Object.fromEntries(
+	Object.entries(DERIVE).map(([letter, entry]) => [
+		letter,
+		(Object.keys(entry) as Derivation[]).filter((k) => !!entry[k])
+	])
+);
+
 export function derivations(letter: string): Derivation[] {
-	const entry = DERIVE[letter];
-	if (!entry) return [];
-	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
+	return DERIVATIONS_MAP[letter] ?? [];
 }
 
-/** The base shape a consonant ultimately comes from, following derivations back. */
-export function baseShapeOf(letter: string): string {
+function findBaseShape(letter: string): string {
 	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
 	for (const [from, ops] of Object.entries(DERIVE)) {
 		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
+			if (target === letter) return findBaseShape(from);
 		}
 	}
 	return '';
+}
+
+// Precomputed base shapes for all consonants to eliminate recursive O(N) array/object allocations during render
+const BASE_SHAPE_MAP: Record<string, string> = Object.fromEntries(
+	LEADS.map((lead) => [lead, findBaseShape(lead)])
+);
+
+/** The base shape a consonant ultimately comes from, following derivations back. */
+export function baseShapeOf(letter: string): string {
+	return BASE_SHAPE_MAP[letter] ?? findBaseShape(letter);
 }
 
 /* ------------------------------------------------------------------ *
