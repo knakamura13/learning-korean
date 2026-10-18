@@ -74,8 +74,14 @@ function finalsFor(unlocked: readonly string[]): string[] {
 	return out;
 }
 
+// Memoization cache for sprint inventory blocks by unlocked tier set
+const SPRINT_INVENTORY_CACHE = new Map<string, string[]>();
+
 export function sprintInventory(unlocked: readonly string[]): string[] {
 	if (!sprintEligible(unlocked)) return [];
+	const key = [...unlocked].sort().join(',');
+	const cached = SPRINT_INVENTORY_CACHE.get(key);
+	if (cached) return cached.slice();
 	const blocks: string[] = [];
 	for (const lead of leadsFor(unlocked)) {
 		for (const vowel of vowelsFor(unlocked)) {
@@ -85,7 +91,8 @@ export function sprintInventory(unlocked: readonly string[]): string[] {
 			}
 		}
 	}
-	return blocks;
+	SPRINT_INVENTORY_CACHE.set(key, blocks);
+	return blocks.slice();
 }
 
 export function pickIndex(length: number, rng: Rng): number {
