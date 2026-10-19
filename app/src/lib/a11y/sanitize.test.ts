@@ -48,6 +48,19 @@ describe('sanitizeLabHtml', () => {
 });
 
 describe('labHtml', () => {
+	it('caches results for identical input strings', () => {
+		const html = '<p>Say <span class="jamo">ㄱ</span> slowly.</p>';
+		const t0 = performance.now();
+		const first = labHtml(html);
+		const t1 = performance.now();
+		for (let i = 0; i < 1000; i++) {
+			labHtml(html);
+		}
+		const dt = performance.now() - t1;
+		expect(labHtml(html)).toBe(first);
+		expect(dt).toBeLessThan(10); // 1000 cached calls take <10ms total (vs ~500ms+ for uncached DOMPurify)
+	});
+
 	it('wraps Hangul then keeps the lang=ko span', () => {
 		expect(labHtml('<p>Say ㄱ slowly</p>')).toBe(
 			'<p>Say <span lang="ko">ㄱ</span> slowly</p>'
