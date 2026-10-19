@@ -37,4 +37,13 @@ describe('SprintChoices', () => {
 		expect(src).toMatch(/min-width:\s*44px/);
 		expect(src).toMatch(/grid-template-columns:\s*1fr 1fr/);
 	});
+
+	it('tags Korean text with lang="ko" and omits mixed aria-label on options', () => {
+		const onPick = vi.fn();
+		const el = render(SprintChoices, { options: ['김', '나', '다', '라'], onPick });
+		const txts = [...el.querySelectorAll<HTMLSpanElement>('button.opt .txt')];
+		expect(txts[0].getAttribute('lang')).toBe('ko');
+		const buttons = [...el.querySelectorAll<HTMLButtonElement>('button.opt')];
+		expect(buttons[0].getAttribute('aria-label')).toBeNull();
+	});
 });
