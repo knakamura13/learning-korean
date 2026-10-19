@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { hasHangul } from '$lib/a11y/lang';
 	import {
 		choiceIndexFromKey,
 		choiceKeyLabel,
@@ -42,15 +43,16 @@
 <div class="opts" role="group" aria-label="answer choices">
 	{#each options as text, i (text)}
 		{@const inert = locked || disabled}
+		{@const Korean = hasHangul(text)}
 		<button
 			class="opt"
 			aria-disabled={inert ? 'true' : undefined}
 			onclick={() => pick(i)}
 			onkeydown={onChoiceKeydown}
-			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {text}"
+			aria-label={Korean ? undefined : `Option ${choiceKeyLabel(keyScheme, i)}: ${text}`}
 		>
 			<span class="key" aria-hidden="true"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
-			<span class="txt">{text}</span>
+			<span class="txt" lang={Korean ? 'ko' : undefined}>{text}</span>
 		</button>
 	{/each}
 </div>
