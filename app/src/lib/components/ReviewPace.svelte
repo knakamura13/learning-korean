@@ -45,14 +45,32 @@
 			<div class="fields">
 				<label>
 					<span>New cards per day</span>
-					<input type="number" min="0" max="50" step="1" bind:value={newPerDay} />
+					<input
+						type="number"
+						min="0"
+						max="50"
+						step="1"
+						aria-describedby="new-cards-hint"
+						bind:value={newPerDay}
+					/>
+					<span id="new-cards-hint" class="hint">0–50 cards</span>
 				</label>
 				<label>
 					<span>Reviews per sitting</span>
-					<input type="number" min="1" max="100" step="1" bind:value={reviewsPerSitting} />
+					<input
+						type="number"
+						min="1"
+						max="100"
+						step="1"
+						aria-describedby="reviews-sitting-hint"
+						bind:value={reviewsPerSitting}
+					/>
+					<span id="reviews-sitting-hint" class="hint">1–100 reviews</span>
 				</label>
 			</div>
-			<button type="submit" class="btn" disabled={saving}>Save study pace</button>
+			<button type="submit" class="btn" disabled={saving}>
+				{saving ? 'Saving…' : 'Save study pace'}
+			</button>
 		</form>
 		{#if prefsStatus}
 			<p class="status" data-tone={prefsStatus.tone} role="status" aria-live="polite">
@@ -97,6 +115,11 @@
 		gap: var(--s1);
 		font-size: 0.78rem;
 		color: var(--ink-soft);
+	}
+
+	.hint {
+		font-size: 0.72rem;
+		color: var(--ink-faint);
 	}
 
 	.fields input {
