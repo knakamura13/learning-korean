@@ -370,11 +370,19 @@ export interface VocabTier {
 	size: number;
 }
 
+// Single-pass count map for O(V + P) calculation of VOCAB_TIERS sizes
+const vocabCountsByTier: Record<string, number> = {};
+for (const c of vocabMeaning) {
+	vocabCountsByTier[c.tier] = (vocabCountsByTier[c.tier] ?? 0) + 1;
+}
+for (const c of vocabPron) {
+	vocabCountsByTier[c.tier] = (vocabCountsByTier[c.tier] ?? 0) + 1;
+}
+
 export const VOCAB_TIERS: VocabTier[] = VOCAB_PACKS.map((pack) => ({
 	id: pack.id,
 	label: pack.label,
-	size: vocabMeaning.filter((c) => c.tier === pack.id).length +
-		vocabPron.filter((c) => c.tier === pack.id).length
+	size: vocabCountsByTier[pack.id] ?? 0
 }));
 
 /* ---------- assembly ---------- */
@@ -390,6 +398,12 @@ export const DECK: Card[] = [
 export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
 	DECK.map((c) => [c.id, c])
 );
+
+// Pre-grouped map for O(1) cardsOfTier() lookup instead of scanning DECK on every call
+const CARDS_BY_TIER: Record<string, Card[]> = {};
+for (const cardItem of DECK) {
+	(CARDS_BY_TIER[cardItem.tier] ??= []).push(cardItem);
+}
 
 export interface Tier {
 	id: string;
@@ -412,7 +426,7 @@ export const TIERS: Tier[] = [
 ];
 
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return CARDS_BY_TIER[tier] ?? [];
 }
 
 /**
