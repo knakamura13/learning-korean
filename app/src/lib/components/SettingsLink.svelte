@@ -11,6 +11,7 @@
 	href={resolve('/settings')}
 	class="settings"
 	aria-label="Settings"
+	aria-describedby="settings-tooltip"
 	aria-current={onSettings ? 'page' : undefined}
 >
 	<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
@@ -24,6 +25,7 @@
 			d="M5.5 20.5c1.2-3.2 3.4-5 6.5-5s5.3 1.8 6.5 5"
 		/>
 	</svg>
+	<span id="settings-tooltip" class="tooltip" role="tooltip">Settings</span>
 </a>
 
 <style>
@@ -84,7 +86,39 @@
 		display: block;
 	}
 
+	.tooltip {
+		position: absolute;
+		top: calc(100% + 6px);
+		inset-inline-end: 0;
+		z-index: 20;
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		line-height: 1;
+		color: var(--ink);
+		background: var(--paper-raised);
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--r-sm);
+		box-shadow: var(--shadow-1);
+		white-space: nowrap;
+		pointer-events: none;
+		opacity: 0;
+		transform: translateY(-4px);
+		transition:
+			opacity var(--fast) var(--ease),
+			transform var(--fast) var(--ease);
+	}
+
+	.settings:hover .tooltip,
+	.settings:focus-visible .tooltip {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
 	@media (prefers-reduced-motion: reduce) {
+		.tooltip {
+			transition: none;
+		}
 		.settings,
 		.settings::before {
 			transition: none;
@@ -106,6 +140,12 @@
 		}
 		.settings:focus-visible::before {
 			outline: 2px solid Highlight;
+			box-shadow: none;
+		}
+		.tooltip {
+			background: Canvas;
+			color: CanvasText;
+			border: 1px solid ButtonBorder;
 			box-shadow: none;
 		}
 	}
