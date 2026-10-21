@@ -37,6 +37,14 @@ describe('SettingsLink', () => {
 		expect(src).not.toMatch(/cog/i);
 	});
 
+	it('includes an accessible tooltip with role="tooltip" and aria-describedby', () => {
+		expect(src).toMatch(/aria-describedby="settings-tooltip"/);
+		expect(src).toMatch(/<span id="settings-tooltip" class="tooltip" role="tooltip">Settings<\/span>/);
+		expect(css).toMatch(/\.tooltip\s*\{/);
+		expect(css).toMatch(/\.settings:hover \.tooltip,/);
+		expect(css).toMatch(/\.settings:focus-visible \.tooltip/);
+	});
+
 	it('sets aria-current when pathname is /settings or /settings/', () => {
 		expect(src).toMatch(
 			/page\.url\.pathname === '\/settings' \|\| page\.url\.pathname === '\/settings\/'/
