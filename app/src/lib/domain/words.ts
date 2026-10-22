@@ -268,6 +268,12 @@ export const VOCAB_PACKS: VocabPack[] = [
 	}
 ];
 
+// Pre-grouped words map for O(1) wordsOfPack lookup
+const WORDS_BY_PACK: Record<string, WordEntry[]> = {};
+for (const word of WORDS) {
+	(WORDS_BY_PACK[word.pack] ??= []).push(word);
+}
+
 export function wordsOfPack(pack: PackId): WordEntry[] {
-	return WORDS.filter((word) => word.pack === pack);
+	return WORDS_BY_PACK[pack] ?? [];
 }

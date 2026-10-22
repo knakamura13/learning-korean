@@ -610,10 +610,20 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
+// Memo cache for syllable romanization (at most 11,172 Hangul syllables)
+const ROMANIZE_SYLLABLE_CACHE = new Map<string, string>();
+
 export function romanizeSyllable(ch: string): string {
+	let cached = ROMANIZE_SYLLABLE_CACHE.get(ch);
+	if (cached !== undefined) return cached;
 	const parts = decompose(ch);
-	if (!parts) return '';
-	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	if (!parts) {
+		ROMANIZE_SYLLABLE_CACHE.set(ch, '');
+		return '';
+	}
+	cached = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	ROMANIZE_SYLLABLE_CACHE.set(ch, cached);
+	return cached;
 }
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
