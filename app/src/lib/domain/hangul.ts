@@ -610,10 +610,19 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
+const ROMANIZE_SYLLABLE_CACHE = new Map<string, string>();
+
 export function romanizeSyllable(ch: string): string {
+	const cached = ROMANIZE_SYLLABLE_CACHE.get(ch);
+	if (cached !== undefined) return cached;
 	const parts = decompose(ch);
-	if (!parts) return '';
-	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	if (!parts) {
+		ROMANIZE_SYLLABLE_CACHE.set(ch, '');
+		return '';
+	}
+	const res = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	ROMANIZE_SYLLABLE_CACHE.set(ch, res);
+	return res;
 }
 
 /** Hyphenated RR of each block. Empty if any character is not a syllable. */
