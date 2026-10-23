@@ -104,6 +104,32 @@ export function shuffled<T>(items: readonly T[], rng: Rng): T[] {
 
 const MAX_TRIAL_ATTEMPTS = 40;
 
+// Cache distinct romanizations grouped by length for a pool reference to avoid scanning 10k+ blocks per trial.
+const POOL_DISTRACTOR_CACHE = new WeakMap<readonly string[], Map<number, string[]>>();
+
+function getPoolDistractorsByLength(pool: readonly string[]): Map<number, string[]> {
+	let cached = POOL_DISTRACTOR_CACHE.get(pool);
+	if (!cached) {
+		const setMap = new Map<number, Set<string>>();
+		for (let i = 0; i < pool.length; i++) {
+			const reading = romanizeSyllable(pool[i]);
+			if (!reading) continue;
+			let set = setMap.get(reading.length);
+			if (!set) {
+				set = new Set<string>();
+				setMap.set(reading.length, set);
+			}
+			set.add(reading);
+		}
+		cached = new Map<number, string[]>();
+		for (const [len, set] of setMap.entries()) {
+			cached.set(len, Array.from(set));
+		}
+		POOL_DISTRACTOR_CACHE.set(pool, cached);
+	}
+	return cached;
+}
+
 function optionsForBlock(
 	block: string,
 	pool: readonly string[],
@@ -111,17 +137,16 @@ function optionsForBlock(
 ): { options: string[]; answerIndex: number } | null {
 	const answer = romanizeSyllable(block);
 	if (!answer) return null;
-	const distractors = new Set<string>();
-	for (const other of pool) {
-		if (other === block) continue;
-		const reading = romanizeSyllable(other);
-		if (reading && reading !== answer && reading.length === answer.length) {
-			distractors.add(reading);
-		}
-	}
-	if (distractors.size < OPTION_COUNT - 1) return null;
+
+	const lengthMap = getPoolDistractorsByLength(pool);
+	const candidates = lengthMap.get(answer.length);
+	if (!candidates) return null;
+
+	// Filter out the correct answer from candidate distractors of equal length
+	const available = candidates.filter((reading) => reading !== answer);
+	if (available.length < OPTION_COUNT - 1) return null;
+
 	const picked: string[] = [];
-	const available = [...distractors];
 	while (picked.length < OPTION_COUNT - 1 && available.length > 0) {
 		const index = pickIndex(available.length, rng);
 		picked.push(available.splice(index, 1)[0]);
