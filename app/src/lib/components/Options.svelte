@@ -89,9 +89,9 @@
 			aria-disabled={locked ? 'true' : undefined}
 			onclick={() => pick(i)}
 			onkeydown={onChoiceKeydown}
-			aria-label="Option {choiceKeyLabel(keyScheme, i)}: {choice.text}"
 		>
 			<span class="key" aria-hidden="true"><span>{choiceKeyLabel(keyScheme, i)}</span></span>
+			<span class="vh" lang="en">Option {choiceKeyLabel(keyScheme, i)}: </span>
 			<span class="txt" lang={hasHangul(choice.text) ? 'ko' : undefined}>{choice.text}</span>
 		</button>
 	{/each}
