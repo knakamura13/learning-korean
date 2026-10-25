@@ -105,15 +105,28 @@ export function derivations(letter: string): Derivation[] {
 	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
 }
 
+// Pre-computed lookup map for baseShapeOf() to eliminate recursive Object.entries()/values() search overhead
+const BASE_SHAPE_MAP: Record<string, string> = (() => {
+	const map: Record<string, string> = {};
+	function resolveBase(l: string): string {
+		if ((BASE_SHAPES as readonly string[]).includes(l)) return l;
+		for (const [from, ops] of Object.entries(DERIVE)) {
+			for (const target of Object.values(ops)) {
+				if (target === l) return resolveBase(from);
+			}
+		}
+		return '';
+	}
+	for (const lead of LEADS) {
+		const base = resolveBase(lead);
+		if (base) map[lead] = base;
+	}
+	return map;
+})();
+
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-	for (const [from, ops] of Object.entries(DERIVE)) {
-		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
-		}
-	}
-	return '';
+	return BASE_SHAPE_MAP[letter] ?? '';
 }
 
 /* ------------------------------------------------------------------ *
