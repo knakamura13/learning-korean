@@ -71,9 +71,9 @@
 </div>
 
 <div class="tools" role="group" aria-label="Derivation tools">
-	<button class="tool" disabled={!canStroke} onclick={() => apply('stroke')}>+ stroke</button>
-	<button class="tool" disabled={!canDouble} onclick={() => apply('double')}>× double</button>
-	<button class="tool undo" disabled={path.length < 2 || won} onclick={undo}>undo</button>
+	<button class="tool" aria-label="Add stroke" disabled={!canStroke} onclick={() => apply('stroke')}>+ stroke</button>
+	<button class="tool" aria-label="Double stroke" disabled={!canDouble} onclick={() => apply('double')}>× double</button>
+	<button class="tool undo" aria-label="Undo derivation step" disabled={path.length < 2 || won} onclick={undo}>undo</button>
 </div>
 
 <style>
