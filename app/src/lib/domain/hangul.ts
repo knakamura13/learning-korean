@@ -105,15 +105,31 @@ export function derivations(letter: string): Derivation[] {
 	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
 }
 
+// Pre-computed map for baseShapeOf O(1) lookup to eliminate array allocations and recursion on every call
+const BASE_SHAPE_MAP = new Map<string, string>();
+function initBaseShapeMap() {
+	function getBaseShape(letter: string): string {
+		if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
+		for (const [from, ops] of Object.entries(DERIVE)) {
+			for (const target of Object.values(ops)) {
+				if (target === letter) return getBaseShape(from);
+			}
+		}
+		return '';
+	}
+	for (const b of BASE_SHAPES) {
+		BASE_SHAPE_MAP.set(b, b);
+	}
+	for (const lead of LEADS) {
+		const base = getBaseShape(lead);
+		if (base) BASE_SHAPE_MAP.set(lead, base);
+	}
+}
+initBaseShapeMap();
+
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-	for (const [from, ops] of Object.entries(DERIVE)) {
-		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
-		}
-	}
-	return '';
+	return BASE_SHAPE_MAP.get(letter) ?? '';
 }
 
 /* ------------------------------------------------------------------ *
@@ -190,9 +206,16 @@ export const VOWEL_MERGERS: string[][] = [
 	['ㅙ', 'ㅚ', 'ㅞ']
 ];
 
+// Pre-computed map for mergedWith O(1) lookup to avoid array allocation and search on every call
+const MERGED_WITH_MAP = new Map<string, string[]>();
+for (const group of VOWEL_MERGERS) {
+	for (const v of group) {
+		MERGED_WITH_MAP.set(v, group.filter((x) => x !== v));
+	}
+}
+
 export function mergedWith(v: string): string[] {
-	const group = VOWEL_MERGERS.find((g) => g.includes(v));
-	return group ? group.filter((x) => x !== v) : [];
+	return MERGED_WITH_MAP.get(v) ?? [];
 }
 
 /* ------------------------------------------------------------------ *
@@ -610,18 +633,34 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
+// Cache for romanizeSyllable to avoid duplicate decomposition, object creation, and string formatting
+const ROMAN_SYLLABLE_CACHE = new Map<string, string>();
+
 export function romanizeSyllable(ch: string): string {
+	const cached = ROMAN_SYLLABLE_CACHE.get(ch);
+	if (cached !== undefined) return cached;
 	const parts = decompose(ch);
-	if (!parts) return '';
-	return `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	if (!parts) {
+		ROMAN_SYLLABLE_CACHE.set(ch, '');
+		return '';
+	}
+	const res = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
+	ROMAN_SYLLABLE_CACHE.set(ch, res);
+	return res;
 }
 
-/** Hyphenated RR of each block. Empty if any character is not a syllable. */
+/**
+ * Hyphenated RR of each block. Empty if any character is not a syllable.
+ * Optimized with an indexed loop and early return to eliminate iterator spread and intermediate arrays.
+ */
 export function romanizeWord(word: string): string {
-	const chars = [...word];
-	if (chars.length === 0) return '';
-	const parts = chars.map((ch) => romanizeSyllable(ch));
-	if (parts.some((p) => p === '')) return '';
+	if (word.length === 0) return '';
+	const parts: string[] = new Array(word.length);
+	for (let i = 0; i < word.length; i++) {
+		const rom = romanizeSyllable(word[i]);
+		if (!rom) return '';
+		parts[i] = rom;
+	}
 	return parts.join('-');
 }
 
