@@ -362,7 +362,8 @@ export function setFlagged(
 }
 
 function pool<T extends SchedulableCard>(state: SrsState, deck: T[]): T[] {
-	return deck.filter((c) => isUnlocked(state, c.tier));
+	const unlocked = new Set(state.unlocked);
+	return deck.filter((c) => unlocked.has(c.tier));
 }
 
 /* ------------------------------------------------------------------ *
@@ -698,24 +699,34 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
-	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
-		let mature = 0;
-		let young = 0;
-		for (const c of cards) {
-			const cs = state.cards[c.id];
-			if (!cs) continue;
-			if (cs.ivl >= MATURE_DAYS) mature++;
-			else young++;
+	const unlockedSet = new Set(state.unlocked);
+
+	// Group card stats by tier in a single O(N) pass over deck to avoid O(T * D) filtering
+	const statsByTier = new Map<string, { total: number; mature: number; young: number }>();
+	for (const c of deck) {
+		let entry = statsByTier.get(c.tier);
+		if (!entry) {
+			entry = { total: 0, mature: 0, young: 0 };
+			statsByTier.set(c.tier, entry);
 		}
-		const seen = mature + young;
+		entry.total++;
+		const cs = state.cards[c.id];
+		if (cs) {
+			if (cs.ivl >= MATURE_DAYS) entry.mature++;
+			else entry.young++;
+		}
+	}
+
+	return tiers.map((tier) => {
+		const entry = statsByTier.get(tier.id) ?? { total: 0, mature: 0, young: 0 };
+		const seen = entry.mature + entry.young;
 		return {
 			id: tier.id,
 			size: tier.size,
-			unlocked: isUnlocked(state, tier.id),
-			mature,
-			young,
-			unseen: cards.length - seen,
+			unlocked: unlockedSet.has(tier.id),
+			mature: entry.mature,
+			young: entry.young,
+			unseen: entry.total - seen,
 			seen
 		};
 	});
