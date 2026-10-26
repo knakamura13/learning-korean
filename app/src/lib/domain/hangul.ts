@@ -105,31 +105,26 @@ export function derivations(letter: string): Derivation[] {
 	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
 }
 
-// Pre-computed map for baseShapeOf O(1) lookup to eliminate array allocations and recursion on every call
+// Memoized lookup map for baseShapeOf to eliminate recursion and array allocations on repeated lookups
 const BASE_SHAPE_MAP = new Map<string, string>();
-function initBaseShapeMap() {
-	function getBaseShape(letter: string): string {
-		if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-		for (const [from, ops] of Object.entries(DERIVE)) {
-			for (const target of Object.values(ops)) {
-				if (target === letter) return getBaseShape(from);
-			}
+
+function getBaseShape(letter: string): string {
+	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
+	for (const [from, ops] of Object.entries(DERIVE)) {
+		for (const target of Object.values(ops)) {
+			if (target === letter) return getBaseShape(from);
 		}
-		return '';
 	}
-	for (const b of BASE_SHAPES) {
-		BASE_SHAPE_MAP.set(b, b);
-	}
-	for (const lead of LEADS) {
-		const base = getBaseShape(lead);
-		if (base) BASE_SHAPE_MAP.set(lead, base);
-	}
+	return '';
 }
-initBaseShapeMap();
 
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	return BASE_SHAPE_MAP.get(letter) ?? '';
+	let base = BASE_SHAPE_MAP.get(letter);
+	if (base !== undefined) return base;
+	base = getBaseShape(letter);
+	BASE_SHAPE_MAP.set(letter, base);
+	return base;
 }
 
 /* ------------------------------------------------------------------ *
@@ -206,7 +201,7 @@ export const VOWEL_MERGERS: string[][] = [
 	['ㅙ', 'ㅚ', 'ㅞ']
 ];
 
-// Pre-computed map for mergedWith O(1) lookup to avoid array allocation and search on every call
+// Pre-computed map for mergedWith lookups to avoid array searching on every call
 const MERGED_WITH_MAP = new Map<string, string[]>();
 for (const group of VOWEL_MERGERS) {
 	for (const v of group) {
@@ -215,7 +210,8 @@ for (const group of VOWEL_MERGERS) {
 }
 
 export function mergedWith(v: string): string[] {
-	return MERGED_WITH_MAP.get(v) ?? [];
+	const res = MERGED_WITH_MAP.get(v);
+	return res ? res.slice() : [];
 }
 
 /* ------------------------------------------------------------------ *
@@ -633,17 +629,20 @@ export function jamoReading(jamo: string, slot: JamoSlot): string {
 	}
 }
 
-// Cache for romanizeSyllable to avoid duplicate decomposition, object creation, and string formatting
+// Cache for romanizeSyllable (bounded to valid Hangul syllable blocks 0xAC00-0xD7A3 to prevent memory leaks)
 const ROMAN_SYLLABLE_CACHE = new Map<string, string>();
 
 export function romanizeSyllable(ch: string): string {
+	if (ch.length !== 1) return '';
+	const code = ch.charCodeAt(0) - SYL_BASE;
+	if (code < 0 || ch.charCodeAt(0) > SYL_LAST) return '';
+
 	const cached = ROMAN_SYLLABLE_CACHE.get(ch);
 	if (cached !== undefined) return cached;
+
 	const parts = decompose(ch);
-	if (!parts) {
-		ROMAN_SYLLABLE_CACHE.set(ch, '');
-		return '';
-	}
+	if (!parts) return '';
+
 	const res = `${jamoReading(parts.lead, 'lead')}${jamoReading(parts.vowel, 'vowel')}${jamoReading(parts.final, 'batchim')}`;
 	ROMAN_SYLLABLE_CACHE.set(ch, res);
 	return res;
@@ -651,15 +650,15 @@ export function romanizeSyllable(ch: string): string {
 
 /**
  * Hyphenated RR of each block. Empty if any character is not a syllable.
- * Optimized with an indexed loop and early return to eliminate iterator spread and intermediate arrays.
+ * Uses for..of string code-point iteration to preserve surrogate pair handling while early-exiting on invalid blocks.
  */
 export function romanizeWord(word: string): string {
 	if (word.length === 0) return '';
-	const parts: string[] = new Array(word.length);
-	for (let i = 0; i < word.length; i++) {
-		const rom = romanizeSyllable(word[i]);
+	const parts: string[] = [];
+	for (const ch of word) {
+		const rom = romanizeSyllable(ch);
 		if (!rom) return '';
-		parts[i] = rom;
+		parts.push(rom);
 	}
 	return parts.join('-');
 }
