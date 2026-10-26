@@ -75,6 +75,11 @@
 		border-color: var(--rule);
 		background: var(--paper-sunk);
 	}
+	.flag-btn:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
 	.flag-btn.active {
 		color: var(--rose);
 	}
@@ -91,6 +96,10 @@
 		.flag-btn {
 			color: ButtonText;
 			border-color: ButtonBorder;
+		}
+		.flag-btn:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
 		}
 		.flag-btn.active {
 			color: Highlight;
