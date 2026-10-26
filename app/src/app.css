@@ -379,6 +379,17 @@ button { font: inherit; color: inherit; }
 	box-shadow: var(--focus-ring);
 }
 
+.btn.danger {
+	border-color: var(--bad);
+	background: var(--bad);
+	color: var(--paper);
+}
+.btn.danger:hover {
+	background: var(--bad);
+	border-color: var(--bad);
+	color: var(--paper);
+}
+
 .btn.ghost {
 	background: transparent;
 	color: var(--ink);
@@ -386,6 +397,15 @@ button { font: inherit; color: inherit; }
 	text-decoration: none;
 }
 .btn.ghost:hover { background: var(--paper-sunk); color: var(--ink); filter: none; }
+.btn.ghost.danger {
+	color: var(--rose);
+	border-color: var(--rule-strong);
+}
+.btn.ghost.danger:hover {
+	background: var(--bad-soft);
+	border-color: var(--bad);
+	color: var(--bad);
+}
 
 .warn {
 	border: 1px solid var(--bad);
@@ -451,6 +471,13 @@ button { font: inherit; color: inherit; }
 		color: ButtonText;
 		border: 1px solid ButtonText;
 		filter: none;
+	}
+
+	.btn.danger,
+	.btn.ghost.danger {
+		background: ButtonFace;
+		color: ButtonText;
+		border: 1px solid ButtonBorder;
 	}
 
 	.btn:disabled {

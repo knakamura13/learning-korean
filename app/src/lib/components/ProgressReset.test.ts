@@ -53,6 +53,7 @@ describe('ProgressReset', () => {
 		const { buttons, cancel, confirm } = confirmButtons(root);
 		expect(buttons[0]).toBe(cancel);
 		expect(buttons[1]).toBe(confirm);
+		expect(confirm?.classList.contains('danger')).toBe(true);
 		expect(document.activeElement).toBe(cancel);
 	});
 
