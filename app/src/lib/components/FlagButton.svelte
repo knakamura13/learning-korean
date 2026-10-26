@@ -60,7 +60,9 @@
 		display: inline-grid;
 		place-items: center;
 		width: 44px;
+		min-width: 44px;
 		height: 44px;
+		min-height: 44px;
 		padding: 0;
 		border: 1px solid transparent;
 		border-radius: var(--r-md);
@@ -68,9 +70,20 @@
 		color: var(--ink-faint);
 		cursor: pointer;
 		flex: 0 0 auto;
+		transition:
+			background var(--fast) var(--ease),
+			color var(--fast) var(--ease),
+			border-color var(--fast) var(--ease);
 	}
-	.flag-btn:hover:not(:disabled),
+	.flag-btn:hover:not(:disabled) {
+		color: var(--ink);
+		border-color: var(--rule);
+		background: var(--paper-sunk);
+	}
 	.flag-btn:focus-visible {
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
 		color: var(--ink);
 		border-color: var(--rule);
 		background: var(--paper-sunk);
@@ -91,6 +104,10 @@
 		.flag-btn {
 			color: ButtonText;
 			border-color: ButtonBorder;
+		}
+		.flag-btn:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
 		}
 		.flag-btn.active {
 			color: Highlight;
