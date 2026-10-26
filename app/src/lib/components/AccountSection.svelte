@@ -51,7 +51,7 @@
 				<button type="button" class="btn ghost" onclick={() => void session.signOut()}>
 					Sign out
 				</button>
-				<button type="button" class="btn ghost danger" onclick={() => (confirmingDelete = true)}>
+				<button type="button" class="btn ghost danger" aria-haspopup="dialog" onclick={() => (confirmingDelete = true)}>
 					Delete account…
 				</button>
 			</div>
