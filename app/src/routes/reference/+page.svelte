@@ -267,7 +267,7 @@
 		<div class="note card">
 			<h3>Named exceptions</h3>
 			<p class="muted tiny">
-				Lexical, not derivable — written into the Standard Pronunciation Rules by name.
+				Lexical, not derivable — named exceptions in standard pronunciation.
 			</p>
 			{#each CLUSTER_EXCEPTIONS as ex (ex.example)}
 				<div class="exrow">
@@ -369,15 +369,15 @@
 				<a href="https://www.korean.go.kr/"
 					>National Institute of Korean Language (<span lang="ko">국립국어원</span>)</a
 				>
-				— the language regulator; publisher of the 1988 Standard Pronunciation Rules
-				(<span lang="ko">표준 발음법</span>) that govern the batchim, cluster and sound-change
+				— the language regulator; publisher of the Standard Pronunciation Rules
+				(<span lang="ko">표준 발음법</span>, pyojun bareumbeop) that govern the batchim, cluster and sound-change
 				sections above.
 			</li>
 			<li>
 				<a href="https://www.tufs.ac.jp/ts/personal/choes/korean/nanboku/bareumbeop.html"
-					><span lang="ko">표준 발음법</span>, full text</a
+					><span lang="ko">표준 발음법</span> (pyojun bareumbeop), full text</a
 				>
-				— Articles 10 and 11 are the source for the cluster rules and their exceptions.
+				— standard pronunciation rules full text for clusters and sound changes.
 			</li>
 			<li>
 				<a href="https://www.koreascience.kr/article/JAKO202225852210743.page">“Hunminjeongeum Phonetics (II)”</a>

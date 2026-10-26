@@ -40,7 +40,7 @@ export const lab09: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p><span class="hg">신</span> ends in <span class="jamo">ㄴ</span>; <span class="hg">라</span> starts with <span class="jamo">ㄹ</span>. Korean never says that sequence — the <span class="jamo">ㄴ</span> assimilates: <span class="hg">[실라]</span>, a long rolled <em>ll</em>.</p>'
+				'<p><span class="hg">신</span> ends in <span class="jamo">ㄴ</span>; <span class="hg">라</span> starts with <span class="jamo">ㄹ</span>. Korean never says that sequence — the <span class="jamo">ㄴ</span> assimilates: <span class="hg">[실라]</span> (sil-la), a long rolled <em>ll</em>.</p>'
 		},
 		{
 			type: 'choice',
@@ -54,14 +54,14 @@ export const lab09: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p><span class="jamo">ㄴ</span> and <span class="jamo">ㄹ</span> are both made at the ridge behind your teeth. At speed, holding the nasal and then flapping is too much work — the tongue just holds the <span class="jamo">ㄹ</span>. <strong>유음화</strong>, Article 20.</p>'
+				'<p><span class="jamo">ㄴ</span> and <span class="jamo">ㄹ</span> are both made at the ridge behind your teeth. At speed, holding the nasal and then flapping is too much work — the tongue just holds the <span class="jamo">ㄹ</span>.</p>'
 		},
 		{
 			type: 'flow',
 			do: 'ㄴ meets ㄹ. Operate the junction.',
 			word: '신라',
 			gloss: 'Silla, the old kingdom',
-			teach: '<p><span class="hg">[실라]</span>. History class says it correctly without knowing why.</p>'
+			teach: '<p><span class="hg">[실라]</span> (sil-la). History class says it correctly without knowing why.</p>'
 		},
 		{
 			type: 'flow',
@@ -69,14 +69,14 @@ export const lab09: Lab = {
 			word: '연락',
 			gloss: 'contact, getting in touch',
 			teach:
-				'<p><span class="hg">[열락]</span>. <span class="hg">연락해</span> — "text me" — is said with the double <span class="jamo">ㄹ</span>.</p>'
+				'<p><span class="hg">[열락]</span> (yeol-lak). <span class="hg">연락해</span> (yeol-lak-hae, "text me") is said with the double <span class="jamo">ㄹ</span>.</p>'
 		},
 		{
 			type: 'flow',
 			do: 'Same junction, everyday word. Operate it.',
 			word: '편리',
 			gloss: 'convenience',
-			teach: '<p><span class="hg">[펼리]</span>. Convenience stores earn the name.</p>'
+			teach: '<p><span class="hg">[펼리]</span> (pyeol-li). Convenience stores earn the name.</p>'
 		},
 
 		/* ---- When ㄹ meets ㄴ, both are pronounced ㄹ ---- */
@@ -97,21 +97,21 @@ export const lab09: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p>Either order, same outcome: the flap wins. <span class="hg">[설랄]</span> — New Year\'s Day. Article 20 covers both directions.</p>'
+				'<p>Either order, same outcome: the flap wins. <span class="hg">[설랄]</span> (seol-lal) — New Year\'s Day.</p>'
 		},
 		{
 			type: 'flow',
 			do: 'ㄹ first this time. Operate the junction.',
 			word: '설날',
 			gloss: 'Lunar New Year’s Day',
-			teach: '<p><span class="hg">[설랄]</span>. The holiday everyone mispronounces from the spelling.</p>'
+			teach: '<p><span class="hg">[설랄]</span> (seol-lal). The holiday everyone mispronounces from the spelling.</p>'
 		},
 		{
 			type: 'flow',
 			do: 'Same order, indoor voice. Operate the junction.',
 			word: '실내',
 			gloss: 'indoors',
-			teach: '<p><span class="hg">[실래]</span>. Gym signs everywhere: <span class="hg">실내화</span>, indoor shoes.</p>'
+			teach: '<p><span class="hg">[실래]</span> (sil-lae). Gym signs everywhere: <span class="hg">실내화</span> (sil-lae-hwa, indoor shoes).</p>'
 		},
 		{
 			type: 'choice',
@@ -125,7 +125,7 @@ export const lab09: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p><strong>유음화</strong> — "becoming liquid". Direct contact, either order, and the ridge holds the flap.</p>'
+				'<p><strong>Lateralization (유음화, yu-eum-hwa)</strong> — "becoming liquid". Direct contact, either order, and the ridge holds the flap.</p>'
 		},
 
 		/* ---- ㄹ after a nasal becomes ㄴ ---- */
@@ -146,14 +146,14 @@ export const lab09: Lab = {
 			stack: true,
 			answer: 0,
 			teach:
-				'<p><span class="jamo">ㅁ</span> and <span class="jamo">ㅇ</span> are nasals made elsewhere in the mouth — a wall the flap cannot roll through. So the <span class="jamo">ㄹ</span> gives up and becomes the nearest ridge nasal: <span class="jamo">ㄴ</span>. <span class="hg">[심니]</span>. Article 19.</p>'
+				'<p><span class="jamo">ㅁ</span> and <span class="jamo">ㅇ</span> are nasals made elsewhere in the mouth — a wall the flap cannot roll through. So the <span class="jamo">ㄹ</span> gives up and becomes the nearest ridge nasal: <span class="jamo">ㄴ</span>. <span class="hg">[심니]</span> (sim-ni).</p>'
 		},
 		{
 			type: 'flow',
 			do: 'A lead ㄹ behind the wall. Operate the junction.',
 			word: '심리',
 			gloss: 'psychology',
-			teach: '<p><span class="hg">[심니]</span>. The <span class="jamo">ㄹ</span> yields.</p>'
+			teach: '<p><span class="hg">[심니]</span> (sim-ni). The <span class="jamo">ㄹ</span> yields.</p>'
 		},
 		{
 			type: 'flow',
@@ -161,14 +161,14 @@ export const lab09: Lab = {
 			word: '종로',
 			gloss: 'Jongno, a Seoul district',
 			teach:
-				'<p><span class="hg">[종노]</span>. Every subway announcement says it this way; the signage romanizes it <em>Jongno</em> for exactly this reason.</p>'
+				'<p><span class="hg">[종노]</span> (jong-no). Every subway announcement says it this way; the signage romanizes it <em>Jongno</em> for exactly this reason.</p>'
 		},
 		{
 			type: 'flow',
 			do: 'Something to order with dinner. Operate the junction.',
 			word: '음료수',
 			gloss: 'a beverage',
-			teach: '<p><span class="hg">[음뇨수]</span>. Menus everywhere.</p>'
+			teach: '<p><span class="hg">[음뇨수]</span> (eum-nyo-su). Menus everywhere.</p>'
 		},
 
 		/* ---- Read from the letters alone ---- */
@@ -178,7 +178,7 @@ export const lab09: Lab = {
 			word: '물이',
 			gloss: 'the water (subject)',
 			teach:
-				'<p>The <span class="jamo">ㄹ</span> sits before a vowel — that junction is Lab 06\'s: it jumps, <span class="hg">[무리]</span>. Nothing in <em>this</em> lab fires without ㄴ contact or a nasal wall.</p>'
+				'<p>The <span class="jamo">ㄹ</span> sits before a vowel — that junction is Lab 06\'s: it jumps, <span class="hg">[무리]</span> (mu-ri). Nothing in <em>this</em> lab fires without ㄴ contact or a nasal wall.</p>'
 		},
 		{
 			type: 'choice',
@@ -207,7 +207,7 @@ export const lab09: Lab = {
 			options: ['the president', 'the professor', 'the announcer', 'the ambassador'],
 			answer: 0,
 			teach:
-				'<p><strong>dae-tong-ryeong</strong>, said <span class="hg">[대통녕]</span>. Every one of the eight sound changes the news reader uses, you now operate on purpose — palatalization stays on the reference page until its own lab.</p>'
+				'<p><strong>dae-tong-ryeong</strong>, said <span class="hg">[대통녕]</span> (dae-tong-nyeong). Every one of the eight sound changes the news reader uses, you now operate on purpose — palatalization stays on the reference page until its own lab.</p>'
 		}
 	]
 };
