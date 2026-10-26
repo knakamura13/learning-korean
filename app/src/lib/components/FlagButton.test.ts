@@ -90,4 +90,21 @@ describe('FlagButton', () => {
 		unmount(app);
 		host.remove();
 	});
+
+	it('supports keyboard focus state and interaction', () => {
+		const host = document.createElement('div');
+		document.body.appendChild(host);
+		const onclick = vi.fn();
+		const app = mount(FlagButton, {
+			target: host,
+			props: { active: false, onclick }
+		});
+
+		const button = host.querySelector('button')!;
+		button.focus();
+		expect(document.activeElement).toBe(button);
+
+		unmount(app);
+		host.remove();
+	});
 });
