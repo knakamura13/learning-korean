@@ -35,6 +35,16 @@
 		failed = true;
 		playing = false;
 	}
+
+	const buttonTitle = $derived(
+		failed
+			? 'Audio unavailable'
+			: playing
+				? 'Pause audio'
+				: jamo
+					? `Play audio for ${jamo}`
+					: 'Play audio'
+	);
 </script>
 
 <button
@@ -43,6 +53,7 @@
 	class:failed
 	aria-disabled={failed}
 	aria-pressed={playing}
+	title={buttonTitle}
 	onclick={toggle}
 >
 	<span class="vh">
