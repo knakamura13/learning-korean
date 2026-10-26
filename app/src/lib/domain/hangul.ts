@@ -40,6 +40,7 @@ const FINAL_MAP = new Map<string, number>(FINALS.map((x, i) => [x, i]));
 
 const SYL_BASE = 0xac00;
 const SYL_LAST = 0xd7a3;
+const SYL_COUNT = SYL_LAST - SYL_BASE;
 
 /** Compose a syllable block. Returns '' if the pieces are not valid. */
 export function compose(lead: string, vowel: string, final = ''): string {
@@ -61,17 +62,22 @@ export interface Decomposed {
 export function decompose(syllable: string): Decomposed | null {
 	if (syllable.length !== 1) return null;
 	const code = syllable.charCodeAt(0) - SYL_BASE;
-	if (code < 0 || syllable.charCodeAt(0) > SYL_LAST) return null;
+	if (code < 0 || code > SYL_COUNT) return null;
 	return {
-		lead: LEADS[Math.floor(code / 588)],
-		vowel: VOWELS[Math.floor((code % 588) / 28)],
+		lead: LEADS[(code / 588) | 0],
+		vowel: VOWELS[((code % 588) / 28) | 0],
 		final: FINALS[code % 28]
 	};
 }
 
-/** True for a composed Hangul syllable block (not a bare jamo). */
+/**
+ * True for a composed Hangul syllable block (not a bare jamo).
+ * Performs direct character code bounds checking to avoid heap allocations from decompose().
+ */
 export function isSyllable(ch: string): boolean {
-	return decompose(ch) !== null;
+	if (ch.length !== 1) return false;
+	const code = ch.charCodeAt(0) - SYL_BASE;
+	return code >= 0 && code <= SYL_COUNT;
 }
 
 /* ------------------------------------------------------------------ *
