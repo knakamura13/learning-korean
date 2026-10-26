@@ -642,6 +642,7 @@ describe('polish audit regressions', () => {
 		expect(styleBlock(labSwitcher)).toMatch(/--focus-ring/);
 		expect(styleBlock(labSwitcher)).toMatch(/forced-colors:\s*active/);
 		expect(labPage).toMatch(/LabSwitcher/);
+		expect(vocabPacks).toMatch(/\.open-pack:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/s);
 	});
 
 	it('mounts a bar lab switcher on compact sitting and hides the page switcher', () => {
