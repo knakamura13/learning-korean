@@ -68,12 +68,27 @@
 		color: var(--ink-faint);
 		cursor: pointer;
 		flex: 0 0 auto;
+		transition:
+			color var(--fast) var(--ease),
+			background var(--fast) var(--ease),
+			border-color var(--fast) var(--ease),
+			transform var(--fast) var(--ease);
 	}
-	.flag-btn:hover:not(:disabled),
+	.flag-btn:hover:not(:disabled) {
+		color: var(--ink);
+		border-color: var(--rule);
+		background: var(--paper-sunk);
+	}
 	.flag-btn:focus-visible {
 		color: var(--ink);
 		border-color: var(--rule);
 		background: var(--paper-sunk);
+		outline: 2px solid var(--paper);
+		outline-offset: 2px;
+		box-shadow: var(--focus-ring);
+	}
+	.flag-btn:active:not(:disabled) {
+		transform: translateY(1px);
 	}
 	.flag-btn.active {
 		color: var(--rose);
@@ -87,10 +102,23 @@
 		height: 1.05rem;
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		.flag-btn {
+			transition: none;
+		}
+		.flag-btn:active:not(:disabled) {
+			transform: none;
+		}
+	}
+
 	@media (forced-colors: active) {
 		.flag-btn {
 			color: ButtonText;
 			border-color: ButtonBorder;
+		}
+		.flag-btn:focus-visible {
+			outline: 2px solid Highlight;
+			box-shadow: none;
 		}
 		.flag-btn.active {
 			color: Highlight;

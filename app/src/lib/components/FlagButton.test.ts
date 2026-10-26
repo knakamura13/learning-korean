@@ -4,6 +4,7 @@
 import { mount, unmount } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import FlagButton from './FlagButton.svelte';
+import src from './FlagButton.svelte?raw';
 import { toastStore } from '$lib/stores/toast.svelte';
 
 describe('FlagButton', () => {
@@ -89,5 +90,14 @@ describe('FlagButton', () => {
 
 		unmount(app);
 		host.remove();
+	});
+
+	it('includes design-system focus-visible ring, reduced-motion, and forced-colors rules', () => {
+		const css = src.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '';
+		expect(css).toMatch(/\.flag-btn:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--paper\)/s);
+		expect(css).toMatch(/\.flag-btn:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/s);
+		expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+		expect(css).toMatch(/@media\s*\(forced-colors:\s*active\)/);
+		expect(css).toMatch(/outline:\s*2px solid Highlight/);
 	});
 });
