@@ -698,16 +698,27 @@ export function tierReviewProgress<T extends SchedulableCard>(
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
-	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
-		let mature = 0;
-		let young = 0;
-		for (const c of cards) {
-			const cs = state.cards[c.id];
-			if (!cs) continue;
-			if (cs.ivl >= MATURE_DAYS) mature++;
-			else young++;
+	// Single-pass scan over deck: avoids O(N_tiers * M_deck) array filter calls and allocations
+	const counts = new Map<string, { total: number; mature: number; young: number }>();
+	for (const c of deck) {
+		let entry = counts.get(c.tier);
+		if (!entry) {
+			entry = { total: 0, mature: 0, young: 0 };
+			counts.set(c.tier, entry);
 		}
+		entry.total++;
+		const cs = state.cards[c.id];
+		if (cs) {
+			if (cs.ivl >= MATURE_DAYS) entry.mature++;
+			else entry.young++;
+		}
+	}
+
+	return tiers.map((tier) => {
+		const entry = counts.get(tier.id);
+		const total = entry?.total ?? 0;
+		const mature = entry?.mature ?? 0;
+		const young = entry?.young ?? 0;
 		const seen = mature + young;
 		return {
 			id: tier.id,
@@ -715,7 +726,7 @@ export function tierReviewProgress<T extends SchedulableCard>(
 			unlocked: isUnlocked(state, tier.id),
 			mature,
 			young,
-			unseen: cards.length - seen,
+			unseen: total - seen,
 			seen
 		};
 	});
