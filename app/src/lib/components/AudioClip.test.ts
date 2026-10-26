@@ -30,7 +30,9 @@ describe('AudioClip', () => {
 
 		const button = host.querySelector('button');
 		expect(button).not.toBeNull();
+
 		expect(button!.getAttribute('aria-disabled')).toBe('true');
+		expect(button!.getAttribute('title')).toBe('Audio unavailable');
 		expect(button!.textContent).toMatch(/Couldn't play/);
 		expect(button!.querySelector('[lang="ko"]')?.textContent).toBe('ㄱ');
 		expect(button!.getAttribute('aria-label')).toBeNull();

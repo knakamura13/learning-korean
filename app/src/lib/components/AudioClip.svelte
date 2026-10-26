@@ -43,6 +43,7 @@
 	class:failed
 	aria-disabled={failed}
 	aria-pressed={playing}
+	title={failed ? 'Audio unavailable' : playing ? 'Pause audio' : 'Listen to audio'}
 	onclick={toggle}
 >
 	<span class="vh">
