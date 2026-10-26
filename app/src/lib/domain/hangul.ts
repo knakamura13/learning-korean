@@ -105,15 +105,21 @@ export function derivations(letter: string): Derivation[] {
 	return (Object.keys(entry) as Derivation[]).filter((k) => !!entry[k]);
 }
 
+/**
+ * Pre-computed lookup table for base shapes of lead consonants.
+ * Eliminates recursive search over `DERIVE` for O(1) time complexity.
+ */
+const BASE_SHAPE_MAP: Record<string, string> = {
+	'ㄱ': 'ㄱ', 'ㅋ': 'ㄱ', 'ㄲ': 'ㄱ',
+	'ㄴ': 'ㄴ', 'ㄷ': 'ㄴ', 'ㅌ': 'ㄴ', 'ㄸ': 'ㄴ',
+	'ㅁ': 'ㅁ', 'ㅂ': 'ㅁ', 'ㅍ': 'ㅁ', 'ㅃ': 'ㅁ',
+	'ㅅ': 'ㅅ', 'ㅈ': 'ㅅ', 'ㅆ': 'ㅅ', 'ㅊ': 'ㅅ', 'ㅉ': 'ㅅ',
+	'ㅇ': 'ㅇ', 'ㅎ': 'ㅇ'
+};
+
 /** The base shape a consonant ultimately comes from, following derivations back. */
 export function baseShapeOf(letter: string): string {
-	if ((BASE_SHAPES as readonly string[]).includes(letter)) return letter;
-	for (const [from, ops] of Object.entries(DERIVE)) {
-		for (const target of Object.values(ops)) {
-			if (target === letter) return baseShapeOf(from);
-		}
-	}
-	return '';
+	return BASE_SHAPE_MAP[letter] ?? '';
 }
 
 /* ------------------------------------------------------------------ *
