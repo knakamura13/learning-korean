@@ -391,6 +391,12 @@ export const CARDS_BY_ID: Record<string, Card> = Object.fromEntries(
 	DECK.map((c) => [c.id, c])
 );
 
+// Pre-grouped card index by tier for O(1) lookup in cardsOfTier
+const CARDS_BY_TIER: Record<string, Card[]> = {};
+for (const c of DECK) {
+	(CARDS_BY_TIER[c.tier] ??= []).push(c);
+}
+
 export interface Tier {
 	id: string;
 	label: string;
@@ -412,8 +418,12 @@ export const TIERS: Tier[] = [
 ];
 
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return CARDS_BY_TIER[tier] ?? [];
 }
+
+const SPACES_RE = /\s+/g;
+const PUNCT_RE = /[.,!?'’]/g;
+const PRON_PUNCT_RE = /[\[\].,!?]/g;
 
 /**
  * Normalize a typed answer for comparison: case, spacing, stray punctuation,
@@ -421,11 +431,11 @@ export function cardsOfTier(tier: string): Card[] {
  * and "im hungry" must both pass.
  */
 export function normalize(input: string): string {
-	return input.toLowerCase().replace(/\s+/g, '').replace(/[.,!?'’]/g, '');
+	return input.toLowerCase().replace(SPACES_RE, '').replace(PUNCT_RE, '');
 }
 
 export function normalizePron(input: string): string {
-	return input.normalize('NFC').toLowerCase().replace(/\s+/g, '').replace(/[\[\].,!?]/g, '');
+	return input.normalize('NFC').toLowerCase().replace(SPACES_RE, '').replace(PRON_PUNCT_RE, '');
 }
 
 export function checkAnswer(card: Card, typed: string): boolean {
