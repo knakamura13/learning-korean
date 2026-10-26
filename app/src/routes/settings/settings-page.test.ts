@@ -7,6 +7,7 @@ import SettingsPage from './+page.svelte';
 import src from './+page.svelte?raw';
 import layout from '../+layout.svelte?raw';
 import review from '../review/+page.svelte?raw';
+import reviewPaceSrc from '$lib/components/ReviewPace.svelte?raw';
 
 let instance: ReturnType<typeof mount> | undefined;
 
@@ -75,6 +76,12 @@ describe('Settings page — Appearance', () => {
 		expect(root.querySelector('.appearance h2')?.textContent?.trim()).toBe('Appearance');
 		expect(root.querySelector('#review-pace')).toBeNull();
 		expect(root.querySelector('#review-heading')).toBeNull();
+	});
+
+	it('includes aria-busy on ReviewPace save button when saving study pace', () => {
+		expect(review).not.toMatch(/aria-busy=\{saving\}/);
+		expect(reviewPaceSrc).toMatch(/aria-busy=\{saving\s*\|\|\s*undefined\}/);
+		expect(reviewPaceSrc).toMatch(/\{saving\s*\?\s*'Saving…'\s*:\s*'Save study pace'\}/);
 	});
 
 	it('places Review between Progress and Appearance in the page source', () => {
