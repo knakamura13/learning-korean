@@ -7,6 +7,14 @@
 	let prefsStatus = $state<{ tone: 'right' | 'wrong'; message: string } | null>(null);
 	let saving = $state(false);
 
+	const newPerDayInvalid = $derived(
+		newPerDay === null || newPerDay === undefined || !Number.isInteger(newPerDay) || newPerDay < 0 || newPerDay > 50
+	);
+	const reviewsPerSittingInvalid = $derived(
+		reviewsPerSitting === null || reviewsPerSitting === undefined || !Number.isInteger(reviewsPerSitting) || reviewsPerSitting < 1 || reviewsPerSitting > 100
+	);
+	const formInvalid = $derived(newPerDayInvalid || reviewsPerSittingInvalid);
+
 	// Refresh the steppers when /api/me lands account pacing after mount.
 	$effect(() => {
 		newPerDay = progress.studyPrefs.newPerDay;
@@ -45,14 +53,36 @@
 			<div class="fields">
 				<label>
 					<span>New cards per day</span>
-					<input type="number" min="0" max="50" step="1" bind:value={newPerDay} />
+					<input
+						type="number"
+						min="0"
+						max="50"
+						step="1"
+						bind:value={newPerDay}
+						aria-invalid={newPerDayInvalid ? 'true' : undefined}
+						aria-errormessage={newPerDayInvalid ? 'new-per-day-err' : undefined}
+					/>
+					{#if newPerDayInvalid}
+						<span id="new-per-day-err" class="err">Must be 0–50</span>
+					{/if}
 				</label>
 				<label>
 					<span>Reviews per sitting</span>
-					<input type="number" min="1" max="100" step="1" bind:value={reviewsPerSitting} />
+					<input
+						type="number"
+						min="1"
+						max="100"
+						step="1"
+						bind:value={reviewsPerSitting}
+						aria-invalid={reviewsPerSittingInvalid ? 'true' : undefined}
+						aria-errormessage={reviewsPerSittingInvalid ? 'reviews-err' : undefined}
+					/>
+					{#if reviewsPerSittingInvalid}
+						<span id="reviews-err" class="err">Must be 1–100</span>
+					{/if}
 				</label>
 			</div>
-			<button type="submit" class="btn" disabled={saving}>Save study pace</button>
+			<button type="submit" class="btn" disabled={saving || formInvalid}>Save study pace</button>
 		</form>
 		{#if prefsStatus}
 			<p class="status" data-tone={prefsStatus.tone} role="status" aria-live="polite">
@@ -115,6 +145,17 @@
 		outline-offset: 2px;
 		box-shadow: var(--focus-ring);
 	}
+	.fields input[aria-invalid='true'] {
+		border-color: var(--bad);
+	}
+	.fields input[aria-invalid='true']:focus-visible {
+		box-shadow: 0 0 0 4px color-mix(in srgb, var(--bad) 25%, transparent), 0 0 0 2px var(--bad);
+	}
+
+	.err {
+		font-size: 0.75rem;
+		color: var(--bad);
+	}
 
 	.status {
 		margin: var(--s3) 0 0;
@@ -134,5 +175,6 @@
 	@media (forced-colors: active) {
 		.status { background: Canvas; border-color: Highlight; color: CanvasText; }
 		.fields input { border-color: ButtonBorder; }
+		.fields input[aria-invalid='true'] { border-color: Highlight; }
 	}
 </style>
