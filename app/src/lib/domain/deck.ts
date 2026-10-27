@@ -411,8 +411,19 @@ export const TIERS: Tier[] = [
 	{ id: 'lab10', label: 'Names', lab: '0010', size: names.length }
 ];
 
+// Pre-built map for O(1) tier lookup in cardsOfTier() to avoid linear DECK filtering
+const CARDS_BY_TIER = new Map<string, Card[]>();
+for (const card of DECK) {
+	let list = CARDS_BY_TIER.get(card.tier);
+	if (!list) {
+		list = [];
+		CARDS_BY_TIER.set(card.tier, list);
+	}
+	list.push(card);
+}
+
 export function cardsOfTier(tier: string): Card[] {
-	return DECK.filter((c) => c.tier === tier);
+	return CARDS_BY_TIER.get(tier) ?? [];
 }
 
 /**

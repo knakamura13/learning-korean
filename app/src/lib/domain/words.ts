@@ -268,6 +268,17 @@ export const VOCAB_PACKS: VocabPack[] = [
 	}
 ];
 
+// Pre-built map for O(1) pack lookup in wordsOfPack() to avoid linear WORDS filtering
+const WORDS_BY_PACK = new Map<PackId, WordEntry[]>();
+for (const word of WORDS) {
+	let list = WORDS_BY_PACK.get(word.pack);
+	if (!list) {
+		list = [];
+		WORDS_BY_PACK.set(word.pack, list);
+	}
+	list.push(word);
+}
+
 export function wordsOfPack(pack: PackId): WordEntry[] {
-	return WORDS.filter((word) => word.pack === pack);
+	return WORDS_BY_PACK.get(pack) ?? [];
 }

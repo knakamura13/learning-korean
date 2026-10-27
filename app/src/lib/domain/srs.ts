@@ -692,14 +692,28 @@ export interface TierReviewProgress {
 	seen: number;
 }
 
-/** Per-tier mastered / learning / not-started counts from existing card state. */
+/**
+ * Per-tier mastered / learning / not-started counts from existing card state.
+ *
+ * Optimized to O(N + M) by grouping deck cards by tier in a single pass instead
+ * of repeatedly filtering the full deck array for each tier O(N * M).
+ */
 export function tierReviewProgress<T extends SchedulableCard>(
 	state: SrsState,
 	deck: T[],
 	tiers: readonly TierMeta[]
 ): TierReviewProgress[] {
+	const cardsByTier = new Map<string, T[]>();
+	for (const card of deck) {
+		let list = cardsByTier.get(card.tier);
+		if (!list) {
+			list = [];
+			cardsByTier.set(card.tier, list);
+		}
+		list.push(card);
+	}
 	return tiers.map((tier) => {
-		const cards = deck.filter((c) => c.tier === tier.id);
+		const cards = cardsByTier.get(tier.id) ?? [];
 		let mature = 0;
 		let young = 0;
 		for (const c of cards) {
